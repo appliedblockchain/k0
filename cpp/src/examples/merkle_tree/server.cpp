@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
     std::cin >> x;
     if (x == "") {
       // somehow there is constantly some input on circleci, ignore this
-    } (x == "end") {
+    } else if (x == "end") {
       need_to_shut_down = true;
     } else {
       std::cout << "You entered \"" << x << "\". Enter \"end\" to shut down." << std::endl;
