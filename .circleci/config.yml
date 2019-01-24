@@ -68,7 +68,8 @@ jobs:
           name: Start server
           command: |
             cd cpp/build/src/examples/merkle_tree
-            ./merkle_tree_server 2 /tmp/mt_addition_pk /tmp/mt_addition_vk /tmp/mt_inclusion_pk /tmp/mt_inclusion_vk &
+            ./merkle_tree_server 2 /tmp/mt_addition_pk /tmp/mt_addition_vk \
+                                   /tmp/mt_inclusion_pk /tmp/mt_inclusion_vk
           background: true
       - run:
           name: Run tests
