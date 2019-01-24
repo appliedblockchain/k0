@@ -68,10 +68,7 @@ jobs:
           name: Start server
           command: |
             cd cpp/build/src/examples/merkle_tree
-            ./merkle_tree_server 2 /tmp/mt_addition_pk /tmp/mt_addition_vk \
-                                   /tmp/mt_inclusion_pk /tmp/mt_inclusion_vk \
-                                   \&
-          background: true
+            ./merkle_tree_server 2 /tmp/mt_addition_pk /tmp/mt_addition_vk /tmp/mt_inclusion_pk /tmp/mt_inclusion_vk &
       - run:
           name: Run tests
           command: cd js && node_modules/.bin/mocha test/merkle_tree.js
