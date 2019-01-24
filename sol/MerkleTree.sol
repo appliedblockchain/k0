@@ -55,7 +55,8 @@ contract MerkleTree {
         }
     }
 
-    function verifyKnowledgeOfLeaf(
+    function verifyKnowledgeOfLeafSecrets(
+        uint[2] sn,
         uint[2] a,
         uint[2] a_p,
         uint[2][2] b,
@@ -65,9 +66,11 @@ contract MerkleTree {
         uint[2] h,
         uint[2] k
     ) public {
-        uint[] memory inputs = new uint[](2);
+        uint[] memory inputs = new uint[](4);
         inputs[0] = root[0];
         inputs[1] = root[1];
+        inputs[2] = sn[0];
+        inputs[3] = sn[1];
         if (inclusionVerifier.verifyProof(
             a, 
             a_p, 

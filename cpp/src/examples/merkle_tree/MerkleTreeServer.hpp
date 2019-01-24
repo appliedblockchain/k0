@@ -33,7 +33,8 @@ public:
   void setInclusionVk(std::string pk_path);
   virtual Json::Value add(const std::string& param01);
   virtual std::string element(int param01);
-  virtual Json::Value proveInclusion(int param01);
+  virtual std::string hash(const std::string& param01, const std::string& param02);
+  virtual Json::Value proveInclusion(int param01, const std::string& param02, const std::string& param03);
   virtual std::string reset();
   virtual std::string root();
   virtual Json::Value simulateAddition(const std::string& param01);

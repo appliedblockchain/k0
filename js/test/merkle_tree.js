@@ -116,6 +116,10 @@ async function mtEngineReady(mtEngine) {
   console.log('Server ready.')
 }
 
+function randomBytesHex(len = 32) {
+  return '0x' + crypto.randomBytes(len).toString('hex')
+}
+
 describe('Merkle tree', function () {
 
   this.timeout(100000)
@@ -156,10 +160,17 @@ describe('Merkle tree', function () {
   })
 
   it('happy path works', async function () {
+    const secrets = []
     for (let i = 0; i < 4; i++) {
       const prefRootResult = await mtEngine.request('root', [])
-      const leaf = '0x' + crypto.randomBytes(32).toString('hex')
+      const r = randomBytesHex()
+      const sn = randomBytesHex()
+      secrets[i] = [r, sn]
+      const hashResponse = await mtEngine.request('hash', [r, sn])
+      const leaf = hashResponse.result
+      console.log(hashResponse)
       const response = await mtEngine.request('simulateAddition', [leaf])
+      console.log(response)
       const simulation = response.result;
       const leafElems = await util.pack256Bits(leaf)
       const data = contract.methods.add(
@@ -176,9 +187,15 @@ describe('Merkle tree', function () {
       console.log(`Added leaf ${i}: ${leaf}`)
       console.log(`New root: ${additionResponse.result.newRoot}`)
       for (let j = 0; j <= i; j++) {
-        const inclusionProofResponse = await mtEngine.request('proveInclusion', [ j ])
+        const [ r, sn ] = secrets[j]
+        const inclusionProofResponse = await mtEngine.request('proveInclusion', [ j, r, sn ])
+        console.log(inclusionProofResponse)
         const proof = inclusionProofResponse.result
-        const data = contract.methods.verifyKnowledgeOfLeaf( ...proof).encodeABI()
+        const snPacked = await util.pack256Bits(sn)
+        console.log({ r, sn, snPacked, proof })
+        console.log(contract.methods)
+        const x = contract.methods.verifyKnowledgeOfLeafSecrets(snPacked, ...proof)
+        const data = x.encodeABI()
         const receipt = await sendTransaction(web3, contract._address, data)
         assert(receipt.status)
         assert(receipt.logs.length === 1)
