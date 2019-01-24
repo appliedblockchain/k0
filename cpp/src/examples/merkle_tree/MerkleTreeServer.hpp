@@ -21,6 +21,10 @@ class MerkleTreeServer : public MerkleTreeStubServer
   AdditionCircuit<FieldT, HashT> addition_circuit;
   InclusionCircuit<FieldT, HashT> inclusion_circuit;
   size_t tree_height;
+  bool addition_pk_loaded;
+  bool addition_vk_loaded;
+  bool inclusion_pk_loaded;
+  bool inclusion_vk_loaded;
 public:
   MerkleTreeServer(size_t tree_height, AbstractServerConnector &connector, serverVersion_t type);
   void setAdditionPk(std::string pk_path);
@@ -33,6 +37,7 @@ public:
   virtual std::string reset();
   virtual std::string root();
   virtual Json::Value simulateAddition(const std::string& param01);
+  virtual Json::Value status();
 };
 
 #include "MerkleTreeServer.tcc"

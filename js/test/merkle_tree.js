@@ -98,6 +98,23 @@ async function compileContracts() {
   }
 }
 
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+async function mtEngineReady(mtEngine) {
+  let ready = false;
+
+  process.stdout.write('Waiting for the server to become ready...')
+  while (!ready) {
+    const statusResponse = await mtEngine.request('status', [])
+    ready = statusResponse.result.ready
+    if (!ready) {
+      process.stdout.write('.')
+      await wait(1000)
+    }
+  }
+  process.stdout.write('\n')
+  console.log('Server ready.')
+}
 
 describe('Merkle tree', function () {
 
@@ -107,6 +124,7 @@ describe('Merkle tree', function () {
   before(async () => {
     const proverPort = parseInt(process.env.PROVER_PORT || '4000', 10)
     mtEngine = jayson.client.http({ port: proverPort })
+    await mtEngineReady(mtEngine)
     await mtEngine.request('reset', [])
     const initialRootResponse = await mtEngine.request('root', [])
     const initialRoot = initialRootResponse.result

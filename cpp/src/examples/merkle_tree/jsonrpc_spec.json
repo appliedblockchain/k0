@@ -63,5 +63,12 @@
         [ "bignum", "bignum" ]
       ]
     }
+  },
+  {
+		"name": "status",
+    "params": [],
+    "returns": {
+      "ready": true
+    }
 	}
 ]

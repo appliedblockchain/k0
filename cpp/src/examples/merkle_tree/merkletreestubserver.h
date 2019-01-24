@@ -18,6 +18,7 @@ class MerkleTreeStubServer : public jsonrpc::AbstractServer<MerkleTreeStubServer
             this->bindAndAddMethod(jsonrpc::Procedure("reset", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING,  NULL), &MerkleTreeStubServer::resetI);
             this->bindAndAddMethod(jsonrpc::Procedure("root", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING,  NULL), &MerkleTreeStubServer::rootI);
             this->bindAndAddMethod(jsonrpc::Procedure("simulateAddition", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING, NULL), &MerkleTreeStubServer::simulateAdditionI);
+            this->bindAndAddMethod(jsonrpc::Procedure("status", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT,  NULL), &MerkleTreeStubServer::statusI);
         }
 
         inline virtual void addI(const Json::Value &request, Json::Value &response)
@@ -44,12 +45,17 @@ class MerkleTreeStubServer : public jsonrpc::AbstractServer<MerkleTreeStubServer
         {
             response = this->simulateAddition(request[0u].asString());
         }
+        inline virtual void statusI(const Json::Value &/*request*/, Json::Value &response)
+        {
+            response = this->status();
+        }
         virtual Json::Value add(const std::string& param01) = 0;
         virtual std::string element(int param01) = 0;
         virtual Json::Value proveInclusion(int param01) = 0;
         virtual std::string reset() = 0;
         virtual std::string root() = 0;
         virtual Json::Value simulateAddition(const std::string& param01) = 0;
+        virtual Json::Value status() = 0;
 };
 
 #endif //JSONRPC_CPP_STUB_MERKLETREESTUBSERVER_H_

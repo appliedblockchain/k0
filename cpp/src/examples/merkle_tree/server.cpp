@@ -15,6 +15,9 @@ int main(int argc, char* argv[])
 
   HttpServer httpserver(4000);
   MerkleTreeServer<FieldT, HashT> server(std::stoi(argv[1]), httpserver, jsonrpc::JSONRPC_SERVER_V2);
+
+  server.StartListening();
+
   std::cout << "Loading addition proving key..." << std::endl;
   server.setAdditionPk(argv[2]);
   std::cout << "Loading addition verification key..." << std::endl;
@@ -25,7 +28,6 @@ int main(int argc, char* argv[])
   std::cout << "Loading inclusion verification key..." << std::endl;
   server.setInclusionVk(argv[5]);
 
-  server.StartListening();
   std::cout << "Server started. Press a button to stop." << std::endl;
   getchar();
   server.StopListening();

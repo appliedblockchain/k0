@@ -42,24 +42,28 @@ template<typename FieldT, typename HashT>
 void MerkleTreeServer<FieldT, HashT>::setAdditionPk(string pk_path)
 {
   addition_pk = loadFromFile<r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp>>(pk_path);
+  addition_pk_loaded = true;
 }
 
 template<typename FieldT, typename HashT>
 void MerkleTreeServer<FieldT, HashT>::setAdditionVk(string vk_path)
 {
   addition_vk = loadFromFile<r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp>>(vk_path);
+  addition_vk_loaded = true;
 }
 
 template<typename FieldT, typename HashT>
 void MerkleTreeServer<FieldT, HashT>::setInclusionPk(string pk_path)
 {
   inclusion_pk = loadFromFile<r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp>>(pk_path);
+  inclusion_pk_loaded = true;
 }
 
 template<typename FieldT, typename HashT>
 void MerkleTreeServer<FieldT, HashT>::setInclusionVk(string vk_path)
 {
   inclusion_vk = loadFromFile<r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp>>(vk_path);
+  inclusion_vk_loaded = true;
 }
 
 template<typename FieldT, typename HashT>
@@ -204,4 +208,14 @@ Json::Value MerkleTreeServer<FieldT, HashT>::proveInclusion(int address) {
   }
 
   return json_conversion::to_json(proof);
+}
+
+
+template<typename FieldT, typename HashT>
+Json::Value MerkleTreeServer<FieldT, HashT>::status()
+{
+  const bool ready = addition_pk_loaded & addition_vk_loaded & inclusion_pk_loaded & inclusion_vk_loaded;
+  Json::Value result;
+  result["ready"] = ready;
+  return result;
 }
