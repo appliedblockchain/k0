@@ -38,6 +38,39 @@ jobs:
           paths:
             - js/node_modules
 
+  run_merkle_tree_test:
+    docker:
+      - image: appliedblockchain/snarkapps-base
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASSWORD
+      - image: appliedblockchain/parity-solo
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASSWORD
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Make sure npm modules are installed
+          command: cd js && npm i
+      - run:
+          name: Setup
+          command: |
+            cd cpp/build/src/examples/merkle_tree
+            ./merkle_tree_addition_setup 2 /tmp/mt_addition_pk /tmp/mt_addition_vk
+            ./merkle_tree_inclusion_setup 2 /tmp/mt_inclusion_pk /tmp/mt_inclusion_vk
+            cd $CIRCLE_WORKING_DIRECTORY/cpp/build/src
+            ./convert_pk /tmp/mt_addition_vk /tmp/mt_addition_vk_alt
+            ./convert_pk /tmp/mt_inclusion_vk /tmp/mt_inclusion_vk_alt
+      - run:
+          name: Start server
+          command: |
+            cpp/build/src/examples/merkle_tree
+            ./merkle_tree_server 2 /tmp/mt_addition_pk /tmp/mt_addition_vk \
+                                   /tmp/mt_inclusion_pk /tmp/mt_inclusion_vk
+
 workflows:
   version: 2
   main:
@@ -46,3 +79,8 @@ workflows:
           context: org-global
       - prepare_node:
           context: org-global
+      - run_merkle_tree_test:
+          context: org-global
+          requires:
+            - build_cpp
+            - prepare_node
