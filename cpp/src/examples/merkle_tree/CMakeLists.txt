@@ -1,14 +1,3 @@
-add_executable(merkle_tree_nursery nursery.cpp ../../MerkleTree.cpp)
-target_link_libraries(merkle_tree_nursery snark)
-target_include_directories(
-  merkle_tree_nursery
-
-  PUBLIC
-  ${DEPENDS_DIR}/libsnark
-  ${DEPENDS_DIR}/libsnark/depends/libff
-  ${DEPENDS_DIR}/libsnark/depends/libfqfft
-)
-
 add_executable(
   merkle_tree_server
 
@@ -36,69 +25,6 @@ target_include_directories(
 )
 
 add_executable(
-  merkle_tree_addition_test
-
-  addition_test.cpp
-  ../../MerkleTree.cpp
-  ../../serialization.cpp
-)
-target_link_libraries(
-  merkle_tree_addition_test
-
-  snark
-)
-target_include_directories(
-  merkle_tree_addition_test
-
-  PUBLIC
-  ${DEPENDS_DIR}/libsnark
-  ${DEPENDS_DIR}/libsnark/depends/libff
-  ${DEPENDS_DIR}/libsnark/depends/libfqfft
-)
-
-add_executable(
-  merkle_tree_addition_packed_test
-
-  addition_packed_test.cpp
-  ../../MerkleTree.cpp
-  ../../serialization.cpp
-)
-target_link_libraries(
-  merkle_tree_addition_packed_test
-
-  snark
-)
-target_include_directories(
-  merkle_tree_addition_packed_test
-
-  PUBLIC
-  ${DEPENDS_DIR}/libsnark
-  ${DEPENDS_DIR}/libsnark/depends/libff
-  ${DEPENDS_DIR}/libsnark/depends/libfqfft
-)
-
-add_executable(
-  merkle_tree_addition_circuit_test
-
-  addition_circuit_test.cpp
-  ../../MerkleTree.cpp
-  ../../serialization.cpp
-)
-target_link_libraries(
-  merkle_tree_addition_circuit_test
-
-  snark
-)
-target_include_directories(
-  merkle_tree_addition_circuit_test
-
-  PUBLIC
-  ${DEPENDS_DIR}/libsnark
-  ${DEPENDS_DIR}/libsnark/depends/libff
-  ${DEPENDS_DIR}/libsnark/depends/libfqfft
-)
-
-add_executable(
   merkle_tree_addition_setup
 
   addition_setup.cpp
@@ -118,47 +44,6 @@ target_include_directories(
   ${DEPENDS_DIR}/libsnark/depends/libff
   ${DEPENDS_DIR}/libsnark/depends/libfqfft
 )
-
-add_executable(
-  merkle_tree_addition_verify
-
-  addition_verify.cpp
-)
-target_link_libraries(
-  merkle_tree_addition_verify
-
-  snark
-)
-target_include_directories(
-  merkle_tree_addition_verify
-
-  PUBLIC
-  ${DEPENDS_DIR}/libsnark
-  ${DEPENDS_DIR}/libsnark/depends/libff
-  ${DEPENDS_DIR}/libsnark/depends/libfqfft
-)
-
-add_executable(
-  merkle_tree_inclusion_test
-
-  inclusion_test.cpp
-  ../../MerkleTree.cpp
-  ../../serialization.cpp
-)
-target_link_libraries(
-  merkle_tree_inclusion_test
-
-  snark
-)
-target_include_directories(
-  merkle_tree_inclusion_test
-
-  PUBLIC
-  ${DEPENDS_DIR}/libsnark
-  ${DEPENDS_DIR}/libsnark/depends/libff
-  ${DEPENDS_DIR}/libsnark/depends/libfqfft
-)
-
 
 add_executable(
   merkle_tree_inclusion_setup
