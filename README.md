@@ -33,7 +33,26 @@ make
 cd ../..
 ```
 
-## Run examples
+## ZKP setup
 ```
-scripts/run.sh forty_two '[]'
+cd cpp/build
+src/examples/merkle_tree/merkle_tree_addition_setup 2 /tmp/mt_addition_pk \
+                                                      /tmp/mt_addition_vk
+src/examples/merkle_tree/merkle_tree_inclusion_setup 2 /tmp/mt_addition_pk \
+                                                       /tmp/mt_addition_vk
+./convert_vk /tmp/mt_addition_vk /tmp/mt_addition_vk_alt
+./convert_vk /tmp/mt_inclusion_vk /tmp/mt_inclusion_vk_alt
+```
+
+## Run server
+```
+cd cpp/build
+./merkle_tree/merkle_tree_server 2 /tmp/mt_addition_pk /tmp/mt_addition_vk \
+                                   /tmp/mt_inclusion_pk /tmp/mt_inclusion_vk  
+```
+
+## Run tests
+```
+cd js
+mocha test/merkle_tree
 ```
