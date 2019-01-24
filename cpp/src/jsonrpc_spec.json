@@ -1,0 +1,23 @@
+[
+	{
+		"name": "proveFortyTwo",
+		"params": {
+			"name": "42"
+		},
+		"returns" : {
+      "proof": [
+        [ "bignum", "bignum" ],
+        [ "bignum", "bignum" ],
+        [
+          [ "bignum", "bignum" ],
+          [ "bignum", "bignum" ]
+        ],
+        [ "bignum", "bignum" ],
+        [ "bignum", "bignum" ],
+        [ "bignum", "bignum" ],
+        [ "bignum", "bignum" ],
+        [ "bignum", "bignum" ]
+      ]
+    }
+	}
+]

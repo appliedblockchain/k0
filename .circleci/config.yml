@@ -1,0 +1,48 @@
+version: 2
+
+jobs:
+  build_cpp:
+    docker:
+      - image: appliedblockchain/snarkapps-base
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASSWORD
+    steps:
+      - checkout
+      - run:
+          name: Init Git submodules
+          command: git submodule update --init --recursive
+      - run:
+          name: "C++: CMake"
+          command: mkdir cpp/build && cd cpp/build && cmake ..
+      - run:
+          name: "C++: Make"
+          command: cd cpp/build && make
+      - persist_to_workspace:
+          root: .
+          paths:
+            - cpp/build/src
+  prepare_node:
+    docker:
+      - image: appliedblockchain/snarkapps-base
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASSWORD
+    steps:
+      - checkout
+      - run:
+          name: Install npm modules
+          command: cd js && npm i
+      - persist_to_workspace:
+          root: .
+          paths:
+            - js/node_modules
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - build_cpp:
+          context: org-global
+      - prepare_node:
+          context: org-global

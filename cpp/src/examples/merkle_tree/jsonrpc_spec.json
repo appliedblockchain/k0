@@ -1,0 +1,67 @@
+[
+	{
+		"name": "add",
+		"params": [
+      "0x1111111111111111111111111111111111111111111111111111111111111111"
+    ],
+		"returns": {
+      "address": 1337,
+		  "newRoot": "0x1111111111111111111111111111111111111111111111111111111111111111"
+    }
+	},
+	{
+		"name": "element",
+		"params": [ 1337 ],
+		"returns": "0x1111111111111111111111111111111111111111111111111111111111111111"
+	},
+  {
+    "name": "proveInclusion",
+    "params": [ 1337 ],
+    "returns": [
+      [ "bignum", "bignum" ],
+      [ "bignum", "bignum" ],
+      [
+        [ "bignum", "bignum" ],
+        [ "bignum", "bignum" ]
+      ],
+      [ "bignum", "bignum" ],
+      [ "bignum", "bignum" ],
+      [ "bignum", "bignum" ],
+      [ "bignum", "bignum" ],
+      [ "bignum", "bignum" ]
+    ]
+  },
+  {
+		"name": "reset",
+    "params": [],
+    "returns": "0x1111111111111111111111111111111111111111111111111111111111111111"
+	},
+  {
+		"name": "root",
+    "params": [],
+    "returns": "0x1111111111111111111111111111111111111111111111111111111111111111"
+	},
+	{
+		"name": "simulateAddition",
+		"params": [
+      "0x1111111111111111111111111111111111111111111111111111111111111111"
+    ],
+		"returns": {
+		  "address": 1337,
+		  "newRoot": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "proof": [
+        [ "bignum", "bignum" ],
+        [ "bignum", "bignum" ],
+        [
+          [ "bignum", "bignum" ],
+          [ "bignum", "bignum" ]
+        ],
+        [ "bignum", "bignum" ],
+        [ "bignum", "bignum" ],
+        [ "bignum", "bignum" ],
+        [ "bignum", "bignum" ],
+        [ "bignum", "bignum" ]
+      ]
+    }
+	}
+]

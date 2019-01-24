@@ -1,0 +1,6 @@
+[submodule "cpp/depends/libsnark"]
+	path = cpp/depends/libsnark
+	url = https://github.com/scipr-lab/libsnark.git
+[submodule "cpp/depends/gtest"]
+	path = cpp/depends/gtest
+	url = https://github.com/google/googletest.git
