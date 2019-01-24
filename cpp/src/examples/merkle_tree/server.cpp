@@ -28,8 +28,18 @@ int main(int argc, char* argv[])
   std::cout << "Loading inclusion verification key..." << std::endl;
   server.setInclusionVk(argv[5]);
 
-  std::cout << "Server started. Press a button to stop." << std::endl;
-  getchar();
-  server.StopListening();
+  std::cout << "Server started. Enter \"end\" to shut down." << std::endl;
+
+  bool need_to_shut_down = false;
+  while(!need_to_shut_down) {
+    std::string x;
+    std::cin >> x;
+    if (x == "end") {
+      need_to_shut_down = true;
+    } else {
+      std::cout << "You entered \"" << x << "\". Enter \"end\" to shut down." << std::endl;
+    }
+  }
+
   return 0;
 }
