@@ -3,6 +3,7 @@
 const _ = require('lodash')
 const assert = require('assert')
 const asyncFs = require('../async-fs')
+const compileContract = require('./helpers/compile-contract')
 const crypto = require('crypto')
 const deploy = require('../deploy')
 const execAsync = require('../exec-async')
@@ -14,6 +15,7 @@ const sendTransaction = require('../send-transaction')
 const vkFromFile = require('../vk-from-file')
 const vkToSol = require('../vk-to-sol')
 
+const TREE_HEIGHT = 4
 const tmpDir = '/tmp'
 
 const paths = {
@@ -40,10 +42,8 @@ async function generateVerifierContractAlt(pathToVk, filePath, contractName) {
 
   // Put contract name and vk into contract source, write to temporary file
   const vkSolSnippet = vkToSol(...vk)
-  let contractSource = contractTemplate.replace('____CONTRACT_NAME____',
-                                                contractName)
-  contractSource = contractSource.replace('____VERIFYING_KEY_BODY____',
-                                                vkSolSnippet)
+  let contractSource = contractTemplate.replace('____CONTRACT_NAME____', contractName)
+  contractSource = contractSource.replace('____VERIFYING_KEY_BODY____', vkSolSnippet)
 
   await asyncFs.writeTextFile(filePath, contractSource, 'utf8')
 
@@ -62,10 +62,10 @@ async function compileContracts() {
     path.join(contractsDir, 'InclusionVerifier.sol'),
     'InclusionVerifier'
   )
-  const mtPath = path.join(contractsDir, 'MerkleTree.sol')
+  const mtPath = path.join(contractsDir, 'Mixer.sol')
   await asyncFs.copyFile(
     path.join(
-      path.parse(module.filename).dir, '..', '..', 'sol', 'MerkleTree.sol'
+      path.parse(module.filename).dir, '..', '..', 'sol', 'Mixer.sol'
     ),
     mtPath
   )
@@ -77,9 +77,17 @@ async function compileContracts() {
     pairingPath
   )
 
-
+  const ozDir = path.join(
+    __dirname,
+    '..',
+    'node_modules',
+    'openzeppelin-solidity'
+  )
   const outputPath = path.join(contractsDir, 'output.json')
-  const command = `solc --combined-json abi,bin MerkleTree.sol > output.json`
+  const command = [
+    `solc --combined-json abi,bin openzeppelin-solidity=${ozDir}`,
+    `Mixer.sol > output.json`
+  ].join(' ')
   const options = {
     cwd: contractsDir,
     maxBuffer: 1024 * 1024
@@ -92,12 +100,25 @@ async function compileContracts() {
   // TODO Delete directory
   //await asyncFs.unlink(tmpFilePath)
   const result = JSON.parse(json)
-  //console.log(result)
+  console.log(result)
   return {
-    MerkleTree: extractContractArtefacts(result, 'MerkleTree'),
+    Mixer: extractContractArtefacts(result, 'Mixer'),
     AdditionVerifier: extractContractArtefacts(result, 'AdditionVerifier'),
     InclusionVerifier: extractContractArtefacts(result, 'InclusionVerifier')
   }
+}
+
+async function deployStandardContract(web3, contractName, account = null) {
+  const artefacts = await compileContract(contractName)
+  const contractAddress = await deploy(
+    web3,
+    artefacts.abi,
+    artefacts.bytecode,
+    50000000,
+    [],
+    account
+  )
+  return new web3.eth.Contract(artefacts.abi, contractAddress)
 }
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
@@ -122,12 +143,57 @@ function randomBytesHex(len = 32) {
   return '0x' + crypto.randomBytes(len).toString('hex')
 }
 
-describe('Merkle tree', function () {
+describe('Commitment-based mixer', function () {
 
   this.timeout(100000)
-  let web3, contract, mtEngine
+  let web3, erc20, mixer, tokenMaster, depositors, mtEngine
+
+  async function printBalances(addresses) {
+    addresses = [ mixer._address, ...addresses ]
+    console.log('Balances:')
+    for (let i = 0; i < addresses.length; i++) {
+      const balance = await erc20.methods.balanceOf(addresses[i]).call()
+      console.log(addresses[i], web3.utils.fromWei(balance))
+    }
+  }
 
   before(async () => {
+
+    web3 = util.initWeb3()
+    tokenMaster = web3.eth.accounts.create()
+    depositors = _.times(TREE_HEIGHT, () => web3.eth.accounts.create())
+
+    erc20 = await deployStandardContract(web3, 'DollarCoin', tokenMaster)
+    const moneyShower = await deployStandardContract(web3, 'MoneyShower')
+
+    // Make some money
+    const data = erc20.methods
+      .mint(tokenMaster.address, web3.utils.toWei('1000000'))
+      .encodeABI()
+
+    await sendTransaction(web3, erc20._address, data, 5000000, tokenMaster)
+
+    // Money to the people
+    await sendTransaction(
+      web3,
+      erc20._address,
+      erc20.methods.approve(
+        moneyShower._address, web3.utils.toWei(TREE_HEIGHT.toString())
+      ).encodeABI(),
+      5000000,
+      tokenMaster
+    )
+    await sendTransaction(
+      web3,
+      moneyShower._address,
+      moneyShower.methods.transfer(
+        erc20._address,
+        _.map(depositors, 'address'),
+        _.times(depositors.length, () => web3.utils.toWei('1'))
+      ).encodeABI(),
+      5000000,
+      tokenMaster
+    )
     const proverPort = parseInt(process.env.PROVER_PORT || '4000', 10)
     mtEngine = jayson.client.http({ port: proverPort })
     await mtEngineReady(mtEngine)
@@ -148,62 +214,88 @@ describe('Merkle tree', function () {
       contractArtefacts.InclusionVerifier.bytecode,
       50000000
     )
-    const merkleTreeAddress = await deploy(
+    const mixerAddress = await deploy(
       web3,
-      contractArtefacts.MerkleTree.abi,
-      contractArtefacts.MerkleTree.bytecode,
+      contractArtefacts.Mixer.abi,
+      contractArtefacts.Mixer.bytecode,
       50000000,
-      [additionVerifierAddress, inclusionVerifierAddress, await util.pack256Bits(initialRoot)]
+      [
+        erc20._address,
+        additionVerifierAddress,
+        inclusionVerifierAddress,
+        await util.pack256Bits(initialRoot)
+      ]
     )
-    contract = new web3.eth.Contract(
-      contractArtefacts.MerkleTree.abi,
-      merkleTreeAddress
+    mixer = new web3.eth.Contract(
+      contractArtefacts.Mixer.abi,
+      mixerAddress
     )
+
   })
 
   it('happy path works', async function () {
     const secrets = []
-    for (let i = 0; i < 4; i++) {
-      const prefRootResult = await mtEngine.request('root', [])
+
+    printBalances(_.map(depositors, 'address'))
+
+    for (let i = 0; i < TREE_HEIGHT; i++) {
+      const account = depositors[i]
+
+      await sendTransaction(
+        web3,
+        erc20._address,
+        erc20.methods.approve(
+          mixer._address, web3.utils.toWei('1')
+        ).encodeABI(),
+        5000000,
+        account
+      )
+
       const r = randomBytesHex()
       const sn = randomBytesHex()
       secrets[i] = [r, sn]
       const hashResponse = await mtEngine.request('hash', [r, sn])
       const leaf = hashResponse.result
-      console.log(hashResponse)
       const response = await mtEngine.request('simulateAddition', [leaf])
-      console.log(response)
       const simulation = response.result;
       const leafElems = await util.pack256Bits(leaf)
-      const data = contract.methods.add(
+      const data = mixer.methods.payIn(
         leafElems,
         simulation.newRoot,
         ...simulation.proof
       ).encodeABI()
-      const receipt = await sendTransaction(web3, contract._address, data)
+      const receipt = await sendTransaction(web3, mixer._address, data, 5000000, account)
       assert(receipt.status)
-      assert(receipt.logs.length === 1)
-      // event "Verified(string)"
-      assert(receipt.logs[0].topics[0] === '0x3f3cfdb26fb5f9f1786ab4f1a1f9cd4c0b5e726cbdfc26e495261731aad44e39')
+
       const additionResponse = await mtEngine.request('add', [leaf])
       console.log(`Added leaf ${i}: ${leaf}`)
       console.log(`New root: ${additionResponse.result.newRoot}`)
-      for (let j = 0; j <= i; j++) {
-        const [ r, sn ] = secrets[j]
-        const inclusionProofResponse = await mtEngine.request('proveInclusion', [ j, r, sn ])
-        const proof = inclusionProofResponse.result
-        const snPacked = await util.pack256Bits(sn)
-        const x = contract.methods.verifyKnowledgeOfLeafSecrets(snPacked, ...proof)
-        const data = x.encodeABI()
-        const receipt = await sendTransaction(web3, contract._address, data)
-        assert(receipt.status)
-        assert(receipt.logs.length === 1)
-        // event "Verified(string)"
-        assert(receipt.logs[0].topics[0] === '0x3f3cfdb26fb5f9f1786ab4f1a1f9cd4c0b5e726cbdfc26e495261731aad44e39')
-        console.log(`Proved inclusion of leaf ${j}.`)
-      }
+
+      await printBalances(_.map(depositors, 'address'))
       console.log()
     }
+
+    const withdrawers = _.times(TREE_HEIGHT, () => web3.eth.accounts.create())
+
+
+    for (let i = 0; i < TREE_HEIGHT; i++) {
+
+      const account = withdrawers[i];
+
+      const [r, sn] = secrets[i]
+      const inclusionProofResponse = await mtEngine.request('proveInclusion', [i, r, sn])
+      const proof = inclusionProofResponse.result
+      const snPacked = await util.pack256Bits(sn)
+      const x = mixer.methods.withdraw(snPacked, ...proof)
+      const data = x.encodeABI()
+      const receipt = await sendTransaction(web3, mixer._address, data, 5000000, account)
+      assert(receipt.status)
+      await printBalances(_.map([...depositors, ...withdrawers], 'address'))
+      console.log()
+    }
+
+
   })
 
-}) 
+
+})
