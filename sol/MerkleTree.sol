@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.3;
 
 import 'AdditionVerifier.sol';
 import 'InclusionVerifier.sol';
@@ -11,23 +11,23 @@ contract MerkleTree {
 
     event Log(string);
 
-    constructor(address additionVerifierAddress, address inclusionVerifierAddress, uint[2] initialRoot) public {
+    constructor(address additionVerifierAddress, address inclusionVerifierAddress, uint[2] memory initialRoot) public {
         additionVerifier = AdditionVerifier(additionVerifierAddress);
         inclusionVerifier = InclusionVerifier(inclusionVerifierAddress);
         root = initialRoot;
     }
 
     function add(
-        uint[2] leaf,
-        uint[2] newRoot,
-        uint[2] a,
-        uint[2] a_p,
-        uint[2][2] b,
-        uint[2] b_p,
-        uint[2] c,
-        uint[2] c_p,
-        uint[2] h,
-        uint[2] k
+        uint[2] memory leaf,
+        uint[2] memory newRoot,
+        uint[2] memory a,
+        uint[2] memory a_p,
+        uint[2][2] memory b,
+        uint[2] memory b_p,
+        uint[2] memory c,
+        uint[2] memory c_p,
+        uint[2] memory h,
+        uint[2] memory k
     ) public {
         uint[] memory inputs = new uint[](7);
         inputs[0] = num_leaves;
@@ -56,15 +56,15 @@ contract MerkleTree {
     }
 
     function verifyKnowledgeOfLeafSecrets(
-        uint[2] sn,
-        uint[2] a,
-        uint[2] a_p,
-        uint[2][2] b,
-        uint[2] b_p,
-        uint[2] c,
-        uint[2] c_p,
-        uint[2] h,
-        uint[2] k
+        uint[2] memory sn,
+        uint[2] memory a,
+        uint[2] memory a_p,
+        uint[2][2] memory b,
+        uint[2] memory b_p,
+        uint[2] memory c,
+        uint[2] memory c_p,
+        uint[2] memory h,
+        uint[2] memory k
     ) public {
         uint[] memory inputs = new uint[](4);
         inputs[0] = root[0];
