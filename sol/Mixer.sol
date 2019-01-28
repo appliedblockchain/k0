@@ -43,7 +43,6 @@ contract Mixer {
             tokenContract.transferFrom(msg.sender, address(this), 1 ether),
             "ERC20 transfer failed (sufficient allowance?)"
         );
-        emit Log("Here we are");
         uint[] memory inputs = new uint[](7);
         emit Log(num_leaves);
         emit Log(root[0], root[1]);

@@ -15,7 +15,14 @@ const sendTransaction = require('../send-transaction')
 const vkFromFile = require('../vk-from-file')
 const vkToSol = require('../vk-to-sol')
 
-const TREE_HEIGHT = 4
+if (process.env.MOCHA_MERKLE_TREE_HEIGHT === undefined) {
+  console.log('Env var MOCHA_MERKLE_TREE_HEIGHT must be set.')
+  process.exit(1)
+}
+
+const TREE_HEIGHT = parseInt(process.env.MOCHA_MERKLE_TREE_HEIGHT || '2', 10)
+const NUM_PEOPLE = 2
+
 const tmpDir = '/tmp'
 
 const paths = {
@@ -145,7 +152,7 @@ function randomBytesHex(len = 32) {
 
 describe('Commitment-based mixer', function () {
 
-  this.timeout(100000)
+  this.timeout(4 * 3600 * 1000)
   let web3, erc20, mixer, tokenMaster, depositors, mtEngine
 
   async function printBalances(addresses) {
@@ -161,7 +168,7 @@ describe('Commitment-based mixer', function () {
 
     web3 = util.initWeb3()
     tokenMaster = web3.eth.accounts.create()
-    depositors = _.times(TREE_HEIGHT, () => web3.eth.accounts.create())
+    depositors = _.times(NUM_PEOPLE, () => web3.eth.accounts.create())
 
     erc20 = await deployStandardContract(web3, 'DollarCoin', tokenMaster)
     const moneyShower = await deployStandardContract(web3, 'MoneyShower')
@@ -178,7 +185,7 @@ describe('Commitment-based mixer', function () {
       web3,
       erc20._address,
       erc20.methods.approve(
-        moneyShower._address, web3.utils.toWei(TREE_HEIGHT.toString())
+        moneyShower._address, web3.utils.toWei((NUM_PEOPLE).toString())
       ).encodeABI(),
       5000000,
       tokenMaster
@@ -234,11 +241,11 @@ describe('Commitment-based mixer', function () {
   })
 
   it('happy path works', async function () {
-    const secrets = []
+    const secrets = [], additionProvingTimes = [], inclusionProvingTimes = []
 
     printBalances(_.map(depositors, 'address'))
 
-    for (let i = 0; i < TREE_HEIGHT; i++) {
+    for (let i = 0; i < NUM_PEOPLE; i++) {
       const account = depositors[i]
 
       await sendTransaction(
@@ -256,7 +263,11 @@ describe('Commitment-based mixer', function () {
       secrets[i] = [r, sn]
       const hashResponse = await mtEngine.request('hash', [r, sn])
       const leaf = hashResponse.result
+
+      const timestampStart = Date.now()
       const response = await mtEngine.request('simulateAddition', [leaf])
+      const proofDuration = Date.now() - timestampStart
+
       const simulation = response.result;
       const leafElems = await util.pack256Bits(leaf)
       const data = mixer.methods.payIn(
@@ -270,20 +281,31 @@ describe('Commitment-based mixer', function () {
       const additionResponse = await mtEngine.request('add', [leaf])
       console.log(`Added leaf ${i}: ${leaf}`)
       console.log(`New root: ${additionResponse.result.newRoot}`)
+      additionProvingTimes.push(proofDuration)
+
+      const timesSum = additionProvingTimes.reduce((acc, val) => acc + val)
+      const avg = timesSum / additionProvingTimes.length
+
+      console.log([
+        'Duration of addition proving operation:',
+        `${Math.round(proofDuration/1000)}s`,
+        `(avg: ${Math.round(avg / 1000)}s)`
+      ].join(' '))
 
       await printBalances(_.map(depositors, 'address'))
       console.log()
     }
 
-    const withdrawers = _.times(TREE_HEIGHT, () => web3.eth.accounts.create())
+    const withdrawers = _.times(NUM_PEOPLE, () => web3.eth.accounts.create())
 
-
-    for (let i = 0; i < TREE_HEIGHT; i++) {
+    for (let i = 0; i < NUM_PEOPLE; i++) {
 
       const account = withdrawers[i];
 
       const [r, sn] = secrets[i]
+      const timestampStart = Date.now()
       const inclusionProofResponse = await mtEngine.request('proveInclusion', [i, r, sn])
+      const proofDuration = Date.now() - timestampStart
       const proof = inclusionProofResponse.result
       const snPacked = await util.pack256Bits(sn)
       const x = mixer.methods.withdraw(snPacked, ...proof)
@@ -291,6 +313,16 @@ describe('Commitment-based mixer', function () {
       const receipt = await sendTransaction(web3, mixer._address, data, 5000000, account)
       assert(receipt.status)
       await printBalances(_.map([...depositors, ...withdrawers], 'address'))
+      inclusionProvingTimes.push(proofDuration)
+
+      const timesSum = inclusionProvingTimes.reduce((acc, val) => acc + val)
+      const avg = timesSum / inclusionProvingTimes.length
+
+      console.log([
+        'Duration of inclusion proving operation:',
+        `${Math.round(proofDuration/1000)}s`,
+        `(avg: ${Math.round(avg / 1000)}s)`
+      ].join(' '))
       console.log()
     }
 

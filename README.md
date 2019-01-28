@@ -35,7 +35,7 @@ cd ../..
 
 ## ZKP setup
 ```
-cd cpp/build/src
+cd cpp/build
 src/examples/merkle_tree/merkle_tree_addition_setup 2 /tmp/mt_addition_pk  /tmp/mt_addition_vk
 src/examples/merkle_tree/merkle_tree_inclusion_setup 2 /tmp/mt_inclusion_pk /tmp/mt_inclusion_vk
 src/convert_vk /tmp/mt_addition_vk /tmp/mt_addition_vk_alt
@@ -52,5 +52,5 @@ src/examples/merkle_tree/merkle_tree_server 2 /tmp/mt_addition_pk /tmp/mt_additi
 ## Run tests
 ```
 cd js
-mocha test/merkle_tree
+MOCHA_MERKLE_TREE_HEIGHT=2 node_modules/.bin/mocha test/mixer.js
 ```
