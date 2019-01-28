@@ -35,20 +35,18 @@ cd ../..
 
 ## ZKP setup
 ```
-cd cpp/build
-src/examples/merkle_tree/merkle_tree_addition_setup 2 /tmp/mt_addition_pk \
-                                                      /tmp/mt_addition_vk
-src/examples/merkle_tree/merkle_tree_inclusion_setup 2 /tmp/mt_addition_pk \
-                                                       /tmp/mt_addition_vk
-./convert_vk /tmp/mt_addition_vk /tmp/mt_addition_vk_alt
-./convert_vk /tmp/mt_inclusion_vk /tmp/mt_inclusion_vk_alt
+cd cpp/build/src
+src/examples/merkle_tree/merkle_tree_addition_setup 2 /tmp/mt_addition_pk  /tmp/mt_addition_vk
+src/examples/merkle_tree/merkle_tree_inclusion_setup 2 /tmp/mt_inclusion_pk /tmp/mt_inclusion_vk
+src/convert_vk /tmp/mt_addition_vk /tmp/mt_addition_vk_alt
+src/convert_vk /tmp/mt_inclusion_vk /tmp/mt_inclusion_vk_alt
 ```
 
 ## Run server
 ```
 cd cpp/build
-./merkle_tree/merkle_tree_server 2 /tmp/mt_addition_pk /tmp/mt_addition_vk \
-                                   /tmp/mt_inclusion_pk /tmp/mt_inclusion_vk  
+src/examples/merkle_tree/merkle_tree_server 2 /tmp/mt_addition_pk /tmp/mt_addition_vk \
+                                              /tmp/mt_inclusion_pk /tmp/mt_inclusion_vk  
 ```
 
 ## Run tests
