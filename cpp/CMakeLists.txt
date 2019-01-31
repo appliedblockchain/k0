@@ -97,8 +97,6 @@ else()
   add_definitions(-DNO_PROCPS)
 endif()
 
-add_definitions(-DMERKLE_TREE_HEIGHT=2)
-
 include_directories(.)
 
 add_subdirectory(depends)

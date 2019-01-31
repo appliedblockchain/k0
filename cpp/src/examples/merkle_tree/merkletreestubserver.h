@@ -14,7 +14,8 @@ class MerkleTreeStubServer : public jsonrpc::AbstractServer<MerkleTreeStubServer
         {
             this->bindAndAddMethod(jsonrpc::Procedure("add", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING, NULL), &MerkleTreeStubServer::addI);
             this->bindAndAddMethod(jsonrpc::Procedure("element", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING, "param01",jsonrpc::JSON_INTEGER, NULL), &MerkleTreeStubServer::elementI);
-            this->bindAndAddMethod(jsonrpc::Procedure("proveInclusion", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_ARRAY, "param01",jsonrpc::JSON_INTEGER, NULL), &MerkleTreeStubServer::proveInclusionI);
+            this->bindAndAddMethod(jsonrpc::Procedure("hash", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_STRING, NULL), &MerkleTreeStubServer::hashI);
+            this->bindAndAddMethod(jsonrpc::Procedure("proveInclusion", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_ARRAY, "param01",jsonrpc::JSON_INTEGER,"param02",jsonrpc::JSON_STRING,"param03",jsonrpc::JSON_STRING, NULL), &MerkleTreeStubServer::proveInclusionI);
             this->bindAndAddMethod(jsonrpc::Procedure("reset", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING,  NULL), &MerkleTreeStubServer::resetI);
             this->bindAndAddMethod(jsonrpc::Procedure("root", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING,  NULL), &MerkleTreeStubServer::rootI);
             this->bindAndAddMethod(jsonrpc::Procedure("simulateAddition", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING, NULL), &MerkleTreeStubServer::simulateAdditionI);
@@ -29,9 +30,13 @@ class MerkleTreeStubServer : public jsonrpc::AbstractServer<MerkleTreeStubServer
         {
             response = this->element(request[0u].asInt());
         }
+        inline virtual void hashI(const Json::Value &request, Json::Value &response)
+        {
+            response = this->hash(request[0u].asString(), request[1u].asString());
+        }
         inline virtual void proveInclusionI(const Json::Value &request, Json::Value &response)
         {
-            response = this->proveInclusion(request[0u].asInt());
+            response = this->proveInclusion(request[0u].asInt(), request[1u].asString(), request[2u].asString());
         }
         inline virtual void resetI(const Json::Value &/*request*/, Json::Value &response)
         {
@@ -51,7 +56,8 @@ class MerkleTreeStubServer : public jsonrpc::AbstractServer<MerkleTreeStubServer
         }
         virtual Json::Value add(const std::string& param01) = 0;
         virtual std::string element(int param01) = 0;
-        virtual Json::Value proveInclusion(int param01) = 0;
+        virtual std::string hash(const std::string& param01, const std::string& param02) = 0;
+        virtual Json::Value proveInclusion(int param01, const std::string& param02, const std::string& param03) = 0;
         virtual std::string reset() = 0;
         virtual std::string root() = 0;
         virtual Json::Value simulateAddition(const std::string& param01) = 0;
