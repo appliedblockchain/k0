@@ -147,7 +147,7 @@ Json::Value MerkleTreeServer<FieldT, HashT>::simulateAddition(const string &leaf
   // for (size_t i = 0; i < addition_circuit.pb->primary_input().size(); i ++) {
   //   primary_input_in_json[i] = field_element_to_string(addition_circuit.pb->primary_input()[i]);
   // }
-  result["address"] = address;
+  result["address"] = Json::UInt64(address);
   result["newRoot"] = new_root_json;
   result["proof"] = proof_in_json;
   return result;
@@ -159,7 +159,7 @@ Json::Value MerkleTreeServer<FieldT, HashT>::add(const string &leaf_hex)
   bit_vector leaf_bv = hex2bits(leaf_hex);
   size_t address = mt.add(leaf_bv);
   Json::Value result;
-  result["address"] = address;
+  result["address"] = Json::UInt64(address);
   result["newRoot"] = bits2hex(mt.root());
   return result;
 }
