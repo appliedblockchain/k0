@@ -77,7 +77,7 @@ Json::Value MerkleTreeServer<FieldT, HashT>::simulateAddition(const string &leaf
 
   bit_vector leaf_bv = hex2bits(leaf_hex);
   auto simulation_result = mt.simulate_add(leaf_bv);
-  uint address = get<0>(simulation_result);
+  size_t address = get<0>(simulation_result);
   bit_vector next_root_bv = get<1>(simulation_result);
   vector<bit_vector> path = get<2>(simulation_result);
 
@@ -144,7 +144,7 @@ Json::Value MerkleTreeServer<FieldT, HashT>::simulateAddition(const string &leaf
   //std::transform(addition_circuit.pb->primary_input().begin(), addition_circuit.pb->primary_input().end(), primary_input_strings.begin(), field_element_to_string);
   Json::Value result;
   // Json::Value primary_input_in_json;
-  // for (uint i = 0; i < addition_circuit.pb->primary_input().size(); i ++) {
+  // for (size_t i = 0; i < addition_circuit.pb->primary_input().size(); i ++) {
   //   primary_input_in_json[i] = field_element_to_string(addition_circuit.pb->primary_input()[i]);
   // }
   result["address"] = address;
@@ -157,7 +157,7 @@ template <typename FieldT, typename HashT>
 Json::Value MerkleTreeServer<FieldT, HashT>::add(const string &leaf_hex)
 {
   bit_vector leaf_bv = hex2bits(leaf_hex);
-  uint address = mt.add(leaf_bv);
+  size_t address = mt.add(leaf_bv);
   Json::Value result;
   result["address"] = address;
   result["newRoot"] = bits2hex(mt.root());
