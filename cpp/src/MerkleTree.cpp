@@ -41,12 +41,11 @@ bool returnFalse() {
 MerkleTree::MerkleTree(size_t d) :
   depth{d}
 {
-  cout << "MT CONSTRUCTOR" << endl;
   max_size = exp2(depth);
   empty_tree_roots = new bit_vector[depth];
   node_levels = new vector<bit_vector>[depth];
   leaves = new vector<bit_vector>();
-  for (uint i = 0; i < depth; i++) {
+  for (size_t i = 0; i < depth; i++) {
     bit_vector prev;
     if (i == 0) {
       prev = all_zeros;
@@ -62,25 +61,25 @@ bit_vector MerkleTree::root() {
   return node_levels[depth - 1][0];
 }
 
-uint MerkleTree::num_elements() {
+size_t MerkleTree::num_elements() {
   return leaves->size();
 }
 
-bit_vector MerkleTree::operator[](uint i) {
+bit_vector MerkleTree::operator[](size_t i) {
   return leaves->at(i);
 }
 
-uint MerkleTree::add(bit_vector leaf) {
-  const uint address = leaves->size();
+size_t MerkleTree::add(bit_vector leaf) {
+  const size_t address = leaves->size();
   if (leaves->size() >= max_size) {
     throw overflow_error("Tree is full");
   }
   leaves->push_back(leaf);
-  uint prev_level_pos = address;
-  for (uint level = 0; level < depth; level++) {
+  size_t prev_level_pos = address;
+  for (size_t level = 0; level < depth; level++) {
     // First we need to find out which element at the current level gets updated
     // (position at previous level divided by 2).
-    const uint pos = prev_level_pos / 2;
+    const size_t pos = prev_level_pos / 2;
     // We store the values of all the nodes, however most of them will only have
     // empty subtrees and therefore have the standard values. We only need to
     // store the actually computed hash values. On each level these will grow
@@ -116,10 +115,10 @@ uint MerkleTree::add(bit_vector leaf) {
   return address;
 }
 
-vector<bit_vector> MerkleTree::path(uint address) {
+vector<bit_vector> MerkleTree::path(size_t address) {
   vector<bit_vector> p;
-  uint prev_pos;
-  for (uint row = 0; row < depth; row++) {
+  size_t prev_pos;
+  for (size_t row = 0; row < depth; row++) {
     bit_vector sibling;
     if (row == 0) {
       if (address % 2) {
@@ -130,7 +129,7 @@ vector<bit_vector> MerkleTree::path(uint address) {
       }
       prev_pos = address;
     } else {
-      uint pos = prev_pos / 2;
+      size_t pos = prev_pos / 2;
       if (pos % 2) {
         // right side
         sibling = internal_node_at(row, pos - 1);
@@ -144,12 +143,12 @@ vector<bit_vector> MerkleTree::path(uint address) {
   return p;
 }
 
-tuple<uint, bit_vector, vector<bit_vector>> MerkleTree::simulate_add(bit_vector leaf) {
-  uint address = leaves->size();
+tuple<size_t, bit_vector, vector<bit_vector>> MerkleTree::simulate_add(bit_vector leaf) {
+  size_t address = leaves->size();
   vector<bit_vector> p;
-  uint prev_pos;
+  size_t prev_pos;
   bit_vector prev_hash;
-  for (uint row = 0; row < depth; row++) {
+  for (size_t row = 0; row < depth; row++) {
     bit_vector sibling;
     bit_vector hash;
     if (row == 0) {
@@ -163,7 +162,7 @@ tuple<uint, bit_vector, vector<bit_vector>> MerkleTree::simulate_add(bit_vector 
       }
       prev_pos = address;
     } else {
-      uint pos = prev_pos / 2;
+      size_t pos = prev_pos / 2;
       if (pos % 2) {
         // right side
         sibling = internal_node_at(row, pos - 1);
@@ -181,7 +180,7 @@ tuple<uint, bit_vector, vector<bit_vector>> MerkleTree::simulate_add(bit_vector 
   return make_tuple(address, prev_hash, p);
 }
 
-bit_vector MerkleTree::internal_node_at(uint row, uint pos) {
+bit_vector MerkleTree::internal_node_at(size_t row, size_t pos) {
   if (row == 0) {
     if (pos + 1 <= leaves->size()) {
       return leaves->at(pos);
@@ -190,7 +189,7 @@ bit_vector MerkleTree::internal_node_at(uint row, uint pos) {
     }
   } else {
     // row 0 is the leaves, row 1 is (node_level) level 0 etc.
-    uint level = row - 1;
+    size_t level = row - 1;
     if (pos + 1 <= node_levels[level].size()) {
       return node_levels[level][pos];
     } else {
@@ -201,8 +200,8 @@ bit_vector MerkleTree::internal_node_at(uint row, uint pos) {
 
 void MerkleTree::print() {
   for (int level = depth - 1; level >= 0; level--) {
-    uint num_elems = exp2(depth - level - 1);
-    for (uint pos = 0; pos < num_elems; pos++) {
+    size_t num_elems = exp2(depth - level - 1);
+    for (size_t pos = 0; pos < num_elems; pos++) {
       if (node_levels[level].size() - 1 >= pos) {
         printnode(node_levels[level][pos]);
       } else {
@@ -211,7 +210,7 @@ void MerkleTree::print() {
     }
     cout << endl;
   }
-  for (uint pos = 0; pos < max_size; pos++) {
+  for (size_t pos = 0; pos < max_size; pos++) {
     if (leaves->size() - 1 >= pos) {
       printnode(leaves->at(pos));
     } else {
