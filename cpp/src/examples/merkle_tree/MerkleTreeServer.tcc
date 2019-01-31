@@ -158,7 +158,6 @@ Json::Value MerkleTreeServer<FieldT, HashT>::add(const string &leaf_hex)
 {
   bit_vector leaf_bv = hex2bits(leaf_hex);
   uint address = mt.add(leaf_bv);
-  mt.print();
   Json::Value result;
   result["address"] = address;
   result["newRoot"] = bits2hex(mt.root());
