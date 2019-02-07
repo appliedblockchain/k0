@@ -1,0 +1,24 @@
+add_executable(
+        letest
+
+        main.cpp
+        prfs.cpp
+        sha256_compression.cpp
+        util.cpp
+)
+target_link_libraries(
+        letest
+
+        gtest
+        ff
+        snark
+        zktrade
+)
+
+target_include_directories(
+        letest
+
+        PUBLIC
+        ${DEPENDS_DIR}/libsnark
+        ${DEPENDS_DIR}/libsnark/depends/libff
+)

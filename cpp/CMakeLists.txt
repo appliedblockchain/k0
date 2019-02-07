@@ -97,7 +97,10 @@ else()
   add_definitions(-DNO_PROCPS)
 endif()
 
+add_definitions(-DNDEBUG=0)
+
 include_directories(.)
 
 add_subdirectory(depends)
 add_subdirectory(src)
+add_subdirectory(test)

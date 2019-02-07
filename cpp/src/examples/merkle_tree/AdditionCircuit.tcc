@@ -8,7 +8,7 @@ using namespace libsnark;
 
 template<typename FieldT, typename HashT>
 AdditionCircuit<FieldT, HashT> make_addition_circuit(size_t tree_height) {
-    protoboard<FieldT>*pb = new protoboard<FieldT>();
+    protoboard<FieldT>* pb = new protoboard<FieldT>();
 
     pb_variable<FieldT>* address_v = new pb_variable<FieldT>();
     address_v->allocate(*pb, "address");

@@ -1,17 +1,9 @@
-#include <chrono>
 #include <libsnark/gadgetlib1/gadgets/hashes/sha256/sha256_gadget.hpp>
 #include <jsonrpccpp/server/connectors/httpserver.h>
 #include "MerkleTreeServer.hpp"
 
-void task1(std::string msg)
-{
-    std::cout << "task1 says: " << msg;
-}
-
 int main(int argc, char* argv[])
 {
-
-  auto start_timestamp = std::chrono::system_clock::now();
   if (argc != 6) {
     std::cerr << "Need exactly 5 arguments (tree height, path to addition pk, path to addition vk, path to inclusion pk, path to inclusion vk)" << std::endl;
     return 1;
@@ -36,10 +28,6 @@ int main(int argc, char* argv[])
   std::cout << "Loading inclusion verification key..." << std::endl;
   server.setInclusionVk(argv[5]);
 
-  auto init_done_timestamp = std::chrono::system_clock::now();
-  auto init_duration = init_done_timestamp - start_timestamp;
-  std::cout << "Init done. Elapsed time: " << init_duration.count() / 1000000 << "s";
-  std::cout << std::endl;
   std::cout << "Server started. Enter \"end\" to shut down." << std::endl;
 
   bool need_to_shut_down = false;
