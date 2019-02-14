@@ -1,7 +1,7 @@
 #include <libsnark/gadgetlib1/protoboard.hpp>
 #include <libsnark/gadgetlib1/gadgets/basic_gadgets.hpp>
 #include <libsnark/gadgetlib1/gadgets/merkle_tree/merkle_authentication_path_variable.hpp>
-#include "MTLeafAdditionPacked.hpp"
+#include "../../circuits/gadgets/MTLeafAdditionPacked.hpp"
 
 using namespace libff;
 using namespace libsnark;

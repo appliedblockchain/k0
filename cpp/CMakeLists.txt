@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
+cmake_policy(SET CMP0076 NEW)
+
 project(libsnark-tutorial)
 
 set(
@@ -98,8 +100,6 @@ else()
 endif()
 
 add_definitions(-DNDEBUG=0)
-
-include_directories(.)
 
 add_subdirectory(depends)
 add_subdirectory(src)

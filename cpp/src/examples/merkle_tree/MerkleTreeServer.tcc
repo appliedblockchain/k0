@@ -11,6 +11,7 @@
 using namespace std;
 using namespace libff;
 using namespace libsnark;
+using namespace zktrade;
 
 typedef Fr<default_r1cs_ppzksnark_pp> FieldT;
 typedef sha256_two_to_one_hash_gadget<FieldT> HashT;

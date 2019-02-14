@@ -7,7 +7,7 @@ const sendTransaction = require('../send-transaction')
 const Web3 = require('web3')
 
 const baseDir = path.join(__dirname, '..', '..')
-const cppUtilDir = path.join(baseDir, 'cpp', 'build', 'src')
+const cppUtilDir = path.join(baseDir, 'cpp', 'cmake-build-debug', 'src')
 
 async function convertVk(vkPath, vkAltPath) {
   const executablePath = path.join(cppUtilDir, 'convert_vk')

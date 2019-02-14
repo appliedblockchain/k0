@@ -1,8 +1,8 @@
 #include <fstream>
 #include <gtest/gtest.h>
 #include <stdlib.h>
-#include <libsnark/gadgetlib1/gadgets/hashes/sha256/sha256_gadget.hpp>
 #include <libsnark/common/default_types/r1cs_ppzksnark_pp.hpp>
+#include <libsnark/gadgetlib1/gadgets/hashes/sha256/sha256_gadget.hpp>
 #include <libsnark/gadgetlib1/gadgets/hashes/hash_io.hpp>
 #include <libsnark/gadgetlib1/gadgets/hashes/sha256/sha256_gadget.hpp>
 #include "hash/sha256_compression.h"
@@ -94,7 +94,7 @@ TEST(SHA256Compression, CorrectnessOfPythonImplementation) {
 }
 
 TEST(SHA256Compression, EqualityOfImplementations) {
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 1; i++) {
         string input_hex = "0x" + random_bytes_hex(64);
         string output_python_hex = get_python_hash(input_hex);
 

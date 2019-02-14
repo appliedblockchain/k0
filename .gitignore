@@ -3,5 +3,6 @@
 *.pyc
 /data
 /cpp/build
+/cpp/cmake-build-debug
 /*/node_modules
 /*/package-lock.json

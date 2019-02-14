@@ -38,6 +38,20 @@ libff::bit_vector zktrade::concat(libff::bit_vector &a, libff::bit_vector &b) {
     return result;
 }
 
+libff::bit_vector zktrade::concat(libff::bit_vector &a, libff::bit_vector &b, libff::bit_vector &c) {
+    libff::bit_vector result;
+    for (auto bit : a) {
+        result.push_back(bit);
+    }
+    for (auto bit : b) {
+        result.push_back(bit);
+    }
+    for (auto bit : c) {
+        result.push_back(bit);
+    }
+    return result;
+}
+
 libff::bit_vector zktrade::bytes_to_bits(std::vector<unsigned char> &bytes) {
     libff::bit_vector result;
     for (auto b : bytes) {
@@ -67,19 +81,40 @@ std::string zktrade::bytes_to_hex(std::vector<unsigned char> bytes) {
     std::stringstream stream;
     stream << "0x";
     for (auto b : bytes) {
-        stream << std::hex << std::setfill('0') << std::setw(2) << (int)b;
+        stream << std::hex << std::setfill('0') << std::setw(2) << (int) b;
     }
     return stream.str();
 }
 
-libff::bit_vector zktrade::random_bits(size_t len)
-{
-    libff::bit_vector vec(len);
-    for (size_t i = 0; i < len; i++) {
-        // TODO Is this okay, randomness-wise?
-        // TODO Well definitely it's not performant
-        vec[i] = rand() % 2;
-    }
-    return vec;
+libff::bit_vector zktrade::random_bits(size_t len = 256) {
+    libff::bit_vector v(len);
+    generate(v.begin(), v.end(), [&]() { return rand() % 2; });
+    return v;
 }
 
+bit_vector zktrade::truncate(bit_vector input, size_t len) {
+    if (len >= input.size()) {
+        throw invalid_argument(
+                "Desired output length not smaller than the size of the input bit vector");
+    }
+    bit_vector shortened(input.begin(), input.begin() + len);
+    return shortened;
+}
+
+string zktrade::bits_to_string(bit_vector input) {
+    stringstream stream;
+    for (bool bit : input) {
+        stream << (bit ? "1" : "0");
+    }
+    return stream.str();
+}
+
+string zktrade::bits_to_hex(bit_vector input) {
+    return bytes_to_hex(bits_to_bytes(input));
+}
+
+bit_vector zktrade::zero_bits(size_t len) {
+    bit_vector result(len);
+    std::fill(result.begin(), result.end(), 0);
+    return result;
+}

@@ -65,3 +65,17 @@ TEST(Util, bytes_to_bits) {
         ASSERT_EQ(bytes_to_bits(example.bytes), example.bits);
     }
 }
+
+TEST(Util, truncate) {
+    struct truncate_example {
+        bit_vector in;
+        bit_vector out;
+    };
+    vector<truncate_example> examples{
+            {{1,0,1},{1,0}},
+            {{1,0,1},{1}}
+    };
+    for (auto example: examples) {
+        ASSERT_EQ(truncate(example.in, example.out.size()), example.out);
+    }
+}

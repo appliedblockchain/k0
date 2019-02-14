@@ -2,7 +2,7 @@
 #include <libsnark/common/default_types/r1cs_ppzksnark_pp.hpp>
 #include <libsnark/gadgetlib1/gadgets/hashes/sha256/sha256_gadget.hpp>
 #include "AdditionCircuit.hpp"
-#include "../../util.hpp"
+#include "../../util.h"
 #include "../../setup.cpp"
 
 using namespace libff;
