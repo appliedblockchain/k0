@@ -54,9 +54,6 @@ target_include_directories(
         ${DEPENDS_DIR}/libsnark/depends/libfqfft
 )
 
-add_subdirectory(examples)
-include_directories(.)
-
 add_library(zktrade "")
 
 target_sources(
@@ -87,4 +84,6 @@ target_include_directories(
         ${DEPENDS_DIR}/libsnark/depends/libfqfft
 )
 
-include_directories(.)
+add_subdirectory(setup)
+
+add_subdirectory(server)

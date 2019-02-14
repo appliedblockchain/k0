@@ -1,7 +1,7 @@
 #include <libsnark/common/default_types/r1cs_ppzksnark_pp.hpp>
 #include <libsnark/gadgetlib1/pb_variable.hpp>
 #include <libsnark/zk_proof_systems/ppzksnark/r1cs_ppzksnark/r1cs_ppzksnark.hpp>
-#include "pkutil.cpp"
+#include "../pkutil.cpp"
 
 using namespace libsnark;
 using namespace std;

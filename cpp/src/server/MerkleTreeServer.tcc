@@ -2,11 +2,11 @@
 #include <libsnark/gadgetlib1/gadgets/hashes/sha256/sha256_gadget.hpp>
 #include <libsnark/gadgetlib1/gadgets/merkle_tree/merkle_tree_check_update_gadget.hpp>
 #include "MerkleTreeServer.hpp"
-#include "../../pkutil.cpp"
-#include "../../serialization.hpp"
-#include "../../printbits.hpp"
-#include "../../json_conversion.hpp"
-#include "../../packing.hpp"
+#include "../pkutil.cpp"
+#include "../serialization.hpp"
+#include "../printbits.hpp"
+#include "../json_conversion.hpp"
+#include "../packing.hpp"
 
 using namespace std;
 using namespace libff;
