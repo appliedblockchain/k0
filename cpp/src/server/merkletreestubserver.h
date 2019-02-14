@@ -14,6 +14,7 @@ class MerkleTreeStubServer : public jsonrpc::AbstractServer<MerkleTreeStubServer
         {
             this->bindAndAddMethod(jsonrpc::Procedure("add", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING, NULL), &MerkleTreeStubServer::addI);
             this->bindAndAddMethod(jsonrpc::Procedure("element", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING, "param01",jsonrpc::JSON_INTEGER, NULL), &MerkleTreeStubServer::elementI);
+            this->bindAndAddMethod(jsonrpc::Procedure("generateCommitment", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_STRING,"param03",jsonrpc::JSON_STRING,"param04",jsonrpc::JSON_STRING, NULL), &MerkleTreeStubServer::generateCommitmentI);
             this->bindAndAddMethod(jsonrpc::Procedure("hash", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_STRING, NULL), &MerkleTreeStubServer::hashI);
             this->bindAndAddMethod(jsonrpc::Procedure("proveInclusion", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_ARRAY, "param01",jsonrpc::JSON_INTEGER,"param02",jsonrpc::JSON_STRING,"param03",jsonrpc::JSON_STRING, NULL), &MerkleTreeStubServer::proveInclusionI);
             this->bindAndAddMethod(jsonrpc::Procedure("reset", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING,  NULL), &MerkleTreeStubServer::resetI);
@@ -29,6 +30,10 @@ class MerkleTreeStubServer : public jsonrpc::AbstractServer<MerkleTreeStubServer
         inline virtual void elementI(const Json::Value &request, Json::Value &response)
         {
             response = this->element(request[0u].asInt());
+        }
+        inline virtual void generateCommitmentI(const Json::Value &request, Json::Value &response)
+        {
+            response = this->generateCommitment(request[0u].asString(), request[1u].asString(), request[2u].asString(), request[3u].asString());
         }
         inline virtual void hashI(const Json::Value &request, Json::Value &response)
         {
@@ -56,6 +61,7 @@ class MerkleTreeStubServer : public jsonrpc::AbstractServer<MerkleTreeStubServer
         }
         virtual Json::Value add(const std::string& param01) = 0;
         virtual std::string element(int param01) = 0;
+        virtual std::string generateCommitment(const std::string& param01, const std::string& param02, const std::string& param03, const std::string& param04) = 0;
         virtual std::string hash(const std::string& param01, const std::string& param02) = 0;
         virtual Json::Value proveInclusion(int param01, const std::string& param02, const std::string& param03) = 0;
         virtual std::string reset() = 0;

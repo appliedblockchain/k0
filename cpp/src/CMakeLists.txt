@@ -65,13 +65,21 @@ target_sources(
         scheme/cm.cpp
         scheme/prfs.cpp
         util.cpp
+        MerkleTree.cpp
+        serialization.cpp
+        json_conversion.cpp
 
         PUBLIC
         circuitry/gadgets/prfs.h
         hash/sha256_compression.h
         scheme/cm.h
         scheme/prfs.h
+        server/MerkleTreeServer.hpp
+        server/MerkleTreeServer.tcc
         util.h
+        MerkleTree.hpp
+        serialization.hpp
+        json_conversion.hpp
 )
 
 target_include_directories(
@@ -87,3 +95,5 @@ target_include_directories(
 add_subdirectory(setup)
 
 add_subdirectory(server)
+
+include_directories(.)

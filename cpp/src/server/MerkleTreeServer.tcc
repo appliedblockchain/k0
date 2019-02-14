@@ -7,6 +7,8 @@
 #include "../printbits.hpp"
 #include "../json_conversion.hpp"
 #include "../packing.hpp"
+#include "../util.h"
+#include "../scheme/cm.h"
 
 using namespace std;
 using namespace libff;
@@ -66,6 +68,16 @@ void MerkleTreeServer<FieldT, HashT>::setInclusionVk(string vk_path)
 {
   inclusion_vk = loadFromFile<r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp>>(vk_path);
   inclusion_vk_loaded = true;
+}
+
+template <typename FieldT, typename HashT>
+std::string MerkleTreeServer<FieldT, HashT>::generateCommitment(const std::string& a_pk_str, const std::string& rho_str, const std::string& r_str, const std::string& v_str)
+{
+  bit_vector a_pk = hex2bits(a_pk_str);
+  bit_vector rho = hex2bits(rho_str);
+  bit_vector r = hex2bits(r_str);
+  bit_vector v = hex2bits(v_str);
+  return bits_to_hex(cm(a_pk, rho, r, v));
 }
 
 template <typename FieldT, typename HashT>

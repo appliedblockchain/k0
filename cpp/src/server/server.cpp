@@ -19,14 +19,14 @@ int main(int argc, char* argv[])
   server.StartListening();
 
   std::cout << "Loading addition proving key..." << std::endl;
-  server.setAdditionPk(argv[2]);
+  // server.setAdditionPk(argv[2]);
   std::cout << "Loading addition verification key..." << std::endl;
-  server.setAdditionVk(argv[3]);
+  // server.setAdditionVk(argv[3]);
 
   std::cout << "Loading inclusion proving key..." << std::endl;
-  server.setInclusionPk(argv[4]);
+  // server.setInclusionPk(argv[4]);
   std::cout << "Loading inclusion verification key..." << std::endl;
-  server.setInclusionVk(argv[5]);
+  // server.setInclusionVk(argv[5]);
 
   std::cout << "Server started. Enter \"end\" to shut down." << std::endl;
 
