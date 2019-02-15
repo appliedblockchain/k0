@@ -5,7 +5,7 @@
 #include <libsnark/gadgetlib1/gadgets/hashes/hash_io.hpp>
 #include "scheme/prfs.h"
 #include "util.h"
-#include "hash/sha256_compression.h"
+#include "hash/sha256_compression.hpp"
 #include "circuitry/gadgets/prfs.hpp"
 
 using namespace libff;

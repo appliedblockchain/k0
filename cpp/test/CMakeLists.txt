@@ -3,9 +3,11 @@ add_executable(
 
         main.cpp
         prfs.cpp
-        sha256_compression.cpp
+        hashes.cpp
         util.cpp
-        note_commitment.cpp withdrawal_circuit.cpp)
+        note_commitment.cpp
+        withdrawal_circuit.cpp
+)
 target_link_libraries(
         letest
 

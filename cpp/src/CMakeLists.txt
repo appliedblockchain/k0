@@ -61,6 +61,7 @@ target_sources(
 
         PRIVATE
         crypto/sha256.cpp
+        hash/sha256.cpp
         hash/sha256_compression.cpp
         scheme/cm.cpp
         scheme/prfs.cpp
@@ -71,7 +72,8 @@ target_sources(
 
         PUBLIC
         circuitry/gadgets/prfs.hpp
-        hash/sha256_compression.h
+        hash/sha256.hpp
+        hash/sha256_compression.hpp
         scheme/cm.h
         scheme/prfs.h
         server/MerkleTreeServer.hpp

@@ -23,10 +23,10 @@ int main(int argc, char* argv[])
   std::cout << "Loading addition verification key..." << std::endl;
   // server.setAdditionVk(argv[3]);
 
-  std::cout << "Loading inclusion proving key..." << std::endl;
-  // server.setInclusionPk(argv[4]);
-  std::cout << "Loading inclusion verification key..." << std::endl;
-  // server.setInclusionVk(argv[5]);
+  std::cout << "Loading withdrawal proving key..." << std::endl;
+  // server.setWithdrawalPk(argv[4]);
+  std::cout << "Loading withdrawal verification key..." << std::endl;
+  // server.setWithdrawalVk(argv[5]);
 
   std::cout << "Server started. Enter \"end\" to shut down." << std::endl;
 

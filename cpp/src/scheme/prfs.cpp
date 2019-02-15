@@ -1,4 +1,4 @@
-#include "hash/sha256_compression.h"
+#include "hash/sha256_compression.hpp"
 #include "prfs.h"
 #include "util.h"
 

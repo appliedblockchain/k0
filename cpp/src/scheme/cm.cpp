@@ -1,5 +1,5 @@
 #include "cm.h"
-#include "hash/sha256_compression.h"
+#include "hash/sha256_compression.hpp"
 #include "util.h"
 
 using namespace libff;

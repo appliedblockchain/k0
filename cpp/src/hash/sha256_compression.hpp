@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_SHA256_COMPRESSION_H
-#define ZKTRADE_SHA256_COMPRESSION_H
+#ifndef ZKTRADE_SHA256_COMPRESSION_HPP
+#define ZKTRADE_SHA256_COMPRESSION_HPP
 
 #include <libff/common/utils.hpp>
 
@@ -8,4 +8,4 @@ namespace zktrade {
     libff::bit_vector sha256_compress(libff::bit_vector input);
 }
 
-#endif //ZKTRADE_SHA256_COMPRESSION_H
+#endif //ZKTRADE_SHA256_COMPRESSION_HPP
