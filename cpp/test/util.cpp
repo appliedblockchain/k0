@@ -1,9 +1,12 @@
 #include <gtest/gtest.h>
+#include <libsnark/common/default_types/r1cs_ppzksnark_pp.hpp>
 #include "util.h"
 
 using namespace std;
 using namespace libff;
 using namespace zktrade;
+
+typedef Fr<default_r1cs_ppzksnark_pp> FieldT;
 
 struct byte_to_bits_example {
     unsigned char b;
@@ -78,4 +81,12 @@ TEST(Util, truncate) {
     for (auto example: examples) {
         ASSERT_EQ(truncate(example.in, example.out.size()), example.out);
     }
+}
+
+TEST(Util, field_element_to_64_bits) {
+    bit_vector result = field_element_to_64_bits(FieldT("1000000000000000000"));
+    cout << bits_to_hex(result) << endl;
+
+    uint64_t uint64_val = 1000000000000000000;
+    cout << uint64_to_string(uint64_val) << endl;
 }

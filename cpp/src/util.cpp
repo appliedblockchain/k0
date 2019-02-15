@@ -118,3 +118,10 @@ bit_vector zktrade::zero_bits(size_t len) {
     std::fill(result.begin(), result.end(), 0);
     return result;
 }
+
+string zktrade::uint64_to_string(uint64_t val)
+{
+    stringstream stream;
+    stream << dec << val;
+    return stream.str();
+}

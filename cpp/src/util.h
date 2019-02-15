@@ -33,6 +33,8 @@ namespace zktrade {
 
     bit_vector zero_bits(size_t len);
 
+    string uint64_to_string(uint64_t val);
+
     template<typename FieldT>
     vector<FieldT> field_elements_from_bits(bit_vector bitv) {
         protoboard<FieldT> pb;
@@ -69,6 +71,22 @@ namespace zktrade {
         stringstream stream;
         stream << el;
         return stream.str();
+    }
+
+    template<typename FieldT>
+    bit_vector field_element_to_64_bits(FieldT v) {
+        protoboard<FieldT> pb;
+        pb_variable<FieldT> v_number;
+        v_number.allocate(pb, "v_number");
+        pb_variable_array<FieldT> v_bits;
+        v_bits.allocate(pb, 64, "v_bits");
+        packing_gadget<FieldT> packer(pb, v_bits, v_number, "packing");
+
+        pb.set_input_sizes(1);
+        packer.generate_r1cs_constraints(false);
+        pb.val(v_number) = v;
+        packer.generate_r1cs_witness_from_packed();
+        return v_bits.get_bits(pb);
     }
 }
 
