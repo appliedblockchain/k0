@@ -26,6 +26,8 @@ TEST(WithdrawalCircuit, Test) {
     bit_vector v = field_element_to_64_bits(v_field_element);
     cout << "bitcoin v bits " << bits_to_hex(v) << endl;
     bit_vector commitment = cm(a_pk, rho, r, v);
+    bit_vector sn = prf_sn(a_sk, rho);
+    // TODO calculate sn
 
     MerkleTree mt(tree_height);
     uint address = mt.num_elements();
@@ -44,16 +46,19 @@ TEST(WithdrawalCircuit, Test) {
     circuit.v_packer->generate_r1cs_witness_from_packed();
     ASSERT_FALSE(circuit.pb->is_satisfied());
     cout << "circuit " << bits_to_hex(circuit.commitment_bits->get_digest()) << endl;
-    circuit.pag->generate_r1cs_witness();
-    circuit.cmg->generate_r1cs_witness();
+    circuit.addr_gadget->generate_r1cs_witness();
+    circuit.commitment_gadget->generate_r1cs_witness();
+    circuit.sn_gadget->generate_r1cs_witness();
+    circuit.sn_packer->generate_r1cs_witness_from_bits();
     cout << "bitcoin " << bits_to_hex(commitment) << endl;
     cout << "circuit " << bits_to_hex(circuit.commitment_bits->get_digest()) << endl;
     ASSERT_FALSE(circuit.pb->is_satisfied());
     circuit.path->generate_r1cs_witness(address, mt.path(address));
-    circuit.mtcrg->generate_r1cs_witness();
+    circuit.mt_path_gadget->generate_r1cs_witness();
 
     ASSERT_TRUE(circuit.pb->is_satisfied());
-
-    // TODO sn
-
+    ASSERT_EQ(circuit.commitment_bits->get_digest(), commitment);
+    ASSERT_EQ(circuit.a_pk_bits->get_digest(), a_pk);
+    ASSERT_EQ(circuit.sn_bits->get_digest(), sn);
+    cout << bits_to_hex(sn) << endl;
 }

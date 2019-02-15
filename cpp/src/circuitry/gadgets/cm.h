@@ -15,8 +15,7 @@ namespace zktrade {
     template<typename FieldT>
     pb_variable_array<FieldT> repeat(pb_variable<FieldT> v, size_t len) {
         pb_variable_array<FieldT> arr;
-
-        for (int i = 0; i < 192; i++) {
+        for (size_t i = 0; i < len; i++) {
             arr.emplace_back(v);
         }
         return arr;

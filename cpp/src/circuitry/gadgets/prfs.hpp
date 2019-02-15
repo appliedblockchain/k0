@@ -27,23 +27,27 @@ namespace zktrade {
                 pb_variable_array<FieldT> x,
                 bool a,
                 bool b,
-                pb_variable_array<FieldT> y,
+                pb_variable_array<FieldT> z,
                 shared_ptr<digest_variable<FieldT>> result,
                 const std::string &annotation_prefix
-        ) : gadget<FieldT>(pb, FMT(annotation_prefix, " gadget")), result(result) {
+        ) : gadget<FieldT>(pb, FMT(annotation_prefix, " gadget")),
+            result(result) {
+            if (x.size() != 256) {
+                throw invalid_argument("x not of length 256");
+            }
+            if (z.size() != 254) {
+                throw invalid_argument("z not of length 254");
+            }
             pb_linear_combination_array<FieldT> IV = SHA256_default_IV(pb);
             pb_variable_array<FieldT> discriminants;
             discriminants.emplace_back(a ? ONE : ZERO);
             discriminants.emplace_back(b ? ONE : ZERO);
-            block.reset(new block_variable<FieldT>(pb, {x, discriminants, y},
-                                                   FMT(annotation_prefix,
-                                                       " block")));
-            hasher.reset(new sha256_compression_function_gadget<FieldT>(pb,
-                                                                        IV,
-                                                                        block->bits,
-                                                                        *result,
-                                                                        FMT(annotation_prefix,
-                                                                            " hasher")));
+            block.reset(new block_variable<FieldT>(
+                    pb, {x, discriminants, z},
+                    FMT(annotation_prefix, " block")));
+            hasher.reset(new sha256_compression_function_gadget<FieldT>(
+                    pb, IV, block->bits, *result,
+                    FMT(annotation_prefix, " hasher")));
         }
 
         void generate_r1cs_constraints() {
@@ -87,8 +91,10 @@ namespace zktrade {
                 pb_variable_array<FieldT> &rho,
                 std::shared_ptr<digest_variable<FieldT>> result,
                 const std::string &annotation_prefix
-        ) : prf_gadget<FieldT>(pb, ZERO, a_sk, 0, 1, rho, result,
-                               annotation_prefix) {}
+        ) : prf_gadget<FieldT>(pb, ZERO, a_sk, 0, 1,
+                               pb_variable_array<FieldT>(rho.begin(),
+                                                         rho.begin() + 254),
+                               result, annotation_prefix) {}
     };
 }
 #endif //ZKTRADE_GADGETS_prfS_H
