@@ -70,7 +70,7 @@ target_sources(
         json_conversion.cpp
 
         PUBLIC
-        circuitry/gadgets/prfs.h
+        circuitry/gadgets/prfs.hpp
         hash/sha256_compression.h
         scheme/cm.h
         scheme/prfs.h

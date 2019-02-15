@@ -27,6 +27,6 @@ bit_vector zktrade::prf_addr(bit_vector a_sk) {
     return prf(a_sk, {0,0}, zeros);
 }
 
-bit_vector zktrade::prf_sn(bit_vector a_sk, bit_vector rho_truncated) {
-    return prf(a_sk, {0,1}, rho_truncated);
+bit_vector zktrade::prf_sn(bit_vector a_sk, bit_vector rho) {
+    return prf(a_sk, {0,1}, truncate(rho, 254));
 }

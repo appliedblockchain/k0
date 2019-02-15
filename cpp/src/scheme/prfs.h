@@ -5,7 +5,7 @@
 using namespace libff;
 
 namespace zktrade {
-    bit_vector prf_sn(bit_vector a_sk, bit_vector rho_truncated);
+    bit_vector prf_sn(bit_vector a_sk, bit_vector rho);
     bit_vector prf_addr(bit_vector a_sk);
 }
 

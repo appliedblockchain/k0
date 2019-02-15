@@ -23,7 +23,7 @@ set(
 option(
   DEBUG
   "Enable debugging mode"
-  OFF
+  ON
 )
 
 set(
@@ -98,8 +98,6 @@ if("${WITH_PROCPS}")
 else()
   add_definitions(-DNO_PROCPS)
 endif()
-
-add_definitions(-DNDEBUG=0)
 
 add_subdirectory(depends)
 add_subdirectory(src)
