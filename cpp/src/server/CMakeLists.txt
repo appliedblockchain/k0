@@ -1,7 +1,7 @@
 add_executable(
         merkle_tree_server
 
-        server.cpp
+        run_server.cpp
 )
 target_link_libraries(
         merkle_tree_server

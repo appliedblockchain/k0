@@ -1,6 +1,6 @@
 #include <libsnark/gadgetlib1/gadgets/hashes/sha256/sha256_gadget.hpp>
 #include <jsonrpccpp/server/connectors/httpserver.h>
-#include "MerkleTreeServer.hpp"
+#include "Server.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
   default_r1cs_ppzksnark_pp::init_public_params();
 
   HttpServer httpserver(4000);
-  MerkleTreeServer<FieldT, HashT> server(std::stoi(argv[1]), httpserver, jsonrpc::JSONRPC_SERVER_V2);
+  Server<FieldT, HashT> server(std::stoi(argv[1]), httpserver, jsonrpc::JSONRPC_SERVER_V2);
 
   server.StartListening();
 
