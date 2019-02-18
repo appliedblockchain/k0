@@ -72,6 +72,8 @@ target_sources(
 
         PUBLIC
         circuitry/gadgets/prfs.hpp
+        circuitry/OuterNoteCommitmentCircuit.hpp
+        circuitry/OuterNoteCommitmentCircuit.tcc
         hash/sha256.hpp
         hash/sha256_compression.hpp
         scheme/cm.h

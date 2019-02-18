@@ -38,7 +38,8 @@ libff::bit_vector zktrade::concat(libff::bit_vector &a, libff::bit_vector &b) {
     return result;
 }
 
-libff::bit_vector zktrade::concat(libff::bit_vector &a, libff::bit_vector &b, libff::bit_vector &c) {
+libff::bit_vector zktrade::concat(libff::bit_vector &a, libff::bit_vector &b,
+                                  libff::bit_vector &c) {
     libff::bit_vector result;
     for (auto bit : a) {
         result.push_back(bit);
@@ -69,7 +70,7 @@ std::vector<unsigned char> zktrade::bits_to_bytes(libff::bit_vector bits) {
                 "size of bit vector is not a multiple of 8");
     }
     std::vector<unsigned char> result;
-    for (int i = 0; i < bits.size(); i = i + 8) {
+    for (size_t i = 0; i < bits.size(); i = i + 8) {
         libff::bit_vector byte_bv = libff::bit_vector(
                 bits.begin() + i, bits.begin() + i + 8);
         result.push_back(bits_to_byte(byte_bv));
@@ -90,6 +91,14 @@ libff::bit_vector zktrade::random_bits(size_t len = 256) {
     libff::bit_vector v(len);
     generate(v.begin(), v.end(), [&]() { return rand() % 2; });
     return v;
+}
+
+uint64_t zktrade::random_uint64() {
+    // https://stackoverflow.com/a/7920941
+    return (((uint64_t) rand() << 0) & 0x000000000000FFFFull) |
+           (((uint64_t) rand() << 16) & 0x00000000FFFF0000ull) |
+           (((uint64_t) rand() << 32) & 0x0000FFFF00000000ull) |
+           (((uint64_t) rand() << 48) & 0xFFFF000000000000ull);
 }
 
 bit_vector zktrade::truncate(bit_vector input, size_t len) {
@@ -119,9 +128,37 @@ bit_vector zktrade::zero_bits(size_t len) {
     return result;
 }
 
-string zktrade::uint64_to_string(uint64_t val)
-{
+string zktrade::uint64_to_string(uint64_t val) {
     stringstream stream;
     stream << dec << val;
     return stream.str();
+}
+
+// Returns the same result as the libsnark gadgetlib1 packer
+bit_vector zktrade::uint64_to_bits(uint64_t input) {
+    bit_vector bits = int_list_to_bits({input}, 64);
+    reverse(bits.begin(), bits.end());
+    return bits;
+}
+
+// Returns the same result as the libsnark gadgetlib1 packer
+uint64_t zktrade::bits_to_uint64(bit_vector input) {
+    if (input.size() != 64) {
+        throw std::invalid_argument("bit vector is not of length 64");
+    }
+
+    // Reverse the input
+    bit_vector bv{input.rbegin(), input.rend()};
+    uint64_t x = 0;
+    for (size_t i = 0; i < 64; i++) {
+        // get the current bit
+        unsigned char j = bv[i] ? 1 : 0;
+        // OR b with the current bit
+        x |= j;
+        if (i < 63) {
+            // shift b 1 bit to the left
+            x = x << 1;
+        }
+    }
+    return x;
 }

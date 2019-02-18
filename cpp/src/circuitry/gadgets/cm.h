@@ -51,6 +51,10 @@ namespace zktrade {
             k_hasher.generate_r1cs_witness();
             outer_gadget.generate_r1cs_witness();
         }
+
+        libff::bit_vector k_bits() {
+            return k.get_digest();
+        }
     };
 }
 

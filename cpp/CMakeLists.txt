@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 
-cmake_policy(SET CMP0076 NEW)
+#cmake_policy(SET CMP0076 NEW)
 
-project(libsnark-tutorial)
+project(zktrade)
 
 set(
   CURVE

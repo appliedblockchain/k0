@@ -25,6 +25,8 @@ namespace zktrade {
 
     bit_vector random_bits(size_t len);
 
+    uint64_t random_uint64();
+
     bit_vector truncate(bit_vector input, size_t len);
 
     string bits_to_string(bit_vector input);
@@ -88,6 +90,12 @@ namespace zktrade {
         packer.generate_r1cs_witness_from_packed();
         return v_bits.get_bits(pb);
     }
+
+    // Returns the same result as the libsnark gadgetlib1 packer
+    bit_vector uint64_to_bits(uint64_t input);
+
+    // Returns the same result as the libsnark gadgetlib1 packer
+    uint64_t bits_to_uint64(bit_vector input);
 }
 
 #endif //ZKTRADE_UTIL_H

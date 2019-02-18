@@ -7,6 +7,7 @@ add_executable(
         util.cpp
         note_commitment.cpp
         withdrawal_circuit.cpp
+        bits_and_numbers.cpp
 )
 target_link_libraries(
         letest

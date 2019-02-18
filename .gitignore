@@ -4,5 +4,6 @@
 /data
 /cpp/build
 /cpp/cmake-build-debug
+/cpp/cmake-build-debug-remote
 /*/node_modules
 /*/package-lock.json

@@ -42,11 +42,12 @@ struct concat_example {
     bit_vector b;
     bit_vector result;
 };
+
 TEST(Util, concat) {
     vector<concat_example> examples{
-            {{},{},{}},
-            {{0},{1},{0,1}},
-            {{1,0,0,0,1,1,1},{0,1,0,1,1},{1,0,0,0,1,1,1,0,1,0,1,1}}
+            {{},                    {},              {}},
+            {{0},                   {1},             {0, 1}},
+            {{1, 0, 0, 0, 1, 1, 1}, {0, 1, 0, 1, 1}, {1, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1}}
     };
     for (auto example : examples) {
         ASSERT_EQ(concat(example.a, example.b), example.result);
@@ -60,9 +61,9 @@ TEST(Util, bytes_to_bits) {
         libff::bit_vector bits;
     };
     vector<bytes_to_bits_example> examples{
-            {{}, {}},
-            {{0}, {0,0,0,0,0,0,0,0}},
-            {{0,4,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0}}
+            {{},        {}},
+            {{0},       {0, 0, 0, 0, 0, 0, 0, 0}},
+            {{0, 4, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}
     };
     for (auto example : examples) {
         ASSERT_EQ(bytes_to_bits(example.bytes), example.bits);
@@ -75,8 +76,8 @@ TEST(Util, truncate) {
         bit_vector out;
     };
     vector<truncate_example> examples{
-            {{1,0,1},{1,0}},
-            {{1,0,1},{1}}
+            {{1, 0, 1}, {1, 0}},
+            {{1, 0, 1}, {1}}
     };
     for (auto example: examples) {
         ASSERT_EQ(truncate(example.in, example.out.size()), example.out);
@@ -89,4 +90,15 @@ TEST(Util, field_element_to_64_bits) {
 
     uint64_t uint64_val = 1000000000000000000;
     cout << uint64_to_string(uint64_val) << endl;
+}
+
+TEST(Util, IntBitsConversion) {
+    for (auto i = 0; i < 100; i++) {
+        uint64_t val = random_uint64();
+        cout << dec << val << endl;
+        cout << hex << val << endl;
+        bit_vector bv{uint64_to_bits(val)};
+        cout << bits_to_hex(bv) << endl;
+        ASSERT_EQ(bits_to_uint64(bv), val);
+    }
 }
