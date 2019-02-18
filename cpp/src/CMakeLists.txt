@@ -63,7 +63,7 @@ target_sources(
         crypto/sha256.cpp
         hash/sha256.cpp
         hash/sha256_compression.cpp
-        scheme/cm.cpp
+        scheme/comms.cpp
         scheme/prfs.cpp
         util.cpp
         MerkleTree.cpp
@@ -76,7 +76,7 @@ target_sources(
         circuitry/OuterNoteCommitmentCircuit.tcc
         hash/sha256.hpp
         hash/sha256_compression.hpp
-        scheme/cm.h
+        scheme/comms.hpp
         scheme/prfs.h
         server/MerkleTreeServer.hpp
         server/MerkleTreeServer.tcc

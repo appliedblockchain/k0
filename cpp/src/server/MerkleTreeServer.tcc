@@ -8,7 +8,7 @@
 #include "../json_conversion.hpp"
 #include "../packing.hpp"
 #include "../util.h"
-#include "../scheme/cm.h"
+#include "scheme/comms.hpp"
 
 using namespace std;
 using namespace libff;
@@ -77,7 +77,7 @@ std::string MerkleTreeServer<FieldT, HashT>::generateCommitment(const std::strin
   bit_vector rho = hex2bits(rho_str);
   bit_vector r = hex2bits(r_str);
   bit_vector v = hex2bits(v_str);
-  return bits_to_hex(cm(a_pk, rho, r, v));
+  return bits_to_hex(comm_s(comm_r(a_pk, rho, r), v));
 }
 
 template <typename FieldT, typename HashT>

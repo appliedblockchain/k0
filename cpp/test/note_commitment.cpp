@@ -6,7 +6,7 @@
 #include "circuitry/gadgets/sha256_compression.h"
 #include "circuitry/OuterNoteCommitmentCircuit.hpp"
 #include "scheme/prfs.h"
-#include "scheme/cm.h"
+#include "scheme/comms.hpp"
 #include "util.h"
 
 using namespace std;
@@ -26,7 +26,8 @@ TEST(NoteCommitment, Test) {
         bit_vector rho_bv = random_bits(256);
         bit_vector r_bv = random_bits(384);
         bit_vector v_bv = uint64_to_bits(v);
-        bit_vector cm_bv = cm(a_pk_bv, rho_bv, r_bv, v_bv);
+        bit_vector k_bv = comm_r(a_pk_bv, rho_bv, r_bv);
+        bit_vector cm_bv = comm_s(k_bv, v_bv);
 
         protoboard<FieldT> pb;
         pb_variable<FieldT> ZERO_v;
