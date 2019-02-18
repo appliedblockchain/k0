@@ -71,16 +71,31 @@ void zktrade::Server<FieldT, HashT>::setInclusionVk(string vk_path) {
 }
 
 template<typename FieldT, typename HashT>
-std::string
+Json::Value
 zktrade::Server<FieldT, HashT>::generateCommitment(const std::string &a_pk_str,
                                                    const std::string &rho_str,
                                                    const std::string &r_str,
                                                    const std::string &v_str) {
-    bit_vector a_pk = hex2bits(a_pk_str);
-    bit_vector rho = hex2bits(rho_str);
-    bit_vector r = hex2bits(r_str);
-    bit_vector v = hex2bits(v_str);
-    return bits_to_hex(comm_s(comm_r(a_pk, rho, r), v));
+    bit_vector a_pk_bits = hex2bits(a_pk_str);
+    bit_vector rho_bits = hex2bits(rho_str);
+    bit_vector r_bits = hex2bits(r_str);
+    FieldT v = FieldT(v_str.c_str());
+    bit_vector v_bits = field_element_to_64_bits(v);
+
+    // Alternative derivation of bits (without circuit)
+    bit_vector v_bits_alt = uint64_to_bits(stoull(v_str));
+
+    cout << "Are these equal?" << endl;
+    cout << bits_to_hex(v_bits) << endl;
+    cout << bits_to_hex(v_bits_alt) << endl;
+
+    bit_vector k_bits = comm_r(a_pk_bits, rho_bits, r_bits);
+    bit_vector cm_bits = comm_s(k_bits, v_bits);
+
+    Json::Value result;
+    result["k"] = bits_to_hex(k_bits);
+    result["cm"] = bits_to_hex(cm_bits);
+    return result;
 }
 
 template<typename FieldT, typename HashT>

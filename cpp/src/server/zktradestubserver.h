@@ -14,7 +14,7 @@ class ZKTradeStubServer : public jsonrpc::AbstractServer<ZKTradeStubServer>
         {
             this->bindAndAddMethod(jsonrpc::Procedure("add", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::addI);
             this->bindAndAddMethod(jsonrpc::Procedure("element", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING, "param01",jsonrpc::JSON_INTEGER, NULL), &ZKTradeStubServer::elementI);
-            this->bindAndAddMethod(jsonrpc::Procedure("generateCommitment", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_STRING,"param03",jsonrpc::JSON_STRING,"param04",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::generateCommitmentI);
+            this->bindAndAddMethod(jsonrpc::Procedure("generateCommitment", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_STRING,"param03",jsonrpc::JSON_STRING,"param04",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::generateCommitmentI);
             this->bindAndAddMethod(jsonrpc::Procedure("hash", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::hashI);
             this->bindAndAddMethod(jsonrpc::Procedure("proveInclusion", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_INTEGER,"param02",jsonrpc::JSON_STRING,"param03",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::proveInclusionI);
             this->bindAndAddMethod(jsonrpc::Procedure("reset", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING,  NULL), &ZKTradeStubServer::resetI);
@@ -61,7 +61,7 @@ class ZKTradeStubServer : public jsonrpc::AbstractServer<ZKTradeStubServer>
         }
         virtual Json::Value add(const std::string& param01) = 0;
         virtual std::string element(int param01) = 0;
-        virtual std::string generateCommitment(const std::string& param01, const std::string& param02, const std::string& param03, const std::string& param04) = 0;
+        virtual Json::Value generateCommitment(const std::string& param01, const std::string& param02, const std::string& param03, const std::string& param04) = 0;
         virtual std::string hash(const std::string& param01, const std::string& param02) = 0;
         virtual Json::Value proveInclusion(int param01, const std::string& param02, const std::string& param03) = 0;
         virtual std::string reset() = 0;

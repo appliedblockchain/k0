@@ -78,8 +78,8 @@ target_sources(
         hash/sha256_compression.hpp
         scheme/comms.hpp
         scheme/prfs.h
-        server/MerkleTreeServer.hpp
-        server/MerkleTreeServer.tcc
+        server/Server.hpp
+        server/Server.tcc
         util.h
         MerkleTree.hpp
         serialization.hpp

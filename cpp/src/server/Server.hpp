@@ -18,10 +18,10 @@ namespace zktrade {
         r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp> addition_vk;
         r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp> inclusion_pk;
         r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp> inclusion_vk;
+        size_t tree_height;
         MerkleTree mt;
         AdditionCircuit<FieldT, HashT> addition_circuit;
         InclusionCircuit<FieldT, HashT> inclusion_circuit;
-        size_t tree_height;
         bool addition_pk_loaded;
         bool addition_vk_loaded;
         bool inclusion_pk_loaded;
@@ -42,7 +42,7 @@ namespace zktrade {
 
         virtual std::string element(int param01);
 
-        virtual std::string
+        virtual Json::Value
         generateCommitment(const std::string &a_pk, const std::string &rho,
                            const std::string &r, const std::string &v);
 

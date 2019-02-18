@@ -1,10 +1,10 @@
 add_executable(
-        merkle_tree_server
+        server
 
         run_server.cpp
 )
 target_link_libraries(
-        merkle_tree_server
+        server
 
         snark
         zktrade
@@ -14,7 +14,7 @@ target_link_libraries(
         jsonrpccpp-server
 )
 target_include_directories(
-        merkle_tree_server
+        server
 
         PUBLIC
         ${DEPENDS_DIR}/libsnark
