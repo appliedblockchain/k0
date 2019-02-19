@@ -1,6 +1,6 @@
 template<typename FieldT>
-OuterNoteCommitmentCircuit<FieldT>
-zktrade::make_outer_note_commitment_circuit() {
+DepositCircuit<FieldT>
+zktrade::make_deposit_circuit() {
     auto pb = new protoboard<FieldT>();
     auto k_packed = new pb_variable_array<FieldT>();
     k_packed->allocate(*pb, 2, "k_packed");
@@ -35,7 +35,7 @@ zktrade::make_outer_note_commitment_circuit() {
     cm_packer->generate_r1cs_constraints(true);
     ocmg->generate_r1cs_constraints();
 
-    return zktrade::OuterNoteCommitmentCircuit<FieldT>{
+    return zktrade::DepositCircuit<FieldT>{
             pb, k_packed, v_packed, cm_packed, ZERO, k_bits, v_bits, cm_bits,
             k_packer, v_packer, cm_packer, ocmg
     };

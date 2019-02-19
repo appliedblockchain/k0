@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <libsnark/common/default_types/r1cs_ppzksnark_pp.hpp>
 #include "circuitry/AdditionCircuit.hpp"
-#include "circuitry/OuterNoteCommitmentCircuit.hpp"
+#include "circuitry/DepositCircuit.hpp"
 #include "circuitry/WithdrawalCircuit.hpp"
 #include "MerkleTree.hpp"
 #include "scheme/comms.hpp"
@@ -41,20 +41,19 @@ TEST(Lifecycle, Full) {
         // Generate cm
         auto cm = comm_s(k, v_bits);
         // Generate cm proof
-        auto cm_circuit = make_outer_note_commitment_circuit<FieldT>();
-        cm_circuit.pb->val(*cm_circuit.v_packed) = v;
-        //cm_circuit.v_bits->fill_with_bits(*cm_circuit.pb, v_bits);
-        cm_circuit.v_packer->generate_r1cs_witness_from_packed();
-        cm_circuit.k_bits->fill_with_bits(*cm_circuit.pb, k);
-        cm_circuit.k_packer->generate_r1cs_witness_from_bits();
-        cm_circuit.ocmg->generate_r1cs_witness();
-        cm_circuit.cm_packer->generate_r1cs_witness_from_bits();
+        auto dep_circuit = make_deposit_circuit<FieldT>();
+        dep_circuit.pb->val(*dep_circuit.v_packed) = v;
+        dep_circuit.v_packer->generate_r1cs_witness_from_packed();
+        dep_circuit.k_bits->fill_with_bits(*dep_circuit.pb, k);
+        dep_circuit.k_packer->generate_r1cs_witness_from_bits();
+        dep_circuit.ocmg->generate_r1cs_witness();
+        dep_circuit.cm_packer->generate_r1cs_witness_from_bits();
         // TODO pack k locally and compare
         // TODO compare cm with one created above
         // TODO pack cm locally and compare
-        auto cm_packed = cm_circuit.cm_packed->get_vals(*cm_circuit.pb);
-        ASSERT_TRUE(cm_circuit.pb->is_satisfied());
-        ASSERT_EQ(cm_circuit.cm_bits->get_digest(), cm);
+        auto cm_packed = dep_circuit.cm_packed->get_vals(*dep_circuit.pb);
+        ASSERT_TRUE(dep_circuit.pb->is_satisfied());
+        ASSERT_EQ(dep_circuit.cm_bits->get_digest(), cm);
 
         ASSERT_EQ(mt.num_elements(), address);
 

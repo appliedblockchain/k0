@@ -1,12 +1,12 @@
-#ifndef ZKTRADE_OUTERNOTECOMMITMENTCIRCUIT_H
-#define ZKTRADE_OUTERNOTECOMMITMENTCIRCUIT_H
+#ifndef ZKTRADE_DEPOSITCIRCUIT_HPP
+#define ZKTRADE_DEPOSITCIRCUIT_HPP
 
 #include <libsnark/gadgetlib1/gadgets/hashes/hash_io.hpp>
 #include "circuitry/gadgets/comms.hpp"
 
 namespace zktrade {
     template<typename FieldT>
-    struct OuterNoteCommitmentCircuit {
+    struct DepositCircuit {
         protoboard<FieldT> *pb;
         pb_variable_array<FieldT> *k_packed;
         pb_variable<FieldT> *v_packed;
@@ -21,9 +21,9 @@ namespace zktrade {
         outer_commitment_gadget<FieldT>* ocmg;
     };
     template<typename FieldT>
-    OuterNoteCommitmentCircuit<FieldT> make_outer_note_commitment_circuit();
+    DepositCircuit<FieldT> make_deposit_circuit();
 }
 
-#include "OuterNoteCommitmentCircuit.tcc"
+#include "DepositCircuit.tcc"
 
-#endif //ZKTRADE_OUTERNOTECOMMITMENTCIRCUIT_H
+#endif //ZKTRADE_DEPOSITCIRCUIT_HPP

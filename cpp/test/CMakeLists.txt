@@ -5,7 +5,6 @@ add_executable(
         prfs.cpp
         hashes.cpp
         util.cpp
-        note_commitment.cpp
         bits_and_numbers.cpp
         lifecycle.cpp
 )
