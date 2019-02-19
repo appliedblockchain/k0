@@ -14,7 +14,10 @@ WithdrawalCircuit<FieldT> make_withdrawal_circuit(size_t tree_height) {
     pb_variable_array<FieldT> *sn_packed = new pb_variable_array<FieldT>();
     sn_packed->allocate(*pb, 2, "sn_packed");
 
-    pb->set_input_sizes(5);
+    pb_variable<FieldT> *recipient_public = new pb_variable<FieldT>();
+    recipient_public->allocate(*pb, "recipient_public");
+
+    pb->set_input_sizes(6);
 
     pb_variable<FieldT> *ZERO = new pb_variable<FieldT>();
     ZERO->allocate(*pb, "ZERO");
@@ -42,13 +45,15 @@ WithdrawalCircuit<FieldT> make_withdrawal_circuit(size_t tree_height) {
             new merkle_authentication_path_variable<FieldT, TwoToOneSHA256>(
                     *pb, tree_height, "merkle_authentication_path");
 
+    pb_variable<FieldT> *recipient_private = new pb_variable<FieldT>();
+    recipient_private->allocate(*pb, "recipient_private");
+
     auto a_pk_bits = make_shared<digest_variable<FieldT>>(*pb, 256, "a_pk_bits");
 
     digest_variable<FieldT> *commitment_bits =
             new digest_variable<FieldT>( *pb, 256, "commitment_bits");
 
     auto sn_bits = make_shared<digest_variable<FieldT>>(*pb, 256, "sn_bits");
-
 
     multipacking_gadget<FieldT> *rt_packer =
             new multipacking_gadget<FieldT>(*pb, rt_bits->bits, *rt_packed, 128, "rt_packer");
@@ -86,6 +91,10 @@ WithdrawalCircuit<FieldT> make_withdrawal_circuit(size_t tree_height) {
             r1cs_constraint<FieldT>(*ZERO, ONE, FieldT::zero()),
             "ZERO must equal zero");
 
+    pb->add_r1cs_constraint(
+            r1cs_constraint<FieldT>(*recipient_public, ONE, *recipient_private),
+            "recipient_public must equal recipient_private");
+
     commitment_bits->generate_r1cs_constraints();
     a_pk_bits->generate_r1cs_constraints();
 
@@ -102,6 +111,7 @@ WithdrawalCircuit<FieldT> make_withdrawal_circuit(size_t tree_height) {
             rt_packed,
             v_packed,
             sn_packed,
+            recipient_public,
             ZERO,
             rt_bits,
             v_bits,
@@ -110,6 +120,7 @@ WithdrawalCircuit<FieldT> make_withdrawal_circuit(size_t tree_height) {
             r_bits,
             address_bits,
             path,
+            recipient_private,
             a_pk_bits,
             commitment_bits,
             sn_bits,

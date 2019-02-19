@@ -83,16 +83,23 @@ TEST(Lifecycle, Full) {
         mt.add(cm);
 
         // "WITHDRAWAL/UNSHIELDING"
+
+
+        // Generate recipient address
+        uint32_t recipient = rand() % (uint32_t)exp2(20);
+
         // Generate proof
         auto wd_circuit = make_withdrawal_circuit<FieldT>(tree_height);
         wd_circuit.rt_bits->generate_r1cs_witness(mt.root());
         wd_circuit.pb->val(*wd_circuit.v_packed) = v;
+        wd_circuit.pb->val(*wd_circuit.recipient_public) = recipient;
         wd_circuit.pb->val(*wd_circuit.ZERO) = FieldT::zero();
         wd_circuit.a_sk_bits->fill_with_bits(*wd_circuit.pb, a_sk);
         wd_circuit.rho_bits->fill_with_bits(*wd_circuit.pb, rho);
         wd_circuit.r_bits->fill_with_bits(*wd_circuit.pb, r);
         wd_circuit.address_bits->fill_with_bits(*wd_circuit.pb, address_bits);
         wd_circuit.path->generate_r1cs_witness(address, mt.path(address));
+        wd_circuit.pb->val(*wd_circuit.recipient_private) = recipient;
         ASSERT_FALSE(wd_circuit.pb->is_satisfied());
         wd_circuit.rt_packer->generate_r1cs_witness_from_bits();
         wd_circuit.v_packer->generate_r1cs_witness_from_packed();
