@@ -1,6 +1,9 @@
 #ifndef ZKTRADE_OUTERNOTECOMMITMENTCIRCUIT_H
 #define ZKTRADE_OUTERNOTECOMMITMENTCIRCUIT_H
 
+#include <libsnark/gadgetlib1/gadgets/hashes/hash_io.hpp>
+#include "circuitry/gadgets/comms.hpp"
+
 namespace zktrade {
     template<typename FieldT>
     struct OuterNoteCommitmentCircuit {

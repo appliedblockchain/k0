@@ -96,6 +96,22 @@ namespace zktrade {
 
     // Returns the same result as the libsnark gadgetlib1 packer
     uint64_t bits_to_uint64(bit_vector input);
+
+
+    template<typename FieldT>
+    bit_vector int_to_bits(uint input, size_t bitlength)
+    {
+        protoboard<FieldT> pb;
+        pb_variable<FieldT> packed;
+        packed.allocate(pb, "packed");
+        pb_variable_array<FieldT> bits;
+        bits.allocate(pb, bitlength, "bits");
+        packing_gadget<FieldT> packer(pb, bits, packed, "packer");
+        packer.generate_r1cs_constraints(false);
+        pb.val(packed) = input;
+        packer.generate_r1cs_witness_from_packed();
+        return bits.get_bits(pb);
+    }
 }
 
 #endif //ZKTRADE_UTIL_H

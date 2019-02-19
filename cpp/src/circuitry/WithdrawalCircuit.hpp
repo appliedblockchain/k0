@@ -19,24 +19,25 @@ struct WithdrawalCircuit {
     protoboard<FieldT> *pb;
 
     // Primary inputs
-    pb_variable_array<FieldT> *root_packed;
+    pb_variable_array<FieldT> *rt_packed;
     pb_variable<FieldT> *v_packed;
     pb_variable_array<FieldT> *sn_packed;
 
     // Auxiliary inputs
-    digest_variable<FieldT> *root_bits;
-    pb_variable_array<FieldT> *address_bits;
-    pb_variable_array<FieldT> *a_sk_bits;
-    shared_ptr<digest_variable<FieldT>> a_pk_bits;
+    pb_variable<FieldT>* ZERO;
+    digest_variable<FieldT> *rt_bits;
     pb_variable_array<FieldT> *v_bits;
+    pb_variable_array<FieldT> *a_sk_bits;
     pb_variable_array<FieldT> *rho_bits;
     pb_variable_array<FieldT> *r_bits;
+    pb_variable_array<FieldT> *address_bits;
+    merkle_authentication_path_variable<FieldT, sha256_two_to_one_hash_gadget<FieldT>> *path;
+    shared_ptr<digest_variable<FieldT>> a_pk_bits;
     digest_variable<FieldT> *commitment_bits;
     shared_ptr<digest_variable<FieldT>> sn_bits;
-    merkle_authentication_path_variable<FieldT, sha256_two_to_one_hash_gadget<FieldT>> *path;
 
     // Unpackers
-    multipacking_gadget<FieldT> *root_packer;
+    multipacking_gadget<FieldT> *rt_packer;
     packing_gadget<FieldT> *v_packer;
     multipacking_gadget<FieldT> *sn_packer;
 

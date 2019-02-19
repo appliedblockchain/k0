@@ -6,8 +6,8 @@ add_executable(
         hashes.cpp
         util.cpp
         note_commitment.cpp
-        withdrawal_circuit.cpp
         bits_and_numbers.cpp
+        lifecycle.cpp
 )
 target_link_libraries(
         letest

@@ -1,6 +1,8 @@
 #ifndef ZKTRADE_GADGETS_COMMS_HPP
 #define ZKTRADE_GADGETS_COMMS_HPP
 
+#include "circuitry/gadgets/sha256_compression.h"
+
 using namespace libsnark;
 using namespace std;
 using namespace zktrade;
@@ -26,7 +28,7 @@ namespace zktrade {
                                 pb_variable_array<FieldT> &v,
                                 digest_variable<FieldT> &result,
                                 const string &annotation_prefix) :
-                gadget<FieldT>(pb, FMT(annotation_prefix, " gadget")),
+                gadget<FieldT>(pb, FMT(annotation_prefix, " x gadget")),
                 cm_hasher(pb, {k, repeat(ZERO, 192), v}, result,
                           FMT(annotation_prefix, " cm_hasher")) {
         }

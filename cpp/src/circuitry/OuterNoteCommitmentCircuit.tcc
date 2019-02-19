@@ -1,5 +1,6 @@
 template<typename FieldT>
-OuterNoteCommitmentCircuit<FieldT> zktrade::make_outer_note_commitment_circuit() {
+OuterNoteCommitmentCircuit<FieldT>
+zktrade::make_outer_note_commitment_circuit() {
     auto pb = new protoboard<FieldT>();
     auto k_packed = new pb_variable_array<FieldT>();
     k_packed->allocate(*pb, 2, "k_packed");
@@ -12,9 +13,10 @@ OuterNoteCommitmentCircuit<FieldT> zktrade::make_outer_note_commitment_circuit()
     auto k_bits = new pb_variable_array<FieldT>();
     k_bits->allocate(*pb, 256, "k_bits");
     auto v_bits = new pb_variable_array<FieldT>();
-    v_bits->allocate(*pb, 256, "v_bits");
+    v_bits->allocate(*pb, 64, "v_bits");
     auto cm_bits = new digest_variable<FieldT>(*pb, 256, "cm_bits");
-    auto k_packer = new multipacking_gadget<FieldT>(*pb, *k_bits, *k_packed, 128,
+    auto k_packer = new multipacking_gadget<FieldT>(*pb, *k_bits, *k_packed,
+                                                    128,
                                                     "k_packer");
     auto v_packer = new packing_gadget<FieldT>(*pb, *v_bits, *v_packed,
                                                "v_packer");
@@ -26,6 +28,7 @@ OuterNoteCommitmentCircuit<FieldT> zktrade::make_outer_note_commitment_circuit()
                                                     *cm_bits,
                                                     "outer_note_commitment_gadget");
 
+    // TODO add ZERO constraint (ZERO must be zero) (?)
     cm_bits->generate_r1cs_constraints();
     k_packer->generate_r1cs_constraints(true);
     v_packer->generate_r1cs_constraints(true);

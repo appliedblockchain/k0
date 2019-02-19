@@ -162,3 +162,6 @@ uint64_t zktrade::bits_to_uint64(bit_vector input) {
     }
     return x;
 }
+
+
+
