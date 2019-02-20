@@ -1,13 +1,14 @@
 template<typename FieldT, typename HashT>
 MTLeafAddition<FieldT, HashT>::MTLeafAddition(protoboard<FieldT> &pb,
-                                              const size_t tree_height,
-                                              const pb_variable_array<FieldT> &address_bits_va,
-                                              const digest_variable<FieldT> &prev_root_digest,
-                                              const digest_variable<FieldT> &leaf_digest,
-                                              const digest_variable<FieldT> &next_root_digest,
-                                              const merkle_authentication_path_variable<FieldT, HashT> &path_var)
-        :
+                                              size_t tree_height,
+                                              pb_variable<FieldT> &ZERO,
+                                              pb_variable_array<FieldT> &address_bits_va,
+                                              digest_variable<FieldT> &prev_root_digest,
+                                              digest_variable<FieldT> &leaf_digest,
+                                              digest_variable<FieldT> &next_root_digest,
+                                              merkle_authentication_path_variable<FieldT, HashT> &path_var) :
         gadget<FieldT>(pb, "mt_leaf_addition"),
+        ZERO(ZERO),
         address_bits_va(address_bits_va),
         prev_leaf_digest(pb, HashT::get_digest_len(), "prev_leaf"),
         prev_root_digest(prev_root_digest),
@@ -18,7 +19,6 @@ MTLeafAddition<FieldT, HashT>::MTLeafAddition(protoboard<FieldT> &pb,
         mtcug(pb, tree_height, address_bits_va,
               prev_leaf_digest, prev_root_digest, prev_path_var,
               next_leaf_digest, next_root_digest, next_path_var, ONE, "mtcug") {
-    ZERO.allocate(this->pb, "zero");
 }
 
 template<typename FieldT, typename HashT>

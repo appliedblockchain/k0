@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 #include <libsnark/common/default_types/r1cs_ppzksnark_pp.hpp>
-#include "circuitry/AdditionCircuit.hpp"
 #include "circuitry/DepositCircuit.hpp"
 #include "circuitry/WithdrawalCircuit.hpp"
 #include "MerkleTree.hpp"
@@ -40,20 +39,6 @@ TEST(Lifecycle, Full) {
         bit_vector v_bits = uint64_to_bits(stoull(v_str));
         // Generate cm
         auto cm = comm_s(k, v_bits);
-        // Generate cm proof
-        auto dep_circuit = make_deposit_circuit<FieldT>();
-        dep_circuit.pb->val(*dep_circuit.v_packed) = v;
-        dep_circuit.v_packer->generate_r1cs_witness_from_packed();
-        dep_circuit.k_bits->fill_with_bits(*dep_circuit.pb, k);
-        dep_circuit.k_packer->generate_r1cs_witness_from_bits();
-        dep_circuit.ocmg->generate_r1cs_witness();
-        dep_circuit.cm_packer->generate_r1cs_witness_from_bits();
-        // TODO pack k locally and compare
-        // TODO compare cm with one created above
-        // TODO pack cm locally and compare
-        auto cm_packed = dep_circuit.cm_packed->get_vals(*dep_circuit.pb);
-        ASSERT_TRUE(dep_circuit.pb->is_satisfied());
-        ASSERT_EQ(dep_circuit.cm_bits->get_digest(), cm);
 
         ASSERT_EQ(mt.num_elements(), address);
 
@@ -62,27 +47,39 @@ TEST(Lifecycle, Full) {
         // Add cm to the tree
         auto sim_result = mt.simulate_add(cm);
 
-        // Generate Merkle tree update proof
-        auto add_circuit = make_addition_circuit<FieldT, TwoToOneHashT>(
-                tree_height);
-        add_circuit.prev_root_va->fill_with_field_elements(
-                *add_circuit.pb, field_elements_from_bits<FieldT>(mt.root()));
-        add_circuit.pb->val(*add_circuit.address_v) = address;
-        add_circuit.address_unpacker->generate_r1cs_witness_from_packed();
-        add_circuit.leaf_va->fill_with_field_elements(*add_circuit.pb,
-                                                      cm_packed);
-        add_circuit.next_root_va->fill_with_field_elements(
-                *add_circuit.pb,
-                field_elements_from_bits<FieldT>(get<1>(sim_result)));
-        add_circuit.path_var->generate_r1cs_witness(address,
+
+        // Generate deposit proof
+        auto dep_circuit = make_deposit_circuit<FieldT>(tree_height);
+        dep_circuit.prev_root_bits->generate_r1cs_witness(mt.root());
+
+        dep_circuit.pb->val(*dep_circuit.address_packed) = address;
+        dep_circuit.k_bits->fill_with_bits(*dep_circuit.pb, k);
+        dep_circuit.k_packer->generate_r1cs_witness_from_bits();
+        dep_circuit.pb->val(*dep_circuit.v_packed) = v;
+        dep_circuit.v_packer->generate_r1cs_witness_from_packed();
+
+        dep_circuit.commitment_gadget->generate_r1cs_witness();
+        dep_circuit.cm_packer->generate_r1cs_witness_from_bits();
+        // TODO pack k locally and compare
+        // TODO compare cm with one created above
+        // TODO pack cm locally and compare
+
+        dep_circuit.next_root_bits->generate_r1cs_witness(get<1>(sim_result));
+        dep_circuit.path_var->generate_r1cs_witness(address,
                                                     get<2>(sim_result));
-        add_circuit.mtlap->generate_r1cs_witness();
-        ASSERT_TRUE(add_circuit.pb->is_satisfied());
+        dep_circuit.mt_addition_gadget->generate_r1cs_witness();
+        ASSERT_FALSE(dep_circuit.pb->is_satisfied());
+
+        dep_circuit.prev_root_packer->generate_r1cs_witness_from_bits();
+        dep_circuit.next_root_packer->generate_r1cs_witness_from_bits();
+
+        auto cm_packed = dep_circuit.cm_packed->get_vals(*dep_circuit.pb);
+        ASSERT_TRUE(dep_circuit.pb->is_satisfied());
+        ASSERT_EQ(dep_circuit.cm_bits->get_digest(), cm);
 
         mt.add(cm);
 
         // "WITHDRAWAL/UNSHIELDING"
-
 
         // Generate recipient address
         uint32_t recipient = rand() % (uint32_t)exp2(20);
@@ -100,6 +97,7 @@ TEST(Lifecycle, Full) {
         wd_circuit.path->generate_r1cs_witness(address, mt.path(address));
         wd_circuit.pb->val(*wd_circuit.recipient_private) = recipient;
         ASSERT_FALSE(wd_circuit.pb->is_satisfied());
+        wd_circuit.rt_packer->generate_r1cs_witness_from_bits();
         wd_circuit.rt_packer->generate_r1cs_witness_from_bits();
         wd_circuit.v_packer->generate_r1cs_witness_from_packed();
         wd_circuit.addr_gadget->generate_r1cs_witness();

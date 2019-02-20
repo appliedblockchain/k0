@@ -19,12 +19,13 @@ private:
   merkle_tree_check_update_gadget<FieldT, HashT> mtcug;
 public:
   MTLeafAddition(protoboard<FieldT> &pb,
-                 const size_t tree_height,
-                 const pb_variable_array<FieldT> &address_bits_va,
-                 const digest_variable<FieldT> &prev_root_digest,
-                 const digest_variable<FieldT> &leaf_digest,
-                 const digest_variable<FieldT> &next_root_digest,
-                 const merkle_authentication_path_variable<FieldT, HashT> &path_var);
+                 size_t tree_height,
+                 pb_variable<FieldT> &ZERO,
+                 pb_variable_array<FieldT> &address_bits_va,
+                 digest_variable<FieldT> &prev_root_digest,
+                 digest_variable<FieldT> &leaf_digest,
+                 digest_variable<FieldT> &next_root_digest,
+                 merkle_authentication_path_variable<FieldT, HashT> &path_var);
   void generate_r1cs_constraints();
   void generate_r1cs_witness();
 };
