@@ -5,7 +5,8 @@
 #include <libsnark/zk_proof_systems/ppzksnark/r1cs_ppzksnark/r1cs_ppzksnark.hpp>
 #include "../MerkleTree.hpp"
 #include "circuitry/CommitmentCircuit.hpp"
-#include "../circuitry/WithdrawalCircuit.hpp"
+#include "circuitry/MTAdditionCircuit.hpp"
+#include "circuitry/WithdrawalCircuit.hpp"
 
 using namespace jsonrpc;
 using namespace libsnark;
@@ -17,14 +18,16 @@ namespace zktrade {
     class Server : public ZKTradeStubServer {
         r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp> commitment_pk;
         r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp> commitment_vk;
+        r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp> addition_pk;
+        r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp> addition_vk;
         r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp> withdrawal_pk;
         r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp> withdrawal_vk;
         size_t tree_height;
         MerkleTree mt;
-        CommitmentCircuit<FieldT> commitment_circuit;
-        WithdrawalCircuit<FieldT> withdrawal_circuit;
         bool commitment_pk_loaded;
         bool commitment_vk_loaded;
+        bool addition_pk_loaded;
+        bool addition_vk_loaded;
         bool withdrawal_pk_loaded;
         bool withdrawal_vk_loaded;
     public:
@@ -34,6 +37,10 @@ namespace zktrade {
         void setCommitmentPk(std::string pk_path);
 
         void setCommitmentVk(std::string pk_path);
+
+        void setAdditionPk(std::string pk_path);
+
+        void setAdditionVk(std::string pk_path);
 
         void setWithdrawalPk(std::string pk_path);
 

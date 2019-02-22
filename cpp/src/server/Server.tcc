@@ -24,10 +24,7 @@ zktrade::Server<FieldT, HashT>::Server(size_t height,
                                        serverVersion_t type)
         : ZKTradeStubServer(connector, type),
           tree_height{height},
-          mt{height},
-          commitment_circuit{make_commitment_circuit<FieldT>()},
-          withdrawal_circuit{make_withdrawal_circuit<FieldT>(height)} {
-}
+          mt{height} {}
 
 template<typename FieldT, typename HashT>
 string zktrade::Server<FieldT, HashT>::reset() {
@@ -52,6 +49,20 @@ void zktrade::Server<FieldT, HashT>::setCommitmentVk(string vk_path) {
     commitment_vk = loadFromFile<r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp>>(
             vk_path);
     commitment_vk_loaded = true;
+}
+
+template<typename FieldT, typename HashT>
+void zktrade::Server<FieldT, HashT>::setAdditionPk(string pk_path) {
+    addition_pk = loadFromFile<r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp>>(
+            pk_path);
+    addition_pk_loaded = true;
+}
+
+template<typename FieldT, typename HashT>
+void zktrade::Server<FieldT, HashT>::setAdditionVk(string vk_path) {
+    addition_vk = loadFromFile<r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp>>(
+            vk_path);
+    addition_vk_loaded = true;
 }
 
 template<typename FieldT, typename HashT>
@@ -134,6 +145,28 @@ Json::Value zktrade::Server<FieldT, HashT>::prepare_deposit(
     if (!comm_circuit.pb->is_satisfied()) {
         throw JsonRpcException(-32000, "Commitment circuit not satisfied");
     }
+
+        auto add_circuit = make_mt_addition_circuit<FieldT>(tree_height);
+
+        add_circuit.prev_root_bits->generate_r1cs_witness(mt.root());
+        add_circuit.prev_root_packer->generate_r1cs_witness_from_bits();
+
+        add_circuit.pb->val(*add_circuit.address_packed) = address;
+        add_circuit.address_packer->generate_r1cs_witness_from_packed();
+
+        add_circuit.prev_path_var->generate_r1cs_witness(address, mt.path(address));
+
+        add_circuit.next_leaf_bits->generate_r1cs_witness(cm_bits);
+        add_circuit.next_leaf_packer->generate_r1cs_witness_from_bits();
+
+        add_circuit.next_root_bits->generate_r1cs_witness(get<1>(sim_result));
+        add_circuit.next_root_packer->generate_r1cs_witness_from_bits();
+
+        assert(!add_circuit.pb->is_satisfied());
+        add_circuit.mt_update_gadget->generate_r1cs_witness();
+
+        assert(add_circuit.pb->is_satisfied());
+
 //
 //    cout << "Num inputs:    : " << commitment_pk.constraint_system.num_inputs() << endl;
 //    cout << "Num variables  : " << commitment_pk.constraint_system.num_variables() << endl;
@@ -143,18 +176,35 @@ Json::Value zktrade::Server<FieldT, HashT>::prepare_deposit(
 //    cout << "PRIMARY INPUT hex" << endl << hex << dep_circuit.pb->primary_input() << endl;
 
 
-    const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> proof =
+    const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> comm_proof =
             r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
                     commitment_pk, comm_circuit.pb->primary_input(),
                     comm_circuit.pb->auxiliary_input());
-    bool verified =
+
+    const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> add_proof =
+            r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
+                    addition_pk, add_circuit.pb->primary_input(),
+                    add_circuit.pb->auxiliary_input());
+
+    bool comm_verified =
             r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
-                    commitment_vk, comm_circuit.pb->primary_input(), proof);
-    if (verified) {
-        cout << "Successfully verified." << endl;
+                    commitment_vk, comm_circuit.pb->primary_input(), comm_proof);
+    if (comm_verified) {
+        cout << "Commitment proof successfully verified." << endl;
     } else {
-        cerr << "Verification failed." << endl;
+        cerr << "Commitment proof verification failed." << endl;
     }
+
+    cout << "ADDITION params" << endl << hex << add_circuit.pb->primary_input() << endl;
+    bool add_verified =
+            r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
+                    addition_vk, add_circuit.pb->primary_input(), add_proof);
+    if (add_verified) {
+        cout << "Addition proof successfully verified." << endl;
+    } else {
+        cerr << "Addition proof verification failed." << endl;
+    }
+
 
     //writeToFile("/tmp/serverproof", proof);
 
@@ -163,10 +213,9 @@ Json::Value zktrade::Server<FieldT, HashT>::prepare_deposit(
     result["cm"] = bits_to_hex(cm_bits);
     result["nextRoot"] = bits_to_hex(get<1>(sim_result));
 
-    Json::Value proof_in_json = json_conversion::to_json(proof);
-
     result["address"] = (uint)address;
-    result["proof"] = proof_in_json;
+    result["commitmentProof"] = json_conversion::to_json(comm_proof);
+    result["additionProof"] = json_conversion::to_json(add_proof);
 
     return result;
 }

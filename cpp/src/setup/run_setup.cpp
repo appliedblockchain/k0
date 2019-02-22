@@ -2,6 +2,7 @@
 #include <libsnark/common/default_types/r1cs_ppzksnark_pp.hpp>
 #include <libsnark/gadgetlib1/gadgets/hashes/sha256/sha256_gadget.hpp>
 #include "circuitry/CommitmentCircuit.hpp"
+#include "circuitry/MTAdditionCircuit.hpp"
 #include "circuitry/WithdrawalCircuit.hpp"
 #include "setup.cpp"
 
@@ -27,11 +28,12 @@ int main(int argc, char *argv[]) {
         cout << "COMMITMENT" << endl;
         CommitmentCircuit<FieldT> circuit = make_commitment_circuit<FieldT>();
         auto cs = circuit.pb->get_constraint_system();
-
-    cout << "Num inputs:    : " << cs.num_inputs() << endl;
-    cout << "Num variables  : " << cs.num_variables() << endl;
-    cout << "Num constraints: " << cs.num_constraints() << endl;
         setup(cs, argv[3], argv[4]);
+    } else if (circuit_type.compare("addition") == 0) {
+        cout << "ADDITION" << endl;
+        MTAdditionCircuit<FieldT> circuit =
+                make_mt_addition_circuit<FieldT>(tree_height);
+        setup(circuit.pb->get_constraint_system(), argv[3], argv[4]);
     } else if (circuit_type.compare("withdrawal") == 0) {
         cout << "WITHDRAWAL" << endl;
         WithdrawalCircuit<FieldT> circuit =

@@ -4,8 +4,11 @@
 
 int main(int argc, char* argv[])
 {
-  if (argc != 6) {
-    std::cerr << "Need exactly 5 arguments (tree height, path to addition pk, path to addition vk, path to inclusion pk, path to inclusion vk)" << std::endl;
+  if (argc != 8) {
+    std::cerr << "Need exactly 7 arguments (tree height, path to commitment ";
+    std::cerr << "pk, path to commitment vk, path to addition pk, path to ";
+    std::cerr << "addition vk, path to withdrawal pk, path to withdrawal vk)";
+    std::cerr << std::endl;
     return 1;
   }
 
@@ -23,10 +26,15 @@ int main(int argc, char* argv[])
   std::cout << "Loading commitment verification key..." << std::endl;
   server.setCommitmentVk(argv[3]);
 
+  std::cout << "Loading addition proving key..." << std::endl;
+  server.setAdditionPk(argv[4]);
+  std::cout << "Loading addition verification key..." << std::endl;
+  server.setAdditionVk(argv[5]);
+
 //  std::cout << "Loading withdrawal proving key..." << std::endl;
-//  server.setWithdrawalPk(argv[4]);
+//  server.setWithdrawalPk(argv[6]);
 //  std::cout << "Loading withdrawal verification key..." << std::endl;
-//  server.setWithdrawalVk(argv[5]);
+//  server.setWithdrawalVk(argv[7]);
 
   std::cout << "Server started. Enter \"end\" to shut down." << std::endl;
 

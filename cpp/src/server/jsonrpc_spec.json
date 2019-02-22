@@ -35,7 +35,47 @@
     "returns": {
       "k": "0x1111111111111111111111111111111111111111111111111111111111111111",
       "cm": "0x1111111111111111111111111111111111111111111111111111111111111111",
-      "proof": [
+      "commitmentProof": [
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          [
+            "bignum",
+            "bignum"
+          ],
+          [
+            "bignum",
+            "bignum"
+          ]
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ]
+      ],
+      "additionProof": [
         [
           "bignum",
           "bignum"

@@ -28,6 +28,8 @@ const tmpDir = '/tmp'
 const paths = {
     commitmentPk: path.join(tmpDir, 'zktrade_commitment_pk'),
     commitmentVkAlt: path.join(tmpDir, 'zktrade_commitment_vk_alt'),
+    additionPk: path.join(tmpDir, 'zktrade_addition_pk'),
+    additionVkAlt: path.join(tmpDir, 'zktrade_addition_vk_alt'),
     withdrawalPk: path.join(tmpDir, 'zktrade_withdrawal_pk'),
     withdrawalVkAlt: path.join(tmpDir, 'zktrade_withdrawal_vk_alt')
 }
@@ -66,11 +68,16 @@ async function compileContracts() {
         'CommitmentVerifier'
     )
     await generateVerifierContractAlt(
+        paths.additionVkAlt,
+        path.join(contractsDir, 'AdditionVerifier.sol'),
+        'AdditionVerifier'
+    )
+    await generateVerifierContractAlt(
         paths.withdrawalVkAlt,
         path.join(contractsDir, 'WithdrawalVerifier.sol'),
         'WithdrawalVerifier'
     )
-    const mtPath = path.join(contractsDir, 'Mvppt.sol')
+    const mtPath = path.join(contractsDir, 'MVPPT.sol')
     await asyncFs.copyFile(
         path.join(
             path.parse(module.filename).dir, '..', '..', 'sol', 'MVPPT.sol'
@@ -111,6 +118,7 @@ async function compileContracts() {
     console.log(result)
     return {
         MVPPT: extractContractArtefacts(result, 'MVPPT'),
+        AdditionVerifier: extractContractArtefacts(result, 'AdditionVerifier'),
         CommitmentVerifier: extractContractArtefacts(result, 'CommitmentVerifier'),
         WithdrawalVerifier: extractContractArtefacts(result, 'WithdrawalVerifier')
     }
@@ -211,10 +219,17 @@ describe('Minimum viable private payment token', function () {
         const initialRoot = initialRootResponse.result
         web3 = util.initWeb3()
         const contractArtefacts = await compileContracts()
-        const depositVerifierAddress = await deploy(
+        console.log(contractArtefacts)
+        const commitmentVerifierAddress = await deploy(
             web3,
             contractArtefacts.CommitmentVerifier.abi,
             contractArtefacts.CommitmentVerifier.bytecode,
+            50000000
+        )
+        const additionVerifierAddress = await deploy(
+            web3,
+            contractArtefacts.AdditionVerifier.abi,
+            contractArtefacts.AdditionVerifier.bytecode,
             50000000
         )
         const withdrawalVerifierAddress = await deploy(
@@ -230,7 +245,8 @@ describe('Minimum viable private payment token', function () {
             50000000,
             [
                 erc20._address,
-                depositVerifierAddress,
+                commitmentVerifierAddress,
+                additionVerifierAddress,
                 withdrawalVerifierAddress,
                 await util.pack256Bits(initialRoot)
             ]
@@ -292,12 +308,71 @@ describe('Minimum viable private payment token', function () {
 
 
             const data = response.result;
+
+            console.log(data.commitmentProof)
+            const commitmentProofCompact = [
+                data.commitmentProof[0][0], // 0 a
+                data.commitmentProof[0][1], // 1
+
+                data.commitmentProof[1][0], // 2 a_p
+                data.commitmentProof[1][1], // 3
+
+                data.commitmentProof[2][0][0], // 4 b (0)
+                data.commitmentProof[2][0][1], // 5
+                data.commitmentProof[2][1][0], // 6 b (1)
+                data.commitmentProof[2][1][1], // 7
+
+                data.commitmentProof[3][0], // 8 b_p
+                data.commitmentProof[3][1], // 9
+
+                data.commitmentProof[4][0], // 10 c
+                data.commitmentProof[4][1], // 11
+
+                data.commitmentProof[5][0], // 12 c_p
+                data.commitmentProof[5][1], // 13
+
+                data.commitmentProof[6][0], // 14 h
+                data.commitmentProof[6][1], // 15
+
+                data.commitmentProof[7][0], // 16 k
+                data.commitmentProof[7][1]  // 17
+            ]
+
+            const additionProofCompact = [
+                data.additionProof[0][0], // 0 a
+                data.additionProof[0][1], // 1
+
+                data.additionProof[1][0], // 2 a_p
+                data.additionProof[1][1], // 3
+
+                data.additionProof[2][0][0], // 4 b (0)
+                data.additionProof[2][0][1], // 5
+                data.additionProof[2][1][0], // 6 b (1)
+                data.additionProof[2][1][1], // 7
+
+                data.additionProof[3][0], // 8 b_p
+                data.additionProof[3][1], // 9
+
+                data.additionProof[4][0], // 10 c
+                data.additionProof[4][1], // 11
+
+                data.additionProof[5][0], // 12 c_p
+                data.additionProof[5][1], // 13
+
+                data.additionProof[6][0], // 14 h
+                data.additionProof[6][1], // 15
+
+                data.additionProof[7][0], // 16 k
+                data.additionProof[7][1]  // 17
+            ]
+
             const params = [
                 v,
                 await util.pack256Bits(data.k),
                 await util.pack256Bits(data.cm),
                 await util.pack256Bits(data.nextRoot),
-                ...data.proof
+                commitmentProofCompact,
+                additionProofCompact
             ]
             console.log({params})
 
