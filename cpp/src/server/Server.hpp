@@ -4,7 +4,7 @@
 #include <libsnark/common/default_types/r1cs_ppzksnark_pp.hpp>
 #include <libsnark/zk_proof_systems/ppzksnark/r1cs_ppzksnark/r1cs_ppzksnark.hpp>
 #include "../MerkleTree.hpp"
-#include "../circuitry/DepositCircuit.hpp"
+#include "circuitry/CommitmentCircuit.hpp"
 #include "../circuitry/WithdrawalCircuit.hpp"
 
 using namespace jsonrpc;
@@ -15,25 +15,25 @@ namespace zktrade {
     // TODO Remove HashT
     template<typename FieldT, typename HashT>
     class Server : public ZKTradeStubServer {
-        r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp> deposit_pk;
-        r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp> deposit_vk;
+        r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp> commitment_pk;
+        r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp> commitment_vk;
         r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp> withdrawal_pk;
         r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp> withdrawal_vk;
         size_t tree_height;
         MerkleTree mt;
-        DepositCircuit<FieldT> deposit_circuit;
+        CommitmentCircuit<FieldT> commitment_circuit;
         WithdrawalCircuit<FieldT> withdrawal_circuit;
-        bool deposit_pk_loaded;
-        bool deposit_vk_loaded;
+        bool commitment_pk_loaded;
+        bool commitment_vk_loaded;
         bool withdrawal_pk_loaded;
         bool withdrawal_vk_loaded;
     public:
         Server(size_t tree_height, AbstractServerConnector &connector,
                serverVersion_t type);
 
-        void setDepositPk(std::string pk_path);
+        void setCommitmentPk(std::string pk_path);
 
-        void setDepositVk(std::string pk_path);
+        void setCommitmentVk(std::string pk_path);
 
         void setWithdrawalPk(std::string pk_path);
 

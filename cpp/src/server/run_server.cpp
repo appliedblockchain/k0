@@ -18,10 +18,10 @@ int main(int argc, char* argv[])
 
   server.StartListening();
 
-  std::cout << "Loading deposit proving key..." << std::endl;
-  server.setDepositPk(argv[2]);
-  std::cout << "Loading deposit verification key..." << std::endl;
-  server.setDepositVk(argv[3]);
+  std::cout << "Loading commitment proving key..." << std::endl;
+  server.setCommitmentPk(argv[2]);
+  std::cout << "Loading commitment verification key..." << std::endl;
+  server.setCommitmentVk(argv[3]);
 
 //  std::cout << "Loading withdrawal proving key..." << std::endl;
 //  server.setWithdrawalPk(argv[4]);

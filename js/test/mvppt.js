@@ -26,8 +26,8 @@ const NUM_PEOPLE = 2
 const tmpDir = '/tmp'
 
 const paths = {
-    depositPk: path.join(tmpDir, 'zktrade_deposit_pk'),
-    depositVkAlt: path.join(tmpDir, 'zktrade_deposit_vk_alt'),
+    commitmentPk: path.join(tmpDir, 'zktrade_commitment_pk'),
+    commitmentVkAlt: path.join(tmpDir, 'zktrade_commitment_vk_alt'),
     withdrawalPk: path.join(tmpDir, 'zktrade_withdrawal_pk'),
     withdrawalVkAlt: path.join(tmpDir, 'zktrade_withdrawal_vk_alt')
 }
@@ -61,9 +61,9 @@ async function compileContracts() {
     const contractsDir = path.join(tmpDir, crypto.randomBytes(32).toString('hex'))
     await asyncFs.mkdir(contractsDir)
     await generateVerifierContractAlt(
-        paths.depositVkAlt,
-        path.join(contractsDir, 'DepositVerifier.sol'),
-        'DepositVerifier'
+        paths.commitmentVkAlt,
+        path.join(contractsDir, 'CommitmentVerifier.sol'),
+        'CommitmentVerifier'
     )
     await generateVerifierContractAlt(
         paths.withdrawalVkAlt,
@@ -111,7 +111,7 @@ async function compileContracts() {
     console.log(result)
     return {
         MVPPT: extractContractArtefacts(result, 'MVPPT'),
-        DepositVerifier: extractContractArtefacts(result, 'DepositVerifier'),
+        CommitmentVerifier: extractContractArtefacts(result, 'CommitmentVerifier'),
         WithdrawalVerifier: extractContractArtefacts(result, 'WithdrawalVerifier')
     }
 }
@@ -213,8 +213,8 @@ describe('Minimum viable private payment token', function () {
         const contractArtefacts = await compileContracts()
         const depositVerifierAddress = await deploy(
             web3,
-            contractArtefacts.DepositVerifier.abi,
-            contractArtefacts.DepositVerifier.bytecode,
+            contractArtefacts.CommitmentVerifier.abi,
+            contractArtefacts.CommitmentVerifier.bytecode,
             50000000
         )
         const withdrawalVerifierAddress = await deploy(
@@ -243,7 +243,7 @@ describe('Minimum viable private payment token', function () {
     })
 
     it('deposit and withdrawal works', async function () {
-        const secrets = [], depositProvingTimes = [],
+        const secrets = [], commitmentProvingTimes = [],
             withdrawalProvingTimes = []
 
         printBalances(_.map(depositors, 'address'))
@@ -316,13 +316,13 @@ describe('Minimum viable private payment token', function () {
             console.log(await util.pack256Bits(depositResponse.result.newRoot))
             assert(depositResponse.result.newRoot === data.nextRoot)
             console.log(`New root: ${depositResponse.result.newRoot}`)
-            depositProvingTimes.push(proofDuration)
+            commitmentProvingTimes.push(proofDuration)
 
-            const timesSum = depositProvingTimes.reduce((acc, val) => acc + val)
-            const avg = timesSum / depositProvingTimes.length
+            const timesSum = commitmentProvingTimes.reduce((acc, val) => acc + val)
+            const avg = timesSum / commitmentProvingTimes.length
 
             console.log([
-                'Duration of deposit proving operation:',
+                'Duration of commitment proving operation:',
                 `${Math.round(proofDuration / 1000)}s`,
                 `(avg: ${Math.round(avg / 1000)}s)`
             ].join(' '))

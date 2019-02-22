@@ -52,8 +52,8 @@ target_sources(
 
         PUBLIC
         circuitry/gadgets/prfs.hpp
-        circuitry/DepositCircuit.hpp
-        circuitry/DepositCircuit.tcc
+        circuitry/CommitmentCircuit.hpp
+        circuitry/CommitmentCircuit.tcc
         hash/sha256.hpp
         hash/sha256_compression.hpp
         scheme/comms.hpp

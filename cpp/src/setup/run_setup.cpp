@@ -1,7 +1,7 @@
 #include <libff/algebra/curves/public_params.hpp>
 #include <libsnark/common/default_types/r1cs_ppzksnark_pp.hpp>
 #include <libsnark/gadgetlib1/gadgets/hashes/sha256/sha256_gadget.hpp>
-#include "circuitry/DepositCircuit.hpp"
+#include "circuitry/CommitmentCircuit.hpp"
 #include "circuitry/WithdrawalCircuit.hpp"
 #include "setup.cpp"
 
@@ -23,10 +23,9 @@ int main(int argc, char *argv[]) {
     size_t tree_height = stoi(argv[2]);
 
     // TODO Make circuit base class
-    if (circuit_type.compare("deposit") == 0) {
-        cout << "DEPOSIT" << endl;
-        DepositCircuit<FieldT> circuit =
-                make_deposit_circuit<FieldT>(tree_height);
+    if (circuit_type.compare("commitment") == 0) {
+        cout << "COMMITMENT" << endl;
+        CommitmentCircuit<FieldT> circuit = make_commitment_circuit<FieldT>();
         auto cs = circuit.pb->get_constraint_system();
 
     cout << "Num inputs:    : " << cs.num_inputs() << endl;
