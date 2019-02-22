@@ -76,8 +76,48 @@ target_include_directories(
         ${DEPENDS_DIR}/libsnark/depends/libfqfft
 )
 
-add_subdirectory(setup)
-
-add_subdirectory(server)
-
 include_directories(.)
+
+add_executable(
+        setup
+
+        setup/run_setup.cpp
+        MerkleTree.cpp
+        serialization.cpp
+)
+target_link_libraries(
+        setup
+
+        snark
+)
+target_include_directories(
+        setup
+
+        PUBLIC
+        ${DEPENDS_DIR}/libsnark
+        ${DEPENDS_DIR}/libsnark/depends/libff
+        ${DEPENDS_DIR}/libsnark/depends/libfqfft
+)
+add_executable(
+        server
+
+        server/run_server.cpp
+)
+target_link_libraries(
+        server
+
+        snark
+        zktrade
+        jsoncpp
+        microhttpd
+        jsonrpccpp-common
+        jsonrpccpp-server
+)
+target_include_directories(
+        server
+
+        PUBLIC
+        ${DEPENDS_DIR}/libsnark
+        ${DEPENDS_DIR}/libsnark/depends/libff
+        ${DEPENDS_DIR}/libsnark/depends/libfqfft
+)

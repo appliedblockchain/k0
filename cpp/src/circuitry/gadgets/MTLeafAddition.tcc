@@ -25,7 +25,7 @@ template<typename FieldT, typename HashT>
 void MTLeafAddition<FieldT, HashT>::generate_r1cs_constraints() {
     // We're only adding elements, therefore the previous leaf always needs to be zero
     const size_t digest_len = HashT::get_digest_len();
-    for (int i = 0; i < digest_len; i++) {
+    for (size_t i = 0; i < digest_len; i++) {
         this->pb.add_r1cs_constraint(
                 r1cs_constraint<FieldT>(prev_leaf_digest.bits[i], ONE, ZERO),
                 "bit " + std::to_string(i) + " needs to be zero");

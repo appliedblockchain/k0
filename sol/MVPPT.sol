@@ -1,35 +1,39 @@
 pragma solidity ^0.5.3;
 
-import "AdditionVerifier.sol";
-import "InclusionVerifier.sol";
+import "DepositVerifier.sol";
+import "WithdrawalVerifier.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
-contract Mixer {
+contract MVPPT {
     uint[2] public root;
     uint public num_leaves = 0;
-    AdditionVerifier additionVerifier;
-    InclusionVerifier inclusionVerifier;
+    DepositVerifier depositVerifier;
+    WithdrawalVerifier withdrawalVerifier;
     IERC20 tokenContract;
 
     event Log(string);
     event Log(uint);
     event Log(uint, uint);
+    event PrimaryInput(uint, uint, uint, uint, uint, uint, uint, uint, uint, uint);
 
     mapping(bytes32 => bool) snUsed;
 
     constructor(address tokenContractAddress,
-            address additionVerifierAddress,
-            address inclusionVerifierAddress,
+            address depositVerifierAddress,
+            address withdrawalVerifierAddress,
             uint[2] memory initialRoot) public {
         tokenContract = IERC20(tokenContractAddress);
-        additionVerifier = AdditionVerifier(additionVerifierAddress);
-        inclusionVerifier = InclusionVerifier(inclusionVerifierAddress);
+        depositVerifier = DepositVerifier(depositVerifierAddress);
+        withdrawalVerifier = WithdrawalVerifier(withdrawalVerifierAddress);
         root = initialRoot;
     }
 
-    function payIn(
-        uint[2] memory leaf,
-        uint[2] memory newRoot,
+    // TODO add address as a sanity check
+    function deposit(
+        uint v,
+        uint[2] memory comm_k,
+        uint[2] memory comm_cm,
+        uint[2] memory new_root,
         uint[2] memory a,
         uint[2] memory a_p,
         uint[2][2] memory b,
@@ -40,20 +44,24 @@ contract Mixer {
         uint[2] memory k
     ) public {
         require(
-            tokenContract.transferFrom(msg.sender, address(this), 1 ether),
+            tokenContract.transferFrom(msg.sender, address(this), v),
             "ERC20 transfer failed (sufficient allowance?)"
         );
-        uint[] memory inputs = new uint[](7);
+        uint[] memory inputs = new uint[](10);
         emit Log(num_leaves);
         emit Log(root[0], root[1]);
-        inputs[0] = num_leaves;
-        inputs[1] = root[0];
-        inputs[2] = root[1];
-        inputs[3] = leaf[0];
-        inputs[4] = leaf[1];
-        inputs[5] = newRoot[0];
-        inputs[6] = newRoot[1];
-        if (additionVerifier.verifyProof(
+        inputs[0] = root[0];
+        inputs[1] = root[1];
+        inputs[2] = num_leaves;
+        inputs[3] = comm_k[0];
+        inputs[4] = comm_k[1];
+        inputs[5] = v;
+        inputs[6] = comm_cm[0];
+        inputs[7] = comm_cm[1];
+        inputs[8] = new_root[0];
+        inputs[9] = new_root[1];
+        emit PrimaryInput(inputs[0],inputs[1],inputs[2],inputs[3],inputs[4],inputs[5],inputs[6],inputs[7],inputs[8],inputs[9]);
+        if (depositVerifier.verifyProof(
             a, 
             a_p, 
             b,
@@ -64,10 +72,11 @@ contract Mixer {
             k,
             inputs
         )) {
-            root = newRoot;
+            root = new_root;
             num_leaves++;
         } else {
-            revert();
+            emit Log(0xdead,0xbeef);
+            // revert();
         }
     }
 
@@ -90,7 +99,7 @@ contract Mixer {
         inputs[1] = root[1];
         inputs[2] = sn[0];
         inputs[3] = sn[1];
-        if (inclusionVerifier.verifyProof(
+        if (withdrawalVerifier.verifyProof(
             a, 
             a_p, 
             b,

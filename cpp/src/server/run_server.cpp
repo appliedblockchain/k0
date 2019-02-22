@@ -18,15 +18,15 @@ int main(int argc, char* argv[])
 
   server.StartListening();
 
-  std::cout << "Loading addition proving key..." << std::endl;
-  // server.setAdditionPk(argv[2]);
-  std::cout << "Loading addition verification key..." << std::endl;
-  // server.setAdditionVk(argv[3]);
+  std::cout << "Loading deposit proving key..." << std::endl;
+  server.setDepositPk(argv[2]);
+  std::cout << "Loading deposit verification key..." << std::endl;
+  server.setDepositVk(argv[3]);
 
-  std::cout << "Loading withdrawal proving key..." << std::endl;
-  // server.setWithdrawalPk(argv[4]);
-  std::cout << "Loading withdrawal verification key..." << std::endl;
-  // server.setWithdrawalVk(argv[5]);
+//  std::cout << "Loading withdrawal proving key..." << std::endl;
+//  server.setWithdrawalPk(argv[4]);
+//  std::cout << "Loading withdrawal verification key..." << std::endl;
+//  server.setWithdrawalVk(argv[5]);
 
   std::cout << "Server started. Enter \"end\" to shut down." << std::endl;
 

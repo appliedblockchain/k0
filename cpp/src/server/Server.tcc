@@ -9,6 +9,7 @@
 #include "../packing.hpp"
 #include "../util.h"
 #include "scheme/comms.hpp"
+#include "scheme/prfs.h"
 
 using namespace std;
 using namespace libff;
@@ -16,9 +17,6 @@ using namespace libsnark;
 using namespace zktrade;
 
 typedef Fr<default_r1cs_ppzksnark_pp> FieldT;
-typedef sha256_two_to_one_hash_gadget<FieldT> HashT;
-
-const size_t digest_len = HashT::get_digest_len();
 
 template<typename FieldT, typename HashT>
 zktrade::Server<FieldT, HashT>::Server(size_t height,
@@ -27,8 +25,8 @@ zktrade::Server<FieldT, HashT>::Server(size_t height,
         : ZKTradeStubServer(connector, type),
           tree_height{height},
           mt{height},
-          addition_circuit{make_addition_circuit<FieldT, HashT>(height)},
-          inclusion_circuit{make_inclusion_circuit<FieldT, HashT>(height)} {
+          deposit_circuit{make_deposit_circuit<FieldT>(height)},
+          withdrawal_circuit{make_withdrawal_circuit<FieldT>(height)} {
 }
 
 template<typename FieldT, typename HashT>
@@ -43,141 +41,31 @@ string zktrade::Server<FieldT, HashT>::root() {
 }
 
 template<typename FieldT, typename HashT>
-void zktrade::Server<FieldT, HashT>::setAdditionPk(string pk_path) {
-    addition_pk = loadFromFile<r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp>>(
+void zktrade::Server<FieldT, HashT>::setDepositPk(string pk_path) {
+    deposit_pk = loadFromFile<r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp>>(
             pk_path);
-    addition_pk_loaded = true;
+    deposit_pk_loaded = true;
 }
 
 template<typename FieldT, typename HashT>
-void zktrade::Server<FieldT, HashT>::setAdditionVk(string vk_path) {
-    addition_vk = loadFromFile<r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp>>(
+void zktrade::Server<FieldT, HashT>::setDepositVk(string vk_path) {
+    deposit_vk = loadFromFile<r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp>>(
             vk_path);
-    addition_vk_loaded = true;
+    deposit_vk_loaded = true;
 }
 
 template<typename FieldT, typename HashT>
-void zktrade::Server<FieldT, HashT>::setInclusionPk(string pk_path) {
-    inclusion_pk = loadFromFile<r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp>>(
+void zktrade::Server<FieldT, HashT>::setWithdrawalPk(string pk_path) {
+    withdrawal_pk = loadFromFile<r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp>>(
             pk_path);
-    inclusion_pk_loaded = true;
+    withdrawal_pk_loaded = true;
 }
 
 template<typename FieldT, typename HashT>
-void zktrade::Server<FieldT, HashT>::setInclusionVk(string vk_path) {
-    inclusion_vk = loadFromFile<r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp>>(
+void zktrade::Server<FieldT, HashT>::setWithdrawalVk(string vk_path) {
+    withdrawal_vk = loadFromFile<r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp>>(
             vk_path);
-    inclusion_vk_loaded = true;
-}
-
-template<typename FieldT, typename HashT>
-Json::Value
-zktrade::Server<FieldT, HashT>::generateCommitment(const std::string &a_pk_str,
-                                                   const std::string &rho_str,
-                                                   const std::string &r_str,
-                                                   const std::string &v_str) {
-    bit_vector a_pk_bits = hex2bits(a_pk_str);
-    bit_vector rho_bits = hex2bits(rho_str);
-    bit_vector r_bits = hex2bits(r_str);
-    FieldT v = FieldT(v_str.c_str());
-    bit_vector v_bits = field_element_to_64_bits(v);
-
-    // Alternative derivation of bits (without circuit)
-    bit_vector v_bits_alt = uint64_to_bits(stoull(v_str));
-
-    cout << "Are these equal?" << endl;
-    cout << bits_to_hex(v_bits) << endl;
-    cout << bits_to_hex(v_bits_alt) << endl;
-
-    bit_vector k_bits = comm_r(a_pk_bits, rho_bits, r_bits);
-    bit_vector cm_bits = comm_s(k_bits, v_bits);
-
-    Json::Value result;
-    result["k"] = bits_to_hex(k_bits);
-    result["cm"] = bits_to_hex(cm_bits);
-    return result;
-}
-
-template<typename FieldT, typename HashT>
-Json::Value
-zktrade::Server<FieldT, HashT>::simulateAddition(const string &leaf_hex) {
-    if (leaf_hex == "") {
-        throw JsonRpcException(-32100, "Input was empty");
-    }
-
-    bit_vector leaf_bv = hex2bits(leaf_hex);
-    auto simulation_result = mt.simulate_add(leaf_bv);
-    uint address = get<0>(simulation_result);
-    bit_vector next_root_bv = get<1>(simulation_result);
-    vector<bit_vector> path = get<2>(simulation_result);
-
-    addition_circuit.pb->val(*addition_circuit.address_v) = FieldT(address);
-    addition_circuit.address_unpacker->generate_r1cs_witness_from_packed();
-
-    auto prev_root_bv = mt.root();
-    auto prev_root_field_elems = field_elements_from_bits<FieldT>(prev_root_bv);
-    addition_circuit.prev_root_va->fill_with_field_elements(
-            *addition_circuit.pb, prev_root_field_elems);
-
-    vector<FieldT> leaf_field_elems = pack<FieldT>(leaf_bv);
-    addition_circuit.leaf_va->fill_with_field_elements(*addition_circuit.pb,
-                                                       leaf_field_elems);
-
-    auto next_root_elems = field_elements_from_bits<FieldT>(next_root_bv);
-    addition_circuit.next_root_va->fill_with_field_elements(
-            *addition_circuit.pb, next_root_elems);
-
-    addition_circuit.path_var->generate_r1cs_witness(address, path);
-
-    cout << addition_circuit.pb->primary_input() << endl;
-
-    if (addition_circuit.pb->is_satisfied()) {
-        cout << "SATISFIED 1" << endl;
-    } else {
-        cout << "NOT SATISFIED 1 (as expected)" << endl;
-    }
-    addition_circuit.mtlap->generate_r1cs_witness();
-    if (addition_circuit.pb->is_satisfied()) {
-        cout << "SATISFIED 2 (as expected)" << endl;
-    } else {
-        cout << "NOT SATISFIED 2" << endl;
-    }
-    const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> proof = r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
-            addition_pk, addition_circuit.pb->primary_input(),
-            addition_circuit.pb->auxiliary_input());
-    bool verified = r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
-            addition_vk, addition_circuit.pb->primary_input(), proof);
-    if (verified) {
-        cout << "Successfully verified." << endl;
-    } else {
-        cerr << "Verification failed." << endl;
-    }
-
-    writeToFile("/tmp/serverproof", proof);
-    Json::Value proof_in_json = json_conversion::to_json(proof);
-
-    auto new_root_elems = field_elements_from_bits<FieldT>(next_root_bv);
-    Json::Value new_root_json;
-
-    stringstream stream_0;
-    stream_0 << new_root_elems[0];
-    new_root_json[0] = stream_0.str();
-
-    stringstream stream_1;
-    stream_1 << new_root_elems[1];
-    new_root_json[1] = stream_1.str();
-
-    //vector<string> primary_input_strings;
-    //std::transform(addition_circuit.pb->primary_input().begin(), addition_circuit.pb->primary_input().end(), primary_input_strings.begin(), field_element_to_string);
-    Json::Value result;
-    // Json::Value primary_input_in_json;
-    // for (uint i = 0; i < addition_circuit.pb->primary_input().size(); i ++) {
-    //   primary_input_in_json[i] = field_element_to_string(addition_circuit.pb->primary_input()[i]);
-    // }
-    result["address"] = address;
-    result["newRoot"] = new_root_json;
-    result["proof"] = proof_in_json;
-    return result;
+    withdrawal_vk_loaded = true;
 }
 
 template<typename FieldT, typename HashT>
@@ -209,80 +97,109 @@ std::string zktrade::Server<FieldT, HashT>::hash(const std::string &left_hex,
 }
 
 template<typename FieldT, typename HashT>
-Json::Value
-zktrade::Server<FieldT, HashT>::proveInclusion(int address, const string &r_hex,
-                                               const string &sn_hex) {
-    if (mt.num_elements() == 0 || address > (mt.num_elements() - 1)) {
-        throw JsonRpcException(-32602, "Address too big");
+Json::Value zktrade::Server<FieldT, HashT>::prepare_deposit(
+        const std::string &a_pk_str,
+        const std::string &rho_str,
+        const std::string &r_str,
+        const std::string &v_str) {
+    bit_vector a_pk_bits = hex2bits(a_pk_str);
+    bit_vector rho_bits = hex2bits(rho_str);
+    bit_vector r_bits = hex2bits(r_str);
+    FieldT v = FieldT(v_str.c_str());
+    bit_vector v_bits = field_element_to_64_bits(v);
+
+    auto k_bits = comm_r(a_pk_bits, rho_bits, r_bits);
+    auto cm_bits = comm_s(k_bits, v_bits);
+
+
+    auto sim_result = mt.simulate_add(cm_bits);
+
+    uint address = mt.num_elements();
+
+    auto dep_circuit = make_deposit_circuit<FieldT>(tree_height);
+    cout << " root in server " << bits2hex(mt.root()) << endl;
+    cout << " root in server elems " << dec << field_elements_from_bits<FieldT>(mt.root()) << endl;
+    dep_circuit.prev_root_bits->generate_r1cs_witness(mt.root());
+
+    dep_circuit.pb->val(*dep_circuit.address_packed) = address;
+    dep_circuit.k_bits->fill_with_bits(*dep_circuit.pb, k_bits);
+    dep_circuit.k_packer->generate_r1cs_witness_from_bits();
+    dep_circuit.pb->val(*dep_circuit.v_packed) = v;
+    dep_circuit.v_packer->generate_r1cs_witness_from_packed();
+
+    dep_circuit.commitment_gadget->generate_r1cs_witness();
+
+    dep_circuit.next_root_bits->generate_r1cs_witness(get<1>(sim_result));
+    dep_circuit.path_var->generate_r1cs_witness(address, get<2>(sim_result));
+    dep_circuit.mt_addition_gadget->generate_r1cs_witness();
+    // ASSERT_FALSE(dep_circuit.pb->is_satisfied());
+
+    // compare prev root
+    assert(dep_circuit.prev_root_bits->get_digest() == mt.root());
+    // compare next root
+    assert(dep_circuit.next_root_bits->get_digest() == get<1>(sim_result));
+
+    assert(dep_circuit.cm_bits->get_digest() == cm_bits);
+
+    dep_circuit.cm_packer->generate_r1cs_witness_from_bits();
+    dep_circuit.prev_root_packer->generate_r1cs_witness_from_bits();
+    dep_circuit.next_root_packer->generate_r1cs_witness_from_bits();
+    if (!dep_circuit.pb->is_satisfied()) {
+        throw JsonRpcException(-32000, "Circuit not satisfied");
     }
+//
+//    cout << "Num inputs:    : " << deposit_pk.constraint_system.num_inputs() << endl;
+//    cout << "Num variables  : " << deposit_pk.constraint_system.num_variables() << endl;
+//    cout << "Num constraints: " << deposit_pk.constraint_system.num_constraints() << endl;
+//
+//    cout << "PRIMARY INPUT dec" << endl << dec << dep_circuit.pb->primary_input() << endl;
+//    cout << "PRIMARY INPUT hex" << endl << hex << dep_circuit.pb->primary_input() << endl;
 
-    libff::bit_vector r_bv = hex2bits(r_hex);
-    libff::bit_vector sn_bv = hex2bits(sn_hex);
+cout << "prev root used in proof on server " << dec << dep_circuit.pb->primary_input()[0];
+    cout << " " << dep_circuit.pb->primary_input()[1] << endl;
 
-    libff::bit_vector block = r_bv;
-    block.insert(block.end(), sn_bv.begin(), sn_bv.end());
-    libff::bit_vector leaf_bv = HashT::get_hash(block);
-    assert(leaf_bv == mt[address]);
-
-    const libff::bit_vector address_bits = libff::convert_field_element_to_bit_vector<FieldT>(
-            FieldT(address, true), tree_height);
-
-    auto root_bv = mt.root();
-    auto root_field_elems = field_elements_from_bits<FieldT>(root_bv);
-    inclusion_circuit.root_va->fill_with_field_elements(*inclusion_circuit.pb,
-                                                        root_field_elems);
-
-    auto sn_field_elems = field_elements_from_bits<FieldT>(sn_bv);
-    inclusion_circuit.sn_va->fill_with_field_elements(*inclusion_circuit.pb,
-                                                      sn_field_elems);
-
-    inclusion_circuit.root_unpacker->generate_r1cs_witness_from_packed();
-    inclusion_circuit.sn_unpacker->generate_r1cs_witness_from_packed();
-    inclusion_circuit.r_digest->generate_r1cs_witness(r_bv);
-    inclusion_circuit.leaf_hasher->generate_r1cs_witness();
-
-    inclusion_circuit.address_bits_va->fill_with_bits(*inclusion_circuit.pb,
-                                                      address_bits);
-    inclusion_circuit.path_var->generate_r1cs_witness(address,
-                                                      mt.path(address));
-
-    inclusion_circuit.mtcrg->generate_r1cs_witness();
-
-    cout << "Root" << endl;
-    cout << bits2hex(root_bv) << endl;
-    cout << bits2hex(inclusion_circuit.root_digest->get_digest()) << endl;
-    cout << endl;
-
-    cout << "Leaf" << endl;
-    cout << bits2hex(leaf_bv) << endl;
-    cout << bits2hex(inclusion_circuit.leaf_digest->get_digest()) << endl;
-    cout << endl;
-
-    if (inclusion_circuit.pb->is_satisfied()) {
-        cout << "SATISFIED" << endl;
-    } else {
-        cout << "NOT SATISFIED" << endl;
-    }
-
-    const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> proof = r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
-            inclusion_pk, inclusion_circuit.pb->primary_input(),
-            inclusion_circuit.pb->auxiliary_input());
-    bool verified = r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
-            inclusion_vk, inclusion_circuit.pb->primary_input(), proof);
+    const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> proof =
+            r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
+                    deposit_pk, dep_circuit.pb->primary_input(),
+                    dep_circuit.pb->auxiliary_input());
+    bool verified =
+            r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
+                    deposit_vk, dep_circuit.pb->primary_input(), proof);
     if (verified) {
         cout << "Successfully verified." << endl;
     } else {
         cerr << "Verification failed." << endl;
     }
 
-    return json_conversion::to_json(proof);
+    //writeToFile("/tmp/serverproof", proof);
+
+    Json::Value result;
+    result["k"] = bits_to_hex(k_bits);
+    result["cm"] = bits_to_hex(cm_bits);
+    result["nextRoot"] = bits_to_hex(get<1>(sim_result));
+
+    Json::Value proof_in_json = json_conversion::to_json(proof);
+
+    result["address"] = (uint)address;
+    result["proof"] = proof_in_json;
+
+    return result;
+}
+
+template<typename FieldT, typename HashT>
+string zktrade::Server<FieldT, HashT>::prf_addr(const string& a_sk_hex)
+{
+    bit_vector a_sk = hex2bits(a_sk_hex);
+    bit_vector a_pk = zktrade::prf_addr(a_sk);
+    string a_pk_hex = bits2hex(a_pk);
+    return a_pk_hex;
 }
 
 template<typename FieldT, typename HashT>
 Json::Value zktrade::Server<FieldT, HashT>::status() {
     const bool ready =
-            addition_pk_loaded & addition_vk_loaded & inclusion_pk_loaded &
-            inclusion_vk_loaded;
+            deposit_pk_loaded & deposit_vk_loaded & withdrawal_pk_loaded &
+            withdrawal_vk_loaded;
     Json::Value result;
     result["ready"] = ready;
     return result;

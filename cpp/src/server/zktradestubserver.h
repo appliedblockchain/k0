@@ -14,12 +14,11 @@ class ZKTradeStubServer : public jsonrpc::AbstractServer<ZKTradeStubServer>
         {
             this->bindAndAddMethod(jsonrpc::Procedure("add", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::addI);
             this->bindAndAddMethod(jsonrpc::Procedure("element", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING, "param01",jsonrpc::JSON_INTEGER, NULL), &ZKTradeStubServer::elementI);
-            this->bindAndAddMethod(jsonrpc::Procedure("generateCommitment", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_STRING,"param03",jsonrpc::JSON_STRING,"param04",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::generateCommitmentI);
             this->bindAndAddMethod(jsonrpc::Procedure("hash", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::hashI);
-            this->bindAndAddMethod(jsonrpc::Procedure("proveInclusion", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_INTEGER,"param02",jsonrpc::JSON_STRING,"param03",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::proveInclusionI);
+            this->bindAndAddMethod(jsonrpc::Procedure("prepare_deposit", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_STRING,"param03",jsonrpc::JSON_STRING,"param04",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::prepare_depositI);
+            this->bindAndAddMethod(jsonrpc::Procedure("prf_addr", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING, "param01",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::prf_addrI);
             this->bindAndAddMethod(jsonrpc::Procedure("reset", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING,  NULL), &ZKTradeStubServer::resetI);
             this->bindAndAddMethod(jsonrpc::Procedure("root", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING,  NULL), &ZKTradeStubServer::rootI);
-            this->bindAndAddMethod(jsonrpc::Procedure("simulateAddition", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::simulateAdditionI);
             this->bindAndAddMethod(jsonrpc::Procedure("status", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT,  NULL), &ZKTradeStubServer::statusI);
         }
 
@@ -31,17 +30,17 @@ class ZKTradeStubServer : public jsonrpc::AbstractServer<ZKTradeStubServer>
         {
             response = this->element(request[0u].asInt());
         }
-        inline virtual void generateCommitmentI(const Json::Value &request, Json::Value &response)
-        {
-            response = this->generateCommitment(request[0u].asString(), request[1u].asString(), request[2u].asString(), request[3u].asString());
-        }
         inline virtual void hashI(const Json::Value &request, Json::Value &response)
         {
             response = this->hash(request[0u].asString(), request[1u].asString());
         }
-        inline virtual void proveInclusionI(const Json::Value &request, Json::Value &response)
+        inline virtual void prepare_depositI(const Json::Value &request, Json::Value &response)
         {
-            response = this->proveInclusion(request[0u].asInt(), request[1u].asString(), request[2u].asString());
+            response = this->prepare_deposit(request[0u].asString(), request[1u].asString(), request[2u].asString(), request[3u].asString());
+        }
+        inline virtual void prf_addrI(const Json::Value &request, Json::Value &response)
+        {
+            response = this->prf_addr(request[0u].asString());
         }
         inline virtual void resetI(const Json::Value &/*request*/, Json::Value &response)
         {
@@ -51,22 +50,17 @@ class ZKTradeStubServer : public jsonrpc::AbstractServer<ZKTradeStubServer>
         {
             response = this->root();
         }
-        inline virtual void simulateAdditionI(const Json::Value &request, Json::Value &response)
-        {
-            response = this->simulateAddition(request[0u].asString());
-        }
         inline virtual void statusI(const Json::Value &/*request*/, Json::Value &response)
         {
             response = this->status();
         }
         virtual Json::Value add(const std::string& param01) = 0;
         virtual std::string element(int param01) = 0;
-        virtual Json::Value generateCommitment(const std::string& param01, const std::string& param02, const std::string& param03, const std::string& param04) = 0;
         virtual std::string hash(const std::string& param01, const std::string& param02) = 0;
-        virtual Json::Value proveInclusion(int param01, const std::string& param02, const std::string& param03) = 0;
+        virtual Json::Value prepare_deposit(const std::string& param01, const std::string& param02, const std::string& param03, const std::string& param04) = 0;
+        virtual std::string prf_addr(const std::string& param01) = 0;
         virtual std::string reset() = 0;
         virtual std::string root() = 0;
-        virtual Json::Value simulateAddition(const std::string& param01) = 0;
         virtual Json::Value status() = 0;
 };
 
