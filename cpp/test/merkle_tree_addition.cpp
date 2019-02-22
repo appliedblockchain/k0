@@ -19,7 +19,7 @@ TEST(MerkleTreeAddition, Test) {
 
     protoboard<FieldT> pb;
 
-    const size_t tree_height = 1;
+    const size_t tree_height = 3;
 
     MerkleTree mt(tree_height);
 
@@ -41,6 +41,12 @@ TEST(MerkleTreeAddition, Test) {
 
         ASSERT_FALSE(c.pb->is_satisfied());
         c.mt_update_gadget->generate_r1cs_witness();
+
+        c.prev_root_packer->generate_r1cs_witness_from_bits();
+        c.address_packer->generate_r1cs_witness_from_bits();
+        c.next_leaf_packer->generate_r1cs_witness_from_bits();
+        c.next_root_packer->generate_r1cs_witness_from_bits();
+
         ASSERT_TRUE(c.pb->is_satisfied());
 
         // Check that no input got overwritten

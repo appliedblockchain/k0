@@ -14,6 +14,11 @@ namespace zktrade {
     struct MTAdditionCircuit {
         typedef sha256_two_to_one_hash_gadget<FieldT> TwoToOneSHA256;
         protoboard<FieldT> *pb;
+        pb_variable_array<FieldT> *prev_root_packed;
+        pb_variable<FieldT> *address_packed;
+        pb_variable_array<FieldT> *next_leaf_packed;
+        pb_variable_array<FieldT> *next_root_packed;
+
         pb_variable_array<FieldT> *address_bits;
         digest_variable<FieldT> *prev_leaf_bits;
         digest_variable<FieldT> *prev_root_bits;
@@ -21,6 +26,12 @@ namespace zktrade {
         digest_variable<FieldT> *next_leaf_bits;
         digest_variable<FieldT> *next_root_bits;
         merkle_authentication_path_variable<FieldT, TwoToOneSHA256> *next_path_var;
+
+        multipacking_gadget<FieldT> *prev_root_packer;
+        packing_gadget<FieldT> *address_packer;
+        multipacking_gadget<FieldT> *next_leaf_packer;
+        multipacking_gadget<FieldT> *next_root_packer;
+
         merkle_tree_check_update_gadget<FieldT, TwoToOneSHA256> *mt_update_gadget;
     };
 
