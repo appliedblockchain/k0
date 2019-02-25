@@ -33,6 +33,7 @@
       "v_as_decimal_string"
     ],
     "returns": {
+      "address": "1337",
       "k": "0x1111111111111111111111111111111111111111111111111111111111111111",
       "cm": "0x1111111111111111111111111111111111111111111111111111111111111111",
       "commitmentProof": [
@@ -76,6 +77,60 @@
         ]
       ],
       "additionProof": [
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          [
+            "bignum",
+            "bignum"
+          ],
+          [
+            "bignum",
+            "bignum"
+          ]
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "prepare_withdrawal",
+    "params": [
+      "address_as_decimal_string",
+      "a_sk_as_hex_string",
+      "rho_as_hex_string",
+      "r_as_hex_string",
+      "v_as_decimal_string",
+      "recipient_as_hex_string"
+    ],
+    "returns": {
+      "sn": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "proof": [
         [
           "bignum",
           "bignum"

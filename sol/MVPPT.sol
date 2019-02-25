@@ -16,8 +16,9 @@ contract MVPPT {
     event Log(string);
     event Log(uint);
     event Log(uint, uint);
-    event PrimaryInput(uint, uint, uint, uint, uint, uint, uint, uint, uint, uint);
+    event PrimaryInput(uint, uint, uint, uint, uint, uint);
     event PrimaryInput(uint, uint, uint, uint, uint, uint, uint);
+    event PrimaryInput(uint, uint, uint, uint, uint, uint, uint, uint, uint, uint);
 
     mapping(bytes32 => bool) snUsed;
 
@@ -33,7 +34,7 @@ contract MVPPT {
         root = initialRoot;
     }
 
-    // TODO add address as a sanity check
+    // TODO add Merkle tree address as a sanity check
     function deposit(
         uint v,
         uint[2] memory comm_k,
@@ -41,7 +42,6 @@ contract MVPPT {
         uint[2] memory new_root,
         uint[18] memory commitmentProof,
         uint[18] memory additionProof
-
     ) public {
 
         require(
@@ -103,6 +103,7 @@ contract MVPPT {
     }
 
     function withdraw(
+        uint v,
         uint[2] memory sn,
         uint[2] memory a,
         uint[2] memory a_p,
@@ -116,11 +117,15 @@ contract MVPPT {
         bytes32 snHash = keccak256(abi.encode(sn));
         require(!snUsed[snHash], "sn has already been used.");
         snUsed[snHash] = true;
-        uint[] memory inputs = new uint[](4);
+        uint[] memory inputs = new uint[](6);
         inputs[0] = root[0];
         inputs[1] = root[1];
-        inputs[2] = sn[0];
-        inputs[3] = sn[1];
+        inputs[2] = v;
+        inputs[3] = sn[0];
+        inputs[4] = sn[1];
+        inputs[5] = uint256(msg.sender);
+        emit PrimaryInput( inputs[0], inputs[1], inputs[2], inputs[3], inputs[4], inputs[5] );
+
         if (withdrawalVerifier.verifyProof(
                 a,
                 a_p,
@@ -132,9 +137,9 @@ contract MVPPT {
                 k,
                 inputs
             )) {
-            tokenContract.transfer(msg.sender, 1 ether);
+            tokenContract.transfer(msg.sender, v);
         } else {
-            revert();
+            // revert();
         }
     }
 }

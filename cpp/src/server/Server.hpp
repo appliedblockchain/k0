@@ -59,7 +59,15 @@ namespace zktrade {
                 const std::string &r_str,
                 const std::string &v_str);
 
-        virtual std::string prf_addr(const std::string& a_sk);
+        virtual Json::Value prepare_withdrawal(
+                const std::string &address_str,
+                const std::string &a_sk_str,
+                const std::string &rho_str,
+                const std::string &r_str,
+                const std::string &v_str,
+                const std::string &recipient_str);
+
+        virtual std::string prf_addr(const std::string &a_sk);
 
         virtual std::string reset();
 

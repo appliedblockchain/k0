@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <libsnark/gadgetlib1/protoboard.hpp>
 #include <libsnark/gadgetlib1/gadgets/hashes/sha256/sha256_gadget.hpp>
 #include <libsnark/gadgetlib1/gadgets/merkle_tree/merkle_tree_check_update_gadget.hpp>
@@ -128,8 +129,6 @@ Json::Value zktrade::Server<FieldT, HashT>::prepare_deposit(
     uint address = mt.num_elements();
 
     auto comm_circuit = make_commitment_circuit<FieldT>();
-    cout << " root in server " << bits2hex(mt.root()) << endl;
-    cout << " root in server elems " << dec << field_elements_from_bits<FieldT>(mt.root()) << endl;
     // Generate deposit proof
     comm_circuit.k_bits->fill_with_bits(*comm_circuit.pb, k_bits);
     comm_circuit.k_packer->generate_r1cs_witness_from_bits();
@@ -146,36 +145,26 @@ Json::Value zktrade::Server<FieldT, HashT>::prepare_deposit(
         throw JsonRpcException(-32000, "Commitment circuit not satisfied");
     }
 
-        auto add_circuit = make_mt_addition_circuit<FieldT>(tree_height);
+    auto add_circuit = make_mt_addition_circuit<FieldT>(tree_height);
 
-        add_circuit.prev_root_bits->generate_r1cs_witness(mt.root());
-        add_circuit.prev_root_packer->generate_r1cs_witness_from_bits();
+    add_circuit.prev_root_bits->generate_r1cs_witness(mt.root());
+    add_circuit.prev_root_packer->generate_r1cs_witness_from_bits();
 
-        add_circuit.pb->val(*add_circuit.address_packed) = address;
-        add_circuit.address_packer->generate_r1cs_witness_from_packed();
+    add_circuit.pb->val(*add_circuit.address_packed) = address;
+    add_circuit.address_packer->generate_r1cs_witness_from_packed();
 
-        add_circuit.prev_path_var->generate_r1cs_witness(address, mt.path(address));
+    add_circuit.prev_path_var->generate_r1cs_witness(address, mt.path(address));
 
-        add_circuit.next_leaf_bits->generate_r1cs_witness(cm_bits);
-        add_circuit.next_leaf_packer->generate_r1cs_witness_from_bits();
+    add_circuit.next_leaf_bits->generate_r1cs_witness(cm_bits);
+    add_circuit.next_leaf_packer->generate_r1cs_witness_from_bits();
 
-        add_circuit.next_root_bits->generate_r1cs_witness(get<1>(sim_result));
-        add_circuit.next_root_packer->generate_r1cs_witness_from_bits();
+    add_circuit.next_root_bits->generate_r1cs_witness(get<1>(sim_result));
+    add_circuit.next_root_packer->generate_r1cs_witness_from_bits();
 
-        assert(!add_circuit.pb->is_satisfied());
-        add_circuit.mt_update_gadget->generate_r1cs_witness();
+    assert(!add_circuit.pb->is_satisfied());
+    add_circuit.mt_update_gadget->generate_r1cs_witness();
 
-        assert(add_circuit.pb->is_satisfied());
-
-//
-//    cout << "Num inputs:    : " << commitment_pk.constraint_system.num_inputs() << endl;
-//    cout << "Num variables  : " << commitment_pk.constraint_system.num_variables() << endl;
-//    cout << "Num constraints: " << commitment_pk.constraint_system.num_constraints() << endl;
-//
-//    cout << "PRIMARY INPUT dec" << endl << dec << dep_circuit.pb->primary_input() << endl;
-//    cout << "PRIMARY INPUT hex" << endl << hex << dep_circuit.pb->primary_input() << endl;
-
-
+    assert(add_circuit.pb->is_satisfied());
     const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> comm_proof =
             r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
                     commitment_pk, comm_circuit.pb->primary_input(),
@@ -188,14 +177,16 @@ Json::Value zktrade::Server<FieldT, HashT>::prepare_deposit(
 
     bool comm_verified =
             r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
-                    commitment_vk, comm_circuit.pb->primary_input(), comm_proof);
+                    commitment_vk, comm_circuit.pb->primary_input(),
+                    comm_proof);
     if (comm_verified) {
         cout << "Commitment proof successfully verified." << endl;
     } else {
         cerr << "Commitment proof verification failed." << endl;
     }
 
-    cout << "ADDITION params" << endl << hex << add_circuit.pb->primary_input() << endl;
+    cout << "ADDITION params" << endl << hex << add_circuit.pb->primary_input()
+         << endl;
     bool add_verified =
             r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
                     addition_vk, add_circuit.pb->primary_input(), add_proof);
@@ -206,23 +197,84 @@ Json::Value zktrade::Server<FieldT, HashT>::prepare_deposit(
     }
 
 
-    //writeToFile("/tmp/serverproof", proof);
-
     Json::Value result;
     result["k"] = bits_to_hex(k_bits);
     result["cm"] = bits_to_hex(cm_bits);
     result["nextRoot"] = bits_to_hex(get<1>(sim_result));
 
-    result["address"] = (uint)address;
+    result["address"] = (uint) address;
     result["commitmentProof"] = json_conversion::to_json(comm_proof);
     result["additionProof"] = json_conversion::to_json(add_proof);
 
     return result;
 }
 
+
 template<typename FieldT, typename HashT>
-string zktrade::Server<FieldT, HashT>::prf_addr(const string& a_sk_hex)
-{
+Json::Value zktrade::Server<FieldT, HashT>::prepare_withdrawal(
+        const std::string &address_dec_str,
+        const std::string &a_sk_hex_str,
+        const std::string &rho_hex_str,
+        const std::string &r_hex_str,
+        const std::string &v_hex_str,
+        const std::string &recipient_hex_str) {
+    unsigned long address = strtoul(address_dec_str.c_str(), NULL, 10);
+    bit_vector a_sk_bits = hex2bits(a_sk_hex_str);
+    bit_vector rho_bits = hex2bits(rho_hex_str);
+    bit_vector r_bits = hex2bits(r_hex_str);
+    FieldT v = FieldT(v_hex_str.c_str());
+    bit_vector v_bits = field_element_to_64_bits(v);
+    auto recipient = strtoul(recipient_hex_str.c_str(), NULL, 16);
+
+    auto wd_circuit = make_withdrawal_circuit<FieldT>(tree_height);
+    wd_circuit.rt_bits->generate_r1cs_witness(mt.root());
+    wd_circuit.pb->val(*wd_circuit.v_packed) = v;
+    wd_circuit.pb->val(*wd_circuit.recipient_public) = recipient;
+    wd_circuit.pb->val(*wd_circuit.ZERO) = FieldT::zero();
+    wd_circuit.a_sk_bits->fill_with_bits(*wd_circuit.pb, a_sk_bits);
+    wd_circuit.rho_bits->fill_with_bits(*wd_circuit.pb, rho_bits);
+    wd_circuit.r_bits->fill_with_bits(*wd_circuit.pb, r_bits);
+    wd_circuit.address_bits->fill_with_bits_of_ulong(*wd_circuit.pb, address);
+    wd_circuit.path->generate_r1cs_witness(address, mt.path(address));
+    wd_circuit.pb->val(*wd_circuit.recipient_private) = recipient;
+
+    wd_circuit.rt_packer->generate_r1cs_witness_from_bits();
+    wd_circuit.v_packer->generate_r1cs_witness_from_packed();
+    wd_circuit.addr_gadget->generate_r1cs_witness();
+    wd_circuit.commitment_gadget->generate_r1cs_witness();
+
+    assert(!wd_circuit.pb->is_satisfied());
+    wd_circuit.mt_path_gadget->generate_r1cs_witness();
+    wd_circuit.sn_gadget->generate_r1cs_witness();
+    wd_circuit.sn_packer->generate_r1cs_witness_from_bits();
+
+    assert(wd_circuit.pb->is_satisfied());
+
+    const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> proof =
+            r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
+                    withdrawal_pk, wd_circuit.pb->primary_input(),
+                    wd_circuit.pb->auxiliary_input());
+
+    bool verified =
+            r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
+                    withdrawal_vk, wd_circuit.pb->primary_input(), proof);
+    if (verified) {
+        cout << "Withdrawal proof successfully verified." << endl;
+    } else {
+        cerr << "Withdrawal proof verification failed." << endl;
+    }
+
+    cout << "WITHDRAWAL PUBLIC INPUT" << endl << hex << wd_circuit.pb->primary_input() << endl;
+
+
+    Json::Value result;
+    result["sn"] = bits_to_hex(wd_circuit.sn_bits->get_digest());
+    result["proof"] = json_conversion::to_json(proof);
+    return result;
+}
+
+template<typename FieldT, typename HashT>
+string zktrade::Server<FieldT, HashT>::prf_addr(const string &a_sk_hex) {
     bit_vector a_sk = hex2bits(a_sk_hex);
     bit_vector a_pk = zktrade::prf_addr(a_sk);
     string a_pk_hex = bits2hex(a_pk);

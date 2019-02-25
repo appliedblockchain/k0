@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-# cmake_policy(SET CMP0076 NEW)
+cmake_policy(SET CMP0076 NEW)
 
 project(zktrade)
 
@@ -23,7 +23,7 @@ set(
 option(
         DEBUG
         "Enable debugging mode"
-        ON
+        OFF
 )
 
 set(
@@ -55,7 +55,7 @@ option(
 option(
         BINARY_OUTPUT
         "In serialization, output raw binary data (instead of decimal), which is smaller and faster."
-        OFF
+        ON
 )
 
 if (CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")

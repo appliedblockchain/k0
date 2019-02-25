@@ -16,6 +16,7 @@ class ZKTradeStubServer : public jsonrpc::AbstractServer<ZKTradeStubServer>
             this->bindAndAddMethod(jsonrpc::Procedure("element", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING, "param01",jsonrpc::JSON_INTEGER, NULL), &ZKTradeStubServer::elementI);
             this->bindAndAddMethod(jsonrpc::Procedure("hash", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::hashI);
             this->bindAndAddMethod(jsonrpc::Procedure("prepare_deposit", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_STRING,"param03",jsonrpc::JSON_STRING,"param04",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::prepare_depositI);
+            this->bindAndAddMethod(jsonrpc::Procedure("prepare_withdrawal", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_STRING,"param03",jsonrpc::JSON_STRING,"param04",jsonrpc::JSON_STRING,"param05",jsonrpc::JSON_STRING,"param06",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::prepare_withdrawalI);
             this->bindAndAddMethod(jsonrpc::Procedure("prf_addr", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING, "param01",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::prf_addrI);
             this->bindAndAddMethod(jsonrpc::Procedure("reset", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING,  NULL), &ZKTradeStubServer::resetI);
             this->bindAndAddMethod(jsonrpc::Procedure("root", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING,  NULL), &ZKTradeStubServer::rootI);
@@ -38,6 +39,10 @@ class ZKTradeStubServer : public jsonrpc::AbstractServer<ZKTradeStubServer>
         {
             response = this->prepare_deposit(request[0u].asString(), request[1u].asString(), request[2u].asString(), request[3u].asString());
         }
+        inline virtual void prepare_withdrawalI(const Json::Value &request, Json::Value &response)
+        {
+            response = this->prepare_withdrawal(request[0u].asString(), request[1u].asString(), request[2u].asString(), request[3u].asString(), request[4u].asString(), request[5u].asString());
+        }
         inline virtual void prf_addrI(const Json::Value &request, Json::Value &response)
         {
             response = this->prf_addr(request[0u].asString());
@@ -58,6 +63,7 @@ class ZKTradeStubServer : public jsonrpc::AbstractServer<ZKTradeStubServer>
         virtual std::string element(int param01) = 0;
         virtual std::string hash(const std::string& param01, const std::string& param02) = 0;
         virtual Json::Value prepare_deposit(const std::string& param01, const std::string& param02, const std::string& param03, const std::string& param04) = 0;
+        virtual Json::Value prepare_withdrawal(const std::string& param01, const std::string& param02, const std::string& param03, const std::string& param04, const std::string& param05, const std::string& param06) = 0;
         virtual std::string prf_addr(const std::string& param01) = 0;
         virtual std::string reset() = 0;
         virtual std::string root() = 0;

@@ -259,7 +259,8 @@ describe('Minimum viable private payment token', function () {
     })
 
     it('deposit and withdrawal works', async function () {
-        const secrets = [], commitmentProvingTimes = [],
+        const secrets = [],
+            commitmentProvingTimes = [],
             withdrawalProvingTimes = []
 
         printBalances(_.map(depositors, 'address'))
@@ -406,35 +407,41 @@ describe('Minimum viable private payment token', function () {
             console.log()
         }
 
-        // const withdrawers = _.times(NUM_PEOPLE, () => web3.eth.accounts.create())
-        //
-        // for (let i = 0; i < NUM_PEOPLE; i++) {
-        //
-        //   const account = withdrawers[i];
-        //
-        //   const [r, sn] = secrets[i]
-        //   const timestampStart = Date.now()
-        //   const withdrawalProofResponse = await mtEngine.request('proveWithdrawal', [i, r, sn])
-        //   const proofDuration = Date.now() - timestampStart
-        //   const proof = withdrawalProofResponse.result
-        //   const snPacked = await util.pack256Bits(sn)
-        //   const x = MVPPT.methods.withdraw(snPacked, ...proof)
-        //   const data = x.encodeABI()
-        //   const receipt = await sendTransaction(web3, MVPPT._address, data, 5000000, account)
-        //   assert(receipt.status)
-        //   await printBalances(_.map([...depositors, ...withdrawers], 'address'))
-        //   withdrawalProvingTimes.push(proofDuration)
-        //
-        //   const timesSum = withdrawalProvingTimes.reduce((acc, val) => acc + val)
-        //   const avg = timesSum / withdrawalProvingTimes.length
-        //
-        //   console.log([
-        //     'Duration of withdrawal proving operation:',
-        //     `${Math.round(proofDuration/1000)}s`,
-        //     `(avg: ${Math.round(avg / 1000)}s)`
-        //   ].join(' '))
-        //   console.log()
-        // }
+        const withdrawers = _.times(NUM_PEOPLE, () => web3.eth.accounts.create())
+
+        for (let i = 0; i < NUM_PEOPLE; i++) {
+
+          const account = withdrawers[i];
+
+          const [a_sk, rho, r, v] = secrets[i]
+          const timestampStart = Date.now()
+          const params = [i.toString(10), a_sk, rho, r, v, account.address]
+            console.log("PARAMAS", params)
+            console.log(account)
+          const withdrawalProofResponse = await mtEngine.request(
+              'prepare_withdrawal', params
+          )
+          const proofDuration = Date.now() - timestampStart
+          const { sn, proof } = withdrawalProofResponse.result
+          const snPacked = await util.pack256Bits(sn)
+          const x = MVPPT.methods.withdraw(v, snPacked, ...proof)
+          const data = x.encodeABI()
+          const receipt = await sendTransaction(web3, MVPPT._address, data, 5000000, account)
+          console.log("Withdrawal successful?", receipt.status)
+            console.log(receipt.logs    )
+          await printBalances(_.map([...depositors, ...withdrawers], 'address'))
+          withdrawalProvingTimes.push(proofDuration)
+
+          const timesSum = withdrawalProvingTimes.reduce((acc, val) => acc + val)
+          const avg = timesSum / withdrawalProvingTimes.length
+
+          console.log([
+            'Duration of withdrawal proving operation:',
+            `${Math.round(proofDuration/1000)}s`,
+            `(avg: ${Math.round(avg / 1000)}s)`
+          ].join(' '))
+          console.log()
+        }
 
     })
 

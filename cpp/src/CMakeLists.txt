@@ -51,7 +51,6 @@ target_sources(
         json_conversion.cpp
 
         PUBLIC
-        circuitry/gadgets/prfs.hpp
         circuitry/CommitmentCircuit.hpp
         circuitry/CommitmentCircuit.tcc
         hash/sha256.hpp
