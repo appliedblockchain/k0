@@ -12,11 +12,13 @@ add_executable(
 target_link_libraries(
         letest
 
-        gtest
         ff
         snark
         zktrade
+        sodium
+        ${GTEST_LDFLAGS}
 )
+
 
 target_include_directories(
         letest
@@ -25,3 +27,5 @@ target_include_directories(
         ${DEPENDS_DIR}/libsnark
         ${DEPENDS_DIR}/libsnark/depends/libff
 )
+
+target_compile_options(letest PUBLIC ${GTEST_CFLAGS})

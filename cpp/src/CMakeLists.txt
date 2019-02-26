@@ -51,8 +51,6 @@ target_sources(
         json_conversion.cpp
 
         PUBLIC
-        circuitry/CommitmentCircuit.hpp
-        circuitry/CommitmentCircuit.tcc
         hash/sha256.hpp
         hash/sha256_compression.hpp
         scheme/comms.hpp
@@ -73,6 +71,7 @@ target_include_directories(
         ${DEPENDS_DIR}/libsnark
         ${DEPENDS_DIR}/libsnark/depends/libff
         ${DEPENDS_DIR}/libsnark/depends/libfqfft
+        /usr/local/include
 )
 
 include_directories(.)

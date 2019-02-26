@@ -124,18 +124,7 @@ async function compileContracts() {
     }
 }
 
-async function deployStandardContract(web3, contractName, account = null) {
-    const artefacts = await compileContract(contractName)
-    const contractAddress = await deploy(
-        web3,
-        artefacts.abi,
-        artefacts.bytecode,
-        50000000,
-        [],
-        account
-    )
-    return new web3.eth.Contract(artefacts.abi, contractAddress)
-}
+
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -179,8 +168,8 @@ describe('Minimum viable private payment token', function () {
         tokenMaster = web3.eth.accounts.create()
         depositors = _.times(NUM_PEOPLE, () => web3.eth.accounts.create())
 
-        erc20 = await deployStandardContract(web3, 'DollarCoin', tokenMaster)
-        const moneyShower = await deployStandardContract(web3, 'MoneyShower')
+        erc20 = await util.deployStandardContract(web3, 'DollarCoin', tokenMaster)
+        const moneyShower = await util.deployStandardContract(web3, 'MoneyShower')
 
         // Make some money
         const data = erc20.methods

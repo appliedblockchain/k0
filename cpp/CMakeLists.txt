@@ -99,6 +99,9 @@ else ()
     add_definitions(-DNO_PROCPS)
 endif ()
 
+find_package(PkgConfig)
+pkg_search_module(GTEST REQUIRED gtest_main)
+
 add_subdirectory(depends)
 add_subdirectory(src)
 add_subdirectory(test)

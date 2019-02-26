@@ -71,7 +71,42 @@ TEST(BitsAndNumbers, MultiPacking) {
     auto bits_1 = hex2bits("0x" + hex_1.str());
     cout << "bits_1               " << bits_to_hex(bits_1) << endl;
     cout << "second_half          " << bits_to_hex(second_half) << endl;
-    cout << "second_half_reversed " << bits_to_hex(second_half_reversed) << endl;
+    cout << "second_half_reversed " << bits_to_hex(second_half_reversed)
+         << endl;
     ASSERT_NE(bits_1, second_half);
     ASSERT_EQ(bits_1, second_half_reversed);
+}
+
+TEST(BitsAndNumbers, LessThan256Bits) {
+    vector<string> input{
+            "0x0000000000000000000000000000000000000001",
+            "0xffffffffffffffffffffffffffffffffffffffff",
+            "0xdf1a27Fc2b2EA68525E3dcc5780CbcbE73e6778A",
+            "0x61201b8cBA5CAB5c99935146Cd9c6B99050BC47f",
+            "0x43658D5cce59e1A63Ad40630c89423Aa23c4E134",
+            "0x7a2dAf3028b903c73eAeF361E20aEBbe4190A1c7",
+            "0x4C4eDd3Cc65e6bcA86e01c406252A34b7574b835",
+            "0x6Ad5182Eb11A9792B1d74833F64f0FEeB7CA72Be",
+            "0xCfF76aF5bFC34dbDAa810ed9a2E9edAb093E3472",
+            "0xEeDA3e1669579C04A05E01c50aFA77EDB1c061AA",
+            "0xE94Ae3289bE44A946d55e77827fF19F44450cA5b",
+            "0x105C92C07f47709aa9926c697DED50e56E3E6dF2"
+    };
+    vector<string> expected_output{
+            "1",
+            "1461501637330902918203684832716283019655932542975",
+            "1273688244456584839735093243794471170958885812106",
+            "554488128535234514404730477514677120558175077503",
+            "384767071322830634246376080506636963586398019892",
+            "697515668612163741629280368201275722368080191943",
+            "435642029203907532051349391777938782044493756469",
+            "609905187017876682145402197593137347723770098366",
+            "1187278691150957129503052088492597600117512352882",
+            "1363606774497317157814832081707217741900230451626",
+            "1331864893054062757360647830021747940020301384283",
+            "93408304788589627958079886778341295953834569202"
+    };
+    vector<string> output(input.size());
+    transform(input.begin(), input.end(), output.begin(), hex_to_dec_string);
+    ASSERT_EQ(output, expected_output);
 }

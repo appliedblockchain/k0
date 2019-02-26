@@ -224,7 +224,8 @@ Json::Value zktrade::Server<FieldT, HashT>::prepare_withdrawal(
     bit_vector r_bits = hex2bits(r_hex_str);
     FieldT v = FieldT(v_hex_str.c_str());
     bit_vector v_bits = field_element_to_64_bits(v);
-    auto recipient = strtoul(recipient_hex_str.c_str(), NULL, 16);
+    auto recipient_dec_str = hex_to_dec_string(recipient_hex_str);
+    auto recipient = FieldT(recipient_dec_str.c_str());
 
     auto wd_circuit = make_withdrawal_circuit<FieldT>(tree_height);
     wd_circuit.rt_bits->generate_r1cs_witness(mt.root());

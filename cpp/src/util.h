@@ -69,6 +69,21 @@ namespace zktrade {
     }
 
     template<typename FieldT>
+    FieldT bits_to_field_element(bit_vector &input)
+    {
+        protoboard<FieldT> pb;
+        pb_variable<FieldT> packed;
+        packed.allocate(pb, "packed");
+        pb_variable_array<FieldT> bits;
+        bits.allocate(pb, input.size(), "bits");
+        packing_gadget<FieldT> packer(pb, bits, packed, "packer");
+        packer.generate_r1cs_constraints(false);
+        bits.fill_with_bits(pb, input);
+        packer.generate_r1cs_witness_from_bits();
+        return pb.val(packed);
+    }
+
+    template<typename FieldT>
     string field_element_to_string(FieldT el) {
         stringstream stream;
         stream << el;
@@ -112,6 +127,10 @@ namespace zktrade {
         packer.generate_r1cs_witness_from_packed();
         return bits.get_bits(pb);
     }
+
+    // "0xdf1a27Fc2b2EA68525E3dcc5780CbcbE73e6778A" ->
+    // "1273688244456584839735093243794471170958885812106"
+    string hex_to_dec_string(string hex);
 }
 
 #endif //ZKTRADE_UTIL_H

@@ -164,4 +164,15 @@ uint64_t zktrade::bits_to_uint64(bit_vector input) {
 }
 
 
+string zktrade::hex_to_dec_string(string hex) {
+    assert(strcmp(hex.substr(0,2).c_str(), "0x") == 0);
+    mpz_t bignum;
+    mpz_init_set_str (bignum, hex.substr(2).c_str(), 16);
+    stringstream stream;
+    stream << bignum;
+    mpz_clear(bignum);
+    return stream.str();
+}
+
+
 

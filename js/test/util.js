@@ -1,5 +1,7 @@
 const assert = require('assert')
+const compileContract = require('./helpers/compile-contract')
 const crypto = require('crypto')
+const deploy = require('../deploy')
 const execAsync = require('../exec-async')
 const path = require('path')
 const proofFromFile = require('../proof-from-file')
@@ -79,9 +81,23 @@ function initWeb3() {
   return new Web3( endpointFromEnv || 'http://localhost:8545/')
 }
 
+async function deployStandardContract(web3, contractName, account = null) {
+    const artefacts = await compileContract(contractName)
+    const contractAddress = await deploy(
+        web3,
+        artefacts.abi,
+        artefacts.bytecode,
+        50000000,
+        [],
+        account
+    )
+    return new web3.eth.Contract(artefacts.abi, contractAddress)
+}
+
 module.exports = {
   convertVk,
   convertProof,
+  deployStandardContract,
   initWeb3,
   randomBytes,
   paths,
