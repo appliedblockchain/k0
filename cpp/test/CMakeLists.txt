@@ -8,6 +8,7 @@ add_executable(
         bits_and_numbers.cpp
         lifecycle.cpp
         merkle_tree_addition.cpp
+        transfer.cpp
 )
 target_link_libraries(
         letest

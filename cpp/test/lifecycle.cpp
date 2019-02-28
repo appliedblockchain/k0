@@ -4,6 +4,7 @@
 #include "circuitry/CommitmentCircuit.hpp"
 #include "circuitry/MTAdditionCircuit.hpp"
 #include "circuitry/WithdrawalCircuit.hpp"
+#include "circuitry/TransferCircuit.hpp"
 #include "MerkleTree.hpp"
 #include "scheme/comms.hpp"
 #include "scheme/prfs.h"
@@ -29,7 +30,8 @@ TEST(Lifecycle, Full) {
         auto a_sk = random_bits(256);
         // Derive public key/address
         auto a_pk = prf_addr<CompressionHashT>(a_sk);
-        // "DEPOSIT/SHIELDING"
+
+        // DEPOSIT/"SHIELDING"
         // Sample rho
         auto rho = random_bits(256);
         // Sample r
@@ -90,7 +92,14 @@ TEST(Lifecycle, Full) {
 
         mt.add(cm);
 
-        // "WITHDRAWAL/UNSHIELDING"
+
+        // TRANSFER
+        auto transfer_circuit = make_transfer_circuit<FieldT, CompressionHashT, TwoToOneHashT>(tree_height);
+
+
+
+
+        // WITHDRAWAL/"UNSHIELDING"
 
         // Generate recipient address
         uint32_t recipient = rand() % (uint32_t)exp2(20);

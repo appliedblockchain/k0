@@ -21,8 +21,8 @@ typedef Fr<default_r1cs_ppzksnark_pp> FieldT;
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::Server(size_t height,
-                                       AbstractServerConnector &connector,
-                                       serverVersion_t type)
+                                                                  AbstractServerConnector &connector,
+                                                                  serverVersion_t type)
         : ZKTradeStubServer(connector, type),
           tree_height{height},
           mt{height} {}
@@ -39,49 +39,56 @@ string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::root() {
 }
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
-void zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setCommitmentPk(string pk_path) {
+void zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setCommitmentPk(
+        string pk_path) {
     commitment_pk = loadFromFile<r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp>>(
             pk_path);
     commitment_pk_loaded = true;
 }
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
-void zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setCommitmentVk(string vk_path) {
+void zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setCommitmentVk(
+        string vk_path) {
     commitment_vk = loadFromFile<r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp>>(
             vk_path);
     commitment_vk_loaded = true;
 }
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
-void zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setAdditionPk(string pk_path) {
+void zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setAdditionPk(
+        string pk_path) {
     addition_pk = loadFromFile<r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp>>(
             pk_path);
     addition_pk_loaded = true;
 }
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
-void zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setAdditionVk(string vk_path) {
+void zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setAdditionVk(
+        string vk_path) {
     addition_vk = loadFromFile<r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp>>(
             vk_path);
     addition_vk_loaded = true;
 }
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
-void zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setWithdrawalPk(string pk_path) {
+void zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setWithdrawalPk(
+        string pk_path) {
     withdrawal_pk = loadFromFile<r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp>>(
             pk_path);
     withdrawal_pk_loaded = true;
 }
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
-void zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setWithdrawalVk(string vk_path) {
+void zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setWithdrawalVk(
+        string vk_path) {
     withdrawal_vk = loadFromFile<r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp>>(
             vk_path);
     withdrawal_vk_loaded = true;
 }
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
-Json::Value zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::add(const string &leaf_hex) {
+Json::Value zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::add(
+        const string &leaf_hex) {
     bit_vector leaf_bv = hex2bits(leaf_hex);
     uint address = mt.add(leaf_bv);
     mt.print();
@@ -92,7 +99,8 @@ Json::Value zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::add(const
 }
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
-string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::element(int address) {
+string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::element(
+        int address) {
     if (mt.num_elements() == 0 || address > (mt.num_elements() - 1)) {
         throw JsonRpcException(-32602, "Address too big");
     }
@@ -100,8 +108,9 @@ string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::element(int ad
 }
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
-std::string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::hash(const std::string &left_hex,
-                                                 const std::string &right_hex) {
+std::string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::hash(
+        const std::string &left_hex,
+        const std::string &right_hex) {
     libff::bit_vector block = hex2bits(left_hex);
     libff::bit_vector right = hex2bits(right_hex);
     block.insert(block.end(), right.begin(), right.end());
@@ -109,7 +118,8 @@ std::string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::hash(cons
 }
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
-Json::Value zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_deposit(
+Json::Value
+zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_deposit(
         const std::string &a_pk_str,
         const std::string &rho_str,
         const std::string &r_str,
@@ -145,7 +155,8 @@ Json::Value zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_d
         throw JsonRpcException(-32000, "Commitment circuit not satisfied");
     }
 
-    auto add_circuit = make_mt_addition_circuit<FieldT, MerkleTreeHashT>(tree_height);
+    auto add_circuit = make_mt_addition_circuit<FieldT, MerkleTreeHashT>(
+            tree_height);
 
     add_circuit.prev_root_bits->generate_r1cs_witness(mt.root());
     add_circuit.prev_root_packer->generate_r1cs_witness_from_bits();
@@ -211,7 +222,8 @@ Json::Value zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_d
 
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
-Json::Value zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_withdrawal(
+Json::Value
+zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_withdrawal(
         const std::string &address_dec_str,
         const std::string &a_sk_hex_str,
         const std::string &rho_hex_str,
@@ -227,7 +239,9 @@ Json::Value zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_w
     auto recipient_dec_str = hex_to_dec_string(recipient_hex_str);
     auto recipient = FieldT(recipient_dec_str.c_str());
 
-    auto wd_circuit = make_withdrawal_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(tree_height);
+    auto wd_circuit =
+            make_withdrawal_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(
+                    tree_height);
     wd_circuit.rt_bits->generate_r1cs_witness(mt.root());
     wd_circuit.pb->val(*wd_circuit.v_packed) = v;
     wd_circuit.pb->val(*wd_circuit.recipient_public) = recipient;
@@ -265,7 +279,8 @@ Json::Value zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_w
         cerr << "Withdrawal proof verification failed." << endl;
     }
 
-    cout << "WITHDRAWAL PUBLIC INPUT" << endl << hex << wd_circuit.pb->primary_input() << endl;
+    cout << "WITHDRAWAL PUBLIC INPUT" << endl << hex
+         << wd_circuit.pb->primary_input() << endl;
 
 
     Json::Value result;
@@ -275,7 +290,8 @@ Json::Value zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_w
 }
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
-string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prf_addr(const string &a_sk_hex) {
+string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prf_addr(
+        const string &a_sk_hex) {
     bit_vector a_sk = hex2bits(a_sk_hex);
     bit_vector a_pk = zktrade::prf_addr<CommitmentHashT>(a_sk);
     string a_pk_hex = bits2hex(a_pk);
@@ -283,7 +299,8 @@ string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prf_addr(const
 }
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
-Json::Value zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::status() {
+Json::Value
+zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::status() {
     const bool ready =
             commitment_pk_loaded & commitment_vk_loaded & withdrawal_pk_loaded &
             withdrawal_vk_loaded;
