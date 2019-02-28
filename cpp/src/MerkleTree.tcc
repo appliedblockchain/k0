@@ -1,3 +1,6 @@
+#ifndef ZKTRADE_MERKLETREE_TCC
+#define ZKTRADE_MERKLETREE_TCC
+
 #include <bitset>
 #include <iomanip>
 #include <iostream>
@@ -6,39 +9,21 @@
 #include <libsnark/gadgetlib1/gadgets/hashes/sha256/sha256_gadget.hpp>
 #include "MerkleTree.hpp"
 #include "serialization.hpp"
+#include "util.h"
 
 using namespace std;
 using namespace libff;
 using namespace libsnark;
 
-typedef Fr<default_r1cs_ppzksnark_pp> FieldT;
-typedef sha256_two_to_one_hash_gadget<FieldT> HashT;
-
-void printnode(vector<bool> bv) {
-  uint wordlength = 32;
-  bitset<32> word;
-  cout << "0x";
-  for (uint i = 0; i < bv.size(); i++) {
-      word.set(wordlength - 1 - (i % wordlength), bv[i]);
-      if (i % wordlength == wordlength - 1 || i == bv.size() - 1) {
-        cout << setfill('0') << setw(8) << hex << word.to_ulong();
-      }
-  }
-  cout << " ";
-}
-
-bit_vector all_zeros = hex2bits("0x0000000000000000000000000000000000000000000000000000000000000000");
-
+template<typename HashT>
 bit_vector hashLR(bit_vector left, bit_vector right) {
   bit_vector block = left;
   block.insert(block.end(), right.begin(), right.end());
   return HashT::get_hash(block);
 }
 
-bool returnFalse() {
-  return false;
-}
-MerkleTree::MerkleTree(size_t d) :
+template<typename HashT>
+MerkleTree<HashT>::MerkleTree(size_t d) :
   depth{d}
 {
   cout << "MT CONSTRUCTOR" << endl;
@@ -46,6 +31,7 @@ MerkleTree::MerkleTree(size_t d) :
   empty_tree_roots = new bit_vector[depth];
   node_levels = new vector<bit_vector>[depth];
   leaves = new vector<bit_vector>();
+  auto all_zeros = hex2bits("0x0000000000000000000000000000000000000000000000000000000000000000");
   for (uint i = 0; i < depth; i++) {
     bit_vector prev;
     if (i == 0) {
@@ -53,30 +39,36 @@ MerkleTree::MerkleTree(size_t d) :
     } else {
       prev = empty_tree_roots[i - 1];
     }
-    empty_tree_roots[i] = hashLR(prev, prev);
+    empty_tree_roots[i] = hashLR<HashT>(prev, prev);
   }
   node_levels[depth - 1].push_back(empty_tree_roots[depth - 1]);
 }
 
-bit_vector MerkleTree::root() {
+template<typename HashT>
+bit_vector MerkleTree<HashT>::root() {
   return node_levels[depth - 1][0];
 }
 
-uint MerkleTree::num_elements() {
+template<typename HashT>
+uint MerkleTree<HashT>::num_elements() {
   return leaves->size();
 }
 
-bit_vector MerkleTree::operator[](uint i) {
+template<typename HashT>
+bit_vector MerkleTree<HashT>::operator[](uint i) {
   return leaves->at(i);
 }
 
-uint MerkleTree::add(bit_vector leaf) {
+template<typename HashT>
+uint MerkleTree<HashT>::add(bit_vector leaf) {
   const uint address = leaves->size();
   if (leaves->size() >= max_size) {
     throw overflow_error("Tree is full");
   }
   leaves->push_back(leaf);
   uint prev_level_pos = address;
+
+  auto all_zeros = hex2bits("0x0000000000000000000000000000000000000000000000000000000000000000");
   for (uint level = 0; level < depth; level++) {
     // First we need to find out which element at the current level gets updated
     // (position at previous level divided by 2).
@@ -103,7 +95,7 @@ uint MerkleTree::add(bit_vector leaf) {
         right = node_levels[level-1][pos * 2 + 1];
       }
     }
-    bit_vector new_hash = hashLR(left, right);
+    bit_vector new_hash = hashLR<HashT>(left, right);
     if (node_levels[level].size() - 1 == pos) {
       // need to replace the node
       node_levels[level][pos] = new_hash;
@@ -116,7 +108,8 @@ uint MerkleTree::add(bit_vector leaf) {
   return address;
 }
 
-vector<bit_vector> MerkleTree::path(uint address) {
+template<typename HashT>
+vector<bit_vector> MerkleTree<HashT>::path(uint address) {
   vector<bit_vector> p;
   uint prev_pos;
   for (uint row = 0; row < depth; row++) {
@@ -144,7 +137,8 @@ vector<bit_vector> MerkleTree::path(uint address) {
   return p;
 }
 
-tuple<uint, bit_vector, vector<bit_vector>> MerkleTree::simulate_add(bit_vector leaf) {
+template<typename HashT>
+tuple<uint, bit_vector, vector<bit_vector>> MerkleTree<HashT>::simulate_add(bit_vector leaf) {
   uint address = leaves->size();
   vector<bit_vector> p;
   uint prev_pos;
@@ -156,10 +150,10 @@ tuple<uint, bit_vector, vector<bit_vector>> MerkleTree::simulate_add(bit_vector 
       if (address % 2) {
         // right side
         sibling = internal_node_at(0, address - 1);
-        hash = hashLR(sibling, leaf);
+        hash = hashLR<HashT>(sibling, leaf);
       } else {
         sibling = internal_node_at(0, address + 1);
-        hash = hashLR(leaf, sibling);
+        hash = hashLR<HashT>(leaf, sibling);
       }
       prev_pos = address;
     } else {
@@ -167,10 +161,10 @@ tuple<uint, bit_vector, vector<bit_vector>> MerkleTree::simulate_add(bit_vector 
       if (pos % 2) {
         // right side
         sibling = internal_node_at(row, pos - 1);
-        hash = hashLR(sibling, prev_hash);
+        hash = hashLR<HashT>(sibling, prev_hash);
       } else {
         sibling = internal_node_at(row, pos + 1);
-        hash = hashLR(prev_hash, sibling);
+        hash = hashLR<HashT>(prev_hash, sibling);
       }
       prev_pos = pos;
     }
@@ -181,7 +175,9 @@ tuple<uint, bit_vector, vector<bit_vector>> MerkleTree::simulate_add(bit_vector 
   return make_tuple(address, prev_hash, p);
 }
 
-bit_vector MerkleTree::internal_node_at(uint row, uint pos) {
+template<typename HashT>
+bit_vector MerkleTree<HashT>::internal_node_at(uint row, uint pos) {
+  auto all_zeros = hex2bits("0x0000000000000000000000000000000000000000000000000000000000000000");
   if (row == 0) {
     if (pos + 1 <= leaves->size()) {
       return leaves->at(pos);
@@ -199,24 +195,28 @@ bit_vector MerkleTree::internal_node_at(uint row, uint pos) {
   }
 }
 
-void MerkleTree::print() {
+template<typename HashT>
+void MerkleTree<HashT>::print() {
+  auto all_zeros = hex2bits("0x0000000000000000000000000000000000000000000000000000000000000000");
   for (int level = depth - 1; level >= 0; level--) {
     uint num_elems = exp2(depth - level - 1);
     for (uint pos = 0; pos < num_elems; pos++) {
       if (node_levels[level].size() - 1 >= pos) {
-        printnode(node_levels[level][pos]);
+        zktrade::printnode(node_levels[level][pos]);
       } else {
-        printnode(empty_tree_roots[level]);
+        zktrade::printnode(empty_tree_roots[level]);
       }
     }
     cout << endl;
   }
   for (uint pos = 0; pos < max_size; pos++) {
     if (leaves->size() - 1 >= pos) {
-      printnode(leaves->at(pos));
+      zktrade::printnode(leaves->at(pos));
     } else {
-      printnode(all_zeros);
+      zktrade::printnode(all_zeros);
     }
   }
   cout << endl;
 }
+
+#endif // ZKTRADE_MERKLETREE_TCC

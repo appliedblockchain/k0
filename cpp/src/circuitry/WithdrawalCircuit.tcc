@@ -1,8 +1,9 @@
 #ifndef ZKTRADE_CIRCUITRY_WITHDRAWAL_CIRCUIT_TCC
 #define ZKTRADE_CIRCUITRY_WITHDRAWAL_CIRCUIT_TCC
 
-template<typename FieldT>
-WithdrawalCircuit<FieldT> make_withdrawal_circuit(size_t tree_height) {
+template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+WithdrawalCircuit<FieldT, CommitmentHashT, MerkleTreeHashT>
+make_withdrawal_circuit(size_t tree_height) {
     protoboard<FieldT> *pb = new protoboard<FieldT>();
 
     pb_variable_array<FieldT> *rt_packed = new pb_variable_array<FieldT>();
@@ -23,7 +24,7 @@ WithdrawalCircuit<FieldT> make_withdrawal_circuit(size_t tree_height) {
     ZERO->allocate(*pb, "ZERO");
 
     digest_variable<FieldT> *rt_bits =
-            new digest_variable<FieldT>( *pb, 256, "rt_bits");
+            new digest_variable<FieldT>(*pb, 256, "rt_bits");
 
     pb_variable_array<FieldT> *v_bits = new pb_variable_array<FieldT>();
     v_bits->allocate(*pb, 64, "v_bits");
@@ -40,51 +41,55 @@ WithdrawalCircuit<FieldT> make_withdrawal_circuit(size_t tree_height) {
     pb_variable_array<FieldT> *address_bits = new pb_variable_array<FieldT>();
     address_bits->allocate(*pb, tree_height, "address_bits");
 
-    typedef sha256_two_to_one_hash_gadget<FieldT> TwoToOneSHA256;
-    merkle_authentication_path_variable<FieldT, TwoToOneSHA256> *path =
-            new merkle_authentication_path_variable<FieldT, TwoToOneSHA256>(
+    merkle_authentication_path_variable<FieldT, MerkleTreeHashT> *path =
+            new merkle_authentication_path_variable<FieldT, MerkleTreeHashT>(
                     *pb, tree_height, "merkle_authentication_path");
 
     pb_variable<FieldT> *recipient_private = new pb_variable<FieldT>();
     recipient_private->allocate(*pb, "recipient_private");
 
-    auto a_pk_bits = make_shared<digest_variable<FieldT>>(*pb, 256, "a_pk_bits");
+    auto a_pk_bits = make_shared<digest_variable<FieldT>>(*pb, 256,
+                                                          "a_pk_bits");
 
     digest_variable<FieldT> *commitment_bits =
-            new digest_variable<FieldT>( *pb, 256, "commitment_bits");
+            new digest_variable<FieldT>(*pb, 256, "commitment_bits");
 
     auto sn_bits = make_shared<digest_variable<FieldT>>(*pb, 256, "sn_bits");
 
     multipacking_gadget<FieldT> *rt_packer =
-            new multipacking_gadget<FieldT>(*pb, rt_bits->bits, *rt_packed, 128, "rt_packer");
+            new multipacking_gadget<FieldT>(
+                    *pb, rt_bits->bits, *rt_packed, 128, "rt_packer");
 
     packing_gadget<FieldT> *v_packer =
-            new packing_gadget<FieldT>( *pb, *v_bits, *v_packed, "v_packer");
+            new packing_gadget<FieldT>(*pb, *v_bits, *v_packed, "v_packer");
 
     multipacking_gadget<FieldT> *sn_packer =
-            new multipacking_gadget<FieldT>(*pb, sn_bits->bits, *sn_packed, 128, "sn_packer");
+            new multipacking_gadget<FieldT>(
+                    *pb, sn_bits->bits, *sn_packed, 128, "sn_packer");
 
-    prf_addr_gadget<FieldT>* addr_gadget = new prf_addr_gadget<FieldT>(*pb, *ZERO,
-                                                               *a_sk_bits,
-                                                               a_pk_bits,
-                                                               "prf_addr");
+    prf_addr_gadget<FieldT, CommitmentHashT> *addr_gadget =
+            new prf_addr_gadget<FieldT, CommitmentHashT>(
+                    *pb, *ZERO, *a_sk_bits, a_pk_bits, "prf_addr");
 
 
-    cm_gadget<FieldT> *commitment_gadget = new cm_gadget<FieldT>(*pb, *ZERO, a_pk_bits->bits,
-                                                   *rho_bits, *r_bits, *v_bits,
-                                                   *commitment_bits);
+    cm_gadget<FieldT, CommitmentHashT> *commitment_gadget =
+            new cm_gadget<FieldT, CommitmentHashT>(
+                    *pb, *ZERO, a_pk_bits->bits, *rho_bits, *r_bits, *v_bits,
+                    *commitment_bits);
+    auto sn_gadget =
+            new prf_sn_gadget<FieldT, CommitmentHashT>(
+                    *pb, *ZERO, *a_sk_bits, *rho_bits, sn_bits, "prf_sn");
 
-    auto sn_gadget = new prf_sn_gadget<FieldT>(*pb, *ZERO, *a_sk_bits, *rho_bits, sn_bits, "prf_sn");
-
-    merkle_tree_check_read_gadget<FieldT, TwoToOneSHA256> *mt_path_gadget = new merkle_tree_check_read_gadget<FieldT, TwoToOneSHA256>(
-            *pb,
-            tree_height,
-            *address_bits,
-            *commitment_bits,
-            *rt_bits,
-            *path,
-            ONE,
-            "merkle_tree_check_read_gadget");
+    merkle_tree_check_read_gadget<FieldT, MerkleTreeHashT> *mt_path_gadget =
+            new merkle_tree_check_read_gadget<FieldT, MerkleTreeHashT>(
+                    *pb,
+                    tree_height,
+                    *address_bits,
+                    *commitment_bits,
+                    *rt_bits,
+                    *path,
+                    ONE,
+                    "merkle_tree_check_read_gadget");
 
 
     pb->add_r1cs_constraint(
@@ -106,7 +111,7 @@ WithdrawalCircuit<FieldT> make_withdrawal_circuit(size_t tree_height) {
     sn_gadget->generate_r1cs_constraints();
     mt_path_gadget->generate_r1cs_constraints();
 
-    WithdrawalCircuit<FieldT> circuit{
+    WithdrawalCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> circuit{
             pb,
             rt_packed,
             v_packed,

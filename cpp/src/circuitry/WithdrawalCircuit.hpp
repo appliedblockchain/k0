@@ -14,7 +14,7 @@ using namespace libff;
 using namespace libsnark;
 using namespace zktrade;
 
-template<typename FieldT>
+template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 struct WithdrawalCircuit {
     protoboard<FieldT> *pb;
 
@@ -32,7 +32,7 @@ struct WithdrawalCircuit {
     pb_variable_array<FieldT> *rho_bits;
     pb_variable_array<FieldT> *r_bits;
     pb_variable_array<FieldT> *address_bits;
-    merkle_authentication_path_variable<FieldT, sha256_two_to_one_hash_gadget<FieldT>> *path;
+    merkle_authentication_path_variable<FieldT, MerkleTreeHashT> *path;
     pb_variable<FieldT>* recipient_private;
     shared_ptr<digest_variable<FieldT>> a_pk_bits;
     digest_variable<FieldT> *commitment_bits;
@@ -44,14 +44,14 @@ struct WithdrawalCircuit {
     multipacking_gadget<FieldT> *sn_packer;
 
     // Workhorse gadgets
-    prf_addr_gadget <FieldT> *addr_gadget;
-    cm_gadget <FieldT> *commitment_gadget;
-    prf_sn_gadget <FieldT> *sn_gadget;
-    merkle_tree_check_read_gadget<FieldT, sha256_two_to_one_hash_gadget<FieldT>> *mt_path_gadget;
+    prf_addr_gadget <FieldT, CommitmentHashT> *addr_gadget;
+    cm_gadget <FieldT, CommitmentHashT> *commitment_gadget;
+    prf_sn_gadget <FieldT, CommitmentHashT> *sn_gadget;
+    merkle_tree_check_read_gadget<FieldT, MerkleTreeHashT> *mt_path_gadget;
 };
 
-template<typename FieldT>
-WithdrawalCircuit<FieldT> make_withdrawal_circuit(size_t tree_height);
+template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+WithdrawalCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> make_withdrawal_circuit(size_t tree_height);
 
 #include "WithdrawalCircuit.tcc"
 

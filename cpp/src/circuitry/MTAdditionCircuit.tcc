@@ -5,11 +5,10 @@
 using namespace libff;
 using namespace libsnark;
 
-template<typename FieldT>
-zktrade::MTAdditionCircuit<FieldT>
+template<typename FieldT, typename MerkleTreeHashT>
+zktrade::MTAdditionCircuit<FieldT, MerkleTreeHashT>
 zktrade::make_mt_addition_circuit(size_t tree_height) {
 
-    typedef sha256_two_to_one_hash_gadget<FieldT> TwoToOneSHA256;
     auto pb = new protoboard<FieldT>();
 
     auto prev_root_packed = new pb_variable_array<FieldT>();
@@ -34,7 +33,7 @@ zktrade::make_mt_addition_circuit(size_t tree_height) {
     auto prev_root_bits = new digest_variable<FieldT>(*pb, 256,
                                                       "prev_root_bits");
     auto prev_path_var =
-            new merkle_authentication_path_variable<FieldT, TwoToOneSHA256>(
+            new merkle_authentication_path_variable<FieldT, MerkleTreeHashT>(
                     *pb, tree_height, "prev_path_var");
 
     auto next_leaf_bits = new digest_variable<FieldT>(*pb, 256,
@@ -42,7 +41,7 @@ zktrade::make_mt_addition_circuit(size_t tree_height) {
     auto next_root_bits = new digest_variable<FieldT>(*pb, 256,
                                                       "next_root_bits");
     auto next_path_var =
-            new merkle_authentication_path_variable<FieldT, TwoToOneSHA256>(
+            new merkle_authentication_path_variable<FieldT, MerkleTreeHashT>(
                     *pb, tree_height, "next_path_var");
 
     auto prev_root_packer =
@@ -64,7 +63,7 @@ zktrade::make_mt_addition_circuit(size_t tree_height) {
                                             "next_root_packer");
 
 
-    auto mt_update_gadget = new merkle_tree_check_update_gadget<FieldT, TwoToOneSHA256>(
+    auto mt_update_gadget = new merkle_tree_check_update_gadget<FieldT, MerkleTreeHashT>(
             *pb,
             tree_height,
             *address_bits,
@@ -90,7 +89,7 @@ zktrade::make_mt_addition_circuit(size_t tree_height) {
 
     mt_update_gadget->generate_r1cs_constraints();
 
-    MTAdditionCircuit <FieldT> circuit{
+    MTAdditionCircuit <FieldT, MerkleTreeHashT> circuit{
             pb,
             prev_root_packed,
             address_packed,

@@ -1,14 +1,10 @@
 #include <libff/algebra/curves/public_params.hpp>
 #include <libsnark/common/default_types/r1cs_ppzksnark_pp.hpp>
-#include <libsnark/gadgetlib1/gadgets/hashes/sha256/sha256_gadget.hpp>
 #include "circuitry/CommitmentCircuit.hpp"
 #include "circuitry/MTAdditionCircuit.hpp"
 #include "circuitry/WithdrawalCircuit.hpp"
+#include "definitions.hpp"
 #include "setup.cpp"
-
-using namespace libff;
-using namespace libsnark;
-using namespace std;
 
 int main(int argc, char *argv[]) {
     if (argc != 5) {
@@ -17,7 +13,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    typedef libff::Fr<default_r1cs_ppzksnark_pp> FieldT;
     default_r1cs_ppzksnark_pp::init_public_params();
 
     string circuit_type = argv[1];
@@ -26,18 +21,17 @@ int main(int argc, char *argv[]) {
     // TODO Make circuit base class
     if (circuit_type.compare("commitment") == 0) {
         cout << "COMMITMENT" << endl;
-        CommitmentCircuit<FieldT> circuit = make_commitment_circuit<FieldT>();
+        auto circuit = make_commitment_circuit<FieldT, CommitmentHashT>();
         auto cs = circuit.pb->get_constraint_system();
         setup(cs, argv[3], argv[4]);
     } else if (circuit_type.compare("addition") == 0) {
         cout << "ADDITION" << endl;
-        MTAdditionCircuit<FieldT> circuit =
-                make_mt_addition_circuit<FieldT>(tree_height);
+        MTAdditionCircuit<FieldT, MerkleTreeHashT> circuit =
+                make_mt_addition_circuit<FieldT, MerkleTreeHashT>(tree_height);
         setup(circuit.pb->get_constraint_system(), argv[3], argv[4]);
     } else if (circuit_type.compare("withdrawal") == 0) {
         cout << "WITHDRAWAL" << endl;
-        WithdrawalCircuit<FieldT> circuit =
-                make_withdrawal_circuit<FieldT>(tree_height);
+        auto circuit =make_withdrawal_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(tree_height);
         setup(circuit.pb->get_constraint_system(), argv[3], argv[4]);
     } else {
         std::cerr << "Invalid circuit type" << endl;

@@ -12,15 +12,15 @@
 using namespace libsnark;
 
 namespace zktrade {
-    template<typename FieldT>
+    template<typename FieldT, typename HashT>
     class cm_gadget : gadget<FieldT> {
     private:
         digest_variable<FieldT> a_pk_rho_hash;
-        sha256_compression_gadget<FieldT> a_pk_rho_hasher;
+        HashT a_pk_rho_hasher;
         pb_variable_array<FieldT> a_pk_rho_hash_truncated;
         digest_variable<FieldT> k;
-        sha256_compression_gadget<FieldT> k_hasher;
-        outer_commitment_gadget<FieldT> outer_gadget;
+        HashT k_hasher;
+        outer_commitment_gadget<FieldT, HashT> outer_gadget;
     public:
         cm_gadget(protoboard<FieldT> &pb,
                   pb_variable<FieldT> &ZERO,
@@ -31,12 +31,12 @@ namespace zktrade {
                   digest_variable<FieldT> &result) :
                 gadget<FieldT>(pb, "cm"),
                 a_pk_rho_hash(pb, 256, "a_pk_rho_hash"),
-                a_pk_rho_hasher(pb, a_pk, rho, a_pk_rho_hash,
+                a_pk_rho_hasher(pb, {a_pk, rho}, a_pk_rho_hash,
                                 "a_pk_rho_hasher"),
                 a_pk_rho_hash_truncated(a_pk_rho_hash.bits.begin(),
                                         a_pk_rho_hash.bits.begin() + 128),
                 k(pb, 256, "k"),
-                k_hasher(pb, r, a_pk_rho_hash_truncated, k, "k_hasher"),
+                k_hasher(pb, {r, a_pk_rho_hash_truncated}, k, "k_hasher"),
                 outer_gadget(pb, ZERO, k.bits, v, result, "outer_gadget") {
         }
 

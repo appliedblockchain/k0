@@ -4,7 +4,7 @@
 #include <libff/common/utils.hpp>
 
 namespace zktrade {
-    void sha256_compress(unsigned char* input, unsigned char* output);
+    // void sha256_compress(unsigned char* input, unsigned char* output);
     libff::bit_vector sha256_compress(libff::bit_vector input);
 }
 

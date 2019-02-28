@@ -7,7 +7,7 @@
 #include "circuitry/gadgets/MTLeafAddition.hpp"
 
 namespace zktrade {
-    template<typename FieldT>
+    template<typename FieldT, typename HashT>
     struct CommitmentCircuit {
         protoboard<FieldT> *pb;
 
@@ -24,10 +24,10 @@ namespace zktrade {
         packing_gadget<FieldT>* v_packer;
         multipacking_gadget<FieldT>* cm_packer;
 
-        outer_commitment_gadget<FieldT>* commitment_gadget;
+        outer_commitment_gadget<FieldT, HashT>* commitment_gadget;
     };
-    template<typename FieldT>
-    CommitmentCircuit<FieldT> make_commitment_circuit();
+    template<typename FieldT, typename HashT>
+    CommitmentCircuit<FieldT, HashT> make_commitment_circuit();
 }
 
 #include "CommitmentCircuit.tcc"

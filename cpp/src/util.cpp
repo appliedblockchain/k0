@@ -175,4 +175,16 @@ string zktrade::hex_to_dec_string(string hex) {
 }
 
 
+void zktrade::printnode(vector<bool> bv) {
+  uint wordlength = 32;
+  bitset<32> word;
+  cout << "0x";
+  for (uint i = 0; i < bv.size(); i++) {
+      word.set(wordlength - 1 - (i % wordlength), bv[i]);
+      if (i % wordlength == wordlength - 1 || i == bv.size() - 1) {
+        cout << setfill('0') << setw(8) << hex << word.to_ulong();
+      }
+  }
+  cout << " ";
+}
 

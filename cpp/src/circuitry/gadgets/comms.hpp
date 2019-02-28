@@ -17,10 +17,10 @@ namespace zktrade {
         return arr;
     }
 
-    template<typename FieldT>
+    template<typename FieldT, typename HashT>
     class outer_commitment_gadget : gadget<FieldT> {
     private:
-        sha256_compression_gadget <FieldT> cm_hasher;
+        HashT cm_hasher;
     public:
         outer_commitment_gadget(protoboard<FieldT> &pb,
                                 pb_variable<FieldT> &ZERO,

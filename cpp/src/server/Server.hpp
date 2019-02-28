@@ -13,8 +13,7 @@ using namespace libsnark;
 
 namespace zktrade {
 
-    // TODO Remove HashT
-    template<typename FieldT, typename HashT>
+    template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
     class Server : public ZKTradeStubServer {
         r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp> commitment_pk;
         r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp> commitment_vk;
@@ -23,7 +22,7 @@ namespace zktrade {
         r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp> withdrawal_pk;
         r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp> withdrawal_vk;
         size_t tree_height;
-        MerkleTree mt;
+        MerkleTree<MerkleTreeHashT> mt;
         bool commitment_pk_loaded;
         bool commitment_vk_loaded;
         bool addition_pk_loaded;

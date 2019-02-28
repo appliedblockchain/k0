@@ -131,6 +131,8 @@ namespace zktrade {
     // "0xdf1a27Fc2b2EA68525E3dcc5780CbcbE73e6778A" ->
     // "1273688244456584839735093243794471170958885812106"
     string hex_to_dec_string(string hex);
+
+    void printnode(vector<bool> bv);
 }
 
 #endif //ZKTRADE_UTIL_H

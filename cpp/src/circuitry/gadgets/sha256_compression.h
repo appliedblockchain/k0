@@ -14,31 +14,14 @@ namespace zktrade {
     public:
         sha256_compression_gadget(
                 protoboard<FieldT> &pb,
-                pb_variable_array<FieldT> &input_1,
-                pb_variable_array<FieldT> &input_2,
-                digest_variable<FieldT> &result,
-                const std::string &annotation_prefix
-        );
-
-        sha256_compression_gadget(
-                protoboard<FieldT> &pb,
-                pb_variable_array<FieldT> &input_1,
-                pb_variable_array<FieldT> &input_2,
-                pb_variable_array<FieldT> &input_3,
-                digest_variable<FieldT> &result,
-                const std::string &annotation_prefix
-        );
-
-        sha256_compression_gadget(
-                protoboard<FieldT> &pb,
                 std::vector<pb_variable_array<FieldT>> inputs,
                 digest_variable<FieldT> &result,
                 const std::string &annotation_prefix
         );
-
         void generate_r1cs_constraints();
-
         void generate_r1cs_witness();
+
+        static libff::bit_vector get_hash(const libff::bit_vector &input);
     };
 
 };

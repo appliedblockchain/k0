@@ -21,14 +21,14 @@ TEST(MerkleTreeAddition, Test) {
 
     const size_t tree_height = 3;
 
-    MerkleTree mt(tree_height);
+    MerkleTree<TwoToOneSHA256> mt(tree_height);
 
     for (size_t address = 0; address < exp2(tree_height); address++) {
         cout << "Address " << dec << address << endl;
         auto address_bits = int_to_bits<FieldT>(address, tree_height);
         const auto leaf = random_bits(256);
         auto sim = mt.simulate_add(leaf);
-        auto c = make_mt_addition_circuit<FieldT>(tree_height);
+        auto c = make_mt_addition_circuit<FieldT, TwoToOneSHA256>(tree_height);
         c.prev_root_bits->generate_r1cs_witness(mt.root());
         c.address_bits->fill_with_bits(*c.pb, address_bits);
         c.prev_path_var->generate_r1cs_witness(address, mt.path(address));

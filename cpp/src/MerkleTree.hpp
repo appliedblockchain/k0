@@ -1,8 +1,12 @@
+#ifndef ZKTRADE_MERKLETREE_HPP
+#define ZKTRADE_MERKLETREE_HPP
+
 #include <libff/common/utils.hpp>
 
+template<typename HashT>
 class MerkleTree {
 public:
-    MerkleTree(size_t depth);
+    explicit MerkleTree(size_t depth);
 
     libff::bit_vector root();
 
@@ -28,3 +32,7 @@ private:
 
     libff::bit_vector internal_node_at(uint level, uint position);
 };
+
+#include "MerkleTree.tcc"
+
+#endif // ZKTRADE_MERKLETREE_HPP

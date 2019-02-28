@@ -1,6 +1,7 @@
-#include <libsnark/gadgetlib1/gadgets/hashes/sha256/sha256_gadget.hpp>
 #include <jsonrpccpp/server/connectors/httpserver.h>
+#include "definitions.hpp"
 #include "Server.hpp"
+#include "circuitry/gadgets/dummyhash_gadget.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -12,12 +13,10 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  typedef libff::Fr<default_r1cs_ppzksnark_pp> FieldT;
-  typedef sha256_two_to_one_hash_gadget<FieldT> HashT;
   default_r1cs_ppzksnark_pp::init_public_params();
 
   HttpServer httpserver(4000);
-  Server<FieldT, HashT> server(std::stoi(argv[1]), httpserver, jsonrpc::JSONRPC_SERVER_V2);
+  Server<FieldT, CommitmentHashT, MerkleTreeHashT> server(std::stoi(argv[1]), httpserver, jsonrpc::JSONRPC_SERVER_V2);
 
   server.StartListening();
 

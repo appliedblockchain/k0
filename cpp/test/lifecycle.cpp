@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <libsnark/common/default_types/r1cs_ppzksnark_pp.hpp>
+#include "circuitry/gadgets/dummyhash_gadget.hpp"
 #include "circuitry/CommitmentCircuit.hpp"
 #include "circuitry/MTAdditionCircuit.hpp"
 #include "circuitry/WithdrawalCircuit.hpp"
@@ -12,13 +13,14 @@ using namespace zktrade;
 using namespace libsnark;
 
 typedef Fr<default_r1cs_ppzksnark_pp> FieldT;
-typedef sha256_two_to_one_hash_gadget<FieldT> TwoToOneHashT;
+typedef zktrade::dummyhash_two_to_one_hash_gadget<FieldT> TwoToOneHashT;
+typedef zktrade::dummyhash_compression_gadget<FieldT> CompressionHashT;
 
 TEST(Lifecycle, Full) {
 
     size_t tree_height = 2;
 
-    MerkleTree mt(tree_height);
+    MerkleTree<TwoToOneHashT> mt(tree_height);
 
     for (size_t address = 0; address < exp2(tree_height); address++) {
         cout << endl << "Address " << address << endl;
@@ -26,20 +28,20 @@ TEST(Lifecycle, Full) {
         // Sample private key
         auto a_sk = random_bits(256);
         // Derive public key/address
-        auto a_pk = prf_addr(a_sk);
+        auto a_pk = prf_addr<CompressionHashT>(a_sk);
         // "DEPOSIT/SHIELDING"
         // Sample rho
         auto rho = random_bits(256);
         // Sample r
         auto r = random_bits(384);
         // Generate k
-        auto k = comm_r(a_pk, rho, r);
+        auto k = comm_r<CompressionHashT>(a_pk, rho, r);
         // Set v
         string v_str = "5000000000000000000";
         FieldT v = FieldT(v_str.c_str());
         bit_vector v_bits = uint64_to_bits(stoull(v_str));
         // Generate cm
-        auto cm = comm_s(k, v_bits);
+        auto cm = comm_s<CompressionHashT>(k, v_bits);
 
         ASSERT_EQ(mt.num_elements(), address);
 
@@ -50,7 +52,7 @@ TEST(Lifecycle, Full) {
 
 
         // Generate deposit proof
-        auto comm_circuit = make_commitment_circuit<FieldT>();
+        auto comm_circuit = make_commitment_circuit<FieldT, CompressionHashT>();
         comm_circuit.k_bits->fill_with_bits(*comm_circuit.pb, k);
         comm_circuit.k_packer->generate_r1cs_witness_from_bits();
         comm_circuit.pb->val(*comm_circuit.v_packed) = v;
@@ -64,7 +66,7 @@ TEST(Lifecycle, Full) {
 
         auto cm_packed = comm_circuit.cm_packed->get_vals(*comm_circuit.pb);
 
-        auto add_circuit = make_mt_addition_circuit<FieldT>(tree_height);
+        auto add_circuit = make_mt_addition_circuit<FieldT, TwoToOneHashT>(tree_height);
 
         add_circuit.prev_root_bits->generate_r1cs_witness(mt.root());
         add_circuit.prev_root_packer->generate_r1cs_witness_from_bits();
@@ -94,7 +96,7 @@ TEST(Lifecycle, Full) {
         uint32_t recipient = rand() % (uint32_t)exp2(20);
 
         // Generate proof
-        auto wd_circuit = make_withdrawal_circuit<FieldT>(tree_height);
+        auto wd_circuit = make_withdrawal_circuit<FieldT, CompressionHashT, TwoToOneHashT>(tree_height);
         wd_circuit.rt_bits->generate_r1cs_witness(mt.root());
         wd_circuit.pb->val(*wd_circuit.v_packed) = v;
         wd_circuit.pb->val(*wd_circuit.recipient_public) = recipient;

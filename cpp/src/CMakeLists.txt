@@ -43,10 +43,9 @@ target_sources(
         crypto/sha256.cpp
         hash/sha256.cpp
         hash/sha256_compression.cpp
-        scheme/comms.cpp
-        scheme/prfs.cpp
+        scheme/comms.tcc
+        scheme/prfs.tcc
         util.cpp
-        MerkleTree.cpp
         serialization.cpp
         json_conversion.cpp
 
@@ -59,6 +58,7 @@ target_sources(
         server/Server.tcc
         util.h
         MerkleTree.hpp
+        MerkleTree.tcc
         serialization.hpp
         json_conversion.hpp
 )
@@ -80,7 +80,6 @@ add_executable(
         setup
 
         setup/run_setup.cpp
-        MerkleTree.cpp
         serialization.cpp
 )
 target_link_libraries(
