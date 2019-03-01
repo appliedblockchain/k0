@@ -11,7 +11,7 @@ namespace zktrade {
         protoboard<FieldT> *pb;
         pb_variable_array<FieldT> *rt_packed;
         vector<pb_variable_array<FieldT> *> sn_in_packed_vec;
-        vector<pb_variable_array<FieldT> *> cm_in_packed_vec;
+        vector<pb_variable_array<FieldT> *> cm_out_packed_vec;
 
         pb_variable<FieldT> *ZERO;
         digest_variable<FieldT> *rt_bits;
@@ -37,6 +37,7 @@ namespace zktrade {
         vector<pb_variable_array<FieldT>*> v_out_bits_vec;
         vector<digest_variable<FieldT> *> cm_out_bits_vec;
         vector<cm_gadget<FieldT, CommitmentHashT> *> cm_out_gadget_vec;
+        vector<multipacking_gadget<FieldT> *> cm_out_packer_vec;
 
         // TODO sum-of-inputs-equals-sum-of-outputs gadget
 

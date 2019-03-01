@@ -1,23 +1,20 @@
-#include <stdlib.h>
-#include <libsnark/gadgetlib1/protoboard.hpp>
 #include <libsnark/gadgetlib1/gadgets/hashes/sha256/sha256_gadget.hpp>
 #include <libsnark/gadgetlib1/gadgets/merkle_tree/merkle_tree_check_update_gadget.hpp>
-#include "Server.hpp"
-#include "../pkutil.cpp"
-#include "../serialization.hpp"
-#include "../printbits.hpp"
-#include "../json_conversion.hpp"
-#include "../packing.hpp"
-#include "../util.h"
+#include <libsnark/gadgetlib1/protoboard.hpp>
+#include <stdlib.h>
+#include "circuitry/CommitmentCircuit.hpp"
+#include "circuitry/MTAdditionCircuit.hpp"
+#include "circuitry/TransferCircuit.hpp"
+#include "circuitry/WithdrawalCircuit.hpp"
+#include "json_conversion.hpp"
+#include "packing.hpp"
+#include "pkutil.cpp"
+#include "printbits.hpp"
 #include "scheme/comms.hpp"
 #include "scheme/prfs.h"
-
-using namespace std;
-using namespace libff;
-using namespace libsnark;
-using namespace zktrade;
-
-typedef Fr<default_r1cs_ppzksnark_pp> FieldT;
+#include "serialization.hpp"
+#include "Server.hpp"
+#include "util.h"
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::Server(size_t height,
@@ -168,7 +165,7 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_deposit(
     assert(comm_circuit.cm_bits->get_digest() == cm_bits);
 
     if (!comm_circuit.pb->is_satisfied()) {
-        throw JsonRpcException(-32000, "Commitment circuit not satisfied");
+        throw JsonRpcException(-32010, "Commitment circuit not satisfied");
     }
 
     auto add_circuit = make_mt_addition_circuit<FieldT, MerkleTreeHashT>(
@@ -191,7 +188,13 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_deposit(
     assert(!add_circuit.pb->is_satisfied());
     add_circuit.mt_update_gadget->generate_r1cs_witness();
 
+    cout << "CHECKING ADDITION" << endl;
+    cout << add_circuit.pb->primary_input().size() << " " << addition_pk.constraint_system.num_inputs() << endl;
+    cout << "CHECKING COMMITMENT" << endl;
+    cout << comm_circuit.pb->primary_input().size() << " " << commitment_pk.constraint_system.num_inputs() << endl;
+
     assert(add_circuit.pb->is_satisfied());
+
     const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> comm_proof =
             r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
                     commitment_pk, comm_circuit.pb->primary_input(),
@@ -240,18 +243,160 @@ template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 Json::Value
 zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_transfer(
         const std::string &input_0_address_str,
-        const std::string &input_0_a_sk_str, const std::string &input_0_rho_str,
-        const std::string &input_0_r_str, const std::string &input_0_v_str,
+        const std::string &input_0_a_sk_str,
+        const std::string &input_0_rho_str,
+        const std::string &input_0_r_str,
+        const std::string &input_0_v_str,
         const std::string &input_1_address_str,
-        const std::string &input_1_a_sk_str, const std::string &input_1_rho_str,
-        const std::string &input_1_r_str, const std::string &input_1_v_str,
+        const std::string &input_1_a_sk_str,
+        const std::string &input_1_rho_str,
+        const std::string &input_1_r_str,
+        const std::string &input_1_v_str,
         const std::string &output_0_a_pk_str,
-        const std::string &output_0_rho_str, const std::string &output_0_r_str,
-        const std::string &output_0_v_str, const std::string &output_1_a_pk_str,
-        const std::string &output_1_rho_str, const std::string &output_1_r_str,
+        const std::string &output_0_rho_str,
+        const std::string &output_0_r_str,
+        const std::string &output_0_v_str,
+        const std::string &output_1_a_pk_str,
+        const std::string &output_1_rho_str,
+        const std::string &output_1_r_str,
         const std::string &output_1_v_str) {
+    struct input_note {
+        size_t address;
+        bit_vector a_sk;
+        bit_vector rho;
+        bit_vector r;
+        uint64_t v;
+    };
+    struct output_note {
+        size_t address;
+        bit_vector a_pk;
+        bit_vector rho;
+        bit_vector r;
+        uint64_t v;
+    };
+
+    cout << "MAX " << dec << UINT64_MAX << endl;
+
+    // TODO validate inputs (max values for bit lengths)
+
+    input_note input_notes[]{
+            {
+                    strtoul(input_0_address_str.c_str(), NULL, 10),
+                    hex2bits(input_0_a_sk_str),
+                    hex2bits(input_0_rho_str),
+                    hex2bits(input_0_r_str),
+                    strtoul(input_0_v_str.c_str(), NULL, 10),
+            },
+            {
+                    strtoul(input_1_address_str.c_str(), NULL, 10),
+                    hex2bits(input_1_a_sk_str),
+                    hex2bits(input_1_rho_str),
+                    hex2bits(input_1_r_str),
+                    strtoul(input_1_v_str.c_str(), NULL, 10),
+            }
+    };
+    output_note output_notes[]{
+            {
+                    mt.num_elements(),
+                    hex2bits(output_0_a_pk_str),
+                    hex2bits(output_0_rho_str),
+                    hex2bits(output_0_r_str),
+                    strtoul(output_0_v_str.c_str(), NULL, 10),
+            },
+            {
+                    mt.num_elements() + 1,
+                    hex2bits(output_1_a_pk_str),
+                    hex2bits(output_1_rho_str),
+                    hex2bits(output_1_r_str),
+                    strtoul(output_1_v_str.c_str(), NULL, 10),
+            }
+    };
+
+    auto circuit = make_transfer_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(
+            tree_height);
+
+    circuit.rt_bits->generate_r1cs_witness(mt.root());
+
+    cout << "Root " << bits2hex(mt.root()) << endl;
+
+    for (size_t i = 0; i < 2; i++) {
+        input_note c = input_notes[i];
+        cout << "Input note " << i << endl;
+        cout << "address: " << c.address << endl;
+        cout << "a_sk: " << bits2hex(c.a_sk) << endl;
+        cout << "rho: " << bits2hex(c.rho) << endl;
+        cout << "r: " << bits2hex(c.r) << endl;
+        cout << "v: " << c.v << endl;
+        cout << "MT path" << endl;
+        for (auto x : mt.path(c.address)) {
+            cout << bits2hex(x) << endl;
+        }
+        cout << endl;
+
+        bit_vector address_bits = int_to_bits<FieldT>(c.address, tree_height);
+        bit_vector v_bits = int_to_bits<FieldT>(c.v, 64);
+
+        circuit.address_in_bits_vec[i]->fill_with_bits(*circuit.pb,
+                                                       address_bits);
+        circuit.path_in_vec[i]->generate_r1cs_witness(c.address,
+                                                      mt.path(c.address));
+        circuit.a_sk_in_bits_vec[i]->fill_with_bits(*circuit.pb, c.a_sk);
+        circuit.rho_in_bits_vec[i]->fill_with_bits(*circuit.pb, c.rho);
+        circuit.r_in_bits_vec[i]->fill_with_bits(*circuit.pb, c.r);
+        circuit.v_in_bits_vec[i]->fill_with_bits(*circuit.pb, v_bits);
+
+        circuit.input_note_vec[i]->generate_r1cs_witness();
+        circuit.sn_in_packer_vec[i]->generate_r1cs_witness_from_bits();
+    }
+
+    for (size_t i = 0; i < 2; i++) {
+        output_note c = output_notes[i];
+        cout << "Output note " << i << endl;
+        cout << "p_sk: " << bits2hex(c.a_pk) << endl;
+        cout << "rho: " << bits2hex(c.rho) << endl;
+        cout << "r: " << bits2hex(c.r) << endl;
+        cout << "v: " << c.v << endl;
+        cout << endl;
+
+        bit_vector v_bits = int_to_bits<FieldT>(c.v, 64);
+        circuit.a_pk_out_bits_vec[i]->fill_with_bits(*circuit.pb, c.a_pk);
+        circuit.rho_out_bits_vec[i]->fill_with_bits(*circuit.pb, c.rho);
+        circuit.r_out_bits_vec[i]->fill_with_bits(*circuit.pb, c.r);
+        circuit.v_out_bits_vec[i]->fill_with_bits(*circuit.pb, v_bits);
+        circuit.cm_out_gadget_vec[i]->generate_r1cs_witness();
+        circuit.cm_out_packer_vec[i]->generate_r1cs_witness_from_bits();
+    }
+
+    circuit.rt_packer->generate_r1cs_witness_from_bits();
+    if (!circuit.pb->is_satisfied()) {
+        throw JsonRpcException(-32010, "Transfer circuit not satisfied");
+    }
+
+    cout << "TRANSFER PUBLIC INPUT" << endl << hex
+         << circuit.pb->primary_input() << endl;
+
+    auto xfer_proof =
+            r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
+                    transfer_pk, circuit.pb->primary_input(),
+                    circuit.pb->auxiliary_input());
+
+    bool xfer_verified =
+            r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
+                    transfer_vk, circuit.pb->primary_input(),
+                    xfer_proof);
+    if (xfer_verified) {
+        cout << "Transfer proof successfully verified." << endl;
+    } else {
+        cerr << "Transfer proof verification failed." << endl;
+    }
     Json::Value result;
-    result["foo"] = "bar";
+    result["input_0_sn"] = bits2hex(circuit.sn_in_bits_vec[0]->get_digest());
+    result["input_1_sn"] = bits2hex(circuit.sn_in_bits_vec[1]->get_digest());
+    result["output_0_address"] = mt.num_elements();
+    result["output_0_cm"] = bits2hex(circuit.cm_out_bits_vec[0]->get_digest());
+    result["output_1_address"] = mt.num_elements() + 1;
+    result["output_1_cm"] = bits2hex(circuit.cm_out_bits_vec[1]->get_digest());
+    result["transfer_proof"] = json_conversion::to_json(xfer_proof);
     return result;
 }
 
@@ -274,6 +419,13 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_withdrawal(
     auto recipient_dec_str = hex_to_dec_string(recipient_hex_str);
     auto recipient = FieldT(recipient_dec_str.c_str());
 
+    cout << "Coin" << endl;
+    cout << "address " << dec << address << endl;
+    cout << "a_sk " << bits2hex(a_sk_bits) << endl;
+    cout << "rho " << bits2hex(rho_bits) << endl;
+    cout << "r " << bits2hex(r_bits) << endl;
+    cout << "v " << v << endl;
+
     auto wd_circuit =
             make_withdrawal_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(
                     tree_height);
@@ -295,9 +447,12 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_withdrawal(
 
     assert(!wd_circuit.pb->is_satisfied());
     wd_circuit.mt_path_gadget->generate_r1cs_witness();
+
     wd_circuit.sn_gadget->generate_r1cs_witness();
     wd_circuit.sn_packer->generate_r1cs_witness_from_bits();
 
+    cout << "mt root " << bits2hex(mt.root()) << endl;
+    cout << "circuit root " << bits2hex(wd_circuit.rt_bits->get_digest()) << endl;
     assert(wd_circuit.pb->is_satisfied());
 
     const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> proof =

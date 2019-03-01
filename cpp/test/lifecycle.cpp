@@ -113,6 +113,7 @@ TEST(Lifecycle, Full) {
     }
 
 
+    // TRANSFER
     for (size_t input_0_address = 0; input_0_address < num_initial_coins; input_0_address += 2) {
 
         auto circuit = make_transfer_circuit<FieldT, CompressionHashT, TwoToOneHashT>(tree_height);
@@ -121,8 +122,6 @@ TEST(Lifecycle, Full) {
 
         // input coins
         for (size_t i = 0; i < 2; i++) {
-
-
             coin c = coins[input_0_address + i];
             bit_vector address_bits = int_to_bits<FieldT>(c.address, tree_height);
             bit_vector v_bits = int_to_bits<FieldT>(c.v, 64);
@@ -138,24 +137,16 @@ TEST(Lifecycle, Full) {
             circuit.sn_in_packer_vec[i]->generate_r1cs_witness_from_bits();
         }
 
+        // output coins
         for (size_t i = 0; i < 2; i++) {
 
             size_t address = num_initial_coins + input_0_address + i;
 
-                // Sample private key
             auto a_sk = random_bits(256);
-            // Derive public key/address
             auto a_pk = prf_addr<CompressionHashT>(a_sk);
-
-            // DEPOSIT/"SHIELDING"
-            // Sample rho
             auto rho = random_bits(256);
-            // Sample r
             auto r = random_bits(384);
-            // Generate k
-            auto k = comm_r<CompressionHashT>(a_pk, rho, r);
 
-            // Set v
             uint64_t v_uint = 5000000000000000000;
             string v_str = to_string(v_uint);
             FieldT v = FieldT(v_str.c_str());
@@ -169,6 +160,7 @@ TEST(Lifecycle, Full) {
             circuit.r_out_bits_vec[i]->fill_with_bits(*circuit.pb, r);
             circuit.v_out_bits_vec[i]->fill_with_bits(*circuit.pb, v_bits);
             circuit.cm_out_gadget_vec[i]->generate_r1cs_witness();
+            circuit.cm_out_packer_vec[i]->generate_r1cs_witness_from_bits();
         }
 
         circuit.rt_packer->generate_r1cs_witness_from_bits();

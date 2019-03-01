@@ -25,7 +25,7 @@ set(
 option(
         DEBUG
         "Enable debugging mode"
-        ON
+        OFF
 )
 
 set(

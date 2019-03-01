@@ -118,3 +118,22 @@ target_include_directories(
         ${DEPENDS_DIR}/libsnark/depends/libff
         ${DEPENDS_DIR}/libsnark/depends/libfqfft
 )
+add_executable(
+        hash
+
+        hash.cpp
+)
+target_link_libraries(
+        hash
+
+        snark
+        zktrade
+)
+target_include_directories(
+        hash
+
+        PUBLIC
+        ${DEPENDS_DIR}/libsnark
+        ${DEPENDS_DIR}/libsnark/depends/libff
+        ${DEPENDS_DIR}/libsnark/depends/libfqfft
+)

@@ -23,7 +23,7 @@ zktrade::make_transfer_circuit(size_t tree_height) {
                                        "cm_out_" + to_string(i) + "_packed");
     }
 
-    pb->set_input_sizes(6);
+    pb->set_input_sizes(10);
 
     auto ZERO = new pb_variable<FieldT>();
     ZERO->allocate(*pb, "ZERO");
@@ -40,7 +40,7 @@ zktrade::make_transfer_circuit(size_t tree_height) {
     vector<shared_ptr<digest_variable<FieldT>>> sn_in_bits_vec(2);
     vector<pb_variable_array<FieldT> *> address_in_bits_vec(2);
     vector<merkle_authentication_path_variable<FieldT, MerkleTreeHashT> *> path_in_vec(2);
-    vector<multipacking_gadget<FieldT> *> sn_in_packer(2);
+    vector<multipacking_gadget<FieldT> *> sn_in_packer_vec(2);
     vector<input_note_gadget<FieldT, CommitmentHashT, MerkleTreeHashT> *> input_note_vec(
             2);
 
@@ -80,10 +80,10 @@ zktrade::make_transfer_circuit(size_t tree_height) {
 
         path_in_vec[i]->generate_r1cs_constraints();
 
-        sn_in_packer[i] = new multipacking_gadget<FieldT>(
+        sn_in_packer_vec[i] = new multipacking_gadget<FieldT>(
                 *pb, sn_in_bits_vec[i]->bits, *sn_in_packed_vec[i], 128,
                 "sn_in_" + to_string(i) + "_packer");
-        sn_in_packer[i]->generate_r1cs_constraints(true);
+        sn_in_packer_vec[i]->generate_r1cs_constraints(true);
 
         input_note_vec[i] = new input_note_gadget<FieldT, CommitmentHashT, MerkleTreeHashT>(
                 tree_height,
@@ -109,6 +109,7 @@ zktrade::make_transfer_circuit(size_t tree_height) {
     vector<pb_variable_array<FieldT> *> v_out_bits_vec(2);
     vector<digest_variable<FieldT> *> cm_out_bits_vec(2);
     vector<cm_gadget<FieldT, CommitmentHashT> *> cm_out_gadget_vec(2);
+    vector<multipacking_gadget<FieldT> *> cm_out_packer_vec(2);
 
     for (int i = 0; i < 2; i++) {
         a_pk_out_bits_vec[i] = new pb_variable_array<FieldT>();
@@ -134,6 +135,11 @@ zktrade::make_transfer_circuit(size_t tree_height) {
                 *r_out_bits_vec[i], *v_out_bits_vec[i],
                 *cm_out_bits_vec[i], "cm_out_" + to_string(i) + "_gadget");
         cm_out_gadget_vec[i]->generate_r1cs_constraints();
+
+        cm_out_packer_vec[i] = new multipacking_gadget<FieldT>(
+                *pb, cm_out_bits_vec[i]->bits, *cm_out_packed_vec[i], 128,
+                "cm_out_" + to_string(i) + "_packer");
+        cm_out_packer_vec[i]->generate_r1cs_constraints(true);
     }
 
     auto rt_packer = new multipacking_gadget<FieldT>(
@@ -158,7 +164,7 @@ zktrade::make_transfer_circuit(size_t tree_height) {
             sn_in_bits_vec,
             address_in_bits_vec,
             path_in_vec,
-            sn_in_packer,
+            sn_in_packer_vec,
             input_note_vec,
             a_pk_out_bits_vec,
             rho_out_bits_vec,
@@ -166,6 +172,7 @@ zktrade::make_transfer_circuit(size_t tree_height) {
             v_out_bits_vec,
             cm_out_bits_vec,
             cm_out_gadget_vec,
+            cm_out_packer_vec,
             rt_packer
     };
 }

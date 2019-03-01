@@ -1,3 +1,6 @@
+// Copied from libsnark
+// Modified by Applied Blockchain
+
 #ifndef ZKTRADE_DUMMYHASH_GADGET_HPP
 #define ZKTRADE_DUMMYHASH_GADGET_HPP
 
@@ -13,10 +16,22 @@ namespace zktrade {
 template<typename FieldT>
 class dummyhash_compression_function_gadget : public gadget<FieldT> {
 public:
-    pb_variable_array<FieldT> A;
-    pb_variable_array<FieldT> B;
-    pb_variable_array<FieldT> C;
-    pb_variable_array<FieldT> tmp;
+    std::vector<pb_linear_combination_array<FieldT> > round_a;
+    std::vector<pb_linear_combination_array<FieldT> > round_b;
+    std::vector<pb_linear_combination_array<FieldT> > round_c;
+    std::vector<pb_linear_combination_array<FieldT> > round_d;
+    std::vector<pb_linear_combination_array<FieldT> > round_e;
+    std::vector<pb_linear_combination_array<FieldT> > round_f;
+    std::vector<pb_linear_combination_array<FieldT> > round_g;
+    std::vector<pb_linear_combination_array<FieldT> > round_h;
+
+    pb_variable_array<FieldT> packed_W;
+    std::shared_ptr<sha256_message_schedule_gadget<FieldT> > message_schedule;
+    std::vector<sha256_round_function_gadget<FieldT> > round_functions;
+
+    pb_variable_array<FieldT> unreduced_output;
+    pb_variable_array<FieldT> reduced_output;
+    std::vector<lastbits_gadget<FieldT> > reduce_output;
 public:
     pb_linear_combination_array<FieldT> prev_output;
     pb_variable_array<FieldT> new_block;
