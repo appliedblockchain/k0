@@ -27,53 +27,74 @@ zktrade::dummyhash_compression_function_gadget<FieldT>::dummyhash_compression_fu
 template<typename FieldT>
 void
 zktrade::dummyhash_compression_function_gadget<FieldT>::generate_r1cs_constraints() {
-    // Taken from libsnark XOR3 gadget
-    // tmp = A + B - 2AB i.e. tmp = A xor B
-    // out = tmp + C - 2tmp C i.e. out = tmp xor C
-    for (size_t i = 0; i < 250; i++) {
-        this->pb.add_r1cs_constraint(
-                r1cs_constraint<FieldT>( 2 * A[i], B[i], A[i] + B[i] - tmp[i]),
-                FMT(this->annotation_prefix, " tmp"));
+
+    for (size_t i = 0; i < 256; i++) {
+        if (i % 2) {
+
+            auto
+            str = " tmp_bit_" + to_string(i) + "_from_A";
+            this->pb.add_r1cs_constraint(
+                    r1cs_constraint<FieldT>(A[i], ONE, tmp[i]),
+                    FMT(this->annotation_prefix, str.c_str()));
+        } else {
+             auto
+            str = " tmp_bit_" + to_string(i) + "_from_B";
+            this->pb.add_r1cs_constraint(
+                    r1cs_constraint<FieldT>(B[i], ONE, tmp[i]),
+                    FMT(this->annotation_prefix, str.c_str()));
+        }
+        // Taken from libsnark XOR3 gadget
+        // tmp = A + B - 2AB i.e. tmp = A xor B
+        // out = tmp + C - 2tmp C i.e. out = tmp xor C
+//    for (size_t i = 0; i < 256; i++) {
+//        this->pb.add_r1cs_constraint(
+//                r1cs_constraint<FieldT>( 2 * A[i], B[i], A[i] + B[i] - tmp[i]),
+//                FMT(this->annotation_prefix, " tmp"));
         this->pb.add_r1cs_constraint(
                 r1cs_constraint<FieldT>(
                         2 * tmp[i], C[i], tmp[i] + C[i] - output.bits[i]),
-                        FMT(this->annotation_prefix, " out"));
+                FMT(this->annotation_prefix, " out"));
+//    }
     }
-
 }
 
 template<typename FieldT>
 void
 zktrade::dummyhash_compression_function_gadget<FieldT>::generate_r1cs_witness() {
 
-//#ifdef DEBUG
-//    printf("Input:\n");
-//    for (size_t i = 0; i < 256; ++i) {
-//        printf("%lx ", this->pb.val(this->new_block[i]).as_ulong());
-//    }
-//    printf("\n");
-//    for (size_t i = 0; i < 256; ++i) {
-//        printf("%lx ", this->pb.val(this->new_block[256 + i]).as_ulong());
-//    }
-//    printf("\n");
-//#endif
+#ifdef DEBUG
+    printf("Input:\n");
+    for (size_t i = 0; i < 256; ++i) {
+        printf("%lx ", this->pb.val(this->new_block[i]).as_ulong());
+    }
+    printf("\n");
+    for (size_t i = 0; i < 256; ++i) {
+        printf("%lx ", this->pb.val(this->new_block[256 + i]).as_ulong());
+    }
+    printf("\n");
+#endif
 
     for (size_t i = 0; i < 256; i++) {
-        this->pb.val(tmp[i]) = this->pb.lc_val(A[i]) + this->pb.lc_val(B[i]) -
-                               FieldT(2) * this->pb.lc_val(A[i]) *
-                               this->pb.lc_val(B[i]);
-        this->pb.lc_val(output.bits[i]) =
-                this->pb.val(tmp[i]) + this->pb.lc_val(C[i]) -
-                FieldT(2) * this->pb.val(tmp[i]) * this->pb.lc_val(C[i]);
+        if (i % 2) {
+            cout << "assigning to tmp " << i << " value from A: " << this->pb.val(A[i]) << endl;
+            this->pb.val(tmp[i]) = this->pb.val(A[i]);
+        } else {
+            cout << "assigning to tmp " << i << " value from B: " << this->pb.val(B[i]) << endl;
+            this->pb.val(tmp[i]) = this->pb.val(B[i]);
+        }
+
+               this->pb.lc_val(output.bits[i]) =
+                                this->pb.val(tmp[i]) + this->pb.lc_val(C[i]) -
+                                FieldT(2) * this->pb.val(tmp[i]) * this->pb.lc_val(C[i]);
     }
 
-//#ifdef DEBUG
-//    printf("Output:\n");
-//    for (size_t i = 0; i < 256; ++i) {
-//        printf("%lx ", this->pb.val(output.bits[i]).as_ulong());
-//    }
-//    printf("\n");
-//#endif
+#ifdef DEBUG
+    printf("Output:\n");
+    for (size_t i = 0; i < 256; ++i) {
+        printf("%lx ", this->pb.val(output.bits[i]).as_ulong());
+    }
+    printf("\n");
+#endif
 }
 
 
@@ -149,9 +170,9 @@ libff::bit_vector zktrade::dummyhash_two_to_one_hash_gadget<FieldT>::get_hash(
 
     block_variable<FieldT> input_variable(pb, SHA256_block_size, "input");
     digest_variable<FieldT> output_variable(pb, SHA256_digest_size, "output");
-    dummyhash_two_to_one_hash_gadget <FieldT> f(pb, SHA256_block_size,
-                                                input_variable, output_variable,
-                                                "f");
+    dummyhash_two_to_one_hash_gadget<FieldT> f(pb, SHA256_block_size,
+                                               input_variable, output_variable,
+                                               "f");
 
     input_variable.generate_r1cs_witness(input);
     f.generate_r1cs_witness();
