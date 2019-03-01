@@ -1,5 +1,6 @@
 #include <libff/algebra/curves/public_params.hpp>
 #include <libsnark/common/default_types/r1cs_ppzksnark_pp.hpp>
+#include <circuitry/TransferCircuit.hpp>
 #include "circuitry/CommitmentCircuit.hpp"
 #include "circuitry/MTAdditionCircuit.hpp"
 #include "circuitry/WithdrawalCircuit.hpp"
@@ -26,8 +27,13 @@ int main(int argc, char *argv[]) {
         setup(cs, argv[3], argv[4]);
     } else if (circuit_type.compare("addition") == 0) {
         cout << "ADDITION" << endl;
-        MTAdditionCircuit<FieldT, MerkleTreeHashT> circuit =
+        auto circuit =
                 make_mt_addition_circuit<FieldT, MerkleTreeHashT>(tree_height);
+        setup(circuit.pb->get_constraint_system(), argv[3], argv[4]);
+    } else if (circuit_type.compare("transfer") == 0) {
+        cout << "TRANSFER" << endl;
+        auto circuit =
+                make_transfer_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(tree_height);
         setup(circuit.pb->get_constraint_system(), argv[3], argv[4]);
     } else if (circuit_type.compare("withdrawal") == 0) {
         cout << "WITHDRAWAL" << endl;

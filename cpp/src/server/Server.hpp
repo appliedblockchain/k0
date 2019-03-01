@@ -19,6 +19,8 @@ namespace zktrade {
         r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp> commitment_vk;
         r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp> addition_pk;
         r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp> addition_vk;
+        r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp> transfer_pk;
+        r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp> transfer_vk;
         r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp> withdrawal_pk;
         r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp> withdrawal_vk;
         size_t tree_height;
@@ -27,6 +29,8 @@ namespace zktrade {
         bool commitment_vk_loaded;
         bool addition_pk_loaded;
         bool addition_vk_loaded;
+        bool transfer_pk_loaded;
+        bool transfer_vk_loaded;
         bool withdrawal_pk_loaded;
         bool withdrawal_vk_loaded;
     public:
@@ -40,6 +44,10 @@ namespace zktrade {
         void setAdditionPk(std::string pk_path);
 
         void setAdditionVk(std::string pk_path);
+
+        void setTransferPk(std::string pk_path);
+
+        void setTransferVk(std::string pk_path);
 
         void setWithdrawalPk(std::string pk_path);
 
@@ -57,6 +65,26 @@ namespace zktrade {
                 const std::string &rho_str,
                 const std::string &r_str,
                 const std::string &v_str);
+
+        virtual Json::Value prepare_transfer(
+                const std::string& input_0_address_str,
+                const std::string& input_0_a_sk_str,
+                const std::string& input_0_rho_str,
+                const std::string& input_0_r_str,
+                const std::string& input_0_v_str,
+                const std::string& input_1_address_str,
+                const std::string& input_1_a_sk_str,
+                const std::string& input_1_rho_str,
+                const std::string& input_1_r_str,
+                const std::string& input_1_v_str,
+                const std::string& output_0_a_pk_str,
+                const std::string& output_0_rho_str,
+                const std::string& output_0_r_str,
+                const std::string& output_0_v_str,
+                const std::string& output_1_a_pk_str,
+                const std::string& output_1_rho_str,
+                const std::string& output_1_r_str,
+                const std::string& output_1_v_str);
 
         virtual Json::Value prepare_withdrawal(
                 const std::string &address_str,

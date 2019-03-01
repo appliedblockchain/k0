@@ -71,6 +71,22 @@ void zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setAdditionVk(
 }
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+void zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setTransferPk(
+        string pk_path) {
+    transfer_pk = loadFromFile<r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp>>(
+            pk_path);
+    transfer_pk_loaded = true;
+}
+
+template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+void zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setTransferVk(
+        string vk_path) {
+    transfer_vk = loadFromFile<r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp>>(
+            vk_path);
+    transfer_vk_loaded = true;
+}
+
+template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 void zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setWithdrawalPk(
         string pk_path) {
     withdrawal_pk = loadFromFile<r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp>>(
@@ -220,6 +236,25 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_deposit(
     return result;
 }
 
+template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+Json::Value
+zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_transfer(
+        const std::string &input_0_address_str,
+        const std::string &input_0_a_sk_str, const std::string &input_0_rho_str,
+        const std::string &input_0_r_str, const std::string &input_0_v_str,
+        const std::string &input_1_address_str,
+        const std::string &input_1_a_sk_str, const std::string &input_1_rho_str,
+        const std::string &input_1_r_str, const std::string &input_1_v_str,
+        const std::string &output_0_a_pk_str,
+        const std::string &output_0_rho_str, const std::string &output_0_r_str,
+        const std::string &output_0_v_str, const std::string &output_1_a_pk_str,
+        const std::string &output_1_rho_str, const std::string &output_1_r_str,
+        const std::string &output_1_v_str) {
+    Json::Value result;
+    result["foo"] = "bar";
+    return result;
+}
+
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 Json::Value
@@ -301,9 +336,10 @@ string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prf_addr(
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 Json::Value
 zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::status() {
-    const bool ready =
-            commitment_pk_loaded & commitment_vk_loaded & withdrawal_pk_loaded &
-            withdrawal_vk_loaded;
+    const bool ready = commitment_pk_loaded & commitment_vk_loaded &
+                       addition_pk_loaded & addition_vk_loaded &
+                       transfer_pk_loaded & transfer_vk_loaded &
+                       withdrawal_pk_loaded & withdrawal_vk_loaded;
     Json::Value result;
     result["ready"] = ready;
     return result;
