@@ -75,7 +75,7 @@ make_withdrawal_circuit(size_t tree_height) {
     cm_gadget<FieldT, CommitmentHashT> *commitment_gadget =
             new cm_gadget<FieldT, CommitmentHashT>(
                     *pb, *ZERO, a_pk_bits->bits, *rho_bits, *r_bits, *v_bits,
-                    *commitment_bits);
+                    *commitment_bits, "commitment_gadget");
     auto sn_gadget =
             new prf_sn_gadget<FieldT, CommitmentHashT>(
                     *pb, *ZERO, *a_sk_bits, *rho_bits, sn_bits, "prf_sn");

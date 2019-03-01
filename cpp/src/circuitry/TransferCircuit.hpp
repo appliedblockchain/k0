@@ -38,6 +38,8 @@ namespace zktrade {
         vector<digest_variable<FieldT> *> cm_out_bits_vec;
         vector<cm_gadget<FieldT, CommitmentHashT> *> cm_out_gadget_vec;
 
+        // TODO sum-of-inputs-equals-sum-of-outputs gadget
+
         multipacking_gadget<FieldT> *rt_packer;
     };
 

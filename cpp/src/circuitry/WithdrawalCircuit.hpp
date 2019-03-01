@@ -44,6 +44,7 @@ struct WithdrawalCircuit {
     multipacking_gadget<FieldT> *sn_packer;
 
     // Workhorse gadgets
+    // TODO Use input_note_gadget instead
     prf_addr_gadget <FieldT, CommitmentHashT> *addr_gadget;
     cm_gadget <FieldT, CommitmentHashT> *commitment_gadget;
     prf_sn_gadget <FieldT, CommitmentHashT> *sn_gadget;

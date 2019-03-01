@@ -28,16 +28,20 @@ namespace zktrade {
                   pb_variable_array<FieldT> &rho,
                   pb_variable_array<FieldT> &r,
                   pb_variable_array<FieldT> &v,
-                  digest_variable<FieldT> &result) :
-                gadget<FieldT>(pb, "cm"),
-                a_pk_rho_hash(pb, 256, "a_pk_rho_hash"),
+                  digest_variable<FieldT> &result,
+                  const string &annotation_prefix) :
+                gadget<FieldT>(pb, annotation_prefix),
+                a_pk_rho_hash(pb, 256,
+                              FMT(annotation_prefix, " a_pk_rho_hash")),
                 a_pk_rho_hasher(pb, {a_pk, rho}, a_pk_rho_hash,
-                                "a_pk_rho_hasher"),
+                                FMT(annotation_prefix, " a_pk_rho_hasher")),
                 a_pk_rho_hash_truncated(a_pk_rho_hash.bits.begin(),
                                         a_pk_rho_hash.bits.begin() + 128),
-                k(pb, 256, "k"),
-                k_hasher(pb, {r, a_pk_rho_hash_truncated}, k, "k_hasher"),
-                outer_gadget(pb, ZERO, k.bits, v, result, "outer_gadget") {
+                k(pb, 256, FMT(annotation_prefix, " k")),
+                k_hasher(pb, {r, a_pk_rho_hash_truncated}, k,
+                         FMT(annotation_prefix, " k_hasher")),
+                outer_gadget(pb, ZERO, k.bits, v, result,
+                             FMT(annotation_prefix, " outer_gadget")) {
         }
 
         void generate_r1cs_constraints() {

@@ -86,7 +86,20 @@ zktrade::make_transfer_circuit(size_t tree_height) {
         sn_in_packer[i]->generate_r1cs_constraints(true);
 
         input_note_vec[i] = new input_note_gadget<FieldT, CommitmentHashT, MerkleTreeHashT>(
-                *pb);
+                tree_height,
+                *pb,
+                *ZERO,
+                *rt_bits,
+                *v_in_bits_vec[i],
+                *a_sk_in_bits_vec[i],
+                *rho_in_bits_vec[i],
+                *r_in_bits_vec[i],
+                *address_in_bits_vec[i],
+                *path_in_vec[i],
+                a_pk_in_bits_vec[i],
+                *cm_in_bits_vec[i],
+                sn_in_bits_vec[i],
+                "input_note_" + to_string(i) + "_gadget");
         input_note_vec[i]->generate_r1cs_constraints();
     }
 
@@ -119,7 +132,7 @@ zktrade::make_transfer_circuit(size_t tree_height) {
         cm_out_gadget_vec[i] = new cm_gadget<FieldT, CommitmentHashT>(
                 *pb, *ZERO, *a_pk_out_bits_vec[i], *rho_out_bits_vec[i],
                 *r_out_bits_vec[i], *v_out_bits_vec[i],
-                *cm_out_bits_vec[i]);
+                *cm_out_bits_vec[i], "cm_out_" + to_string(i) + "_gadget");
         cm_out_gadget_vec[i]->generate_r1cs_constraints();
     }
 

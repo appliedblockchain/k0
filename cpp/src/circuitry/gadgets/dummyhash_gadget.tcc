@@ -46,17 +46,17 @@ template<typename FieldT>
 void
 zktrade::dummyhash_compression_function_gadget<FieldT>::generate_r1cs_witness() {
 
-#ifdef DEBUG
-    printf("Input:\n");
-    for (size_t i = 0; i < 256; ++i) {
-        printf("%lx ", this->pb.val(this->new_block[i]).as_ulong());
-    }
-    printf("\n");
-    for (size_t i = 0; i < 256; ++i) {
-        printf("%lx ", this->pb.val(this->new_block[256 + i]).as_ulong());
-    }
-    printf("\n");
-#endif
+//#ifdef DEBUG
+//    printf("Input:\n");
+//    for (size_t i = 0; i < 256; ++i) {
+//        printf("%lx ", this->pb.val(this->new_block[i]).as_ulong());
+//    }
+//    printf("\n");
+//    for (size_t i = 0; i < 256; ++i) {
+//        printf("%lx ", this->pb.val(this->new_block[256 + i]).as_ulong());
+//    }
+//    printf("\n");
+//#endif
 
     for (size_t i = 0; i < 256; i++) {
         this->pb.val(tmp[i]) = this->pb.lc_val(A[i]) + this->pb.lc_val(B[i]) -
@@ -67,13 +67,13 @@ zktrade::dummyhash_compression_function_gadget<FieldT>::generate_r1cs_witness() 
                 FieldT(2) * this->pb.val(tmp[i]) * this->pb.lc_val(C[i]);
     }
 
-#ifdef DEBUG
-    printf("Output:\n");
-    for (size_t i = 0; i < 256; ++i) {
-        printf("%lx ", this->pb.val(output.bits[i]).as_ulong());
-    }
-    printf("\n");
-#endif
+//#ifdef DEBUG
+//    printf("Output:\n");
+//    for (size_t i = 0; i < 256; ++i) {
+//        printf("%lx ", this->pb.val(output.bits[i]).as_ulong());
+//    }
+//    printf("\n");
+//#endif
 }
 
 
