@@ -21,6 +21,7 @@ typedef dummyhash_two_to_one_hash_gadget<FieldT> MerkleTreeHashT;
 #else
 
 #include <libsnark/gadgetlib1/gadgets/hashes/sha256/sha256_gadget.hpp>
+#include "circuitry/gadgets/sha256_compression.h"
 typedef sha256_compression_gadget<FieldT> CommitmentHashT;
 typedef sha256_two_to_one_hash_gadget<FieldT> MerkleTreeHashT;
 

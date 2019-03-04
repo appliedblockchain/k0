@@ -97,19 +97,18 @@ TEST(SHA256Compression, CorrectnessOfPythonImplementation) {
     }
 }
 
-//TEST(SHA256Compression, EqualityOfImplementations) {
-//    for (int i = 0; i < 1; i++) {
-//        string input_hex = "0x" + random_bytes_hex(64);
-//        string output_python_hex = get_python_hash("sha256_compress",
-//                                                   input_hex);
-//
-//        unsigned char input[64];
-//        hex_to_bytes(input, input_hex, 64);
-//        unsigned char output_bitcoin[32];
-//        sha256_compress(input, output_bitcoin);
-//        string output_bitcoin_hex = bytes_to_hex(output_bitcoin, 32);
-//        ASSERT_EQ(output_bitcoin_hex, output_python_hex);
-//
+TEST(SHA256Compression, EqualityOfImplementations) {
+    for (int i = 0; i < 1; i++) {
+        auto input = random_bits(512);
+        cout << "input     " << bits_to_hex(input) << endl;
+        string output_python_hex = get_python_hash("sha256_compress",
+                                                   bits_to_hex(input));
+
+        cout << "output py " << output_python_hex << endl;
+        bit_vector output = sha256_compress(input);
+        cout << "output    " << bits_to_hex(output) << endl;
+        ASSERT_EQ(bits_to_hex(output), output_python_hex);
+
 //        protoboard<FieldT> pb;
 //        pb_linear_combination_array<FieldT> IV = SHA256_default_IV(pb);
 //        pb_variable_array<FieldT> block;
@@ -129,8 +128,8 @@ TEST(SHA256Compression, CorrectnessOfPythonImplementation) {
 //        vector<unsigned char> result_bytes = bits_to_bytes(result.get_digest());
 //        string output_gadget_hex = bytes_to_hex(result_bytes);
 //        ASSERT_EQ(output_gadget_hex, output_python_hex);
-//    }
-//}
+    }
+}
 
 // This just checks that the Python implementation works
 TEST(SHA256, CorrectnessOfPythonImplementation) {

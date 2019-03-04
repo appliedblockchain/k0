@@ -1,5 +1,6 @@
-#include "util.h"
+#include <bitset>
 #include <iomanip>
+#include "util.h"
 
 libff::bit_vector zktrade::byte_to_bits(unsigned char b) {
     libff::bit_vector bv(8);

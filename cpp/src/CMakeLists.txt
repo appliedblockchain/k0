@@ -40,7 +40,6 @@ target_sources(
         zktrade
 
         PRIVATE
-        crypto/sha256.cpp
         hash/sha256.cpp
         hash/sha256_compression.cpp
         scheme/comms.tcc
