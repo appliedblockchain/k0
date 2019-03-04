@@ -6,7 +6,6 @@
 #include <iostream>
 #include <vector>
 #include <libsnark/common/default_types/r1cs_ppzksnark_pp.hpp>
-#include <libsnark/gadgetlib1/gadgets/hashes/sha256/sha256_gadget.hpp>
 #include "MerkleTree.hpp"
 #include "serialization.hpp"
 #include "util.h"
