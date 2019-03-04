@@ -67,30 +67,22 @@ make_withdrawal_circuit(size_t tree_height) {
             new multipacking_gadget<FieldT>(
                     *pb, sn_bits->bits, *sn_packed, 128, "sn_packer");
 
-    prf_addr_gadget<FieldT, CommitmentHashT> *addr_gadget =
-            new prf_addr_gadget<FieldT, CommitmentHashT>(
-                    *pb, *ZERO, *a_sk_bits, a_pk_bits, "prf_addr");
-
-
-    cm_gadget<FieldT, CommitmentHashT> *commitment_gadget =
-            new cm_gadget<FieldT, CommitmentHashT>(
-                    *pb, *ZERO, a_pk_bits->bits, *rho_bits, *r_bits, *v_bits,
-                    *commitment_bits, "commitment_gadget");
-    auto sn_gadget =
-            new prf_sn_gadget<FieldT, CommitmentHashT>(
-                    *pb, *ZERO, *a_sk_bits, *rho_bits, sn_bits, "prf_sn");
-
-    merkle_tree_check_read_gadget<FieldT, MerkleTreeHashT> *mt_path_gadget =
-            new merkle_tree_check_read_gadget<FieldT, MerkleTreeHashT>(
-                    *pb,
+    auto note_gadget =
+            new input_note_gadget<FieldT, CommitmentHashT, MerkleTreeHashT>(
                     tree_height,
-                    *address_bits,
-                    *commitment_bits,
+                    *pb,
+                    *ZERO,
                     *rt_bits,
+                    *v_bits,
+                    *a_sk_bits,
+                    *rho_bits,
+                    *r_bits,
+                    *address_bits,
                     *path,
-                    ONE,
-                    "merkle_tree_check_read_gadget");
-
+                    a_pk_bits,
+                    *commitment_bits,
+                    sn_bits,
+                    "input_note_gadget");
 
     pb->add_r1cs_constraint(
             r1cs_constraint<FieldT>(*ZERO, ONE, FieldT::zero()),
@@ -106,10 +98,7 @@ make_withdrawal_circuit(size_t tree_height) {
     rt_packer->generate_r1cs_constraints(true);
     v_packer->generate_r1cs_constraints(true);
     sn_packer->generate_r1cs_constraints(true);
-    addr_gadget->generate_r1cs_constraints();
-    commitment_gadget->generate_r1cs_constraints();
-    sn_gadget->generate_r1cs_constraints();
-    mt_path_gadget->generate_r1cs_constraints();
+    note_gadget->generate_r1cs_constraints();
 
     WithdrawalCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> circuit{
             pb,
@@ -132,10 +121,7 @@ make_withdrawal_circuit(size_t tree_height) {
             rt_packer,
             v_packer,
             sn_packer,
-            addr_gadget,
-            commitment_gadget,
-            sn_gadget,
-            mt_path_gadget
+            note_gadget
     };
 
     return circuit;

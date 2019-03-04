@@ -29,11 +29,11 @@ TEST(Lifecycle, Full) {
 
     vector<coin> coins;
 
-    size_t tree_height = 2;
+    size_t tree_height = 3;
 
     MerkleTree<TwoToOneHashT> mt(tree_height);
 
-//    size_t num_initial_coins = exp2(tree_height) / 2;
+    //size_t num_initial_coins = exp2(tree_height) / 2;
     size_t num_initial_coins = exp2(tree_height);
 
     for (size_t address = 0; address < num_initial_coins; address++) {
@@ -76,7 +76,7 @@ TEST(Lifecycle, Full) {
         comm_circuit.k_packer->generate_r1cs_witness_from_bits();
         comm_circuit.pb->val(*comm_circuit.v_packed) = v;
         comm_circuit.v_packer->generate_r1cs_witness_from_packed();
-        //ASSERT_FALSE(comm_circuit.pb->is_satisfied());
+        ASSERT_FALSE(comm_circuit.pb->is_satisfied());
 
         comm_circuit.commitment_gadget->generate_r1cs_witness();
         comm_circuit.cm_packer->generate_r1cs_witness_from_bits();
@@ -105,7 +105,7 @@ TEST(Lifecycle, Full) {
         add_circuit.next_root_bits->generate_r1cs_witness(get<1>(sim_result));
         add_circuit.next_root_packer->generate_r1cs_witness_from_bits();
 
-//        ASSERT_FALSE(add_circuit.pb->is_satisfied());
+        ASSERT_FALSE(add_circuit.pb->is_satisfied());
         add_circuit.mt_update_gadget->generate_r1cs_witness();
 
         ASSERT_TRUE(add_circuit.pb->is_satisfied());
@@ -119,67 +119,70 @@ TEST(Lifecycle, Full) {
     }
 
 
-    // TRANSFER
-    for (size_t input_0_address = 0; input_0_address < num_initial_coins; input_0_address += 2) {
-
-        auto circuit = make_transfer_circuit<FieldT, CompressionHashT, TwoToOneHashT>(tree_height);
-
-        circuit.rt_bits->generate_r1cs_witness(mt.root());
-
-        // input coins
-        for (size_t i = 0; i < 2; i++) {
-            coin c = coins[input_0_address + i];
-            bit_vector address_bits = int_to_bits<FieldT>(c.address, tree_height);
-            bit_vector v_bits = int_to_bits<FieldT>(c.v, 64);
-
-            circuit.address_in_bits_vec[i]->fill_with_bits(*circuit.pb, address_bits);
-            circuit.path_in_vec[i]->generate_r1cs_witness(c.address, mt.path(c.address));
-            circuit.a_sk_in_bits_vec[i]->fill_with_bits(*circuit.pb, c.a_sk);
-            circuit.rho_in_bits_vec[i]->fill_with_bits(*circuit.pb, c.rho);
-            circuit.r_in_bits_vec[i]->fill_with_bits(*circuit.pb, c.r);
-            circuit.v_in_bits_vec[i]->fill_with_bits(*circuit.pb, v_bits);
-
-            circuit.input_note_vec[i]->generate_r1cs_witness();
-            circuit.sn_in_packer_vec[i]->generate_r1cs_witness_from_bits();
-        }
-
-        // output coins
-        for (size_t i = 0; i < 2; i++) {
-
-            size_t address = num_initial_coins + input_0_address + i;
-
-            auto a_sk = random_bits(256);
-            auto a_pk = prf_addr<CompressionHashT>(a_sk);
-            auto rho = random_bits(256);
-            auto r = random_bits(384);
-
-            uint64_t v_uint = 5000000000000000000;
-            string v_str = to_string(v_uint);
-            FieldT v = FieldT(v_str.c_str());
-            bit_vector v_bits = uint64_to_bits(stoull(v_str));
-
-            coin c{address, rho, r, a_sk, v_uint};
-            coins.push_back(c);
-
-            circuit.a_pk_out_bits_vec[i]->fill_with_bits(*circuit.pb, a_pk);
-            circuit.rho_out_bits_vec[i]->fill_with_bits(*circuit.pb, rho);
-            circuit.r_out_bits_vec[i]->fill_with_bits(*circuit.pb, r);
-            circuit.v_out_bits_vec[i]->fill_with_bits(*circuit.pb, v_bits);
-            circuit.cm_out_gadget_vec[i]->generate_r1cs_witness();
-            circuit.cm_out_packer_vec[i]->generate_r1cs_witness_from_bits();
-        }
-
-        circuit.rt_packer->generate_r1cs_witness_from_bits();
-        ASSERT_TRUE(circuit.pb->is_satisfied());
-
-        for (size_t i = 0; i < 2; i++) {
-            mt.add(circuit.cm_out_bits_vec[i]->get_digest());
-        }
-
-    }
+//    // TRANSFER
+//    for (size_t input_0_address = 0; input_0_address < num_initial_coins; input_0_address += 2) {
+//
+//        cout << "input_0_address " << input_0_address << endl;
+//        auto circuit = make_transfer_circuit<FieldT, CompressionHashT, TwoToOneHashT>(tree_height);
+//
+//        circuit.rt_bits->generate_r1cs_witness(mt.root());
+//
+//        // input coins
+//        for (size_t i = 0; i < 2; i++) {
+//            coin c = coins[input_0_address + i];
+//            bit_vector address_bits = int_to_bits<FieldT>(c.address, tree_height);
+//            bit_vector v_bits = int_to_bits<FieldT>(c.v, 64);
+//
+//            circuit.address_in_bits_vec[i]->fill_with_bits(*circuit.pb, address_bits);
+//            circuit.path_in_vec[i]->generate_r1cs_witness(c.address, mt.path(c.address));
+//            circuit.a_sk_in_bits_vec[i]->fill_with_bits(*circuit.pb, c.a_sk);
+//            circuit.rho_in_bits_vec[i]->fill_with_bits(*circuit.pb, c.rho);
+//            circuit.r_in_bits_vec[i]->fill_with_bits(*circuit.pb, c.r);
+//            circuit.v_in_bits_vec[i]->fill_with_bits(*circuit.pb, v_bits);
+//
+//            circuit.input_note_vec[i]->generate_r1cs_witness();
+//            circuit.sn_in_packer_vec[i]->generate_r1cs_witness_from_bits();
+//        }
+//
+//        // output coins
+//        for (size_t i = 0; i < 2; i++) {
+//
+//            size_t address = num_initial_coins + input_0_address + i;
+//
+//            auto a_sk = random_bits(256);
+//            auto a_pk = prf_addr<CompressionHashT>(a_sk);
+//            auto rho = random_bits(256);
+//            auto r = random_bits(384);
+//
+//            uint64_t v_uint = 5000000000000000000;
+//            string v_str = to_string(v_uint);
+//            FieldT v = FieldT(v_str.c_str());
+//            bit_vector v_bits = uint64_to_bits(stoull(v_str));
+//
+//            coin c{address, rho, r, a_sk, v_uint};
+//            coins.push_back(c);
+//
+//            circuit.a_pk_out_bits_vec[i]->fill_with_bits(*circuit.pb, a_pk);
+//            circuit.rho_out_bits_vec[i]->fill_with_bits(*circuit.pb, rho);
+//            circuit.r_out_bits_vec[i]->fill_with_bits(*circuit.pb, r);
+//            circuit.v_out_bits_vec[i]->fill_with_bits(*circuit.pb, v_bits);
+//            circuit.cm_out_gadget_vec[i]->generate_r1cs_witness();
+//            circuit.cm_out_packer_vec[i]->generate_r1cs_witness_from_bits();
+//        }
+//
+//        circuit.rt_packer->generate_r1cs_witness_from_bits();
+//        ASSERT_TRUE(circuit.pb->is_satisfied());
+//
+//        for (size_t i = 0; i < 2; i++) {
+//            mt.add(circuit.cm_out_bits_vec[i]->get_digest());
+//        }
+//
+//    }
 
     for (size_t address = 0; address < num_initial_coins; address++) {
         // WITHDRAWAL/"UNSHIELDING"
+
+        cout << "Address " << address << endl;
 
         coin c = coins[address];
         bit_vector address_bits = int_to_bits<FieldT>(c.address, tree_height);
@@ -205,11 +208,8 @@ TEST(Lifecycle, Full) {
         wd_circuit.rt_packer->generate_r1cs_witness_from_bits();
         wd_circuit.rt_packer->generate_r1cs_witness_from_bits();
         wd_circuit.v_packer->generate_r1cs_witness_from_packed();
-        wd_circuit.addr_gadget->generate_r1cs_witness();
-        wd_circuit.commitment_gadget->generate_r1cs_witness();
-        wd_circuit.sn_gadget->generate_r1cs_witness();
+        wd_circuit.note_gadget->generate_r1cs_witness();
         wd_circuit.sn_packer->generate_r1cs_witness_from_bits();
-        wd_circuit.mt_path_gadget->generate_r1cs_witness();
         ASSERT_TRUE(wd_circuit.pb->is_satisfied());
 
         // Set original inputs again to make sure nothing has been overwritten

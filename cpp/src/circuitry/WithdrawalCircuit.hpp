@@ -6,6 +6,7 @@
 #include <libsnark/gadgetlib1/gadgets/merkle_tree/merkle_authentication_path_variable.hpp>
 #include <libsnark/gadgetlib1/gadgets/merkle_tree/merkle_tree_check_read_gadget.hpp>
 #include "gadgets/cm.h"
+#include "gadgets/input_note_gadget.hpp"
 #include "gadgets/prfs.hpp"
 #include "util.h"
 
@@ -43,12 +44,7 @@ struct WithdrawalCircuit {
     packing_gadget<FieldT> *v_packer;
     multipacking_gadget<FieldT> *sn_packer;
 
-    // Workhorse gadgets
-    // TODO Use input_note_gadget instead
-    prf_addr_gadget <FieldT, CommitmentHashT> *addr_gadget;
-    cm_gadget <FieldT, CommitmentHashT> *commitment_gadget;
-    prf_sn_gadget <FieldT, CommitmentHashT> *sn_gadget;
-    merkle_tree_check_read_gadget<FieldT, MerkleTreeHashT> *mt_path_gadget;
+    input_note_gadget <FieldT, CommitmentHashT, MerkleTreeHashT> *note_gadget;
 };
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
