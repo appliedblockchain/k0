@@ -134,7 +134,7 @@ TEST(Lifecycle, Full) {
         uint32_t recipient = rand() % (uint32_t)exp2(20);
 
         // Generate proof
-        auto wd_circuit = make_withdrawal_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(tree_height);
+        auto wd_circuit = make_new_transfer_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(tree_height);
         wd_circuit.rt_bits->generate_r1cs_witness(mt.root());
         wd_circuit.pb->val(*wd_circuit.v_packed) = v;
         wd_circuit.pb->val(*wd_circuit.recipient_public) = recipient;
