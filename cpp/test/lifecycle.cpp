@@ -15,8 +15,8 @@ using namespace libsnark;
 
 typedef Fr<default_r1cs_ppzksnark_pp> FieldT;
 
-typedef dummyhash_compression_gadget<FieldT> CommitmentHashT;
-typedef dummyhash_two_to_one_hash_gadget<FieldT> MerkleTreeHashT;
+typedef sha256_compression_gadget<FieldT> CommitmentHashT;
+typedef sha256_two_to_one_hash_gadget<FieldT> MerkleTreeHashT;
 
 TEST(Lifecycle, Full) {
 
@@ -26,6 +26,7 @@ TEST(Lifecycle, Full) {
         bit_vector r;
         bit_vector a_sk;
         uint64_t v;
+        bit_vector cm;
     };
 
     vector<coin> coins;
@@ -58,11 +59,12 @@ TEST(Lifecycle, Full) {
         FieldT v = FieldT(v_str.c_str());
         bit_vector v_bits = uint64_to_bits(stoull(v_str));
 
-        coin c{address, rho, r, a_sk, v_uint};
-        coins.push_back(c);
 
         // Generate cm
         auto cm = comm_s<CommitmentHashT>(k, v_bits);
+
+        coin c{address, rho, r, a_sk, v_uint, cm};
+        coins.push_back(c);
 
         ASSERT_EQ(mt.num_elements(), address);
 
@@ -129,6 +131,7 @@ TEST(Lifecycle, Full) {
         bit_vector address_bits = int_to_bits<FieldT>(c.address, tree_height);
         string v_str = to_string(c.v);
         FieldT v = FieldT(v_str.c_str());
+        bit_vector v_bits = uint64_to_bits(c.v);
 
         // Generate proof
         auto wd_circuit = make_new_transfer_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(tree_height);
@@ -163,7 +166,12 @@ TEST(Lifecycle, Full) {
         cout << "v          " << bits2hex(wd_circuit.v_bits->get_bits(*wd_circuit.pb)) << endl;
         cout << "cm          " << bits2hex(wd_circuit.commitment_bits->get_digest()) << endl;
         cout << "Path" << endl;
+
+
         ASSERT_TRUE(wd_circuit.pb->is_satisfied());
+        ASSERT_EQ(wd_circuit.v_bits->get_bits(*wd_circuit.pb), v_bits);
+        ASSERT_EQ(wd_circuit.commitment_bits->get_digest(), c.cm);
+        ASSERT_EQ(wd_circuit.rt_bits->get_digest(), mt.root());
 
         // Set original inputs again to make sure nothing has been overwritten
         wd_circuit.rt_bits->generate_r1cs_witness(mt.root());
