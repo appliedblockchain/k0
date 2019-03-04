@@ -16,7 +16,7 @@ zktrade::make_new_transfer_circuit(size_t tree_height) {
     pb_variable_array<FieldT> *sn_packed = new pb_variable_array<FieldT>();
     sn_packed->allocate(*pb, 2, "sn_packed");
 
-    pb->set_input_sizes(6);
+    pb->set_input_sizes(5);
 
     pb_variable<FieldT> *ZERO = new pb_variable<FieldT>();
     ZERO->allocate(*pb, "ZERO");

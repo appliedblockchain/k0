@@ -15,8 +15,8 @@ using namespace libsnark;
 
 typedef Fr<default_r1cs_ppzksnark_pp> FieldT;
 
-typedef sha256_compression_gadget<FieldT> CommitmentHashT;
-typedef sha256_two_to_one_hash_gadget<FieldT> MerkleTreeHashT;
+typedef dummyhash_compression_gadget<FieldT> CommitmentHashT;
+typedef dummyhash_two_to_one_hash_gadget<FieldT> MerkleTreeHashT;
 
 TEST(Lifecycle, Full) {
 
