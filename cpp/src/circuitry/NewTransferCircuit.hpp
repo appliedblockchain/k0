@@ -14,10 +14,12 @@ namespace zktrade {
         // Primary inputs
         pb_variable_array<FieldT> *rt_packed;
         pb_variable_array<FieldT> *in_0_sn_packed;
+        pb_variable_array<FieldT> *in_1_sn_packed;
 
         // Auxiliary inputs
         pb_variable<FieldT>* ZERO;
         digest_variable<FieldT> *rt_bits;
+
         pb_variable_array<FieldT> *in_0_v_bits;
         pb_variable_array<FieldT> *in_0_a_sk_bits;
         pb_variable_array<FieldT> *in_0_rho_bits;
@@ -28,11 +30,24 @@ namespace zktrade {
         digest_variable<FieldT> *in_0_cm_bits;
         shared_ptr<digest_variable<FieldT>> in_0_sn_bits;
 
+        pb_variable_array<FieldT> *in_1_v_bits;
+        pb_variable_array<FieldT> *in_1_a_sk_bits;
+        pb_variable_array<FieldT> *in_1_rho_bits;
+        pb_variable_array<FieldT> *in_1_r_bits;
+        pb_variable_array<FieldT> *in_1_address_bits;
+        merkle_authentication_path_variable<FieldT, MerkleTreeHashT> *in_1_path;
+        shared_ptr<digest_variable<FieldT>> in_1_a_pk_bits;
+        digest_variable<FieldT> *in_1_cm_bits;
+        shared_ptr<digest_variable<FieldT>> in_1_sn_bits;
+
         // Unpackers
         multipacking_gadget<FieldT> *rt_packer;
         multipacking_gadget<FieldT> *in_0_sn_packer;
+        multipacking_gadget<FieldT> *in_1_sn_packer;
 
-        input_note_gadget <FieldT, CommitmentHashT, MerkleTreeHashT> *note_gadget;
+        // Note gadgets
+        input_note_gadget <FieldT, CommitmentHashT, MerkleTreeHashT> *in_0_note_gadget;
+        input_note_gadget <FieldT, CommitmentHashT, MerkleTreeHashT> *in_1_note_gadget;
     };
 
     template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>

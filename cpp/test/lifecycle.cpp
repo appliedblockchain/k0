@@ -127,20 +127,33 @@ TEST(Lifecycle, Full) {
 
         cout << "Address " << input_0_address << endl;
 
-        coin c = coins[input_0_address];
-        bit_vector address_bits = int_to_bits<FieldT>(c.address, tree_height);
-        bit_vector v_bits = uint64_to_bits(c.v);
+        coin c0 = coins[input_0_address];
+        bit_vector in_0_address_bits = int_to_bits<FieldT>(c0.address, tree_height);
+        bit_vector in_0_v_bits = uint64_to_bits(c0.v);
+
+        coin c1 = coins[input_0_address + 1];
+        bit_vector in_1_address_bits = int_to_bits<FieldT>(c1.address, tree_height);
+        bit_vector in_1_v_bits = uint64_to_bits(c1.v);
 
         // Generate proof
         auto xfer_circuit = make_new_transfer_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(tree_height);
         xfer_circuit.rt_bits->generate_r1cs_witness(mt.root());
         xfer_circuit.pb->val(*xfer_circuit.ZERO) = FieldT::zero();
-        xfer_circuit.in_0_a_sk_bits->fill_with_bits(*xfer_circuit.pb, c.a_sk);
-        xfer_circuit.in_0_rho_bits->fill_with_bits(*xfer_circuit.pb, c.rho);
-        xfer_circuit.in_0_r_bits->fill_with_bits(*xfer_circuit.pb, c.r);
-        xfer_circuit.in_0_address_bits->fill_with_bits(*xfer_circuit.pb, address_bits);
-        xfer_circuit.in_0_v_bits->fill_with_bits(*xfer_circuit.pb, v_bits);
+
+        xfer_circuit.in_0_a_sk_bits->fill_with_bits(*xfer_circuit.pb, c0.a_sk);
+        xfer_circuit.in_0_rho_bits->fill_with_bits(*xfer_circuit.pb, c0.rho);
+        xfer_circuit.in_0_r_bits->fill_with_bits(*xfer_circuit.pb, c0.r);
+        xfer_circuit.in_0_address_bits->fill_with_bits(*xfer_circuit.pb, in_0_address_bits);
+        xfer_circuit.in_0_v_bits->fill_with_bits(*xfer_circuit.pb, in_0_v_bits);
         xfer_circuit.in_0_path->generate_r1cs_witness(input_0_address, mt.path(input_0_address));
+
+        xfer_circuit.in_1_a_sk_bits->fill_with_bits(*xfer_circuit.pb, c1.a_sk);
+        xfer_circuit.in_1_rho_bits->fill_with_bits(*xfer_circuit.pb, c1.rho);
+        xfer_circuit.in_1_r_bits->fill_with_bits(*xfer_circuit.pb, c1.r);
+        xfer_circuit.in_1_address_bits->fill_with_bits(*xfer_circuit.pb, in_1_address_bits);
+        xfer_circuit.in_1_v_bits->fill_with_bits(*xfer_circuit.pb, in_1_v_bits);
+        xfer_circuit.in_1_path->generate_r1cs_witness(input_0_address + 1, mt.path(input_0_address + 1));
+
         ASSERT_FALSE(xfer_circuit.pb->is_satisfied());
         xfer_circuit.rt_packer->generate_r1cs_witness_from_bits();
         cout << "BEFORE" << endl;
@@ -152,8 +165,10 @@ TEST(Lifecycle, Full) {
         cout << "cm          " << bits2hex(xfer_circuit.in_0_cm_bits->get_digest()) << endl;
         cout << "Path" << endl;
 
-        xfer_circuit.note_gadget->generate_r1cs_witness();
+        xfer_circuit.in_0_note_gadget->generate_r1cs_witness();
+        xfer_circuit.in_1_note_gadget->generate_r1cs_witness();
         xfer_circuit.in_0_sn_packer->generate_r1cs_witness_from_bits();
+        xfer_circuit.in_1_sn_packer->generate_r1cs_witness_from_bits();
 
         cout << "AFTER" << endl;
         cout << "Root " << bits2hex(xfer_circuit.rt_bits->get_digest()) << endl;
@@ -166,18 +181,18 @@ TEST(Lifecycle, Full) {
 
 
         ASSERT_TRUE(xfer_circuit.pb->is_satisfied());
-        ASSERT_EQ(xfer_circuit.in_0_v_bits->get_bits(*xfer_circuit.pb), v_bits);
-        ASSERT_EQ(xfer_circuit.in_0_cm_bits->get_digest(), c.cm);
+        ASSERT_EQ(xfer_circuit.in_0_v_bits->get_bits(*xfer_circuit.pb), in_0_v_bits);
+        ASSERT_EQ(xfer_circuit.in_0_cm_bits->get_digest(), c0.cm);
         ASSERT_EQ(xfer_circuit.rt_bits->get_digest(), mt.root());
 
         // Set original inputs again to make sure nothing has been overwritten
         xfer_circuit.rt_bits->generate_r1cs_witness(mt.root());
         xfer_circuit.pb->val(*xfer_circuit.ZERO) = FieldT::zero();
-        xfer_circuit.in_0_a_sk_bits->fill_with_bits(*xfer_circuit.pb, c.a_sk);
-        xfer_circuit.in_0_rho_bits->fill_with_bits(*xfer_circuit.pb, c.rho);
-        xfer_circuit.in_0_r_bits->fill_with_bits(*xfer_circuit.pb, c.r);
-        xfer_circuit.in_0_v_bits->fill_with_bits(*xfer_circuit.pb, v_bits);
-        xfer_circuit.in_0_address_bits->fill_with_bits(*xfer_circuit.pb, address_bits);
+        xfer_circuit.in_0_a_sk_bits->fill_with_bits(*xfer_circuit.pb, c0.a_sk);
+        xfer_circuit.in_0_rho_bits->fill_with_bits(*xfer_circuit.pb, c0.rho);
+        xfer_circuit.in_0_r_bits->fill_with_bits(*xfer_circuit.pb, c0.r);
+        xfer_circuit.in_0_v_bits->fill_with_bits(*xfer_circuit.pb, in_0_v_bits);
+        xfer_circuit.in_0_address_bits->fill_with_bits(*xfer_circuit.pb, in_0_address_bits);
         xfer_circuit.in_0_path->generate_r1cs_witness(input_0_address, mt.path(input_0_address));
         // Circuit should still be satisfied
         ASSERT_TRUE(xfer_circuit.pb->is_satisfied());
