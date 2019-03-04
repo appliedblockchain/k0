@@ -82,9 +82,6 @@ zktrade::make_new_transfer_circuit(size_t tree_height) {
     auto in_1_sn_bits = make_shared<digest_variable<FieldT>>(*pb, 256, "in_1_sn_bits");
 
 
-
-
-
     multipacking_gadget<FieldT> *rt_packer =
             new multipacking_gadget<FieldT>(
                     *pb, rt_bits->bits, *rt_packed, 128, "rt_packer");
@@ -135,10 +132,13 @@ zktrade::make_new_transfer_circuit(size_t tree_height) {
             r1cs_constraint<FieldT>(*ZERO, ONE, FieldT::zero()),
             "ZERO must equal zero");
 
-    in_0_cm_bits->generate_r1cs_constraints();
+    in_0_path->generate_r1cs_constraints();
     in_0_a_pk_bits->generate_r1cs_constraints();
-    in_1_cm_bits->generate_r1cs_constraints();
+    in_0_cm_bits->generate_r1cs_constraints();
+    in_1_path->generate_r1cs_constraints();
     in_1_a_pk_bits->generate_r1cs_constraints();
+    in_1_cm_bits->generate_r1cs_constraints();
+
 
     rt_packer->generate_r1cs_constraints(true);
     in_0_sn_packer->generate_r1cs_constraints(true);

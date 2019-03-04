@@ -92,8 +92,10 @@ make_withdrawal_circuit(size_t tree_height) {
             r1cs_constraint<FieldT>(*recipient_public, ONE, *recipient_private),
             "recipient_public must equal recipient_private");
 
-    commitment_bits->generate_r1cs_constraints();
+    path->generate_r1cs_constraints();
     a_pk_bits->generate_r1cs_constraints();
+    commitment_bits->generate_r1cs_constraints();
+    sn_bits->generate_r1cs_constraints();
 
     rt_packer->generate_r1cs_constraints(true);
     v_packer->generate_r1cs_constraints(true);
