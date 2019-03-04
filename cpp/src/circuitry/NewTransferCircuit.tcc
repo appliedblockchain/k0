@@ -10,13 +10,10 @@ zktrade::make_new_transfer_circuit(size_t tree_height) {
     pb_variable_array<FieldT> *rt_packed = new pb_variable_array<FieldT>();
     rt_packed->allocate(*pb, 2, "rt_packed");
 
-    pb_variable<FieldT> *v_packed = new pb_variable<FieldT>();
-    v_packed->allocate(*pb, "v_packed");
-
     pb_variable_array<FieldT> *sn_packed = new pb_variable_array<FieldT>();
     sn_packed->allocate(*pb, 2, "sn_packed");
 
-    pb->set_input_sizes(5);
+    pb->set_input_sizes(4);
 
     pb_variable<FieldT> *ZERO = new pb_variable<FieldT>();
     ZERO->allocate(*pb, "ZERO");
@@ -55,9 +52,6 @@ zktrade::make_new_transfer_circuit(size_t tree_height) {
             new multipacking_gadget<FieldT>(
                     *pb, rt_bits->bits, *rt_packed, 128, "rt_packer");
 
-    packing_gadget<FieldT> *v_packer =
-            new packing_gadget<FieldT>(*pb, *v_bits, *v_packed, "v_packer");
-
     multipacking_gadget<FieldT> *sn_packer =
             new multipacking_gadget<FieldT>(
                     *pb, sn_bits->bits, *sn_packed, 128, "sn_packer");
@@ -87,14 +81,12 @@ zktrade::make_new_transfer_circuit(size_t tree_height) {
     a_pk_bits->generate_r1cs_constraints();
 
     rt_packer->generate_r1cs_constraints(true);
-    v_packer->generate_r1cs_constraints(true);
     sn_packer->generate_r1cs_constraints(true);
     note_gadget->generate_r1cs_constraints();
 
     NewTransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> circuit{
             pb,
             rt_packed,
-            v_packed,
             sn_packed,
             ZERO,
             rt_bits,
@@ -108,7 +100,6 @@ zktrade::make_new_transfer_circuit(size_t tree_height) {
             commitment_bits,
             sn_bits,
             rt_packer,
-            v_packer,
             sn_packer,
             note_gadget
     };

@@ -13,7 +13,6 @@ namespace zktrade {
 
         // Primary inputs
         pb_variable_array<FieldT> *rt_packed;
-        pb_variable<FieldT> *v_packed;
         pb_variable_array<FieldT> *sn_packed;
 
         // Auxiliary inputs
@@ -31,7 +30,6 @@ namespace zktrade {
 
         // Unpackers
         multipacking_gadget<FieldT> *rt_packer;
-        packing_gadget<FieldT> *v_packer;
         multipacking_gadget<FieldT> *sn_packer;
 
         input_note_gadget <FieldT, CommitmentHashT, MerkleTreeHashT> *note_gadget;
