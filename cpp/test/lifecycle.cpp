@@ -130,21 +130,16 @@ TEST(Lifecycle, Full) {
         string v_str = to_string(c.v);
         FieldT v = FieldT(v_str.c_str());
 
-        // Generate recipient address
-        uint32_t recipient = rand() % (uint32_t)exp2(20);
-
         // Generate proof
         auto wd_circuit = make_new_transfer_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(tree_height);
         wd_circuit.rt_bits->generate_r1cs_witness(mt.root());
         wd_circuit.pb->val(*wd_circuit.v_packed) = v;
-        wd_circuit.pb->val(*wd_circuit.recipient_public) = recipient;
         wd_circuit.pb->val(*wd_circuit.ZERO) = FieldT::zero();
         wd_circuit.a_sk_bits->fill_with_bits(*wd_circuit.pb, c.a_sk);
         wd_circuit.rho_bits->fill_with_bits(*wd_circuit.pb, c.rho);
         wd_circuit.r_bits->fill_with_bits(*wd_circuit.pb, c.r);
         wd_circuit.address_bits->fill_with_bits(*wd_circuit.pb, address_bits);
         wd_circuit.path->generate_r1cs_witness(input_0_address, mt.path(input_0_address));
-        wd_circuit.pb->val(*wd_circuit.recipient_private) = recipient;
         ASSERT_FALSE(wd_circuit.pb->is_satisfied());
         wd_circuit.rt_packer->generate_r1cs_witness_from_bits();
         wd_circuit.v_packer->generate_r1cs_witness_from_packed();
