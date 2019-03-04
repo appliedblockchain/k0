@@ -15,7 +15,6 @@ namespace zktrade {
         pb_variable_array<FieldT> *rt_packed;
         pb_variable<FieldT> *v_packed;
         pb_variable_array<FieldT> *sn_packed;
-        pb_variable<FieldT>* recipient_public;
 
         // Auxiliary inputs
         pb_variable<FieldT>* ZERO;
@@ -26,7 +25,6 @@ namespace zktrade {
         pb_variable_array<FieldT> *r_bits;
         pb_variable_array<FieldT> *address_bits;
         merkle_authentication_path_variable<FieldT, MerkleTreeHashT> *path;
-        pb_variable<FieldT>* recipient_private;
         shared_ptr<digest_variable<FieldT>> a_pk_bits;
         digest_variable<FieldT> *commitment_bits;
         shared_ptr<digest_variable<FieldT>> sn_bits;
