@@ -20,25 +20,25 @@ int main(int argc, char* argv[])
 
   server.StartListening();
 
-  std::cout << "Loading commitment proving key..." << std::endl;
-  server.setCommitmentPk(argv[2]);
-  std::cout << "Loading commitment verification key..." << std::endl;
-  server.setCommitmentVk(argv[3]);
-
-  std::cout << "Loading addition proving key..." << std::endl;
-  server.setAdditionPk(argv[4]);
-  std::cout << "Loading addition verification key..." << std::endl;
-  server.setAdditionVk(argv[5]);
-
-  std::cout << "Loading transfer proving key..." << std::endl;
-  server.setTransferPk(argv[6]);
-  std::cout << "Loading transfer verification key..." << std::endl;
-  server.setTransferVk(argv[7]);
-
-  std::cout << "Loading withdrawal proving key..." << std::endl;
-  server.setWithdrawalPk(argv[8]);
-  std::cout << "Loading withdrawal verification key..." << std::endl;
-  server.setWithdrawalVk(argv[9]);
+//  std::cout << "Loading commitment proving key..." << std::endl;
+//  server.setCommitmentPk(argv[2]);
+//  std::cout << "Loading commitment verification key..." << std::endl;
+//  server.setCommitmentVk(argv[3]);
+//
+//  std::cout << "Loading addition proving key..." << std::endl;
+//  server.setAdditionPk(argv[4]);
+//  std::cout << "Loading addition verification key..." << std::endl;
+//  server.setAdditionVk(argv[5]);
+//
+//  std::cout << "Loading transfer proving key..." << std::endl;
+//  server.setTransferPk(argv[6]);
+//  std::cout << "Loading transfer verification key..." << std::endl;
+//  server.setTransferVk(argv[7]);
+//
+//  std::cout << "Loading withdrawal proving key..." << std::endl;
+//  server.setWithdrawalPk(argv[8]);
+//  std::cout << "Loading withdrawal verification key..." << std::endl;
+//  server.setWithdrawalVk(argv[9]);
 
   std::cout << "Server started. Enter \"end\" to shut down." << std::endl;
 

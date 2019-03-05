@@ -34,13 +34,13 @@ zktrade::dummyhash_compression_function_gadget<FieldT>::generate_r1cs_constraint
         if (i % 2) {
 
             auto
-            str = " tmp_bit_" + to_string(i) + "_from_A";
+                    str = " tmp_bit_" + to_string(i) + "_from_A";
             this->pb.add_r1cs_constraint(
                     r1cs_constraint<FieldT>(A[i], ONE, tmp[i]),
                     FMT(this->annotation_prefix, str.c_str()));
         } else {
-             auto
-            str = " tmp_bit_" + to_string(i) + "_from_B";
+            auto
+                    str = " tmp_bit_" + to_string(i) + "_from_B";
             this->pb.add_r1cs_constraint(
                     r1cs_constraint<FieldT>(B[i], ONE, tmp[i]),
                     FMT(this->annotation_prefix, str.c_str()));
@@ -78,16 +78,16 @@ zktrade::dummyhash_compression_function_gadget<FieldT>::generate_r1cs_witness() 
 
     for (size_t i = 0; i < 256; i++) {
         if (i % 2) {
-            cout << "assigning to tmp " << i << " value from A: " << this->pb.val(A[i]) << endl;
+            //cout << "assigning to tmp " << i << " value from A: " << this->pb.val(A[i]) << endl;
             this->pb.val(tmp[i]) = this->pb.val(A[i]);
         } else {
-            cout << "assigning to tmp " << i << " value from B: " << this->pb.val(B[i]) << endl;
+            //cout << "assigning to tmp " << i << " value from B: " << this->pb.val(B[i]) << endl;
             this->pb.val(tmp[i]) = this->pb.val(B[i]);
         }
 
-               this->pb.lc_val(output.bits[i]) =
-                                this->pb.val(tmp[i]) + this->pb.lc_val(C[i]) -
-                                FieldT(2) * this->pb.val(tmp[i]) * this->pb.lc_val(C[i]);
+        this->pb.lc_val(output.bits[i]) =
+                this->pb.val(tmp[i]) + this->pb.lc_val(C[i]) -
+                FieldT(2) * this->pb.val(tmp[i]) * this->pb.lc_val(C[i]);
     }
 
 #ifdef DEBUG
@@ -172,9 +172,9 @@ libff::bit_vector zktrade::dummyhash_two_to_one_hash_gadget<FieldT>::get_hash(
 
     block_variable<FieldT> input_variable(pb, SHA256_block_size, "input");
     digest_variable<FieldT> output_variable(pb, SHA256_digest_size, "output");
-    dummyhash_two_to_one_hash_gadget<FieldT> f(pb, SHA256_block_size,
-                                               input_variable, output_variable,
-                                               "f");
+    dummyhash_two_to_one_hash_gadget <FieldT> f(pb, SHA256_block_size,
+                                                input_variable, output_variable,
+                                                "f");
 
     input_variable.generate_r1cs_witness(input);
     f.generate_r1cs_witness();

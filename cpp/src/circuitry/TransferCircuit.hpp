@@ -78,6 +78,9 @@ namespace zktrade {
     template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
     TransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT>
     make_transfer_circuit(size_t tree_height);
+
+    template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+    void print_transfer_circuit_inputs(TransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> &c);
 }
 
 #include "TransferCircuit.tcc"

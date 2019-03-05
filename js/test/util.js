@@ -9,7 +9,8 @@ const sendTransaction = require('../send-transaction')
 const Web3 = require('web3')
 
 const baseDir = path.join(__dirname, '..', '..')
-const cppUtilDir = path.join(baseDir, 'cpp', 'cmake-build-debug', 'src')
+const cppDir = process.env.CPP_DIR || path.join(baseDir, 'cpp')
+const cppUtilDir = process.env.CPP_UTIL_DIR || path.join(cppDir, 'cmake-build-debug', 'src')
 
 async function convertVk(vkPath, vkAltPath) {
   const executablePath = path.join(cppUtilDir, 'convert_vk')
@@ -29,8 +30,8 @@ function paths(label) {
   return {
     tmpDir,
     baseDir,
-    cppDir: path.join(baseDir, 'cpp', 'build', 'src', 'examples', label),
-    cppUtilDir: path.join(baseDir, 'cpp', 'build', 'src'),
+    cppDir,
+    cppUtilDir: path.join(cppDir, 'build', 'src'),
     pk: path.join(tmpDir, `${label}_pk`),
     vk: path.join(tmpDir, `${label}_vk`),
     vkAlt: path.join(tmpDir, `${label}_vk_alt`),
@@ -92,6 +93,22 @@ async function deployStandardContract(web3, contractName, account = null) {
         account
     )
     return new web3.eth.Contract(artefacts.abi, contractAddress)
+}
+
+function toUnits(input) {
+  assert(BN.isBN(input))
+  const ten = new BN('10', 10)
+  const decimals = new BN('8', 10)
+  const multiplier = ten.pow(decimals)
+  return input.mul(multiplier)
+}
+
+function fromUnits(input) {
+  assert(BN.isBN(input))
+  const ten = new BN('10', 10)
+  const decimals = new BN('8', 10)
+  const divisor = ten.pow(decimals)
+  return input.div(divisor)
 }
 
 module.exports = {

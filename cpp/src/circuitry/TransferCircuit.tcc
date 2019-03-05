@@ -1,6 +1,8 @@
 #ifndef ZKTRADE_TRANSFERCIRCUIT_TCC
 #define ZKTRADE_TRANSFERCIRCUIT_TCC
 
+#include "serialization.hpp"
+
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 TransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT>
 zktrade::make_transfer_circuit(size_t tree_height) {
@@ -272,6 +274,71 @@ zktrade::make_transfer_circuit(size_t tree_height) {
     };
 
     return circuit;
+}
+
+template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+void zktrade::print_transfer_circuit_inputs(TransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> &c)
+{
+    cout << endl;
+    cout << endl;
+    cout << "************************ TRANSFER CIRCUIT *************************" << endl;
+    cout << endl;
+    cout << "IN 0" << endl;
+    cout << "v_bits       " << bits2hex(c.in_0_v_bits->get_bits(*c.pb)) << endl;
+    cout << "v val        " << c.in_0_v_bits->get_field_element_from_bits(*c.pb) << endl;
+    cout << "a_sk_bits    " << bits2hex(c.in_0_a_sk_bits->get_bits(*c.pb)) << endl;
+    cout << "rho_bits     " << bits2hex(c.in_0_rho_bits->get_bits(*c.pb)) << endl;
+    cout << "r_bits       " << bits2hex(c.in_0_r_bits->get_bits(*c.pb)) << endl;
+    cout << "address_bits " << bits2hex(c.in_0_address_bits->get_bits(*c.pb)) << endl;
+    FieldT in_0_address = c.in_0_address_bits->get_field_element_from_bits(*c.pb);
+    cout << "address val  " << in_0_address << endl;
+    cout << "a_pk_bits    " << bits2hex(c.in_0_a_pk_bits->get_digest()) << endl;
+    cout << "cm_bits      " << bits2hex(c.in_0_cm_bits->get_digest()) << endl;
+    cout << "path" << endl;
+    for (auto bv : c.in_0_path->get_authentication_path(in_0_address.as_bigint().as_ulong())) {
+        cout << bits2hex(bv) << endl;
+    }
+
+    cout << endl;
+    cout << "IN 1" << endl;
+    cout << "v_bits       " << bits2hex(c.in_1_v_bits->get_bits(*c.pb)) << endl;
+    cout << "v val        " << c.in_1_v_bits->get_field_element_from_bits(*c.pb) << endl;
+    cout << "a_sk_bits    " << bits2hex(c.in_1_a_sk_bits->get_bits(*c.pb)) << endl;
+    cout << "rho_bits     " << bits2hex(c.in_1_rho_bits->get_bits(*c.pb)) << endl;
+    cout << "r_bits       " << bits2hex(c.in_1_r_bits->get_bits(*c.pb)) << endl;
+    cout << "address_bits " << bits2hex(c.in_1_address_bits->get_bits(*c.pb)) << endl;
+    FieldT in_1_address = c.in_1_address_bits->get_field_element_from_bits(*c.pb);
+    cout << "address val  " << in_1_address << endl;
+    cout << "a_pk_bits    " << bits2hex(c.in_1_a_pk_bits->get_digest()) << endl;
+    cout << "cm_bits      " << bits2hex(c.in_1_cm_bits->get_digest()) << endl;
+    cout << "path" << endl;
+    for (auto bv : c.in_1_path->get_authentication_path(in_1_address.as_bigint().as_ulong())) {
+        cout << bits2hex(bv) << endl;
+    }
+
+    cout << endl;
+    cout << "OUT 0" << endl;
+    cout << "v_bits       " << bits2hex(c.out_0_v_bits->get_bits(*c.pb)) << endl;
+    cout << "v val        " << c.out_0_v_bits->get_field_element_from_bits(*c.pb) << endl;
+    cout << "a_pk_bits    " << bits2hex(c.out_0_a_pk_bits->get_bits(*c.pb)) << endl;
+    cout << "rho_bits     " << bits2hex(c.out_0_rho_bits->get_bits(*c.pb)) << endl;
+    cout << "r_bits       " << bits2hex(c.out_0_r_bits->get_bits(*c.pb)) << endl;
+    cout << "cm_bits      " << bits2hex(c.out_0_cm_bits->get_digest()) << endl;
+
+    cout << endl;
+
+    cout << "OUT 1" << endl;
+    cout << "v_bits       " << bits2hex(c.out_1_v_bits->get_bits(*c.pb)) << endl;
+    cout << "v val        " << c.out_1_v_bits->get_field_element_from_bits(*c.pb) << endl;
+    cout << "a_pk_bits    " << bits2hex(c.out_1_a_pk_bits->get_bits(*c.pb)) << endl;
+    cout << "rho_bits     " << bits2hex(c.out_1_rho_bits->get_bits(*c.pb)) << endl;
+    cout << "r_bits       " << bits2hex(c.out_1_r_bits->get_bits(*c.pb)) << endl;
+    cout << "cm_bits      " << bits2hex(c.out_1_cm_bits->get_digest()) << endl;
+
+    cout << endl;
+    cout << "*******************************************************************" << endl;
+    cout << endl;
+    cout << endl;
 }
 
 #endif //ZKTRADE_TRANSFERCIRCUIT_TCC
