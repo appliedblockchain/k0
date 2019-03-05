@@ -16,10 +16,13 @@ namespace zktrade {
         pb_variable_array<FieldT> *in_0_sn_packed;
         pb_variable_array<FieldT> *in_1_sn_packed;
 
+        // TODO packed cms
+
         // Auxiliary inputs
         pb_variable<FieldT>* ZERO;
         digest_variable<FieldT> *rt_bits;
 
+        // TODO use arrays/vectors
         // First input
         pb_variable_array<FieldT> *in_0_v_bits;
         pb_variable_array<FieldT> *in_0_a_sk_bits;
@@ -49,6 +52,13 @@ namespace zktrade {
         pb_variable_array<FieldT> *out_0_r_bits;
         digest_variable<FieldT> *out_0_cm_bits;
 
+        // Second output
+        pb_variable_array<FieldT> *out_1_v_bits;
+        pb_variable_array<FieldT> *out_1_a_pk_bits;
+        pb_variable_array<FieldT> *out_1_rho_bits;
+        pb_variable_array<FieldT> *out_1_r_bits;
+        digest_variable<FieldT> *out_1_cm_bits;
+
         // Unpackers
         multipacking_gadget<FieldT> *rt_packer;
         multipacking_gadget<FieldT> *in_0_sn_packer;
@@ -58,6 +68,7 @@ namespace zktrade {
         input_note_gadget <FieldT, CommitmentHashT, MerkleTreeHashT> *in_0_note_gadget;
         input_note_gadget <FieldT, CommitmentHashT, MerkleTreeHashT> *in_1_note_gadget;
         cm_full_gadget<FieldT, CommitmentHashT> *out_0_cm_gadget;
+        cm_full_gadget<FieldT, CommitmentHashT> *out_1_cm_gadget;
     };
 
     template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
