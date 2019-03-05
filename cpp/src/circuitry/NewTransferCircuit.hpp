@@ -15,6 +15,8 @@ namespace zktrade {
         pb_variable_array<FieldT> *rt_packed;
         pb_variable_array<FieldT> *in_0_sn_packed;
         pb_variable_array<FieldT> *in_1_sn_packed;
+        pb_variable_array<FieldT> *out_0_cm_packed;
+        pb_variable_array<FieldT> *out_1_cm_packed;
 
         // TODO packed cms
 
@@ -59,10 +61,12 @@ namespace zktrade {
         pb_variable_array<FieldT> *out_1_r_bits;
         digest_variable<FieldT> *out_1_cm_bits;
 
-        // Unpackers
+        // Packers
         multipacking_gadget<FieldT> *rt_packer;
         multipacking_gadget<FieldT> *in_0_sn_packer;
         multipacking_gadget<FieldT> *in_1_sn_packer;
+        multipacking_gadget<FieldT> *out_0_cm_packer;
+        multipacking_gadget<FieldT> *out_1_cm_packer;
 
         // Note gadgets
         input_note_gadget <FieldT, CommitmentHashT, MerkleTreeHashT> *in_0_note_gadget;

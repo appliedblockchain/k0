@@ -201,6 +201,8 @@ TEST(Lifecycle, Full) {
         xfer_circuit.in_1_sn_packer->generate_r1cs_witness_from_bits();
         xfer_circuit.out_0_cm_gadget->generate_r1cs_witness();
         xfer_circuit.out_1_cm_gadget->generate_r1cs_witness();
+        xfer_circuit.out_0_cm_packer->generate_r1cs_witness_from_bits();
+        xfer_circuit.out_1_cm_packer->generate_r1cs_witness_from_bits();
 
         cout << "AFTER" << endl;
         cout << "Root " << bits2hex(xfer_circuit.rt_bits->get_digest()) << endl;
