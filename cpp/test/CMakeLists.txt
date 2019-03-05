@@ -1,15 +1,16 @@
 add_executable(
         letest
 
-        main.cpp
-        prfs.cpp
-        hashes.cpp
-        util.cpp
         bits_and_numbers.cpp
+        comms.cpp
+        hashes.cpp
         lifecycle.cpp
+        main.cpp
         merkle_tree.cpp
         merkle_tree_addition.cpp
+        prfs.cpp
         transfer.cpp
+        util.cpp
 )
 target_link_libraries(
         letest

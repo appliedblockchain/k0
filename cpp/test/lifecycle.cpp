@@ -26,17 +26,17 @@ TEST(Lifecycle, Full) {
         bit_vector r;
         bit_vector a_sk;
         uint64_t v;
+        bit_vector k;
         bit_vector cm;
     };
 
     vector<coin> coins;
 
-    size_t tree_height = 3;
+    size_t tree_height = 2;
 
     MerkleTree<MerkleTreeHashT> mt(tree_height);
 
     size_t num_initial_coins = exp2(tree_height) / 2;
-//    size_t num_initial_coins = exp2(tree_height);
 
     for (size_t address = 0; address < num_initial_coins; address++) {
 
@@ -59,11 +59,10 @@ TEST(Lifecycle, Full) {
         FieldT v = FieldT(v_str.c_str());
         bit_vector v_bits = uint64_to_bits(stoull(v_str));
 
-
         // Generate cm
         auto cm = comm_s<CommitmentHashT>(k, v_bits);
 
-        coin c{address, rho, r, a_sk, v_uint, cm};
+        coin c{address, rho, r, a_sk, v_uint, k, cm};
         coins.push_back(c);
 
         ASSERT_EQ(mt.num_elements(), address);
@@ -127,22 +126,30 @@ TEST(Lifecycle, Full) {
 
         cout << "Address " << input_0_address << endl;
 
-        coin c0 = coins[input_0_address];
-        bit_vector in_0_address_bits = int_to_bits<FieldT>(c0.address, tree_height);
-        bit_vector in_0_v_bits = uint64_to_bits(c0.v);
+        coin in_0 = coins[input_0_address];
+        bit_vector in_0_address_bits = int_to_bits<FieldT>(in_0.address, tree_height);
+        bit_vector in_0_v_bits = uint64_to_bits(in_0.v);
 
         coin c1 = coins[input_0_address + 1];
         bit_vector in_1_address_bits = int_to_bits<FieldT>(c1.address, tree_height);
         bit_vector in_1_v_bits = uint64_to_bits(c1.v);
 
-        // Generate proof
+        auto out_0_a_sk_bits = random_bits(256);
+        auto out_0_a_pk_bits = prf_addr<CommitmentHashT>(out_0_a_sk_bits);
+        auto out_0_rho_bits = random_bits(256);
+        auto out_0_r_bits = random_bits(384);
+        uint64_t out_0_v_uint = 5000000000000000000;
+        bit_vector out_0_v_bits = uint64_to_bits(out_0_v_uint);
+
+        auto out_0_k_bits = comm_r<CommitmentHashT>(out_0_a_pk_bits, out_0_rho_bits, out_0_r_bits);
+        auto out_0_cm_bits = comm_s<CommitmentHashT>(out_0_k_bits, out_0_v_bits);
         auto xfer_circuit = make_new_transfer_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(tree_height);
         xfer_circuit.rt_bits->generate_r1cs_witness(mt.root());
         xfer_circuit.pb->val(*xfer_circuit.ZERO) = FieldT::zero();
 
-        xfer_circuit.in_0_a_sk_bits->fill_with_bits(*xfer_circuit.pb, c0.a_sk);
-        xfer_circuit.in_0_rho_bits->fill_with_bits(*xfer_circuit.pb, c0.rho);
-        xfer_circuit.in_0_r_bits->fill_with_bits(*xfer_circuit.pb, c0.r);
+        xfer_circuit.in_0_a_sk_bits->fill_with_bits(*xfer_circuit.pb, in_0.a_sk);
+        xfer_circuit.in_0_rho_bits->fill_with_bits(*xfer_circuit.pb, in_0.rho);
+        xfer_circuit.in_0_r_bits->fill_with_bits(*xfer_circuit.pb, in_0.r);
         xfer_circuit.in_0_address_bits->fill_with_bits(*xfer_circuit.pb, in_0_address_bits);
         xfer_circuit.in_0_v_bits->fill_with_bits(*xfer_circuit.pb, in_0_v_bits);
         xfer_circuit.in_0_path->generate_r1cs_witness(input_0_address, mt.path(input_0_address));
@@ -153,6 +160,12 @@ TEST(Lifecycle, Full) {
         xfer_circuit.in_1_address_bits->fill_with_bits(*xfer_circuit.pb, in_1_address_bits);
         xfer_circuit.in_1_v_bits->fill_with_bits(*xfer_circuit.pb, in_1_v_bits);
         xfer_circuit.in_1_path->generate_r1cs_witness(input_0_address + 1, mt.path(input_0_address + 1));
+
+        // TODO Test all sorts of "unhappy" paths (especially different v_bits!)
+        xfer_circuit.out_0_a_pk_bits->fill_with_bits(*xfer_circuit.pb, out_0_a_pk_bits);
+        xfer_circuit.out_0_rho_bits->fill_with_bits(*xfer_circuit.pb, out_0_rho_bits);
+        xfer_circuit.out_0_r_bits->fill_with_bits(*xfer_circuit.pb, out_0_r_bits);
+        xfer_circuit.out_0_v_bits->fill_with_bits(*xfer_circuit.pb, out_0_v_bits);
 
         ASSERT_FALSE(xfer_circuit.pb->is_satisfied());
         xfer_circuit.rt_packer->generate_r1cs_witness_from_bits();
@@ -169,6 +182,7 @@ TEST(Lifecycle, Full) {
         xfer_circuit.in_1_note_gadget->generate_r1cs_witness();
         xfer_circuit.in_0_sn_packer->generate_r1cs_witness_from_bits();
         xfer_circuit.in_1_sn_packer->generate_r1cs_witness_from_bits();
+        xfer_circuit.out_0_cm_gadget->generate_r1cs_witness();
 
         cout << "AFTER" << endl;
         cout << "Root " << bits2hex(xfer_circuit.rt_bits->get_digest()) << endl;
@@ -182,28 +196,47 @@ TEST(Lifecycle, Full) {
 
         ASSERT_TRUE(xfer_circuit.pb->is_satisfied());
         ASSERT_EQ(xfer_circuit.in_0_v_bits->get_bits(*xfer_circuit.pb), in_0_v_bits);
-        ASSERT_EQ(xfer_circuit.in_0_cm_bits->get_digest(), c0.cm);
+        ASSERT_EQ(xfer_circuit.in_0_cm_bits->get_digest(), in_0.cm);
         ASSERT_EQ(xfer_circuit.rt_bits->get_digest(), mt.root());
+        ASSERT_EQ(xfer_circuit.out_0_a_pk_bits->get_bits(*xfer_circuit.pb), out_0_a_pk_bits);
+        ASSERT_EQ(xfer_circuit.out_0_cm_gadget->k_bits(), out_0_k_bits);
+        ASSERT_EQ(xfer_circuit.out_0_cm_bits->get_digest(), out_0_cm_bits);
 
         // Set original inputs again to make sure nothing has been overwritten
         xfer_circuit.rt_bits->generate_r1cs_witness(mt.root());
         xfer_circuit.pb->val(*xfer_circuit.ZERO) = FieldT::zero();
-        xfer_circuit.in_0_a_sk_bits->fill_with_bits(*xfer_circuit.pb, c0.a_sk);
-        xfer_circuit.in_0_rho_bits->fill_with_bits(*xfer_circuit.pb, c0.rho);
-        xfer_circuit.in_0_r_bits->fill_with_bits(*xfer_circuit.pb, c0.r);
+        xfer_circuit.in_0_a_sk_bits->fill_with_bits(*xfer_circuit.pb, in_0.a_sk);
+        xfer_circuit.in_0_rho_bits->fill_with_bits(*xfer_circuit.pb, in_0.rho);
+        xfer_circuit.in_0_r_bits->fill_with_bits(*xfer_circuit.pb, in_0.r);
         xfer_circuit.in_0_v_bits->fill_with_bits(*xfer_circuit.pb, in_0_v_bits);
         xfer_circuit.in_0_address_bits->fill_with_bits(*xfer_circuit.pb, in_0_address_bits);
         xfer_circuit.in_0_path->generate_r1cs_witness(input_0_address, mt.path(input_0_address));
         // Circuit should still be satisfied
         ASSERT_TRUE(xfer_circuit.pb->is_satisfied());
+
+        // Generate cm
+        coin out_0{
+            mt.num_elements(),
+            out_0_rho_bits,
+            out_0_r_bits,
+            out_0_a_sk_bits,
+            out_0_v_uint,
+            out_0_k_bits,
+            out_0_cm_bits};
+
+        coins.push_back(out_0);
+        mt.add(out_0_cm_bits);
     }
 
-    for (size_t address = 0; address < num_initial_coins; address++) {
+    for (size_t address = 0; address < coins.size(); address++) {
         // WITHDRAWAL/"UNSHIELDING"
 
         cout << "Address " << address << endl;
 
         coin c = coins[address];
+
+        cout << "k  " << bits2hex(c.k) << endl;
+        cout << "cm " << bits2hex(c.cm) << endl;
         bit_vector address_bits = int_to_bits<FieldT>(c.address, tree_height);
         string v_str = to_string(c.v);
         FieldT v = FieldT(v_str.c_str());
@@ -238,7 +271,7 @@ TEST(Lifecycle, Full) {
         wd_circuit.note_gadget->generate_r1cs_witness();
         wd_circuit.sn_packer->generate_r1cs_witness_from_bits();
 
-        cout << "AFTER" << endl;
+        cout << "AFTER " << address << endl;
         cout << "Root " << bits2hex(wd_circuit.rt_bits->get_digest()) << endl;
         cout << "a_sk          " << bits2hex(wd_circuit.a_sk_bits->get_bits(*wd_circuit.pb)) << endl;
         cout << "rho          " << bits2hex(wd_circuit.rho_bits->get_bits(*wd_circuit.pb)) << endl;

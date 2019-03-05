@@ -5,5 +5,6 @@
 /cpp/build
 /cpp/cmake-build-debug
 /cpp/cmake-build-debug-remote
+cpp/cmake-build-debug-remote-host
 /*/node_modules
 /*/package-lock.json

@@ -5,7 +5,6 @@
 #include <libsnark/gadgetlib1/gadgets/basic_gadgets.hpp>
 #include <libsnark/gadgetlib1/gadgets/merkle_tree/merkle_authentication_path_variable.hpp>
 #include <libsnark/gadgetlib1/gadgets/merkle_tree/merkle_tree_check_read_gadget.hpp>
-#include "gadgets/cm.h"
 #include "gadgets/input_note_gadget.hpp"
 #include "gadgets/prfs.hpp"
 #include "util.h"

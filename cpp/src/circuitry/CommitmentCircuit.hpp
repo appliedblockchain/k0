@@ -24,7 +24,7 @@ namespace zktrade {
         packing_gadget<FieldT>* v_packer;
         multipacking_gadget<FieldT>* cm_packer;
 
-        outer_commitment_gadget<FieldT, HashT>* commitment_gadget;
+        comm_s_gadget<FieldT, HashT>* commitment_gadget;
     };
     template<typename FieldT, typename HashT>
     CommitmentCircuit<FieldT, HashT> make_commitment_circuit();

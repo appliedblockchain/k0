@@ -108,7 +108,7 @@ zktrade::make_transfer_circuit(size_t tree_height) {
     vector<pb_variable_array<FieldT> *> r_out_bits_vec(2);
     vector<pb_variable_array<FieldT> *> v_out_bits_vec(2);
     vector<digest_variable<FieldT> *> cm_out_bits_vec(2);
-    vector<cm_gadget<FieldT, CommitmentHashT> *> cm_out_gadget_vec(2);
+    vector<cm_full_gadget<FieldT, CommitmentHashT> *> cm_out_gadget_vec(2);
     vector<multipacking_gadget<FieldT> *> cm_out_packer_vec(2);
 
     for (int i = 0; i < 2; i++) {
@@ -130,7 +130,7 @@ zktrade::make_transfer_circuit(size_t tree_height) {
                 *pb, 256, "cm_out_" + to_string(i) + "_bits");
         cm_out_bits_vec[i]->generate_r1cs_constraints();
 
-        cm_out_gadget_vec[i] = new cm_gadget<FieldT, CommitmentHashT>(
+        cm_out_gadget_vec[i] = new cm_full_gadget<FieldT, CommitmentHashT>(
                 *pb, *ZERO, *a_pk_out_bits_vec[i], *rho_out_bits_vec[i],
                 *r_out_bits_vec[i], *v_out_bits_vec[i],
                 *cm_out_bits_vec[i], "cm_out_" + to_string(i) + "_gadget");

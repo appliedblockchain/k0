@@ -25,7 +25,6 @@ zktrade::make_new_transfer_circuit(size_t tree_height) {
             new digest_variable<FieldT>(*pb, 256, "rt_bits");
 
 
-
     pb_variable_array<FieldT> *in_0_v_bits = new pb_variable_array<FieldT>();
     in_0_v_bits->allocate(*pb, 64, "in_0_v_bits");
 
@@ -46,12 +45,13 @@ zktrade::make_new_transfer_circuit(size_t tree_height) {
                     *pb, tree_height, "in_0_path");
 
     auto in_0_a_pk_bits = make_shared<digest_variable<FieldT>>(*pb, 256,
-                                                          "a_pk_bits");
+                                                               "a_pk_bits");
 
     digest_variable<FieldT> *in_0_cm_bits =
             new digest_variable<FieldT>(*pb, 256, "in_0_cm_bits");
 
-    auto in_0_sn_bits = make_shared<digest_variable<FieldT>>(*pb, 256, "in_0_sn_bits");
+    auto in_0_sn_bits = make_shared<digest_variable<FieldT>>(*pb, 256,
+                                                             "in_0_sn_bits");
 
 
     pb_variable_array<FieldT> *in_1_v_bits = new pb_variable_array<FieldT>();
@@ -74,12 +74,29 @@ zktrade::make_new_transfer_circuit(size_t tree_height) {
                     *pb, tree_height, "in_1_path");
 
     auto in_1_a_pk_bits = make_shared<digest_variable<FieldT>>(*pb, 256,
-                                                          "a_pk_bits");
+                                                               "a_pk_bits");
 
     digest_variable<FieldT> *in_1_cm_bits =
             new digest_variable<FieldT>(*pb, 256, "in_1_cm_bits");
 
-    auto in_1_sn_bits = make_shared<digest_variable<FieldT>>(*pb, 256, "in_1_sn_bits");
+    auto in_1_sn_bits = make_shared<digest_variable<FieldT>>(*pb, 256,
+                                                             "in_1_sn_bits");
+
+
+    pb_variable_array<FieldT> *out_0_v_bits = new pb_variable_array<FieldT>();
+    out_0_v_bits->allocate(*pb, 64, "out_0_v_bits");
+
+    pb_variable_array<FieldT> *out_0_a_pk_bits = new pb_variable_array<FieldT>();
+    out_0_a_pk_bits->allocate(*pb, 256, "out_0_a_pk_bits");
+
+    pb_variable_array<FieldT> *out_0_rho_bits = new pb_variable_array<FieldT>();
+    out_0_rho_bits->allocate(*pb, 256, "out_0_rho_bits");
+
+    pb_variable_array<FieldT> *out_0_r_bits = new pb_variable_array<FieldT>();
+    out_0_r_bits->allocate(*pb, 384, "out_0_r_bits");
+
+    digest_variable<FieldT> *out_0_cm_bits =
+            new digest_variable<FieldT>(*pb, 256, "out_0_cm_bits");
 
 
     multipacking_gadget<FieldT> *rt_packer =
@@ -128,6 +145,16 @@ zktrade::make_new_transfer_circuit(size_t tree_height) {
                     in_1_sn_bits,
                     "in_1_note_gadget");
 
+    auto out_0_cm_gadget = new cm_full_gadget<FieldT, CommitmentHashT>(
+            *pb,
+            *ZERO,
+            *out_0_a_pk_bits,
+            *out_0_rho_bits,
+            *out_0_r_bits,
+            *out_0_v_bits,
+            *out_0_cm_bits,
+            "out_0_cm_gadget");
+
     pb->add_r1cs_constraint(
             r1cs_constraint<FieldT>(*ZERO, ONE, FieldT::zero()),
             "ZERO must equal zero");
@@ -145,6 +172,7 @@ zktrade::make_new_transfer_circuit(size_t tree_height) {
     in_0_note_gadget->generate_r1cs_constraints();
     in_1_sn_packer->generate_r1cs_constraints(true);
     in_1_note_gadget->generate_r1cs_constraints();
+    out_0_cm_gadget->generate_r1cs_constraints();
 
     NewTransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> circuit{
             pb,
@@ -175,11 +203,18 @@ zktrade::make_new_transfer_circuit(size_t tree_height) {
             in_1_cm_bits,
             in_1_sn_bits,
 
+            out_0_v_bits,
+            out_0_a_pk_bits,
+            out_0_rho_bits,
+            out_0_r_bits,
+            out_0_cm_bits,
+
             rt_packer,
             in_0_sn_packer,
             in_1_sn_packer,
             in_0_note_gadget,
-            in_1_note_gadget
+            in_1_note_gadget,
+            out_0_cm_gadget
     };
 
     return circuit;

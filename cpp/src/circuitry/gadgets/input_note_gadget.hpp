@@ -2,7 +2,7 @@
 #define ZKTRADE_INPUT_NOTE_GADGET_HPP
 
 #include <libsnark/gadgetlib1/gadgets/merkle_tree/merkle_tree_check_read_gadget.hpp>
-#include "circuitry/gadgets/cm.h"
+#include "circuitry/gadgets/comms.hpp"
 #include "circuitry/gadgets/prfs.hpp"
 
 namespace zktrade {
@@ -11,7 +11,7 @@ namespace zktrade {
     class input_note_gadget : public gadget<FieldT> {
     private:
         prf_addr_gadget<FieldT, CommitmentHashT> addr_gadget;
-        cm_gadget<FieldT, CommitmentHashT> commitment_gadget;
+        cm_full_gadget<FieldT, CommitmentHashT> commitment_gadget;
         merkle_tree_check_read_gadget<FieldT, MerkleTreeHashT> mt_path_gadget;
         prf_sn_gadget<FieldT, CommitmentHashT> sn_gadget;
     public:

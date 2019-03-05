@@ -3,7 +3,7 @@
 
 #include <libsnark/gadgetlib1/gadgets/merkle_tree/merkle_authentication_path_variable.hpp>
 #include "circuitry/gadgets/input_note_gadget.hpp"
-#include "circuitry/gadgets/cm.h"
+#include "circuitry/gadgets/comms.hpp"
 
 namespace zktrade {
     template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
@@ -36,7 +36,7 @@ namespace zktrade {
         vector<pb_variable_array<FieldT> *> r_out_bits_vec;
         vector<pb_variable_array<FieldT>*> v_out_bits_vec;
         vector<digest_variable<FieldT> *> cm_out_bits_vec;
-        vector<cm_gadget<FieldT, CommitmentHashT> *> cm_out_gadget_vec;
+        vector<cm_full_gadget<FieldT, CommitmentHashT> *> cm_out_gadget_vec;
         vector<multipacking_gadget<FieldT> *> cm_out_packer_vec;
 
         // TODO sum-of-inputs-equals-sum-of-outputs gadget

@@ -1,5 +1,5 @@
 template<typename FieldT, typename HashT>
-CommitmentCircuit <FieldT, HashT>
+CommitmentCircuit<FieldT, HashT>
 zktrade::make_commitment_circuit() {
 
     auto pb = new protoboard<FieldT>();
@@ -38,9 +38,9 @@ zktrade::make_commitment_circuit() {
                                             "cm_packer");
 
     auto commitment_gadget =
-            new outer_commitment_gadget<FieldT, HashT>(*pb, *ZERO, *k_bits, *v_bits,
-                                                *cm_bits,
-                                                "outer_commitment_gadget");
+            new comm_s_gadget<FieldT, HashT>(*pb, *ZERO, *k_bits, *v_bits,
+                                              *cm_bits,
+                                              "outer_commitment_gadget");
 
 
     pb->add_r1cs_constraint(
