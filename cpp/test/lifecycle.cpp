@@ -4,7 +4,7 @@
 #include "circuitry/CommitmentCircuit.hpp"
 #include "circuitry/MTAdditionCircuit.hpp"
 #include "circuitry/WithdrawalCircuit.hpp"
-#include "circuitry/NewTransferCircuit.hpp"
+#include "circuitry/TransferCircuit.hpp"
 #include "MerkleTree.hpp"
 #include "scheme/comms.hpp"
 #include "scheme/prfs.h"
@@ -154,7 +154,7 @@ TEST(Lifecycle, Full) {
         auto out_1_k_bits = comm_r<CommitmentHashT>(out_1_a_pk_bits, out_1_rho_bits, out_1_r_bits);
         auto out_1_cm_bits = comm_s<CommitmentHashT>(out_1_k_bits, out_1_v_bits);
 
-        auto xfer_circuit = make_new_transfer_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(tree_height);
+        auto xfer_circuit = make_transfer_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(tree_height);
 
         xfer_circuit.rt_bits->generate_r1cs_witness(mt.root());
         xfer_circuit.pb->val(*xfer_circuit.ZERO) = FieldT::zero();

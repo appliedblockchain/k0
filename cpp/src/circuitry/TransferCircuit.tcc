@@ -1,178 +1,277 @@
-#include <libsnark/gadgetlib1/gadgets/basic_gadgets.hpp>
+#ifndef ZKTRADE_TRANSFERCIRCUIT_TCC
+#define ZKTRADE_TRANSFERCIRCUIT_TCC
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 TransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT>
 zktrade::make_transfer_circuit(size_t tree_height) {
-    auto pb = new protoboard<FieldT>();
+    protoboard<FieldT> *pb = new protoboard<FieldT>();
 
-    auto rt_packed = new pb_variable_array<FieldT>();
+    pb_variable_array<FieldT> *rt_packed = new pb_variable_array<FieldT>();
     rt_packed->allocate(*pb, 2, "rt_packed");
 
-    vector<pb_variable_array<FieldT> *> sn_in_packed_vec(2);
-    vector<pb_variable_array<FieldT> *> cm_out_packed_vec(2);
+    pb_variable_array<FieldT> *in_0_sn_packed = new pb_variable_array<FieldT>();
+    in_0_sn_packed->allocate(*pb, 2, "in_0_sn_packed");
 
-    for (int i = 0; i < 2; i++) {
-        sn_in_packed_vec[i] = new pb_variable_array<FieldT>();
-        sn_in_packed_vec[i]->allocate(*pb, 2,
-                                      "sn_in_" + to_string(i) + "_packed");
-    }
+    pb_variable_array<FieldT> *in_1_sn_packed = new pb_variable_array<FieldT>();
+    in_1_sn_packed->allocate(*pb, 2, "in_1_sn_packed");
 
-    for (int i = 0; i < 2; i++) {
-        cm_out_packed_vec[i] = new pb_variable_array<FieldT>();
-        cm_out_packed_vec[i]->allocate(*pb, 2,
-                                       "cm_out_" + to_string(i) + "_packed");
-    }
+    pb_variable_array<FieldT> *out_0_cm_packed = new pb_variable_array<FieldT>();
+    out_0_cm_packed->allocate(*pb, 2, "out_0_cm_packed");
+
+    pb_variable_array<FieldT> *out_1_cm_packed = new pb_variable_array<FieldT>();
+    out_1_cm_packed->allocate(*pb, 2, "out_1_cm_packed");
 
     pb->set_input_sizes(10);
 
-    auto ZERO = new pb_variable<FieldT>();
+    pb_variable<FieldT> *ZERO = new pb_variable<FieldT>();
     ZERO->allocate(*pb, "ZERO");
 
-    auto rt_bits = new digest_variable<FieldT>(*pb, 256, "rt_bits");
-    rt_bits->generate_r1cs_constraints();
+    digest_variable<FieldT> *rt_bits =
+            new digest_variable<FieldT>(*pb, 256, "rt_bits");
 
-    vector<pb_variable_array<FieldT> *> a_sk_in_bits_vec(2);
-    vector<shared_ptr<digest_variable<FieldT>>> a_pk_in_bits_vec(2);
-    vector<pb_variable_array<FieldT> *> rho_in_bits_vec(2);
-    vector<pb_variable_array<FieldT> *> r_in_bits_vec(2);
-    vector<pb_variable_array<FieldT> *> v_in_bits_vec(2);
-    vector<digest_variable<FieldT> *> cm_in_bits_vec(2);
-    vector<shared_ptr<digest_variable<FieldT>>> sn_in_bits_vec(2);
-    vector<pb_variable_array<FieldT> *> address_in_bits_vec(2);
-    vector<merkle_authentication_path_variable<FieldT, MerkleTreeHashT> *> path_in_vec(2);
-    vector<multipacking_gadget<FieldT> *> sn_in_packer_vec(2);
-    vector<input_note_gadget<FieldT, CommitmentHashT, MerkleTreeHashT> *> input_note_vec(
-            2);
 
-    for (int i = 0; i < 2; i++) {
-        a_sk_in_bits_vec[i] = new pb_variable_array<FieldT>();
-        a_sk_in_bits_vec[i]->allocate(*pb, 256,
-                                  "a_sk_in_" + to_string(i) + "_bits");
+    pb_variable_array<FieldT> *in_0_v_bits = new pb_variable_array<FieldT>();
+    in_0_v_bits->allocate(*pb, 64, "in_0_v_bits");
 
-        a_pk_in_bits_vec[i] = make_shared<digest_variable<FieldT>>(
-                *pb, 256, "a_pk_in_" + to_string(i) + "_bits");
-        a_pk_in_bits_vec[i]->generate_r1cs_constraints();
+    pb_variable_array<FieldT> *in_0_a_sk_bits = new pb_variable_array<FieldT>();
+    in_0_a_sk_bits->allocate(*pb, 256, "in_0_a_sk_bits");
 
-        rho_in_bits_vec[i] = new pb_variable_array<FieldT>();
-        rho_in_bits_vec[i]->allocate(*pb, 256, "rho_in_" + to_string(i) + "_bits");
+    pb_variable_array<FieldT> *in_0_rho_bits = new pb_variable_array<FieldT>();
+    in_0_rho_bits->allocate(*pb, 256, "in_0_rho_bits");
 
-        r_in_bits_vec[i] = new pb_variable_array<FieldT>();
-        r_in_bits_vec[i]->allocate(*pb, 384, "r_in_" + to_string(i) + "_bits");
+    pb_variable_array<FieldT> *in_0_r_bits = new pb_variable_array<FieldT>();
+    in_0_r_bits->allocate(*pb, 384, "in_0_r_bits");
 
-        v_in_bits_vec[i] = new pb_variable_array<FieldT>();
-        v_in_bits_vec[i]->allocate(*pb, 64, "v_in_" + to_string(i) + "_bits");
+    pb_variable_array<FieldT> *in_0_address_bits = new pb_variable_array<FieldT>();
+    in_0_address_bits->allocate(*pb, tree_height, "address_bits");
 
-        cm_in_bits_vec[i] = new digest_variable<FieldT>(
-                *pb, 256, "cm_in_" + to_string(i) + "_bits");
-        cm_in_bits_vec[i]->generate_r1cs_constraints();
+    merkle_authentication_path_variable<FieldT, MerkleTreeHashT> *in_0_path =
+            new merkle_authentication_path_variable<FieldT, MerkleTreeHashT>(
+                    *pb, tree_height, "in_0_path");
 
-        sn_in_bits_vec[i] = make_shared<digest_variable<FieldT>>(
-                *pb, 256, "sn_in_" + to_string(i) + "_bits");
-        sn_in_bits_vec[i]->generate_r1cs_constraints();
+    auto in_0_a_pk_bits = make_shared<digest_variable<FieldT>>(*pb, 256,
+                                                               "a_pk_bits");
 
-        address_in_bits_vec[i] = new pb_variable_array<FieldT>();
-        address_in_bits_vec[i]->allocate(
-                *pb, tree_height, "address_in_" + to_string(i) + "_bits");
+    digest_variable<FieldT> *in_0_cm_bits =
+            new digest_variable<FieldT>(*pb, 256, "in_0_cm_bits");
 
-        path_in_vec[i] =
-                new merkle_authentication_path_variable<FieldT, MerkleTreeHashT>(
-                        *pb, tree_height, "path_in_" + to_string(i));
+    auto in_0_sn_bits = make_shared<digest_variable<FieldT>>(*pb, 256,
+                                                             "in_0_sn_bits");
 
-        path_in_vec[i]->generate_r1cs_constraints();
 
-        sn_in_packer_vec[i] = new multipacking_gadget<FieldT>(
-                *pb, sn_in_bits_vec[i]->bits, *sn_in_packed_vec[i], 128,
-                "sn_in_" + to_string(i) + "_packer");
-        sn_in_packer_vec[i]->generate_r1cs_constraints(true);
+    pb_variable_array<FieldT> *in_1_v_bits = new pb_variable_array<FieldT>();
+    in_1_v_bits->allocate(*pb, 64, "in_1_v_bits");
 
-        input_note_vec[i] = new input_note_gadget<FieldT, CommitmentHashT, MerkleTreeHashT>(
-                tree_height,
-                *pb,
-                *ZERO,
-                *rt_bits,
-                *v_in_bits_vec[i],
-                *a_sk_in_bits_vec[i],
-                *rho_in_bits_vec[i],
-                *r_in_bits_vec[i],
-                *address_in_bits_vec[i],
-                *path_in_vec[i],
-                a_pk_in_bits_vec[i],
-                *cm_in_bits_vec[i],
-                sn_in_bits_vec[i],
-                "input_note_" + to_string(i) + "_gadget");
-        input_note_vec[i]->generate_r1cs_constraints();
-    }
+    pb_variable_array<FieldT> *in_1_a_sk_bits = new pb_variable_array<FieldT>();
+    in_1_a_sk_bits->allocate(*pb, 256, "in_1_a_sk_bits");
 
-    vector<pb_variable_array<FieldT> *> a_pk_out_bits_vec(2);
-    vector<pb_variable_array<FieldT> *> rho_out_bits_vec(2);
-    vector<pb_variable_array<FieldT> *> r_out_bits_vec(2);
-    vector<pb_variable_array<FieldT> *> v_out_bits_vec(2);
-    vector<digest_variable<FieldT> *> cm_out_bits_vec(2);
-    vector<cm_full_gadget<FieldT, CommitmentHashT> *> cm_out_gadget_vec(2);
-    vector<multipacking_gadget<FieldT> *> cm_out_packer_vec(2);
+    pb_variable_array<FieldT> *in_1_rho_bits = new pb_variable_array<FieldT>();
+    in_1_rho_bits->allocate(*pb, 256, "in_1_rho_bits");
 
-    for (int i = 0; i < 2; i++) {
-        a_pk_out_bits_vec[i] = new pb_variable_array<FieldT>();
-        a_pk_out_bits_vec[i]->allocate(*pb, 256,
-                                   "a_pk_out_" + to_string(i) + "_bits");
+    pb_variable_array<FieldT> *in_1_r_bits = new pb_variable_array<FieldT>();
+    in_1_r_bits->allocate(*pb, 384, "in_1_r_bits");
 
-        rho_out_bits_vec[i] = new pb_variable_array<FieldT>();
-        rho_out_bits_vec[i]->allocate(*pb, 256,
-                                  "rho_out_" + to_string(i) + "_bits");
+    pb_variable_array<FieldT> *in_1_address_bits = new pb_variable_array<FieldT>();
+    in_1_address_bits->allocate(*pb, tree_height, "address_bits");
 
-        r_out_bits_vec[i] = new pb_variable_array<FieldT>();
-        r_out_bits_vec[i]->allocate(*pb, 384, "r_out_" + to_string(i) + "_bits");
+    merkle_authentication_path_variable<FieldT, MerkleTreeHashT> *in_1_path =
+            new merkle_authentication_path_variable<FieldT, MerkleTreeHashT>(
+                    *pb, tree_height, "in_1_path");
 
-        v_out_bits_vec[i] = new pb_variable_array<FieldT>();
-        v_out_bits_vec[i]->allocate(*pb, 64, "v_out_" + to_string(i) + "_bits");
+    auto in_1_a_pk_bits = make_shared<digest_variable<FieldT>>(*pb, 256,
+                                                               "a_pk_bits");
 
-        cm_out_bits_vec[i] = new digest_variable<FieldT>(
-                *pb, 256, "cm_out_" + to_string(i) + "_bits");
-        cm_out_bits_vec[i]->generate_r1cs_constraints();
+    digest_variable<FieldT> *in_1_cm_bits =
+            new digest_variable<FieldT>(*pb, 256, "in_1_cm_bits");
 
-        cm_out_gadget_vec[i] = new cm_full_gadget<FieldT, CommitmentHashT>(
-                *pb, *ZERO, *a_pk_out_bits_vec[i], *rho_out_bits_vec[i],
-                *r_out_bits_vec[i], *v_out_bits_vec[i],
-                *cm_out_bits_vec[i], "cm_out_" + to_string(i) + "_gadget");
-        cm_out_gadget_vec[i]->generate_r1cs_constraints();
+    auto in_1_sn_bits = make_shared<digest_variable<FieldT>>(*pb, 256,
+                                                             "in_1_sn_bits");
 
-        cm_out_packer_vec[i] = new multipacking_gadget<FieldT>(
-                *pb, cm_out_bits_vec[i]->bits, *cm_out_packed_vec[i], 128,
-                "cm_out_" + to_string(i) + "_packer");
-        cm_out_packer_vec[i]->generate_r1cs_constraints(true);
-    }
 
-    auto rt_packer = new multipacking_gadget<FieldT>(
-            *pb, rt_bits->bits, *rt_packed, 128, "rt_packer");
+    pb_variable_array<FieldT> *out_0_v_bits = new pb_variable_array<FieldT>();
+    out_0_v_bits->allocate(*pb, 64, "out_0_v_bits");
 
-    generate_r1cs_equals_const_constraint<FieldT>(
-            *pb, *ZERO, FieldT::zero(), "ZERO must be zero");
+    pb_variable_array<FieldT> *out_0_a_pk_bits = new pb_variable_array<FieldT>();
+    out_0_a_pk_bits->allocate(*pb, 256, "out_0_a_pk_bits");
 
-    return {
+    pb_variable_array<FieldT> *out_0_rho_bits = new pb_variable_array<FieldT>();
+    out_0_rho_bits->allocate(*pb, 256, "out_0_rho_bits");
+
+    pb_variable_array<FieldT> *out_0_r_bits = new pb_variable_array<FieldT>();
+    out_0_r_bits->allocate(*pb, 384, "out_0_r_bits");
+
+    digest_variable<FieldT> *out_0_cm_bits =
+            new digest_variable<FieldT>(*pb, 256, "out_0_cm_bits");
+
+
+    pb_variable_array<FieldT> *out_1_v_bits = new pb_variable_array<FieldT>();
+    out_1_v_bits->allocate(*pb, 64, "out_1_v_bits");
+
+    pb_variable_array<FieldT> *out_1_a_pk_bits = new pb_variable_array<FieldT>();
+    out_1_a_pk_bits->allocate(*pb, 256, "out_1_a_pk_bits");
+
+    pb_variable_array<FieldT> *out_1_rho_bits = new pb_variable_array<FieldT>();
+    out_1_rho_bits->allocate(*pb, 256, "out_1_rho_bits");
+
+    pb_variable_array<FieldT> *out_1_r_bits = new pb_variable_array<FieldT>();
+    out_1_r_bits->allocate(*pb, 384, "out_1_r_bits");
+
+    digest_variable<FieldT> *out_1_cm_bits =
+            new digest_variable<FieldT>(*pb, 256, "out_1_cm_bits");
+
+
+    multipacking_gadget<FieldT> *rt_packer =
+            new multipacking_gadget<FieldT>(
+                    *pb, rt_bits->bits, *rt_packed, 128, "rt_packer");
+
+    multipacking_gadget<FieldT> *in_0_sn_packer =
+            new multipacking_gadget<FieldT>(
+                    *pb, in_0_sn_bits->bits, *in_0_sn_packed, 128, "in_0_sn_packer");
+
+    multipacking_gadget<FieldT> *in_1_sn_packer =
+            new multipacking_gadget<FieldT>(
+                    *pb, in_1_sn_bits->bits, *in_1_sn_packed, 128, "in_1_sn_packer");
+
+    multipacking_gadget<FieldT> *out_0_cm_packer =
+            new multipacking_gadget<FieldT>(
+                    *pb, out_0_cm_bits->bits, *out_0_cm_packed, 128, "out_0_cm_packer");
+
+    multipacking_gadget<FieldT> *out_1_cm_packer =
+            new multipacking_gadget<FieldT>(
+                    *pb, out_1_cm_bits->bits, *out_1_cm_packed, 128, "out_0_cm_packer");
+
+    auto in_0_note_gadget =
+            new input_note_gadget<FieldT, CommitmentHashT, MerkleTreeHashT>(
+                    tree_height,
+                    *pb,
+                    *ZERO,
+                    *rt_bits,
+                    *in_0_v_bits,
+                    *in_0_a_sk_bits,
+                    *in_0_rho_bits,
+                    *in_0_r_bits,
+                    *in_0_address_bits,
+                    *in_0_path,
+                    in_0_a_pk_bits,
+                    *in_0_cm_bits,
+                    in_0_sn_bits,
+                    "in_0_note_gadget");
+
+    auto in_1_note_gadget =
+            new input_note_gadget<FieldT, CommitmentHashT, MerkleTreeHashT>(
+                    tree_height,
+                    *pb,
+                    *ZERO,
+                    *rt_bits,
+                    *in_1_v_bits,
+                    *in_1_a_sk_bits,
+                    *in_1_rho_bits,
+                    *in_1_r_bits,
+                    *in_1_address_bits,
+                    *in_1_path,
+                    in_1_a_pk_bits,
+                    *in_1_cm_bits,
+                    in_1_sn_bits,
+                    "in_1_note_gadget");
+
+    auto out_0_cm_gadget = new cm_full_gadget<FieldT, CommitmentHashT>(
+            *pb,
+            *ZERO,
+            *out_0_a_pk_bits,
+            *out_0_rho_bits,
+            *out_0_r_bits,
+            *out_0_v_bits,
+            *out_0_cm_bits,
+            "out_0_cm_gadget");
+
+    auto out_1_cm_gadget = new cm_full_gadget<FieldT, CommitmentHashT>(
+            *pb,
+            *ZERO,
+            *out_1_a_pk_bits,
+            *out_1_rho_bits,
+            *out_1_r_bits,
+            *out_1_v_bits,
+            *out_1_cm_bits,
+            "out_1_cm_gadget");
+
+    pb->add_r1cs_constraint(
+            r1cs_constraint<FieldT>(*ZERO, ONE, FieldT::zero()),
+            "ZERO must equal zero");
+
+    in_0_path->generate_r1cs_constraints();
+    in_0_a_pk_bits->generate_r1cs_constraints();
+    in_0_cm_bits->generate_r1cs_constraints();
+    in_1_path->generate_r1cs_constraints();
+    in_1_a_pk_bits->generate_r1cs_constraints();
+    in_1_cm_bits->generate_r1cs_constraints();
+    out_0_cm_bits->generate_r1cs_constraints();
+    out_1_cm_bits->generate_r1cs_constraints();
+
+    rt_packer->generate_r1cs_constraints(true);
+    in_0_sn_packer->generate_r1cs_constraints(true);
+    in_0_note_gadget->generate_r1cs_constraints();
+    in_1_sn_packer->generate_r1cs_constraints(true);
+    in_1_note_gadget->generate_r1cs_constraints();
+    out_0_cm_gadget->generate_r1cs_constraints();
+    out_0_cm_packer->generate_r1cs_constraints(true);
+    out_1_cm_gadget->generate_r1cs_constraints();
+    out_1_cm_packer->generate_r1cs_constraints(true);
+
+    TransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> circuit{
             pb,
             rt_packed,
-            sn_in_packed_vec,
-            cm_out_packed_vec,
+            in_0_sn_packed,
+            in_1_sn_packed,
+            out_0_cm_packed,
+            out_1_cm_packed,
+
             ZERO,
             rt_bits,
-            a_sk_in_bits_vec,
-            a_pk_in_bits_vec,
-            rho_in_bits_vec,
-            r_in_bits_vec,
-            v_in_bits_vec,
-            cm_in_bits_vec,
-            sn_in_bits_vec,
-            address_in_bits_vec,
-            path_in_vec,
-            sn_in_packer_vec,
-            input_note_vec,
-            a_pk_out_bits_vec,
-            rho_out_bits_vec,
-            r_out_bits_vec,
-            v_out_bits_vec,
-            cm_out_bits_vec,
-            cm_out_gadget_vec,
-            cm_out_packer_vec,
-            rt_packer
+
+            in_0_v_bits,
+            in_0_a_sk_bits,
+            in_0_rho_bits,
+            in_0_r_bits,
+            in_0_address_bits,
+            in_0_path,
+            in_0_a_pk_bits,
+            in_0_cm_bits,
+            in_0_sn_bits,
+
+            in_1_v_bits,
+            in_1_a_sk_bits,
+            in_1_rho_bits,
+            in_1_r_bits,
+            in_1_address_bits,
+            in_1_path,
+            in_1_a_pk_bits,
+            in_1_cm_bits,
+            in_1_sn_bits,
+
+            out_0_v_bits,
+            out_0_a_pk_bits,
+            out_0_rho_bits,
+            out_0_r_bits,
+            out_0_cm_bits,
+
+            out_1_v_bits,
+            out_1_a_pk_bits,
+            out_1_rho_bits,
+            out_1_r_bits,
+            out_1_cm_bits,
+
+            rt_packer,
+            in_0_sn_packer,
+            in_1_sn_packer,
+            out_0_cm_packer,
+            out_1_cm_packer,
+            in_0_note_gadget,
+            in_1_note_gadget,
+            out_0_cm_gadget,
+            out_1_cm_gadget
     };
+
+    return circuit;
 }
+
+#endif //ZKTRADE_TRANSFERCIRCUIT_TCC
