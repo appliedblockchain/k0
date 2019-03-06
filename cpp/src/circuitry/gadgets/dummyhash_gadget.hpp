@@ -4,27 +4,23 @@
 #include <libsnark/common/data_structures/merkle_tree.hpp>
 #include <libsnark/gadgetlib1/gadgets/basic_gadgets.hpp>
 #include <libsnark/gadgetlib1/gadgets/hashes/hash_io.hpp>
-#include <libsnark/gadgetlib1/gadgets/hashes/sha256/sha256_components.hpp>
+#include <libsnark/gadgetlib1/gadgets/hashes/knapsack/knapsack_gadget.hpp>
 
 using namespace libsnark;
 
 namespace zktrade {
 
 template<typename FieldT>
-class dummyhash_compression_function_gadget : public gadget<FieldT> {
+class dummyhash_knapsack_wrapper_gadget : public gadget<FieldT> {
+private:
+    protoboard<FieldT> *pb;
+    const block_variable<FieldT> *block;
+    const digest_variable<FieldT> *output;
+    digest_variable<FieldT> knapsack_output;
+    knapsack_CRH_with_bit_out_gadget<FieldT> knapsack_crh;
 public:
-    pb_variable_array<FieldT> A;
-    pb_variable_array<FieldT> B;
-    pb_variable_array<FieldT> C;
-    pb_variable_array<FieldT> tmp;
-public:
-    pb_linear_combination_array<FieldT> prev_output;
-    pb_variable_array<FieldT> new_block;
-    digest_variable<FieldT> output;
-
-    dummyhash_compression_function_gadget(protoboard<FieldT> &pb,
-                                       const pb_linear_combination_array<FieldT> &prev_output,
-                                       const pb_variable_array<FieldT> &new_block,
+    dummyhash_knapsack_wrapper_gadget(protoboard<FieldT> &pb,
+                                       const block_variable<FieldT> &block,
                                        const digest_variable<FieldT> &output,
                                        const std::string &annotation_prefix);
     void generate_r1cs_constraints();
@@ -38,7 +34,7 @@ public:
         typedef libff::bit_vector hash_value_type;
         typedef merkle_authentication_path merkle_authentication_path_type;
 
-        std::shared_ptr<dummyhash_compression_function_gadget<FieldT> > f;
+        std::shared_ptr<dummyhash_knapsack_wrapper_gadget<FieldT> > f;
 
         dummyhash_two_to_one_hash_gadget(protoboard<FieldT> &pb,
                                       const digest_variable<FieldT> &left,
@@ -64,7 +60,7 @@ public:
     template<typename FieldT>
     class dummyhash_compression_gadget : public gadget<FieldT> {
     private:
-        std::unique_ptr<dummyhash_compression_function_gadget<FieldT> > f;
+        std::unique_ptr<dummyhash_knapsack_wrapper_gadget<FieldT> > f;
     public:
         dummyhash_compression_gadget(
                 protoboard<FieldT> &pb,

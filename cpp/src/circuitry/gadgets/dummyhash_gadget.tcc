@@ -4,99 +4,39 @@
 using namespace std;
 
 template<typename FieldT>
-zktrade::dummyhash_compression_function_gadget<FieldT>::dummyhash_compression_function_gadget(
-        protoboard<FieldT>
-        &pb,
-        const pb_linear_combination_array<FieldT> &prev_output,
-        const pb_variable_array<FieldT> &new_block,
+zktrade::dummyhash_knapsack_wrapper_gadget<FieldT>::dummyhash_knapsack_wrapper_gadget(
+        protoboard<FieldT> &pb,
+        const block_variable<FieldT> &block,
         const digest_variable<FieldT> &output,
-        const std::string &annotation_prefix
-) :
-        gadget<FieldT>(pb, annotation_prefix),
-        A(new_block.begin(), new_block.begin() + 256),
-        B(new_block.begin() + 256, new_block.end()),
-        prev_output(prev_output),
-        new_block(new_block),
-        output(output) {
-    C.allocate(pb, 256, FMT(annotation_prefix, " C"));
-    for (size_t i = 0; i < 256; i++) {
-        pb.val(C[i]) = i % 2 ? FieldT::one() : FieldT::zero();
-    }
-    tmp.allocate(pb, 256, FMT(annotation_prefix, " tmp"));
-}
-
-
-template<typename FieldT>
-void
-zktrade::dummyhash_compression_function_gadget<FieldT>::generate_r1cs_constraints() {
-
-    for (size_t i = 0; i < 256; i++) {
-        if (i % 2) {
-
-            auto
-                    str = " tmp_bit_" + to_string(i) + "_from_A";
-            this->pb.add_r1cs_constraint(
-                    r1cs_constraint<FieldT>(A[i], ONE, tmp[i]),
-                    FMT(this->annotation_prefix, str.c_str()));
-        } else {
-            auto
-                    str = " tmp_bit_" + to_string(i) + "_from_B";
-            this->pb.add_r1cs_constraint(
-                    r1cs_constraint<FieldT>(B[i], ONE, tmp[i]),
-                    FMT(this->annotation_prefix, str.c_str()));
-        }
-        // Taken from libsnark XOR3 gadget
-        // tmp = A + B - 2AB i.e. tmp = A xor B
-        // out = tmp + C - 2tmp C i.e. out = tmp xor C
-//    for (size_t i = 0; i < 256; i++) {
-//        this->pb.add_r1cs_constraint(
-//                r1cs_constraint<FieldT>( 2 * A[i], B[i], A[i] + B[i] - tmp[i]),
-//                FMT(this->annotation_prefix, " tmp"));
-        this->pb.add_r1cs_constraint(
-                r1cs_constraint<FieldT>(
-                        2 * tmp[i], C[i], tmp[i] + C[i] - output.bits[i]),
-                FMT(this->annotation_prefix, " out"));
-//    }
-    }
+        const std::string &annotation_prefix)
+        : gadget<FieldT>(pb, annotation_prefix),
+                pb(&pb),
+                block(&block),
+                output(&output),
+          knapsack_output(pb, 254, FMT(annotation_prefix, "knapsack_output")),
+          knapsack_crh(pb, 512, block, knapsack_output,
+                       FMT(annotation_prefix, " knapsack_crh")) {
 }
 
 template<typename FieldT>
 void
-zktrade::dummyhash_compression_function_gadget<FieldT>::generate_r1cs_witness() {
-
-#ifdef DEBUG
-    printf("Input:\n");
-    for (size_t i = 0; i < 256; ++i) {
-        printf("%lx ", this->pb.val(this->new_block[i]).as_ulong());
+zktrade::dummyhash_knapsack_wrapper_gadget<FieldT>::generate_r1cs_constraints() {
+    knapsack_crh.generate_r1cs_constraints();
+    for (size_t i = 0; i < 254; i++) {
+        pb->add_r1cs_constraint(
+                r1cs_constraint<FieldT>(output->bits[i], FieldT::one(), knapsack_output.bits[i]), "knapsack");
     }
-    printf("\n");
-    for (size_t i = 0; i < 256; ++i) {
-        printf("%lx ", this->pb.val(this->new_block[256 + i]).as_ulong());
-    }
-    printf("\n");
-#endif
+    pb->add_r1cs_constraint(r1cs_constraint<FieldT>(output->bits[255], FieldT::one(), FieldT::zero()), "knapsack");
+}
 
-    for (size_t i = 0; i < 256; i++) {
-        if (i % 2) {
-            //cout << "assigning to tmp " << i << " value from A: " << this->pb.val(A[i]) << endl;
-            this->pb.val(tmp[i]) = this->pb.val(A[i]);
-        } else {
-            //cout << "assigning to tmp " << i << " value from B: " << this->pb.val(B[i]) << endl;
-            this->pb.val(tmp[i]) = this->pb.val(B[i]);
-        }
-
-        this->pb.lc_val(output.bits[i]) =
-                this->pb.val(tmp[i]) + this->pb.lc_val(C[i]) -
-                FieldT(2) * this->pb.val(tmp[i]) * this->pb.lc_val(C[i]);
+template<typename FieldT>
+void
+zktrade::dummyhash_knapsack_wrapper_gadget<FieldT>::generate_r1cs_witness() {
+    knapsack_crh.generate_r1cs_witness();
+    for (size_t i = 0; i < 254; i++) {
+        pb->val(output->bits[i]) = pb->val(knapsack_output.bits[i]);
     }
-
-#ifdef DEBUG
-    printf("Output:\n");
-    for (size_t i = 0; i < 256; ++i) {
-        printf("%lx ", this->pb.val(output.bits[i]).as_ulong());
-    }
-    printf("\n");
-#endif
+    pb->val(output->bits[255]) = FieldT::zero();
 }
 
 
@@ -114,12 +54,8 @@ zktrade::dummyhash_two_to_one_hash_gadget<FieldT>::dummyhash_two_to_one_hash_gad
     block.insert(block.end(), right.bits.begin(), right.bits.end());
 
     /* compute the hash itself */
-    f.reset(new dummyhash_compression_function_gadget<FieldT>(pb,
-                                                              SHA256_default_IV<FieldT>(
-                                                                      pb),
-                                                              block, output,
-                                                              FMT(this->annotation_prefix,
-                                                                  " f")));
+    f.reset(new dummyhash_knapsack_wrapper_gadget<FieldT>(
+            pb, block, output, FMT(this->annotation_prefix, " f")));
 }
 
 template<typename FieldT>
@@ -130,15 +66,10 @@ zktrade::dummyhash_two_to_one_hash_gadget<FieldT>::dummyhash_two_to_one_hash_gad
         const digest_variable<FieldT> &output,
         const std::string &annotation_prefix) :
         gadget<FieldT>(pb, annotation_prefix) {
-    assert(block_length == SHA256_block_size);
+    assert(block_length == 512);
     assert(input_block.bits.size() == block_length);
-    f.reset(new zktrade::dummyhash_compression_function_gadget<FieldT>(pb,
-                                                                       SHA256_default_IV<FieldT>(
-                                                                               pb),
-                                                                       input_block.bits,
-                                                                       output,
-                                                                       FMT(this->annotation_prefix,
-                                                                           " f")));
+    f.reset(new dummyhash_knapsack_wrapper_gadget<FieldT>(
+            pb, input_block, output, FMT(this->annotation_prefix, " f")));
 }
 
 template<typename FieldT>
@@ -157,12 +88,12 @@ zktrade::dummyhash_two_to_one_hash_gadget<FieldT>::generate_r1cs_witness() {
 
 template<typename FieldT>
 size_t zktrade::dummyhash_two_to_one_hash_gadget<FieldT>::get_block_len() {
-    return SHA256_block_size;
+    return 512;
 }
 
 template<typename FieldT>
 size_t zktrade::dummyhash_two_to_one_hash_gadget<FieldT>::get_digest_len() {
-    return SHA256_digest_size;
+    return 256;
 }
 
 template<typename FieldT>
@@ -170,9 +101,9 @@ libff::bit_vector zktrade::dummyhash_two_to_one_hash_gadget<FieldT>::get_hash(
         const libff::bit_vector &input) {
     protoboard<FieldT> pb;
 
-    block_variable<FieldT> input_variable(pb, SHA256_block_size, "input");
-    digest_variable<FieldT> output_variable(pb, SHA256_digest_size, "output");
-    dummyhash_two_to_one_hash_gadget <FieldT> f(pb, SHA256_block_size,
+    block_variable<FieldT> input_variable(pb, 512, "input");
+    digest_variable<FieldT> output_variable(pb, 256, "output");
+    dummyhash_two_to_one_hash_gadget <FieldT> f(pb, 512,
                                                 input_variable, output_variable,
                                                 "f");
 
@@ -199,10 +130,9 @@ zktrade::dummyhash_compression_gadget<FieldT>::dummyhash_compression_gadget(
         gadget<FieldT>(pb, annotation_prefix) {
     block_variable<FieldT> block{pb, inputs, "hasher input"};
     f.reset(
-            new dummyhash_compression_function_gadget<FieldT>(
+            new dummyhash_knapsack_wrapper_gadget<FieldT>(
                     pb,
-                    SHA256_default_IV<FieldT>(pb),
-                    block.bits,
+                    block,
                     result,
                     FMT(this->annotation_prefix, " hasher")));
 }
@@ -226,7 +156,7 @@ libff::bit_vector zktrade::dummyhash_compression_gadget<FieldT>::get_hash(
 
     pb_variable_array<FieldT> input_va;
     input_va.allocate(pb, 512, "input");
-    digest_variable<FieldT> output(pb, SHA256_digest_size, "output");
+    digest_variable<FieldT> output(pb, 256, "output");
     dummyhash_compression_gadget f(pb, {input_va}, output, "f");
     input_va.fill_with_bits(pb, input);
     f.generate_r1cs_witness();
