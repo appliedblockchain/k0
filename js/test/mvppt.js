@@ -122,7 +122,6 @@ async function compileContracts() {
   // TODO Delete directory
   //await asyncFs.unlink(tmpFilePath)
   const result = JSON.parse(json)
-  console.log(result)
   return {
     MVPPT: extractContractArtefacts(result, 'MVPPT'),
     AdditionVerifier: extractContractArtefacts(result, 'AdditionVerifier'),
@@ -311,7 +310,6 @@ describe('Minimum viable private payment token', function () {
 
       const aPkResponse = await mtEngine.request('prf_addr', [a_sk])
       const a_pk = aPkResponse.result
-      console.log({ a_pk })
 
       coins[i] = {a_sk, rho, r, v}
 
@@ -324,17 +322,11 @@ describe('Minimum viable private payment token', function () {
         MVPPT.methods.root(1).call()
       ])
 
-      console.log('getting root from server...')
       const serverRootResponse = await mtEngine.request('root', [])
-      console.log('got root from server')
       console.log(serverRootResponse)
       const serverRoot = await util.pack256Bits(serverRootResponse.result)
-      console.log("ROOOOOOOOOOOOOTS")
-      console.log(contractRoot[0], serverRoot[0])
-      console.log(contractRoot[1], serverRoot[1])
 
 
-      console.log(response)
 
 
       const data = response.result;
@@ -410,17 +402,13 @@ describe('Minimum viable private payment token', function () {
         ...params
       ).encodeABI()
       const receipt = await sendTransaction(web3, MVPPT._address, txData, 5000000, account)
-      console.log("yo")
 
-     console.log(receipt)
-          assert(receipt.status)
+        assert(receipt.status)
 
       const depositResponse = await mtEngine.request('add', [data.cm])
       console.log(`Added leaf ${i}: ${data.cm}`)
       console.log(`New root: ${depositResponse.result.newRoot}, should be ${data.nextRoot}`)
-      console.log(await util.pack256Bits(depositResponse.result.newRoot))
       assert(depositResponse.result.newRoot === data.nextRoot)
-      console.log(`New root: ${depositResponse.result.newRoot}`)
       commitmentProvingTimes.push(proofDuration)
 
       const timesSum = commitmentProvingTimes.reduce((acc, val) => acc + val)
@@ -476,20 +464,11 @@ describe('Minimum viable private payment token', function () {
         outputs[1].r,
         outputs[1].v.toString()
       ]
-      console.log("**********************************************************")
-      console.log("**********************************************************")
-      console.log("**********************************************************")
-      console.log(params)
       const timestampStart = Date.now()
       const response = await mtEngine.request('prepare_transfer', params)
       const proofDuration = Date.now() - timestampStart
-      console.log(response)
-      console.log("**********************************************************")
-      console.log("**********************************************************")
-      console.log("**********************************************************")
 
       const res = response.result
-      console.log(res)
 
       const sn0Packed = await util.pack256Bits(res.input_0_sn)
       const sn1Packed = await util.pack256Bits(res.input_1_sn)
@@ -511,14 +490,12 @@ describe('Minimum viable private payment token', function () {
         newRoot,
         ...res.transfer_proof
       ]
-      console.log({ transferParams })
       const x = MVPPT.methods.transfer(...transferParams)
       const data = x.encodeABI()
 
       const account = transferors[i];
      const receipt = await sendTransaction(web3, MVPPT._address, data, 5000000, account)
-          console.log("Transfer successful?", receipt.status)
-     console.log(receipt)
+      console.log("Transfer successful?", receipt.status)
 
 
     }
@@ -533,12 +510,9 @@ describe('Minimum viable private payment token', function () {
       const {a_sk, rho, r, v} = coins[address]
       const timestampStart = Date.now()
       const params = [address.toString(10), a_sk, rho, r, v.toString(), account.address]
-      console.log("PARAMAS", params)
-      console.log(account)
       const withdrawalProofResponse = await mtEngine.request(
         'prepare_withdrawal', params
       )
-      console.log("proof rsponse", withdrawalProofResponse)
       const proofDuration = Date.now() - timestampStart
       const {sn, proof} = withdrawalProofResponse.result
       const snPacked = await util.pack256Bits(sn)
@@ -546,7 +520,6 @@ describe('Minimum viable private payment token', function () {
       const data = x.encodeABI()
       const receipt = await sendTransaction(web3, MVPPT._address, data, 5000000, account)
       console.log("Withdrawal successful?", receipt.status)
-      console.log(receipt.logs)
       await printBalances(_.map([...depositors, ...withdrawers], 'address'))
       withdrawalProvingTimes.push(proofDuration)
 

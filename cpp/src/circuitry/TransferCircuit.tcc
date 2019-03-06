@@ -2,6 +2,7 @@
 #define ZKTRADE_TRANSFERCIRCUIT_TCC
 
 #include "serialization.hpp"
+#include "util.h"
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 TransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT>
@@ -277,7 +278,7 @@ zktrade::make_transfer_circuit(size_t tree_height) {
 }
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
-void zktrade::print_transfer_circuit_inputs(TransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> &c)
+void zktrade::print(TransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> &c)
 {
     cout << endl;
     cout << endl;
@@ -339,6 +340,50 @@ void zktrade::print_transfer_circuit_inputs(TransferCircuit<FieldT, CommitmentHa
     cout << "*******************************************************************" << endl;
     cout << endl;
     cout << endl;
+}
+
+template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+void zktrade::populate(
+        TransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> &c,
+        size_t tree_height,
+        bit_vector &merkle_tree_root,
+        input_note &in_0,
+        input_note &in_1,
+        output_note &out_0,
+        output_note &out_1)
+{
+    c.rt_bits->generate_r1cs_witness(merkle_tree_root);
+
+    auto in_0_address_bits = int_to_bits<FieldT>(in_0.address, tree_height);
+    auto in_0_v_bits = uint64_to_bits(in_0.v);
+    c.in_0_a_sk_bits->fill_with_bits(*c.pb, in_0.a_sk);
+    c.in_0_rho_bits->fill_with_bits(*c.pb, in_0.rho);
+    c.in_0_r_bits->fill_with_bits(*c.pb, in_0.r);
+    c.in_0_address_bits->fill_with_bits(*c.pb, in_0_address_bits);
+    c.in_0_v_bits->fill_with_bits(*c.pb, in_0_v_bits);
+    c.in_0_path->generate_r1cs_witness(in_0.address, in_0.path);
+
+    auto in_1_address_bits = int_to_bits<FieldT>(in_1.address, tree_height);
+    auto in_1_v_bits = uint64_to_bits(in_1.v);
+    c.in_1_a_sk_bits->fill_with_bits(*c.pb, in_1.a_sk);
+    c.in_1_rho_bits->fill_with_bits(*c.pb, in_1.rho);
+    c.in_1_r_bits->fill_with_bits(*c.pb, in_1.r);
+    c.in_1_address_bits->fill_with_bits(*c.pb, in_1_address_bits);
+    c.in_1_v_bits->fill_with_bits(*c.pb, in_1_v_bits);
+    c.in_1_path->generate_r1cs_witness(in_1.address, in_1.path);
+
+    auto out_0_v_bits = uint64_to_bits(out_0.v);
+    c.out_0_a_pk_bits->fill_with_bits(*c.pb, out_0.a_pk);
+    c.out_0_rho_bits->fill_with_bits(*c.pb, out_0.rho);
+    c.out_0_r_bits->fill_with_bits(*c.pb, out_0.r);
+    c.out_0_v_bits->fill_with_bits(*c.pb, out_0_v_bits);
+
+    auto out_1_v_bits = uint64_to_bits(out_1.v);
+    c.out_1_a_pk_bits->fill_with_bits(*c.pb, out_1.a_pk);
+    c.out_1_rho_bits->fill_with_bits(*c.pb, out_1.rho);
+    c.out_1_r_bits->fill_with_bits(*c.pb, out_1.r);
+    c.out_1_v_bits->fill_with_bits(*c.pb, out_1_v_bits);
+
 }
 
 #endif //ZKTRADE_TRANSFERCIRCUIT_TCC

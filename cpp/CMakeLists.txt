@@ -4,7 +4,7 @@ cmake_policy(SET CMP0076 NEW)
 
 project(zktrade)
 
-#add_definitions(-DZKTRADE_DUMMYHASH)
+add_definitions(-DZKTRADE_DUMMYHASH)
 
 set(
         CURVE

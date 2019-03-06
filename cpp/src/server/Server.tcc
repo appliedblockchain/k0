@@ -171,7 +171,8 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_deposit(
     }
 
     cout << "COMM_CIRCUIT" << endl;
-    cout << "k  " << bits2hex(comm_circuit.k_bits->get_bits(*comm_circuit.pb)) << endl;
+    cout << "k  " << bits2hex(comm_circuit.k_bits->get_bits(*comm_circuit.pb))
+         << endl;
     cout << "cm " << bits2hex(comm_circuit.cm_bits->get_digest()) << endl;
 
     auto add_circuit = make_mt_addition_circuit<FieldT, MerkleTreeHashT>(
@@ -268,52 +269,42 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_transfer(
         const std::string &output_1_rho_str,
         const std::string &output_1_r_str,
         const std::string &output_1_v_str) {
-    struct input_note {
-        size_t address;
-        bit_vector a_sk;
-        bit_vector rho;
-        bit_vector r;
-        uint64_t v;
-    };
-    struct output_note {
-        size_t address;
-        bit_vector a_pk;
-        bit_vector rho;
-        bit_vector r;
-        uint64_t v;
-    };
+
 
     cout << "MAX " << dec << UINT64_MAX << endl;
 
     // TODO validate inputs (max values for bit lengths)
 
+    auto in_0_address = strtoul(input_0_address_str.c_str(), NULL, 10);
+    auto in_1_address = strtoul(input_1_address_str.c_str(), NULL, 10);
+
     input_note in[]{
             {
-                    strtoul(input_0_address_str.c_str(), NULL, 10),
+                    in_0_address,
                     hex2bits(input_0_a_sk_str),
                     hex2bits(input_0_rho_str),
                     hex2bits(input_0_r_str),
                     strtoul(input_0_v_str.c_str(), NULL, 10),
+                    mt.path(in_0_address)
             },
             {
-                    strtoul(input_1_address_str.c_str(), NULL, 10),
+                    in_1_address,
                     hex2bits(input_1_a_sk_str),
                     hex2bits(input_1_rho_str),
                     hex2bits(input_1_r_str),
                     strtoul(input_1_v_str.c_str(), NULL, 10),
+                    mt.path(in_1_address)
             }
     };
 
     output_note out[]{
             {
-                    mt.num_elements(),
                     hex2bits(output_0_a_pk_str),
                     hex2bits(output_0_rho_str),
                     hex2bits(output_0_r_str),
                     strtoul(output_0_v_str.c_str(), NULL, 10),
             },
             {
-                    mt.num_elements() + 1,
                     hex2bits(output_1_a_pk_str),
                     hex2bits(output_1_rho_str),
                     hex2bits(output_1_r_str),
@@ -323,50 +314,11 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_transfer(
 
     auto xfer_circuit = make_transfer_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(
             tree_height);
+    bit_vector mt_root = mt.root();
+    populate(xfer_circuit, tree_height, mt_root, in[0], in[1], out[0],
+             out[1]);
 
-    cout << "Root mt" << bits2hex(mt.root()) << endl;
-    xfer_circuit.rt_bits->generate_r1cs_witness(mt.root());
-    cout << "Root before " << bits2hex(xfer_circuit.rt_bits->get_digest()) << endl;
-    xfer_circuit.pb->val(*xfer_circuit.ZERO) = FieldT::zero();
-
-    bit_vector in_0_address_bits = int_to_bits<FieldT>(in[0].address,
-                                                       tree_height);
-    bit_vector in_0_v_bits = uint64_to_bits(in[0].v);
-    xfer_circuit.in_0_a_sk_bits->fill_with_bits(*xfer_circuit.pb, in[0].a_sk);
-    xfer_circuit.in_0_rho_bits->fill_with_bits(*xfer_circuit.pb, in[0].rho);
-    xfer_circuit.in_0_r_bits->fill_with_bits(*xfer_circuit.pb, in[0].r);
-    xfer_circuit.in_0_address_bits->fill_with_bits(*xfer_circuit.pb,
-                                                   in_0_address_bits);
-    xfer_circuit.in_0_v_bits->fill_with_bits(*xfer_circuit.pb, in_0_v_bits);
-    xfer_circuit.in_0_path->generate_r1cs_witness(in[0].address,
-                                                  mt.path(in[0].address));
-
-    bit_vector in_1_address_bits = int_to_bits<FieldT>(in[1].address,
-                                                       tree_height);
-    bit_vector in_1_v_bits = uint64_to_bits(in[1].v);
-    xfer_circuit.in_1_a_sk_bits->fill_with_bits(*xfer_circuit.pb, in[1].a_sk);
-    xfer_circuit.in_1_rho_bits->fill_with_bits(*xfer_circuit.pb, in[1].rho);
-    xfer_circuit.in_1_r_bits->fill_with_bits(*xfer_circuit.pb, in[1].r);
-    xfer_circuit.in_1_address_bits->fill_with_bits(*xfer_circuit.pb,
-                                                   in_1_address_bits);
-    cout << "what are in_1_v_bits " << bits2hex(in_1_v_bits) << endl;
-    xfer_circuit.in_1_v_bits->fill_with_bits(*xfer_circuit.pb, in_1_v_bits);
-    xfer_circuit.in_1_path->generate_r1cs_witness(in[1].address,
-                                                  mt.path(in[1].address));
-
-    bit_vector out_0_v_bits = uint64_to_bits(out[0].v);
-    xfer_circuit.out_0_a_pk_bits->fill_with_bits(*xfer_circuit.pb, out[0].a_pk);
-    xfer_circuit.out_0_rho_bits->fill_with_bits(*xfer_circuit.pb, out[0].rho);
-    xfer_circuit.out_0_r_bits->fill_with_bits(*xfer_circuit.pb, out[0].r);
-    xfer_circuit.out_0_v_bits->fill_with_bits(*xfer_circuit.pb, out_0_v_bits);
-
-    bit_vector out_1_v_bits = uint64_to_bits(out[1].v);
-    xfer_circuit.out_1_a_pk_bits->fill_with_bits(*xfer_circuit.pb, out[1].a_pk);
-    xfer_circuit.out_1_rho_bits->fill_with_bits(*xfer_circuit.pb, out[1].rho);
-    xfer_circuit.out_1_r_bits->fill_with_bits(*xfer_circuit.pb, out[1].r);
-    xfer_circuit.out_1_v_bits->fill_with_bits(*xfer_circuit.pb, out_1_v_bits);
-
-    print_transfer_circuit_inputs(xfer_circuit);
+    print(xfer_circuit);
     for (size_t i = 0; i < 2; i++) {
         input_note c = in[i];
         cout << "Input note " << i << endl;
@@ -392,7 +344,8 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_transfer(
         cout << endl;
     }
 
-    cout << "Root after 1 " << bits2hex(xfer_circuit.rt_bits->get_digest()) << endl;
+    cout << "Root after 1 " << bits2hex(xfer_circuit.rt_bits->get_digest())
+         << endl;
     xfer_circuit.rt_packer->generate_r1cs_witness_from_bits();
 
     xfer_circuit.in_0_note_gadget->generate_r1cs_witness();
@@ -404,7 +357,8 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_transfer(
     xfer_circuit.out_0_cm_packer->generate_r1cs_witness_from_bits();
     xfer_circuit.out_1_cm_packer->generate_r1cs_witness_from_bits();
 
-    cout << "Root after 2 " << bits2hex(xfer_circuit.rt_bits->get_digest()) << endl;
+    cout << "Root after 2 " << bits2hex(xfer_circuit.rt_bits->get_digest())
+         << endl;
 
     if (!xfer_circuit.pb->is_satisfied()) {
         throw JsonRpcException(-32010, "Transfer circuit not satisfied");

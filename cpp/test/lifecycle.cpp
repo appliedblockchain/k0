@@ -15,8 +15,8 @@ using namespace libsnark;
 
 typedef Fr<default_r1cs_ppzksnark_pp> FieldT;
 
-typedef dummyhash_compression_gadget<FieldT> CommitmentHashT;
-typedef dummyhash_two_to_one_hash_gadget<FieldT> MerkleTreeHashT;
+typedef sha256_compression_gadget<FieldT> CommitmentHashT;
+typedef sha256_two_to_one_hash_gadget<FieldT> MerkleTreeHashT;
 
 TEST(Lifecycle, Full) {
 
@@ -103,7 +103,7 @@ TEST(Lifecycle, Full) {
         cout << "k " << bits2hex(k) << endl;
 
         // Set v
-  //      uint64_t v_uint = 5000000000000000000;
+        //      uint64_t v_uint = 5000000000000000000;
         uint64_t v_uint = coins[address].v;
         string v_str = to_string(v_uint);
         FieldT v = FieldT(v_str.c_str());
@@ -178,98 +178,33 @@ TEST(Lifecycle, Full) {
 
         cout << "Transfer from address " << input_0_address << endl;
 
-        coin in_0 = coins[input_0_address];
-        bit_vector in_0_address_bits = int_to_bits<FieldT>(in_0.address,
-                                                           tree_height);
-        bit_vector in_0_v_bits = uint64_to_bits(in_0.v);
-
-        // TODO rename to in_1
-        coin in_1 = coins[input_0_address + 1];
-        bit_vector in_1_address_bits = int_to_bits<FieldT>(in_1.address,
-                                                           tree_height);
-        bit_vector in_1_v_bits = uint64_to_bits(in_1.v);
-
-        coin out_0 = coins[input_0_address + 2];
-        bit_vector out_0_address_bits = int_to_bits<FieldT>(out_0.address,
-                                                           tree_height);
-        bit_vector out_0_v_bits = uint64_to_bits(out_0.v);
-
-        coin out_1 = coins[input_0_address + 3];
-        bit_vector out_1_address_bits = int_to_bits<FieldT>(out_1.address,
-                                                           tree_height);
-        bit_vector out_1_v_bits = uint64_to_bits(out_1.v);
-
-        auto out_0_address = mt.num_elements();
-        auto out_0_a_pk_bits = prf_addr<CommitmentHashT>(out_0.a_sk);
-
-        auto out_0_k_bits = comm_r<CommitmentHashT>(out_0_a_pk_bits,
-                                                    out_0.rho,
-                                                    out_0.r);
-        auto out_0_cm_bits = comm_s<CommitmentHashT>(out_0_k_bits,
-                                                     out_0_v_bits);
-
-        cout << "ADDING " << out_0.address << endl;
-        cout << "k " << bits2hex(out_0_k_bits) << endl;
-        cout << "cm " << bits2hex(out_0_cm_bits) << endl;
-
-        auto out_1_address = out_0_address + 1;
-        auto out_1_a_pk_bits = prf_addr<CommitmentHashT>(out_1.a_sk);
-        auto out_1_k_bits = comm_r<CommitmentHashT>(out_1_a_pk_bits,
-                                                    out_1.rho,
-                                                    out_1.r);
-        auto out_1_cm_bits = comm_s<CommitmentHashT>(out_1_k_bits,
-                                                     out_1_v_bits);
-
-        cout << "ADDING " << out_1.address << endl;
-        cout << "k " << bits2hex(out_1_k_bits) << endl;
-        cout << "cm " << bits2hex(out_1_cm_bits) << endl;
-
         auto xfer_circuit = make_transfer_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(
                 tree_height);
 
-        xfer_circuit.rt_bits->generate_r1cs_witness(mt.root());
-        xfer_circuit.pb->val(*xfer_circuit.ZERO) = FieldT::zero();
+        input_note in[2];
+        for (size_t i = 0; i < 2; i++) {
+            auto idx = input_0_address + i;
+            in[i].address = input_0_address + i;
+            in[i].a_sk = coins[idx].a_sk;
+            in[i].rho = coins[idx].rho;
+            in[i].r = coins[idx].r;
+            in[i].v = coins[idx].v;
+            in[i].path = mt.path(idx);
+        }
 
-        xfer_circuit.in_0_a_sk_bits->fill_with_bits(*xfer_circuit.pb,
-                                                    in_0.a_sk);
-        xfer_circuit.in_0_rho_bits->fill_with_bits(*xfer_circuit.pb, in_0.rho);
-        xfer_circuit.in_0_r_bits->fill_with_bits(*xfer_circuit.pb, in_0.r);
-        xfer_circuit.in_0_address_bits->fill_with_bits(*xfer_circuit.pb,
-                                                       in_0_address_bits);
-        xfer_circuit.in_0_v_bits->fill_with_bits(*xfer_circuit.pb, in_0_v_bits);
-        xfer_circuit.in_0_path->generate_r1cs_witness(input_0_address,
-                                                      mt.path(input_0_address));
+        output_note out[2];
+        for (size_t i = 0; i < 2; i++) {
+            auto idx = input_0_address + 2 + i;
+            out[i].a_pk = prf_addr<CommitmentHashT>(coins[idx].a_sk);
+            out[i].rho = coins[idx].rho;
+            out[i].r = coins[idx].r;
+            out[i].v = coins[idx].v;
+        }
 
-        xfer_circuit.in_1_a_sk_bits->fill_with_bits(*xfer_circuit.pb, in_1.a_sk);
-        xfer_circuit.in_1_rho_bits->fill_with_bits(*xfer_circuit.pb, in_1.rho);
-        xfer_circuit.in_1_r_bits->fill_with_bits(*xfer_circuit.pb, in_1.r);
-        xfer_circuit.in_1_address_bits->fill_with_bits(*xfer_circuit.pb,
-                                                       in_1_address_bits);
-        xfer_circuit.in_1_v_bits->fill_with_bits(*xfer_circuit.pb, in_1_v_bits);
-        xfer_circuit.in_1_path->generate_r1cs_witness(input_0_address + 1,
-                                                      mt.path(input_0_address +
-                                                              1));
-
-        // TODO Test all sorts of "unhappy" paths (especially different v_bits!)
-        xfer_circuit.out_0_a_pk_bits->fill_with_bits(*xfer_circuit.pb,
-                                                     out_0_a_pk_bits);
-        xfer_circuit.out_0_rho_bits->fill_with_bits(*xfer_circuit.pb,
-                                                    out_0.rho);
-        xfer_circuit.out_0_r_bits->fill_with_bits(*xfer_circuit.pb,
-                                                  out_0.r);
-        xfer_circuit.out_0_v_bits->fill_with_bits(*xfer_circuit.pb,
-                                                  out_0_v_bits);
-
-        xfer_circuit.out_1_a_pk_bits->fill_with_bits(*xfer_circuit.pb,
-                                                     out_1_a_pk_bits);
-        xfer_circuit.out_1_rho_bits->fill_with_bits(*xfer_circuit.pb,
-                                                    out_1.rho);
-        xfer_circuit.out_1_r_bits->fill_with_bits(*xfer_circuit.pb,
-                                                  out_1.r);
-        xfer_circuit.out_1_v_bits->fill_with_bits(*xfer_circuit.pb,
-                                                  out_1_v_bits);
-
-        print_transfer_circuit_inputs(xfer_circuit);
+        bit_vector mt_root = mt.root();
+        populate(xfer_circuit, tree_height, mt_root, in[0], in[1], out[0],
+                 out[1]);
+        print(xfer_circuit);
         //ASSERT_FALSE(xfer_circuit.pb->is_satisfied());
         xfer_circuit.rt_packer->generate_r1cs_witness_from_bits();
         cout << "BEFORE" << endl;
@@ -299,68 +234,18 @@ TEST(Lifecycle, Full) {
         xfer_circuit.out_0_cm_packer->generate_r1cs_witness_from_bits();
         xfer_circuit.out_1_cm_packer->generate_r1cs_witness_from_bits();
 
-        cout << "AFTER" << endl;
-        cout << "Root " << bits2hex(xfer_circuit.rt_bits->get_digest()) << endl;
-        cout << "a_sk          " << bits2hex(
-                xfer_circuit.in_0_a_sk_bits->get_bits(*xfer_circuit.pb))
-             << endl;
-        cout << "rho          "
-             << bits2hex(xfer_circuit.in_0_rho_bits->get_bits(*xfer_circuit.pb))
-             << endl;
-        cout << "r          "
-             << bits2hex(xfer_circuit.in_0_r_bits->get_bits(*xfer_circuit.pb))
-             << endl;
-        cout << "v          "
-             << bits2hex(xfer_circuit.in_0_v_bits->get_bits(*xfer_circuit.pb))
-             << endl;
-        cout << "cm          "
-             << bits2hex(xfer_circuit.in_0_cm_bits->get_digest()) << endl;
-        cout << "Path" << endl;
-
 
         ASSERT_TRUE(xfer_circuit.pb->is_satisfied());
-        ASSERT_EQ(xfer_circuit.in_0_v_bits->get_bits(*xfer_circuit.pb),
-                  in_0_v_bits);
-        // ASSERT_EQ(xfer_circuit.in_0_cm_bits->get_digest(), in_0.cm);
-        ASSERT_EQ(xfer_circuit.rt_bits->get_digest(), mt.root());
-        ASSERT_EQ(xfer_circuit.out_0_a_pk_bits->get_bits(*xfer_circuit.pb),
-                  out_0_a_pk_bits);
-        ASSERT_EQ(xfer_circuit.out_0_cm_gadget->k_bits(), out_0_k_bits);
-        ASSERT_EQ(xfer_circuit.out_0_cm_bits->get_digest(), out_0_cm_bits);
-        ASSERT_EQ(xfer_circuit.out_1_a_pk_bits->get_bits(*xfer_circuit.pb),
-                  out_1_a_pk_bits);
-        ASSERT_EQ(xfer_circuit.out_1_cm_gadget->k_bits(), out_1_k_bits);
-        ASSERT_EQ(xfer_circuit.out_1_cm_bits->get_digest(), out_1_cm_bits);
 
+        for (size_t i = 0; i < 2; i++) {
+            auto idx = input_0_address + 2 + i;
+            auto a_pk = prf_addr<CommitmentHashT>(coins[idx].a_sk);
+            auto k = comm_r<CommitmentHashT>(a_pk, coins[idx].rho,
+                                             coins[idx].r);
+            auto cm = comm_s<CommitmentHashT>(k, uint64_to_bits(coins[idx].v));
+            mt.add(cm);
+        }
 
-        // Set original inputs again to make sure nothing has been overwritten
-        xfer_circuit.rt_bits->generate_r1cs_witness(mt.root());
-        xfer_circuit.pb->val(*xfer_circuit.ZERO) = FieldT::zero();
-        xfer_circuit.in_0_a_sk_bits->fill_with_bits(*xfer_circuit.pb,
-                                                    in_0.a_sk);
-        xfer_circuit.in_0_rho_bits->fill_with_bits(*xfer_circuit.pb, in_0.rho);
-        xfer_circuit.in_0_r_bits->fill_with_bits(*xfer_circuit.pb, in_0.r);
-        xfer_circuit.in_0_v_bits->fill_with_bits(*xfer_circuit.pb, in_0_v_bits);
-        xfer_circuit.in_0_address_bits->fill_with_bits(*xfer_circuit.pb,
-                                                       in_0_address_bits);
-        xfer_circuit.in_0_path->generate_r1cs_witness(input_0_address,
-                                                      mt.path(input_0_address));
-        // Circuit should still be satisfied
-        ASSERT_TRUE(xfer_circuit.pb->is_satisfied());
-        //coins.push_back(out_0);
-        //coins.push_back(out_1);
-        cout << "Root before " << bits2hex(mt.root()) << endl;
-        //mt.print();
-        cout << "Adding      " << bits2hex(out_0_cm_bits) << endl;
-        mt.add(out_0_cm_bits);
-        cout << "Root after  " << bits2hex(mt.root()) << endl;
-
-
-        cout << "Root before " << bits2hex(mt.root()) << endl;
-        //mt.print();
-        cout << "Adding      " << bits2hex(out_1_cm_bits) << endl;
-        mt.add(out_1_cm_bits);
-        cout << "Root after  " << bits2hex(mt.root()) << endl;
 
 
     }

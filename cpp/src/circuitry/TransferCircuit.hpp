@@ -5,6 +5,7 @@
 #include <libsnark/gadgetlib1/gadgets/merkle_tree/merkle_authentication_path_variable.hpp>
 #include "circuitry/gadgets/input_note_gadget.hpp"
 #include "circuitry/gadgets/comms.hpp"
+#include "data.hpp"
 
 namespace zktrade {
     template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
@@ -80,7 +81,17 @@ namespace zktrade {
     make_transfer_circuit(size_t tree_height);
 
     template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
-    void print_transfer_circuit_inputs(TransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> &c);
+    void print(TransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> &c);
+
+    template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+    void populate(
+            TransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> &c,
+            size_t tree_height,
+            bit_vector &merkle_tree_root,
+            input_note &in_0,
+            input_note &in_1,
+            output_note &out_0,
+            output_note &out_1);
 }
 
 #include "TransferCircuit.tcc"
