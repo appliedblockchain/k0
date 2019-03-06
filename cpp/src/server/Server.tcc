@@ -346,16 +346,9 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_transfer(
 
     cout << "Root after 1 " << bits2hex(xfer_circuit.rt_bits->get_digest())
          << endl;
-    xfer_circuit.rt_packer->generate_r1cs_witness_from_bits();
 
-    xfer_circuit.in_0_note_gadget->generate_r1cs_witness();
-    xfer_circuit.in_1_note_gadget->generate_r1cs_witness();
-    xfer_circuit.in_0_sn_packer->generate_r1cs_witness_from_bits();
-    xfer_circuit.in_1_sn_packer->generate_r1cs_witness_from_bits();
-    xfer_circuit.out_0_cm_gadget->generate_r1cs_witness();
-    xfer_circuit.out_1_cm_gadget->generate_r1cs_witness();
-    xfer_circuit.out_0_cm_packer->generate_r1cs_witness_from_bits();
-    xfer_circuit.out_1_cm_packer->generate_r1cs_witness_from_bits();
+
+    generate_witness(xfer_circuit);
 
     cout << "Root after 2 " << bits2hex(xfer_circuit.rt_bits->get_digest())
          << endl;

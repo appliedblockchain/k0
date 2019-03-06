@@ -92,6 +92,11 @@ namespace zktrade {
             input_note &in_1,
             output_note &out_0,
             output_note &out_1);
+
+    template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+    void generate_witness(
+            TransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> &c);
+
 }
 
 #include "TransferCircuit.tcc"

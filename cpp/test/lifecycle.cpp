@@ -205,35 +205,9 @@ TEST(Lifecycle, Full) {
         populate(xfer_circuit, tree_height, mt_root, in[0], in[1], out[0],
                  out[1]);
         print(xfer_circuit);
-        //ASSERT_FALSE(xfer_circuit.pb->is_satisfied());
-        xfer_circuit.rt_packer->generate_r1cs_witness_from_bits();
-        cout << "BEFORE" << endl;
-        cout << "Root " << bits2hex(xfer_circuit.rt_bits->get_digest()) << endl;
-        cout << "a_sk          " << bits2hex(
-                xfer_circuit.in_0_a_sk_bits->get_bits(*xfer_circuit.pb))
-             << endl;
-        cout << "rho          "
-             << bits2hex(xfer_circuit.in_0_rho_bits->get_bits(*xfer_circuit.pb))
-             << endl;
-        cout << "r          "
-             << bits2hex(xfer_circuit.in_0_r_bits->get_bits(*xfer_circuit.pb))
-             << endl;
-        cout << "v          "
-             << bits2hex(xfer_circuit.in_0_v_bits->get_bits(*xfer_circuit.pb))
-             << endl;
-        cout << "cm          "
-             << bits2hex(xfer_circuit.in_0_cm_bits->get_digest()) << endl;
-        cout << "Path" << endl;
+        ASSERT_FALSE(xfer_circuit.pb->is_satisfied());
 
-        xfer_circuit.in_0_note_gadget->generate_r1cs_witness();
-        xfer_circuit.in_1_note_gadget->generate_r1cs_witness();
-        xfer_circuit.in_0_sn_packer->generate_r1cs_witness_from_bits();
-        xfer_circuit.in_1_sn_packer->generate_r1cs_witness_from_bits();
-        xfer_circuit.out_0_cm_gadget->generate_r1cs_witness();
-        xfer_circuit.out_1_cm_gadget->generate_r1cs_witness();
-        xfer_circuit.out_0_cm_packer->generate_r1cs_witness_from_bits();
-        xfer_circuit.out_1_cm_packer->generate_r1cs_witness_from_bits();
-
+        generate_witness(xfer_circuit);
 
         ASSERT_TRUE(xfer_circuit.pb->is_satisfied());
 

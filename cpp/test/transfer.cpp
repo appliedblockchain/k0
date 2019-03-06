@@ -1,15 +1,21 @@
 #include <gtest/gtest.h>
-#include "definitions.hpp"
 #include "circuitry/TransferCircuit.hpp"
+#include "circuitry/gadgets/dummyhash_gadget.hpp"
 #include "MerkleTree.hpp"
 #include "scheme/comms.hpp"
 #include "scheme/prfs.h"
 
 using namespace zktrade;
 
+typedef Fr<default_r1cs_ppzksnark_pp> FieldT;
+
+typedef sha256_compression_gadget<FieldT> CommitmentHashT;
+typedef sha256_two_to_one_hash_gadget<FieldT> MerkleTreeHashT;
+
 TEST(TransferCircuit, Test) {
     size_t tree_height = 3;
-    auto circuit = make_transfer_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(tree_height);
+    auto circuit = make_transfer_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(
+            tree_height);
     MerkleTree<MerkleTreeHashT> mt(tree_height);
 
     print(circuit);
@@ -32,15 +38,18 @@ TEST(TransferCircuit, Test) {
         in[i].path = mt.path(i);
     }
 
-     for (size_t i = 0; i < 2; i++) {
+    for (size_t i = 0; i < 2; i++) {
         out[i].a_pk = random_bits(256);
         out[i].rho = random_bits(256);
         out[i].r = random_bits(384);
         out[i].v = 4;
     }
 
-     auto mt_root = mt.root();
+    auto mt_root = mt.root();
     populate(circuit, tree_height, mt_root, in[0], in[1], out[0], out[1]);
+    ASSERT_FALSE(circuit.pb->is_satisfied());
+    generate_witness(circuit);
+    ASSERT_TRUE(circuit.pb->is_satisfied());
     print(circuit);
 
 }

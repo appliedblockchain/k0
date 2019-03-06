@@ -385,5 +385,19 @@ void zktrade::populate(
     c.out_1_v_bits->fill_with_bits(*c.pb, out_1_v_bits);
 
 }
+template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+void zktrade::generate_witness(
+        TransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> &c)
+{
+    c.rt_packer->generate_r1cs_witness_from_bits();
+    c.in_0_note_gadget->generate_r1cs_witness();
+    c.in_1_note_gadget->generate_r1cs_witness();
+    c.in_0_sn_packer->generate_r1cs_witness_from_bits();
+    c.in_1_sn_packer->generate_r1cs_witness_from_bits();
+    c.out_0_cm_gadget->generate_r1cs_witness();
+    c.out_1_cm_gadget->generate_r1cs_witness();
+    c.out_0_cm_packer->generate_r1cs_witness_from_bits();
+    c.out_1_cm_packer->generate_r1cs_witness_from_bits();
+}
 
 #endif //ZKTRADE_TRANSFERCIRCUIT_TCC
