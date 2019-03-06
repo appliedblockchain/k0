@@ -27,11 +27,13 @@ contract MVPPT {
     constructor(address tokenContractAddress,
         address commitmentVerifierAddress,
         address additionVerifierAddress,
+        address transferVerifierAddress,
         address withdrawalVerifierAddress,
         uint[2] memory initialRoot) public {
         tokenContract = IERC20(tokenContractAddress);
         commitmentVerifier = CommitmentVerifier(commitmentVerifierAddress);
         additionVerifier = AdditionVerifier(additionVerifierAddress);
+        transferVerifier = TransferVerifier(transferVerifierAddress);
         withdrawalVerifier = WithdrawalVerifier(withdrawalVerifierAddress);
         root = initialRoot;
     }
@@ -134,25 +136,25 @@ contract MVPPT {
         inputs[7] = cm_out_0[1];
         inputs[8] = cm_out_1[0];
         inputs[9] = cm_out_1[1];
-        emit PrimaryInput( inputs[0], inputs[1], inputs[2], inputs[3], inputs[4], inputs[5], inputs[6], inputs[7], inputs[8], inputs[9] );
+        emit PrimaryInput(inputs[0], inputs[1], inputs[2], inputs[3], inputs[4], inputs[5], inputs[6], inputs[7], inputs[8], inputs[9]);
 
-//        if (transferVerifier.verifyProof(
-//                a,
-//                a_p,
-//                b,
-//                b_p,
-//                c,
-//                c_p,
-//                h,
-//                k,
-//                inputs
-//            )) {
-//            snUsed[sn0Hash] = true;
-//            snUsed[sn1Hash] = true;
-//            root = new_root;
-//        } else {
-//            // revert();
-//        }
+        if (transferVerifier.verifyProof(
+                a,
+                a_p,
+                b,
+                b_p,
+                c,
+                c_p,
+                h,
+                k,
+                inputs
+            )) {
+            snUsed[sn0Hash] = true;
+            snUsed[sn1Hash] = true;
+            root = new_root;
+        } else {
+            revert();
+        }
     }
 
     function withdraw(
@@ -176,8 +178,8 @@ contract MVPPT {
         inputs[3] = sn[0];
         inputs[4] = sn[1];
         inputs[5] = uint256(msg.sender);
-        emit PrimaryInput( inputs[0], inputs[1], inputs[2], inputs[3], inputs[4], inputs[5] );
-// TODO verify Merkle tree additions
+        emit PrimaryInput(inputs[0], inputs[1], inputs[2], inputs[3], inputs[4], inputs[5]);
+        // TODO verify Merkle tree additions
         if (withdrawalVerifier.verifyProof(
                 a,
                 a_p,

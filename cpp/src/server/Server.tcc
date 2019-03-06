@@ -202,37 +202,37 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_deposit(
          << commitment_pk.constraint_system.num_inputs() << endl;
 
     assert(add_circuit.pb->is_satisfied());
-//
-//    const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> comm_proof =
-//            r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
-//                    commitment_pk, comm_circuit.pb->primary_input(),
-//                    comm_circuit.pb->auxiliary_input());
-//
-//    const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> add_proof =
-//            r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
-//                    addition_pk, add_circuit.pb->primary_input(),
-//                    add_circuit.pb->auxiliary_input());
-//
-//    bool comm_verified =
-//            r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
-//                    commitment_vk, comm_circuit.pb->primary_input(),
-//                    comm_proof);
-//    if (comm_verified) {
-//        cout << "Commitment proof successfully verified." << endl;
-//    } else {
-//        cerr << "Commitment proof verification failed." << endl;
-//    }
-//
-//    cout << "ADDITION params" << endl << hex << add_circuit.pb->primary_input()
-//         << endl;
-//    bool add_verified =
-//            r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
-//                    addition_vk, add_circuit.pb->primary_input(), add_proof);
-//    if (add_verified) {
-//        cout << "Addition proof successfully verified." << endl;
-//    } else {
-//        cerr << "Addition proof verification failed." << endl;
-//    }
+
+    const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> comm_proof =
+            r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
+                    commitment_pk, comm_circuit.pb->primary_input(),
+                    comm_circuit.pb->auxiliary_input());
+
+    const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> add_proof =
+            r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
+                    addition_pk, add_circuit.pb->primary_input(),
+                    add_circuit.pb->auxiliary_input());
+
+    bool comm_verified =
+            r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
+                    commitment_vk, comm_circuit.pb->primary_input(),
+                    comm_proof);
+    if (comm_verified) {
+        cout << "Commitment proof successfully verified." << endl;
+    } else {
+        cerr << "Commitment proof verification failed." << endl;
+    }
+
+    cout << "ADDITION params" << endl << hex << add_circuit.pb->primary_input()
+         << endl;
+    bool add_verified =
+            r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
+                    addition_vk, add_circuit.pb->primary_input(), add_proof);
+    if (add_verified) {
+        cout << "Addition proof successfully verified." << endl;
+    } else {
+        cerr << "Addition proof verification failed." << endl;
+    }
 
 
     Json::Value result;
@@ -241,8 +241,8 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_deposit(
     result["nextRoot"] = bits_to_hex(get<1>(sim_result));
 
     result["address"] = (uint) address;
-//    result["commitmentProof"] = json_conversion::to_json(comm_proof);
-//    result["additionProof"] = json_conversion::to_json(add_proof);
+    result["commitmentProof"] = json_conversion::to_json(comm_proof);
+    result["additionProof"] = json_conversion::to_json(add_proof);
 
     return result;
 }
@@ -410,23 +410,27 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_transfer(
         throw JsonRpcException(-32010, "Transfer circuit not satisfied");
     }
 
-//    cout << "TRANSFER PUBLIC INPUT" << endl << hex
-//         << xfer_circuit.pb->primary_input() << endl;
-//
-//    auto xfer_proof =
-//            r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
-//                    transfer_pk, xfer_circuit.pb->primary_input(),
-//                    xfer_circuit.pb->auxiliary_input());
-//
-//    bool xfer_verified =
-//            r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
-//                    transfer_vk, xfer_circuit.pb->primary_input(),
-//                    xfer_proof);
-//    if (xfer_verified) {
-//        cout << "Transfer proof successfully verified." << endl;
-//    } else {
-//        cerr << "Transfer proof verification failed." << endl;
-//    }
+    cout << "TRANSFER PUBLIC INPUT" << endl << hex
+         << xfer_circuit.pb->primary_input() << endl;
+
+    auto xfer_proof =
+            r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
+                    transfer_pk, xfer_circuit.pb->primary_input(),
+                    xfer_circuit.pb->auxiliary_input());
+
+    bool xfer_verified =
+            r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
+                    transfer_vk, xfer_circuit.pb->primary_input(),
+                    xfer_proof);
+    if (xfer_verified) {
+        cout << "Transfer proof successfully verified." << endl;
+    } else {
+        cerr << "Transfer proof verification failed." << endl;
+    }
+
+    cout << "TRANSFER PUBLIC INPUTS" << endl;
+    cout << xfer_circuit.pb->primary_input() << endl;
+
     Json::Value result;
     result["input_0_sn"] = bits2hex(
             xfer_circuit.in_0_sn_bits->get_digest());
@@ -438,7 +442,7 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_transfer(
     result["output_1_address"] = mt.num_elements() + 1;
     result["output_1_cm"] = bits2hex(
             xfer_circuit.out_1_cm_bits->get_digest());
-//    result["transfer_proof"] = json_conversion::to_json(xfer_proof);
+    result["transfer_proof"] = json_conversion::to_json(xfer_proof);
     return result;
 }
 
@@ -491,20 +495,20 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_withdrawal(
     if (!wd_circuit.pb->is_satisfied()) {
         throw JsonRpcException(-32010, "Withdrawal circuit not satisfied");
     }
-//
-//    const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> proof =
-//            r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
-//                    withdrawal_pk, wd_circuit.pb->primary_input(),
-//                    wd_circuit.pb->auxiliary_input());
-//
-//    bool verified =
-//            r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
-//                    withdrawal_vk, wd_circuit.pb->primary_input(), proof);
-//    if (verified) {
-//        cout << "Withdrawal proof successfully verified." << endl;
-//    } else {
-//        cerr << "Withdrawal proof verification failed." << endl;
-//    }
+
+    const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> proof =
+            r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
+                    withdrawal_pk, wd_circuit.pb->primary_input(),
+                    wd_circuit.pb->auxiliary_input());
+
+    bool verified =
+            r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
+                    withdrawal_vk, wd_circuit.pb->primary_input(), proof);
+    if (verified) {
+        cout << "Withdrawal proof successfully verified." << endl;
+    } else {
+        cerr << "Withdrawal proof verification failed." << endl;
+    }
 
     cout << "WITHDRAWAL PUBLIC INPUT" << endl << hex
          << wd_circuit.pb->primary_input() << endl;
@@ -512,7 +516,7 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_withdrawal(
 
     Json::Value result;
     result["sn"] = bits_to_hex(wd_circuit.sn_bits->get_digest());
-//    result["proof"] = json_conversion::to_json(proof);
+    result["proof"] = json_conversion::to_json(proof);
     return result;
 }
 
