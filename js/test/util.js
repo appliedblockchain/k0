@@ -1,5 +1,7 @@
 const assert = require('assert')
+const compileContract = require('./helpers/compile-contract')
 const crypto = require('crypto')
+const deploy = require('../deploy')
 const execAsync = require('../exec-async')
 const path = require('path')
 const proofFromFile = require('../proof-from-file')
@@ -7,7 +9,8 @@ const sendTransaction = require('../send-transaction')
 const Web3 = require('web3')
 
 const baseDir = path.join(__dirname, '..', '..')
-const cppUtilDir = path.join(baseDir, 'cpp', 'build', 'src')
+const cppDir = process.env.CPP_DIR || path.join(baseDir, 'cpp')
+const cppUtilDir = process.env.CPP_UTIL_DIR || path.join(cppDir, 'cmake-build-debug', 'src')
 
 async function convertVk(vkPath, vkAltPath) {
   const executablePath = path.join(cppUtilDir, 'convert_vk')
@@ -27,8 +30,8 @@ function paths(label) {
   return {
     tmpDir,
     baseDir,
-    cppDir: path.join(baseDir, 'cpp', 'build', 'src', 'examples', label),
-    cppUtilDir: path.join(baseDir, 'cpp', 'build', 'src'),
+    cppDir,
+    cppUtilDir: path.join(cppDir, 'build', 'src'),
     pk: path.join(tmpDir, `${label}_pk`),
     vk: path.join(tmpDir, `${label}_vk`),
     vkAlt: path.join(tmpDir, `${label}_vk_alt`),
@@ -79,9 +82,39 @@ function initWeb3() {
   return new Web3( endpointFromEnv || 'http://localhost:8545/')
 }
 
+async function deployStandardContract(web3, contractName, account = null) {
+    const artefacts = await compileContract(contractName)
+    const contractAddress = await deploy(
+        web3,
+        artefacts.abi,
+        artefacts.bytecode,
+        50000000,
+        [],
+        account
+    )
+    return new web3.eth.Contract(artefacts.abi, contractAddress)
+}
+
+function toUnits(input) {
+  assert(BN.isBN(input))
+  const ten = new BN('10', 10)
+  const decimals = new BN('8', 10)
+  const multiplier = ten.pow(decimals)
+  return input.mul(multiplier)
+}
+
+function fromUnits(input) {
+  assert(BN.isBN(input))
+  const ten = new BN('10', 10)
+  const decimals = new BN('8', 10)
+  const divisor = ten.pow(decimals)
+  return input.div(divisor)
+}
+
 module.exports = {
   convertVk,
   convertProof,
+  deployStandardContract,
   initWeb3,
   randomBytes,
   paths,

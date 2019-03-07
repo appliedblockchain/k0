@@ -19,7 +19,9 @@ unsigned long hex2long(string hex_string) {
 
 vector<bool> hex2bits(string input) {
   input = input.substr(2);
-  assert(input.length() % 8 == 0);
+  if (!(input.length() % 8 == 0)) {
+    throw invalid_argument("Input string (" + input + ") is of length " + to_string(input.length()));
+  }
   vector<bool> input_as_bits;
   for (uint i = input.length(); i >= 8; i = i - 8)
   {

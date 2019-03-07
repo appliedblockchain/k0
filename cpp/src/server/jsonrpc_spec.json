@@ -1,0 +1,350 @@
+[
+  {
+    "name": "add",
+    "params": [
+      "0x1111111111111111111111111111111111111111111111111111111111111111"
+    ],
+    "returns": {
+      "address": 1337,
+      "newRoot": "0x1111111111111111111111111111111111111111111111111111111111111111"
+    }
+  },
+  {
+    "name": "element",
+    "params": [
+      1337
+    ],
+    "returns": "0x1111111111111111111111111111111111111111111111111111111111111111"
+  },
+  {
+    "name": "hash",
+    "params": [
+      "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "0x1111111111111111111111111111111111111111111111111111111111111111"
+    ],
+    "returns": "0x1111111111111111111111111111111111111111111111111111111111111111"
+  },
+  {
+    "name": "prepare_deposit",
+    "params": [
+      "a_pk_as_hex_string",
+      "rho_as_hex_string",
+      "r_as_hex_string",
+      "v_as_decimal_string"
+    ],
+    "returns": {
+      "address": "1337",
+      "k": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "cm": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "commitmentProof": [
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          [
+            "bignum",
+            "bignum"
+          ],
+          [
+            "bignum",
+            "bignum"
+          ]
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ]
+      ],
+      "additionProof": [
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          [
+            "bignum",
+            "bignum"
+          ],
+          [
+            "bignum",
+            "bignum"
+          ]
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "prepare_transfer",
+    "params": [
+      "input_0_address_as_decimal_string",
+      "input_0_a_sk_as_hex_string",
+      "input_0_rho_as_hex_string",
+      "input_0_r_as_hex_string",
+      "input_0_v_as_decimal_string",
+      "input_1_address_as_decimal_string",
+      "input_1_a_sk_as_hex_string",
+      "input_1_rho_as_hex_string",
+      "input_1_r_as_hex_string",
+      "input_1_v_as_decimal_string",
+      "output_0_a_pk_as_hex_string",
+      "output_0_rho_as_hex_string",
+      "output_0_r_as_hex_string",
+      "output_0_v_as_decimal_string",
+      "output_1_a_pk_as_hex_string",
+      "output_1_rho_as_hex_string",
+      "output_1_r_as_hex_string",
+      "output_1_v_as_decimal_string"
+    ],
+    "returns": {
+      "input_0_sn": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "input_1_sn": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "output_0_address": 1337,
+      "output_0_cm": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "output_1_address": 1337,
+      "output_1_cm": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "transfer_proof": [
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          [
+            "bignum",
+            "bignum"
+          ],
+          [
+            "bignum",
+            "bignum"
+          ]
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ]
+      ],
+      "addition_0_proof": [
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          [
+            "bignum",
+            "bignum"
+          ],
+          [
+            "bignum",
+            "bignum"
+          ]
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ]
+      ],
+      "addition_1_proof": [
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          [
+            "bignum",
+            "bignum"
+          ],
+          [
+            "bignum",
+            "bignum"
+          ]
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "prepare_withdrawal",
+    "params": [
+      "address_as_decimal_string",
+      "a_sk_as_hex_string",
+      "rho_as_hex_string",
+      "r_as_hex_string",
+      "v_as_decimal_string",
+      "recipient_as_hex_string"
+    ],
+    "returns": {
+      "sn": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "proof": [
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          [
+            "bignum",
+            "bignum"
+          ],
+          [
+            "bignum",
+            "bignum"
+          ]
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "prf_addr",
+    "params": [
+      "a_sk_as_hex_string"
+    ],
+    "returns": "a_pk_as_hex_string"
+  },
+  {
+    "name": "reset",
+    "params": [],
+    "returns": "0x1111111111111111111111111111111111111111111111111111111111111111"
+  },
+  {
+    "name": "root",
+    "params": [],
+    "returns": "0x1111111111111111111111111111111111111111111111111111111111111111"
+  },
+  {
+    "name": "status",
+    "params": [],
+    "returns": {
+      "ready": true
+    }
+  }
+]
