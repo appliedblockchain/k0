@@ -9,6 +9,7 @@ add_executable(
         merkle_tree.cpp
         merkle_tree_addition.cpp
         prfs.cpp
+        summation.cpp
         transfer.cpp
         util.cpp
 )

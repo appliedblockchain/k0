@@ -19,8 +19,6 @@ namespace zktrade {
         pb_variable_array<FieldT> *out_0_cm_packed;
         pb_variable_array<FieldT> *out_1_cm_packed;
 
-        // TODO packed cms
-
         // Auxiliary inputs
         pb_variable<FieldT>* ZERO;
         digest_variable<FieldT> *rt_bits;
@@ -47,6 +45,8 @@ namespace zktrade {
         shared_ptr<digest_variable<FieldT>> in_1_a_pk_bits;
         digest_variable<FieldT> *in_1_cm_bits;
         shared_ptr<digest_variable<FieldT>> in_1_sn_bits;
+
+        pb_variable_array<FieldT> *total_value;
 
         // First output
         pb_variable_array<FieldT> *out_0_v_bits;
