@@ -9,20 +9,20 @@ async function compileContract(contractName) {
     'node_modules',
     'openzeppelin-solidity'
   )
-  const contractPath = path.join(
+
+  const contractsDir = path.join(
     __dirname,
     '..',
     '..',
     '..',
-    'sol',
-    `${contractName}.sol`
+    'sol'
   )
+  const contractPath = path.join(contractsDir, `${contractName}.sol`)
   const command = [
     `solc --combined-json abi,bin openzeppelin-solidity=${ozDir} `,
     `${contractPath}`
   ].join('')
-  console.log(command)
-  const { stdout, stderr } = await execAsync(command)
+  const { stdout, stderr } = await execAsync(command, { cwd: contractsDir })
   if (stderr) {
     console.log(stderr)
   }

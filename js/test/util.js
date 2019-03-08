@@ -82,14 +82,14 @@ function initWeb3() {
   return new Web3( endpointFromEnv || 'http://localhost:8545/')
 }
 
-async function deployStandardContract(web3, contractName, account = null) {
+async function deployStandardContract(web3, contractName, account = null, params = []) {
     const artefacts = await compileContract(contractName)
     const contractAddress = await deploy(
         web3,
         artefacts.abi,
         artefacts.bytecode,
         50000000,
-        [],
+        params,
         account
     )
     return new web3.eth.Contract(artefacts.abi, contractAddress)
