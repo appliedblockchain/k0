@@ -1,4 +1,5 @@
 const assert = require('assert')
+const compileContracts = require('./helpers/compile-contracts')
 const util = require('./util')
 const sendTransaction = require('../send-transaction')
 const log = console.log
@@ -49,17 +50,9 @@ describe('Transparent trade', async () => {
 
     tokenMaster = web3.eth.accounts.create()
     carManufacturer = web3.eth.accounts.create()
-
-    dollarCoin = await util.deployStandardContract(
-      web3,
-      'DollarCoin',
-      tokenMaster
-    )
-    carToken = await util.deployStandardContract(
-      web3,
-      'CarToken',
-      carManufacturer
-    )
+    const artefacts = await compileContracts()
+    dollarCoin = await util.deployContract(web3, artefacts.DollarCoin, [], tokenMaster)
+    carToken = await util.deployContract(web3, artefacts.CarToken, [], carManufacturer)
   })
 
 

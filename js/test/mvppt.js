@@ -12,8 +12,7 @@ const path = require('path')
 const util = require('./util')
 const expect = require('code').expect
 const sendTransaction = require('../send-transaction')
-const vkFromFile = require('../vk-from-file')
-const vkToSol = require('../vk-to-sol')
+const compileContracts = require('./helpers/compile-contracts')
 
 if (process.env.MOCHA_MERKLE_TREE_HEIGHT === undefined) {
   console.log('Env var MOCHA_MERKLE_TREE_HEIGHT must be set.')
@@ -23,135 +22,22 @@ if (process.env.MOCHA_MERKLE_TREE_HEIGHT === undefined) {
 const TREE_HEIGHT = parseInt(process.env.MOCHA_MERKLE_TREE_HEIGHT || '2', 10)
 const numInitialCoins = 2
 
-const tmpDir = '/tmp'
-
-const paths = {
-  commitmentPk: path.join(tmpDir, 'zktrade_commitment_pk'),
-  commitmentVkAlt: path.join(tmpDir, 'zktrade_commitment_vk_alt'),
-  additionPk: path.join(tmpDir, 'zktrade_addition_pk'),
-  additionVkAlt: path.join(tmpDir, 'zktrade_addition_vk_alt'),
-  transferPk: path.join(tmpDir, 'zktrade_transfer_pk'),
-  transferVkAlt: path.join(tmpDir, 'zktrade_transfer_vk_alt'),
-  withdrawalPk: path.join(tmpDir, 'zktrade_withdrawal_pk'),
-  withdrawalVkAlt: path.join(tmpDir, 'zktrade_withdrawal_vk_alt')
-}
-
-function extractContractArtefacts(result, contractName) {
-  const contractInfo = result.contracts[`${contractName}.sol:${contractName}`]
-  return {
-    abi: JSON.parse(contractInfo.abi),
-    bytecode: '0x' + contractInfo.bin
-  }
-}
-
-async function generateVerifierContractAlt(pathToVk, filePath, contractName) {
-  // Read vk and Solidity contract source code template
-  const templateFilePath = path.join(path.parse(module.filename).dir, '..', '..', 'sol', 'GenericVerifier.sol')
-  const [vk, contractTemplate] = await Promise.all([
-    vkFromFile(pathToVk),
-    asyncFs.readTextFile(templateFilePath)
-  ])
-
-  // Put contract name and vk into contract source, write to temporary file
-  const vkSolSnippet = vkToSol(...vk)
-  let contractSource = contractTemplate.replace('____CONTRACT_NAME____', contractName)
-  contractSource = contractSource.replace('____VERIFYING_KEY_BODY____', vkSolSnippet)
-
-  await asyncFs.writeTextFile(filePath, contractSource, 'utf8')
-
-}
-
-async function compileContracts() {
-  const contractsDir = path.join(tmpDir, crypto.randomBytes(32).toString('hex'))
-  await asyncFs.mkdir(contractsDir)
-  await generateVerifierContractAlt(
-    paths.commitmentVkAlt,
-    path.join(contractsDir, 'CommitmentVerifier.sol'),
-    'CommitmentVerifier'
-  )
-  await generateVerifierContractAlt(
-    paths.additionVkAlt,
-    path.join(contractsDir, 'AdditionVerifier.sol'),
-    'AdditionVerifier'
-  )
-  await generateVerifierContractAlt(
-    paths.transferVkAlt,
-    path.join(contractsDir, 'TransferVerifier.sol'),
-    'TransferVerifier'
-  )
-  await generateVerifierContractAlt(
-    paths.withdrawalVkAlt,
-    path.join(contractsDir, 'WithdrawalVerifier.sol'),
-    'WithdrawalVerifier'
-  )
-  const mtPath = path.join(contractsDir, 'MVPPT.sol')
-  await asyncFs.copyFile(
-    path.join(
-      path.parse(module.filename).dir, '..', '..', 'sol', 'MVPPT.sol'
-    ),
-    mtPath
-  )
-  const pairingPath = path.join(contractsDir, 'Pairing.sol')
-  await asyncFs.copyFile(
-    path.join(
-      path.parse(module.filename).dir, '..', '..', 'sol', 'Pairing.sol'
-    ),
-    pairingPath
-  )
-
-  const ozDir = path.join(
-    __dirname,
-    '..',
-    'node_modules',
-    'openzeppelin-solidity'
-  )
-  const outputPath = path.join(contractsDir, 'output.json')
-  const command = [
-    `solc --combined-json abi,bin openzeppelin-solidity=${ozDir}`,
-    `MVPPT.sol > output.json`
-  ].join(' ')
-  const options = {
-    cwd: contractsDir,
-    maxBuffer: 1024 * 1024
-  }
-  const {stdout, stderr} = await execAsync(command, options)
-  if (stderr) {
-    console.log(stderr)
-  }
-  const json = await asyncFs.readTextFile(outputPath)
-  // TODO Delete directory
-  //await asyncFs.unlink(tmpFilePath)
-  const result = JSON.parse(json)
-  return {
-    MVPPT: extractContractArtefacts(result, 'MVPPT'),
-    AdditionVerifier: extractContractArtefacts(result, 'AdditionVerifier'),
-    CommitmentVerifier: extractContractArtefacts(result, 'CommitmentVerifier'),
-    WithdrawalVerifier: extractContractArtefacts(result, 'WithdrawalVerifier'),
-    TransferVerifier: extractContractArtefacts(result, 'TransferVerifier')
-  }
-}
-
-
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 async function mtEngineReady(mtEngine) {
   let ready = false;
 
   process.stdout.write('Waiting for the server to become ready...')
-  // while (!ready) {
-  //   const statusResponse = await mtEngine.request('status', [])
-  //   ready = statusResponse.result.ready
-  //   if (!ready) {
-  //     process.stdout.write('.')
-  //     await wait(1000)
-  //   }
-  // }
+  while (!ready) {
+    const statusResponse = await mtEngine.request('status', [])
+    ready = statusResponse.result.ready
+    if (!ready) {
+      process.stdout.write('.')
+      await wait(1000)
+    }
+  }
   process.stdout.write('\n')
   console.log('Server ready.')
-}
-
-function randomBytesHex(len = 32) {
-  return '0x' + crypto.randomBytes(len).toString('hex')
 }
 
 describe('Minimum viable private payment token', function () {
@@ -174,15 +60,19 @@ describe('Minimum viable private payment token', function () {
     tokenMaster = web3.eth.accounts.create()
     depositors = _.times(numInitialCoins, () => web3.eth.accounts.create())
 
-    erc20 = await util.deployStandardContract(web3, 'DollarCoin', tokenMaster)
-    const moneyShower = await util.deployStandardContract(web3, 'MoneyShower')
+    const artefacts = await compileContracts()
+
+    erc20 = await util.deployContract(web3, artefacts.DollarCoin, [], tokenMaster)
+    const moneyShower = await util.deployContract(web3, artefacts.MoneyShower)
 
     // Make some money
-    const data = erc20.methods
-    .mint(tokenMaster.address, "1000000000000000")
-    .encodeABI()
-
-    await sendTransaction(web3, erc20._address, data, 5000000, tokenMaster)
+    await sendTransaction(
+      web3,
+      erc20._address,
+      erc20.methods.mint(tokenMaster.address, "1000000000000000").encodeABI(),
+      5000000,
+      tokenMaster
+    )
 
     // Money to the people
     await sendTransaction(
@@ -213,51 +103,24 @@ describe('Minimum viable private payment token', function () {
     console.log("RESETTED")
     const initialRootResponse = await mtEngine.request('root', [])
     const initialRoot = initialRootResponse.result
-
-    const contractArtefacts = await compileContracts()
-    const commitmentVerifierAddress = await deploy(
+    const verifierAddresses = await Promise.all([
+      'CommitmentVerifier',
+      'AdditionVerifier',
+      'TransferVerifier',
+      'WithdrawalVerifier'
+    ].map(async name => {
+      const contract = await util.deployContract(web3, artefacts[name])
+      return contract._address
+    }))
+    MVPPT = await util.deployContract(
       web3,
-      contractArtefacts.CommitmentVerifier.abi,
-      contractArtefacts.CommitmentVerifier.bytecode,
-      50000000
-    )
-    const additionVerifierAddress = await deploy(
-      web3,
-      contractArtefacts.AdditionVerifier.abi,
-      contractArtefacts.AdditionVerifier.bytecode,
-      50000000
-    )
-    const transferVerifierAddress = await deploy(
-      web3,
-      contractArtefacts.TransferVerifier.abi,
-      contractArtefacts.TransferVerifier.bytecode,
-      50000000
-    )
-    const withdrawalVerifierAddress = await deploy(
-      web3,
-      contractArtefacts.WithdrawalVerifier.abi,
-      contractArtefacts.WithdrawalVerifier.bytecode,
-      50000000
-    )
-    const MVPPTAddress = await deploy(
-      web3,
-      contractArtefacts.MVPPT.abi,
-      contractArtefacts.MVPPT.bytecode,
-      50000000,
+      artefacts.MVPPT,
       [
         erc20._address,
-        commitmentVerifierAddress,
-        additionVerifierAddress,
-        transferVerifierAddress,
-        withdrawalVerifierAddress,
+        ...verifierAddresses,
         await util.pack256Bits(initialRoot)
       ]
     )
-    MVPPT = new web3.eth.Contract(
-      contractArtefacts.MVPPT.abi,
-      MVPPTAddress
-    )
-
   })
 
   it('Lifecycle', async function () {
@@ -298,15 +161,14 @@ describe('Minimum viable private payment token', function () {
       const account = depositors[i]
 
       //const v = (_.random(1, 99) * 100000000).toString()
-      const { a_sk, rho, r, v } = coins[i]
-        await sendTransaction(
-          web3,
-          erc20._address,
-          erc20.methods.approve(MVPPT._address, v).encodeABI(),
-          5000000,
-          account
-        )
-
+      const {a_sk, rho, r, v} = coins[i]
+      await sendTransaction(
+        web3,
+        erc20._address,
+        erc20.methods.approve(MVPPT._address, v).encodeABI(),
+        5000000,
+        account
+      )
 
       const aPkResponse = await mtEngine.request('prf_addr', [a_sk])
       const a_pk = aPkResponse.result
@@ -325,9 +187,6 @@ describe('Minimum viable private payment token', function () {
       const serverRootResponse = await mtEngine.request('root', [])
       console.log(serverRootResponse)
       const serverRoot = await util.pack256Bits(serverRootResponse.result)
-
-
-
 
       const data = response.result;
 
@@ -403,7 +262,7 @@ describe('Minimum viable private payment token', function () {
       ).encodeABI()
       const receipt = await sendTransaction(web3, MVPPT._address, txData, 5000000, account)
 
-        assert(receipt.status)
+      assert(receipt.status)
 
       const depositResponse = await mtEngine.request('add', [data.cm])
       console.log(`Added leaf ${i}: ${data.cm}`)
@@ -420,20 +279,19 @@ describe('Minimum viable private payment token', function () {
         `(avg: ${Math.round(avg / 1000)}s)`
       ].join(' '))
 
-     await printBalances(_.map(depositors, 'address'))
+      await printBalances(_.map(depositors, 'address'))
     }
 
     // TRANSFER
-
     const transferors = _.times(numInitialCoins, () => web3.eth.accounts.create())
     for (let i = 0; i < 1; i += 2) {
       let inputs = [coins[i], coins[i + 1]],
         outputs = [coins[i + 2], coins[i + 3]]
 
       for (let j = 0; j < 2; j++) {
-        const a_sk = randomBytesHex(32)
-        const rho = randomBytesHex(32)
-        const r = randomBytesHex(48)
+        const a_sk = util.randomBytesHex(32)
+        const rho = util.randomBytesHex(32)
+        const r = util.randomBytesHex(48)
         const v = 50000000000
         coins.push({a_sk, rho, r, v})
         outputs.push({a_sk, rho, r, v})
@@ -494,7 +352,7 @@ describe('Minimum viable private payment token', function () {
       const data = x.encodeABI()
 
       const account = transferors[i];
-     const receipt = await sendTransaction(web3, MVPPT._address, data, 5000000, account)
+      const receipt = await sendTransaction(web3, MVPPT._address, data, 5000000, account)
       console.log("Transfer successful?", receipt.status)
 
 
