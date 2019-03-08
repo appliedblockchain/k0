@@ -13,6 +13,8 @@ const util = require('./util')
 const expect = require('code').expect
 const sendTransaction = require('../send-transaction')
 const compileContracts = require('./helpers/compile-contracts')
+const mtEngineReady = require('../client/ready')
+const flattenProof = require('../flatten-proof')
 
 if (process.env.MOCHA_MERKLE_TREE_HEIGHT === undefined) {
   console.log('Env var MOCHA_MERKLE_TREE_HEIGHT must be set.')
@@ -24,21 +26,6 @@ const numInitialCoins = 2
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
 
-async function mtEngineReady(mtEngine) {
-  let ready = false;
-
-  process.stdout.write('Waiting for the server to become ready...')
-  while (!ready) {
-    const statusResponse = await mtEngine.request('status', [])
-    ready = statusResponse.result.ready
-    if (!ready) {
-      process.stdout.write('.')
-      await wait(1000)
-    }
-  }
-  process.stdout.write('\n')
-  console.log('Server ready.')
-}
 
 describe('Minimum viable private payment token', function () {
 
@@ -191,61 +178,8 @@ describe('Minimum viable private payment token', function () {
       const data = response.result;
 
       console.log(data.commitmentProof)
-      const commitmentProofCompact = [
-        data.commitmentProof[0][0], // 0 a
-        data.commitmentProof[0][1], // 1
-
-        data.commitmentProof[1][0], // 2 a_p
-        data.commitmentProof[1][1], // 3
-
-        data.commitmentProof[2][0][0], // 4 b (0)
-        data.commitmentProof[2][0][1], // 5
-        data.commitmentProof[2][1][0], // 6 b (1)
-        data.commitmentProof[2][1][1], // 7
-
-        data.commitmentProof[3][0], // 8 b_p
-        data.commitmentProof[3][1], // 9
-
-        data.commitmentProof[4][0], // 10 c
-        data.commitmentProof[4][1], // 11
-
-        data.commitmentProof[5][0], // 12 c_p
-        data.commitmentProof[5][1], // 13
-
-        data.commitmentProof[6][0], // 14 h
-        data.commitmentProof[6][1], // 15
-
-        data.commitmentProof[7][0], // 16 k
-        data.commitmentProof[7][1]  // 17
-      ]
-
-      const additionProofCompact = [
-        data.additionProof[0][0], // 0 a
-        data.additionProof[0][1], // 1
-
-        data.additionProof[1][0], // 2 a_p
-        data.additionProof[1][1], // 3
-
-        data.additionProof[2][0][0], // 4 b (0)
-        data.additionProof[2][0][1], // 5
-        data.additionProof[2][1][0], // 6 b (1)
-        data.additionProof[2][1][1], // 7
-
-        data.additionProof[3][0], // 8 b_p
-        data.additionProof[3][1], // 9
-
-        data.additionProof[4][0], // 10 c
-        data.additionProof[4][1], // 11
-
-        data.additionProof[5][0], // 12 c_p
-        data.additionProof[5][1], // 13
-
-        data.additionProof[6][0], // 14 h
-        data.additionProof[6][1], // 15
-
-        data.additionProof[7][0], // 16 k
-        data.additionProof[7][1]  // 17
-      ]
+      const commitmentProofCompact = flattenProof(data.commitmentProof)
+      const additionProofCompact = flattenProof(data.additionProof)
 
       const params = [
         v,
