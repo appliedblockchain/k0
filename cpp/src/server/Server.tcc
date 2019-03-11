@@ -268,7 +268,8 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_transfer(
         const std::string &output_1_a_pk_str,
         const std::string &output_1_rho_str,
         const std::string &output_1_r_str,
-        const std::string &output_1_v_str) {
+        const std::string &output_1_v_str,
+        const std::string &callee_hex_str) {
 
 
     cout << "MAX " << dec << UINT64_MAX << endl;
@@ -312,11 +313,14 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_transfer(
             }
     };
 
+    auto callee_dec_str = hex_to_dec_string(callee_hex_str);
+    auto callee = FieldT(callee_dec_str.c_str());
+
     auto xfer_circuit = make_transfer_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(
             tree_height);
     bit_vector mt_root = mt.root();
     populate(xfer_circuit, tree_height, mt_root, in[0], in[1], out[0],
-             out[1]);
+             out[1], callee);
 
     print(xfer_circuit);
     for (size_t i = 0; i < 2; i++) {

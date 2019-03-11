@@ -21,6 +21,8 @@ contract MVPPT {
     event PrimaryInput(uint, uint, uint, uint, uint, uint);
     event PrimaryInput(uint, uint, uint, uint, uint, uint, uint);
     event PrimaryInput(uint, uint, uint, uint, uint, uint, uint, uint, uint, uint);
+    event PrimaryInput(uint, uint, uint, uint, uint, uint, uint, uint, uint, uint, uint);
+    event NeedToCall(address);
 
     mapping(bytes32 => bool) snUsed;
 
@@ -38,7 +40,8 @@ contract MVPPT {
         root = initialRoot;
     }
 
-    // TODO add Merkle tree address as a sanity check
+    // TODO add Merkle tree root as a sanity check / economy measure (no need to
+    // run the verification if the tree root doesn't match)
     function deposit(
         uint v,
         uint[2] memory comm_k,
@@ -112,20 +115,14 @@ contract MVPPT {
         uint[2] memory cm_out_0,
         uint[2] memory cm_out_1,
         uint[2] memory new_root,
-        uint[2] memory a,
-        uint[2] memory a_p,
-        uint[2][2] memory b,
-        uint[2] memory b_p,
-        uint[2] memory c,
-        uint[2] memory c_p,
-        uint[2] memory h,
-        uint[2] memory k
+        address callee,
+        uint[18] memory proof
     ) public {
         bytes32 sn0Hash = keccak256(abi.encode(sn_in_0));
         bytes32 sn1Hash = keccak256(abi.encode(sn_in_1));
-        //require(!snUsed[sn0Hash], "sn_in 0 has already been used.");
-        //require(!snUsed[sn1Hash], "sn_in 1 has already been used.");
-        uint[] memory inputs = new uint[](10);
+        require(!snUsed[sn0Hash], "sn_in 0 has already been used.");
+        require(!snUsed[sn1Hash], "sn_in 1 has already been used.");
+        uint[] memory inputs = new uint[](11);
         inputs[0] = root[0];
         inputs[1] = root[1];
         inputs[2] = sn_in_0[0];
@@ -136,17 +133,23 @@ contract MVPPT {
         inputs[7] = cm_out_0[1];
         inputs[8] = cm_out_1[0];
         inputs[9] = cm_out_1[1];
-        emit PrimaryInput(inputs[0], inputs[1], inputs[2], inputs[3], inputs[4], inputs[5], inputs[6], inputs[7], inputs[8], inputs[9]);
-
+        inputs[10] = uint256(callee);
+        if (callee != address(0)) {
+            emit NeedToCall(callee);
+        }
+        emit PrimaryInput(inputs[0], inputs[1], inputs[2], inputs[3], inputs[4], inputs[5], inputs[6], inputs[7], inputs[8], inputs[9], inputs[10]);
         if (transferVerifier.verifyProof(
-                a,
-                a_p,
-                b,
-                b_p,
-                c,
-                c_p,
-                h,
-                k,
+                [proof[0], proof[1]], // a
+                [proof[2], proof[3]], // a_p
+                [
+                [proof[4], proof[5]], // b (0)
+                [proof[6], proof[7]]  // b (1)
+                ],
+                [proof[8], proof[9]], // b_p
+                [proof[10], proof[11]], // c
+                [proof[12], proof[13]], // c_p
+                [proof[14], proof[15]], // h
+                [proof[16], proof[17]], // k
                 inputs
             )) {
             snUsed[sn0Hash] = true;
@@ -157,6 +160,7 @@ contract MVPPT {
         }
     }
 
+    // TODO proof as linear array (like the rest) for consistency
     function withdraw(
         uint v,
         uint[2] memory sn,

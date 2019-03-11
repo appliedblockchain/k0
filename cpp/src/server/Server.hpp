@@ -81,7 +81,8 @@ namespace zktrade {
                 const std::string& output_1_a_pk_str,
                 const std::string& output_1_rho_str,
                 const std::string& output_1_r_str,
-                const std::string& output_1_v_str);
+                const std::string& output_1_v_str,
+                const std::string& callee_hex_str);
 
         virtual Json::Value prepare_withdrawal(
                 const std::string &address_str,

@@ -24,14 +24,16 @@ zktrade::make_transfer_circuit(size_t tree_height) {
     pb_variable_array<FieldT> *out_1_cm_packed = new pb_variable_array<FieldT>();
     out_1_cm_packed->allocate(*pb, 2, "out_1_cm_packed");
 
-    pb->set_input_sizes(10);
+    pb_variable<FieldT> *callee_public = new pb_variable<FieldT>();
+    callee_public->allocate(*pb, "callee_public");
+
+    pb->set_input_sizes(11);
 
     pb_variable<FieldT> *ZERO = new pb_variable<FieldT>();
     ZERO->allocate(*pb, "ZERO");
 
     digest_variable<FieldT> *rt_bits =
             new digest_variable<FieldT>(*pb, 256, "rt_bits");
-
 
     pb_variable_array<FieldT> *in_0_v_bits = new pb_variable_array<FieldT>();
     in_0_v_bits->allocate(*pb, 64, "in_0_v_bits");
@@ -123,6 +125,8 @@ zktrade::make_transfer_circuit(size_t tree_height) {
     digest_variable<FieldT> *out_1_cm_bits =
             new digest_variable<FieldT>(*pb, 256, "out_1_cm_bits");
 
+    pb_variable<FieldT> *callee_private = new pb_variable<FieldT>();
+    callee_private->allocate(*pb, "callee_private");
 
     multipacking_gadget<FieldT> *rt_packer =
             new multipacking_gadget<FieldT>(
@@ -246,6 +250,10 @@ zktrade::make_transfer_circuit(size_t tree_height) {
                 "total_value_bits bit " + to_string(i) + "is boolean");
     }
 
+    pb->add_r1cs_constraint(
+            r1cs_constraint<FieldT>(*callee_public, ONE, *callee_private),
+            "callee_public must equal callee_private");
+
     out_0_cm_gadget->generate_r1cs_constraints();
     out_0_cm_packer->generate_r1cs_constraints(true);
     out_1_cm_gadget->generate_r1cs_constraints();
@@ -258,6 +266,7 @@ zktrade::make_transfer_circuit(size_t tree_height) {
             in_1_sn_packed,
             out_0_cm_packed,
             out_1_cm_packed,
+            callee_public,
 
             ZERO,
             rt_bits,
@@ -295,6 +304,8 @@ zktrade::make_transfer_circuit(size_t tree_height) {
             out_1_rho_bits,
             out_1_r_bits,
             out_1_cm_bits,
+
+            callee_private,
 
             rt_packer,
             in_0_sn_packer,
@@ -409,7 +420,8 @@ void zktrade::populate(
         input_note &in_0,
         input_note &in_1,
         output_note &out_0,
-        output_note &out_1) {
+        output_note &out_1,
+        FieldT &callee) {
     c.rt_bits->generate_r1cs_witness(merkle_tree_root);
 
     auto in_0_address_bits = int_to_bits<FieldT>(in_0.address, tree_height);
@@ -444,6 +456,9 @@ void zktrade::populate(
 
     auto total_out_v_bits = uint64_to_bits(out_0.v + out_1.v);
     c.total_value->fill_with_bits(*c.pb, total_out_v_bits);
+
+    c.pb->val(*c.callee_public) = callee;
+    c.pb->val(*c.callee_private) = callee;
 }
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>

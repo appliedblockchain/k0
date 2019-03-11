@@ -138,7 +138,8 @@
       "output_1_a_pk_as_hex_string",
       "output_1_rho_as_hex_string",
       "output_1_r_as_hex_string",
-      "output_1_v_as_decimal_string"
+      "output_1_v_as_decimal_string",
+      "callee_as_hex_string"
     ],
     "returns": {
       "input_0_sn": "0x1111111111111111111111111111111111111111111111111111111111111111",

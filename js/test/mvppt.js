@@ -236,6 +236,7 @@ describe('Minimum viable private payment token', function () {
         return aPkResponse.result
       }))
 
+      const callee = '0x0000000000000000000000000000000000000000';
       const params = [
         i.toString(10),
         inputs[0].a_sk,
@@ -254,7 +255,8 @@ describe('Minimum viable private payment token', function () {
         a_pk_out[1],
         outputs[1].rho,
         outputs[1].r,
-        outputs[1].v.toString()
+        outputs[1].v.toString(),
+        callee
       ]
       const timestampStart = Date.now()
       const response = await mtEngine.request('prepare_transfer', params)
@@ -262,6 +264,7 @@ describe('Minimum viable private payment token', function () {
 
       const res = response.result
 
+      console.log(response)
       const sn0Packed = await util.pack256Bits(res.input_0_sn)
       const sn1Packed = await util.pack256Bits(res.input_1_sn)
       const cm0Packed = await util.pack256Bits(res.output_0_cm)
@@ -274,13 +277,15 @@ describe('Minimum viable private payment token', function () {
       const addResponse = await mtEngine.request('add', [res.output_1_cm])
       const newRoot = await util.pack256Bits(addResponse.result.newRoot)
 
+      const transferProofCompact = flattenProof(res.transfer_proof)
       const transferParams = [
         sn0Packed,
         sn1Packed,
         cm0Packed,
         cm1Packed,
         newRoot,
-        ...res.transfer_proof
+        callee,
+        transferProofCompact
       ]
       const x = MVPPT.methods.transfer(...transferParams)
       const data = x.encodeABI()

@@ -18,6 +18,7 @@ namespace zktrade {
         pb_variable_array<FieldT> *in_1_sn_packed;
         pb_variable_array<FieldT> *out_0_cm_packed;
         pb_variable_array<FieldT> *out_1_cm_packed;
+        pb_variable<FieldT>* callee_public;
 
         // Auxiliary inputs
         pb_variable<FieldT>* ZERO;
@@ -62,6 +63,9 @@ namespace zktrade {
         pb_variable_array<FieldT> *out_1_r_bits;
         digest_variable<FieldT> *out_1_cm_bits;
 
+        // Callee contract address
+        pb_variable<FieldT>* callee_private;
+
         // Packers
         multipacking_gadget<FieldT> *rt_packer;
         multipacking_gadget<FieldT> *in_0_sn_packer;
@@ -91,7 +95,8 @@ namespace zktrade {
             input_note &in_0,
             input_note &in_1,
             output_note &out_0,
-            output_note &out_1);
+            output_note &out_1,
+            FieldT &callee);
 
     template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
     void generate_witness(
