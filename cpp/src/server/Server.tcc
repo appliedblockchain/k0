@@ -102,6 +102,7 @@ void zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setWithdrawalVk(
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 Json::Value zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::add(
         const string &leaf_hex) {
+    cout << "leaf " << leaf_hex << endl;
     bit_vector leaf_bv = hex2bits(leaf_hex);
     cout << "mt root before" << bits2hex(mt.root()) << endl;
     cout << "mt adding " << bits2hex(leaf_bv) << endl;
@@ -112,6 +113,21 @@ Json::Value zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::add(
     result["newRoot"] = bits2hex(mt.root());
     return result;
 }
+
+template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+std::string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::cm(
+        const std::string &a_pk_hex_str, const std::string &rho_hex_str,
+        const std::string &r_hex_str, const std::string &v_dec_str) {
+    bit_vector a_pk = hex2bits(a_pk_hex_str);
+    bit_vector rho = hex2bits(rho_hex_str);
+    bit_vector r = hex2bits(r_hex_str);
+    FieldT v = FieldT(v_dec_str.c_str());
+    bit_vector v_bits = field_element_to_64_bits(v);
+    bit_vector k = comm_r<CommitmentHashT>(a_pk, rho, r);
+    bit_vector commitment = comm_s<CommitmentHashT>(k, v_bits);
+    return bits2hex(commitment);
+}
+
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::element(
@@ -405,14 +421,14 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_withdrawal(
         const std::string &a_sk_hex_str,
         const std::string &rho_hex_str,
         const std::string &r_hex_str,
-        const std::string &v_hex_str,
+        const std::string &v_dec_str,
         const std::string &recipient_hex_str) {
     unsigned long address = strtoul(address_dec_str.c_str(), NULL, 10);
     bit_vector address_bits = int_to_bits<FieldT>(address, tree_height);
     bit_vector a_sk_bits = hex2bits(a_sk_hex_str);
     bit_vector rho_bits = hex2bits(rho_hex_str);
     bit_vector r_bits = hex2bits(r_hex_str);
-    FieldT v = FieldT(v_hex_str.c_str());
+    FieldT v = FieldT(v_dec_str.c_str());
     bit_vector v_bits = field_element_to_64_bits(v);
     auto recipient_dec_str = hex_to_dec_string(recipient_hex_str);
     auto recipient = FieldT(recipient_dec_str.c_str());

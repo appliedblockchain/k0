@@ -52,6 +52,10 @@ namespace zktrade {
 
         virtual Json::Value add(const std::string &param01);
 
+        virtual std::string
+        cm(const std::string &param01, const std::string &param02,
+           const std::string &param03, const std::string &param04);
+
         virtual std::string element(int param01);
 
         virtual std::string
@@ -64,25 +68,25 @@ namespace zktrade {
                 const std::string &v_str);
 
         virtual Json::Value prepare_transfer(
-                const std::string& input_0_address_str,
-                const std::string& input_0_a_sk_str,
-                const std::string& input_0_rho_str,
-                const std::string& input_0_r_str,
-                const std::string& input_0_v_str,
-                const std::string& input_1_address_str,
-                const std::string& input_1_a_sk_str,
-                const std::string& input_1_rho_str,
-                const std::string& input_1_r_str,
-                const std::string& input_1_v_str,
-                const std::string& output_0_a_pk_str,
-                const std::string& output_0_rho_str,
-                const std::string& output_0_r_str,
-                const std::string& output_0_v_str,
-                const std::string& output_1_a_pk_str,
-                const std::string& output_1_rho_str,
-                const std::string& output_1_r_str,
-                const std::string& output_1_v_str,
-                const std::string& callee_hex_str);
+                const std::string &input_0_address_str,
+                const std::string &input_0_a_sk_str,
+                const std::string &input_0_rho_str,
+                const std::string &input_0_r_str,
+                const std::string &input_0_v_str,
+                const std::string &input_1_address_str,
+                const std::string &input_1_a_sk_str,
+                const std::string &input_1_rho_str,
+                const std::string &input_1_r_str,
+                const std::string &input_1_v_str,
+                const std::string &output_0_a_pk_str,
+                const std::string &output_0_rho_str,
+                const std::string &output_0_r_str,
+                const std::string &output_0_v_str,
+                const std::string &output_1_a_pk_str,
+                const std::string &output_1_rho_str,
+                const std::string &output_1_r_str,
+                const std::string &output_1_v_str,
+                const std::string &callee_hex_str);
 
         virtual Json::Value prepare_withdrawal(
                 const std::string &address_str,

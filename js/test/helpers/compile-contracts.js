@@ -75,11 +75,14 @@ async function compileContracts(tmpDir = '/tmp') {
   ]
 
   const normalContracts = [
-    'Pairing',
-    'MVPPT',
-    'DollarCoin',
+    'Callee',
     'CarToken',
-    'MoneyShower'
+    'CarTrade',
+    'DollarCoin',
+    'HiddenPriceCarTrade',
+    'MoneyShower',
+    'MVPPT',
+    'Pairing'
   ]
 
   const contractNames = verifiers.concat(normalContracts)

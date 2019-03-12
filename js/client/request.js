@@ -8,7 +8,8 @@ async function request(jc, methodName, params = []) {
     throw new Error([
       methodName,
       ' errored: ',
-      _.get(response, 'error.message', 'Error from server')
+      _.get(response, 'error.message', 'Error from server'),
+      ` (params: ${params.join(', ')})`
     ].join(''))
   }
   return response.result

@@ -10,6 +10,16 @@
     }
   },
   {
+    "name": "cm",
+    "params": [
+      "a_pk_as_hex_string",
+      "rho_as_hex_string",
+      "r_as_hex_string",
+      "v_as_decimal_string"
+    ],
+    "returns": "0x1111111111111111111111111111111111111111111111111111111111111111"
+  },
+  {
     "name": "element",
     "params": [
       1337

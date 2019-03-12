@@ -1,5 +1,6 @@
 pragma solidity ^0.5.3;
 
+import "Callee.sol";
 import "AdditionVerifier.sol";
 import "CommitmentVerifier.sol";
 import "TransferVerifier.sol";
@@ -115,7 +116,7 @@ contract MVPPT {
         uint[2] memory cm_out_0,
         uint[2] memory cm_out_1,
         uint[2] memory new_root,
-        address callee,
+        address callee_address,
         uint[18] memory proof
     ) public {
         bytes32 sn0Hash = keccak256(abi.encode(sn_in_0));
@@ -133,11 +134,8 @@ contract MVPPT {
         inputs[7] = cm_out_0[1];
         inputs[8] = cm_out_1[0];
         inputs[9] = cm_out_1[1];
-        inputs[10] = uint256(callee);
-        if (callee != address(0)) {
-            emit NeedToCall(callee);
-        }
-        emit PrimaryInput(inputs[0], inputs[1], inputs[2], inputs[3], inputs[4], inputs[5], inputs[6], inputs[7], inputs[8], inputs[9], inputs[10]);
+        inputs[10] = uint256(callee_address);
+       emit PrimaryInput(inputs[0], inputs[1], inputs[2], inputs[3], inputs[4], inputs[5], inputs[6], inputs[7], inputs[8], inputs[9], inputs[10]);
         if (transferVerifier.verifyProof(
                 [proof[0], proof[1]], // a
                 [proof[2], proof[3]], // a_p
@@ -152,6 +150,8 @@ contract MVPPT {
                 [proof[16], proof[17]], // k
                 inputs
             )) {
+            Callee callee = Callee(callee_address);
+            callee.handle(cm_out_0[0], cm_out_0[1]);
             snUsed[sn0Hash] = true;
             snUsed[sn1Hash] = true;
             root = new_root;

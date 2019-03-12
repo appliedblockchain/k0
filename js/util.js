@@ -10,7 +10,10 @@ function parseG2Point(data) {
 	return [X, Y]
 }
 
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
+
 module.exports = {
   parseG1Point,
-  parseG2Point
+  parseG2Point,
+	wait
 }
