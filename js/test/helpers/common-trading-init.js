@@ -5,8 +5,9 @@ const write = x => process.stdout.write(x)
 const sendTransaction = require('../../send-transaction')
 const printState = require('./print-state')
 const BN = require('bn.js')
+const chalk = require('chalk')
 
-async function commonTradingInit() {
+async function commonTradingInit(fancy = false) {
   const web3 = util.initWeb3()
 
   // map accountIdentifier => web3 account
@@ -46,6 +47,20 @@ async function commonTradingInit() {
   const carId = "1"
 
   util.clear()
+
+  if (fancy) {
+    console.log(chalk.green([
+      '',
+      '██╗  ██╗ ██████╗',
+      '██║ ██╔╝██╔═████╗',
+      '█████╔╝ ██║██╔██║',
+      '██╔═██╗ ████╔╝██║',
+      '██║  ██╗╚██████╔╝',
+      '╚═╝  ╚═╝ ╚═════╝',
+      ''
+    ].join('\n')))
+  }
+
   write('Making a car for Alice...')
   await sendTransaction(
     web3,

@@ -16,16 +16,7 @@ const compileContracts = require('./helpers/compile-contracts')
 const mtEngineReady = require('../client/ready')
 const flattenProof = require('../flatten-proof')
 
-if (process.env.MOCHA_MERKLE_TREE_HEIGHT === undefined) {
-  console.log('Env var MOCHA_MERKLE_TREE_HEIGHT must be set.')
-  process.exit(1)
-}
-
-const TREE_HEIGHT = parseInt(process.env.MOCHA_MERKLE_TREE_HEIGHT || '2', 10)
 const numInitialCoins = 2
-
-const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
-
 
 describe('Minimum viable private payment token', function () {
 

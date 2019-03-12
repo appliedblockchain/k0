@@ -28,7 +28,7 @@ describe('Private trade', async function () {
     server = makeClient()
     await server.ready()
 
-    const initResult = await commonTradingInit()
+    const initResult = await commonTradingInit(true)
     web3 = initResult.web3
     accounts = initResult.accounts
     accountNames = initResult.accountNames
@@ -76,9 +76,10 @@ describe('Private trade', async function () {
     }
   }
 
-  it('Full cycle', async function() {
+  it('Full cycle', async function () {
     this.timeout(3600 * 1000)
-    // bob: Pay in 2x
+
+     // bob: Pay in 2x
     await printState(dollarCoin, carToken, accountAddresses, accountNames, carIds)
 
     await util.prompt()
@@ -88,7 +89,7 @@ describe('Private trade', async function () {
       [a_sk_alice, a_sk_bob].map(a_sk => server.prf_addr(a_sk))
     )
 
-    write("Bob: Shield 70000...")
+    write("Bob: Deposit 70000...")
     const coins = [
       sampleCoin(a_sk_bob, new BN("30000")),
       sampleCoin(a_sk_bob, new BN("40000"))
@@ -180,7 +181,6 @@ describe('Private trade', async function () {
     ].join(''))
 
     const change_coin = sampleCoin(a_sk_bob, coins[0].v.add(coins[1].v).sub(expected_coin.v))
-    // log(change_coin)
 
 
     const params = [
@@ -238,6 +238,54 @@ describe('Private trade', async function () {
 
     const receipt = await sendTransaction(web3, mvppt._address, data, 5000000, accounts.bob)
 
+    write('done.\n')
+
+    await printState(dollarCoin, carToken, accountAddresses, accountNames, carIds)
+
+    await util.prompt()
+
+    // WITHDRAW
+    // Alice
+    write('Alice: Withdraw 50000...')
+    {
+      const wdRes = await server.prepare_withdrawal(
+        "2",
+        expected_coin.a_sk,
+        expected_coin.rho,
+        expected_coin.r,
+        expected_coin.v.toString(),
+        accounts.alice.address
+      )
+      const {sn, proof} = wdRes
+      const snPacked = await util.pack256Bits(sn)
+      const x = mvppt.methods.withdraw(expected_coin.v.toString(), snPacked, ...proof)
+      const data = x.encodeABI()
+      const receipt = await sendTransaction(web3, mvppt._address, data, 5000000, accounts.alice)
+    }
+    write('done.\n')
+
+    await printState(dollarCoin, carToken, accountAddresses, accountNames, carIds)
+
+
+    await util.prompt()
+
+    write('Bob: Withdraw 20000...')
+    {
+      const wdRes = await server.prepare_withdrawal(
+        "3",
+        change_coin.a_sk,
+        change_coin.rho,
+        change_coin.r,
+        change_coin.v.toString(),
+        accounts.bob.address
+      )
+
+      const {sn, proof} = wdRes
+      const snPacked = await util.pack256Bits(sn)
+      const x = mvppt.methods.withdraw(change_coin.v.toString(), snPacked, ...proof)
+      const data = x.encodeABI()
+      const receipt = await sendTransaction(web3, mvppt._address, data, 5000000, accounts.bob)
+    }
     write('done.\n')
 
     await printState(dollarCoin, carToken, accountAddresses, accountNames, carIds)

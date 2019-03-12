@@ -80,8 +80,8 @@ async function sha256Instance() {
 }
 
 function initWeb3() {
-  const endpointFromEnv = process.env.ETHEREUM_JSONRPC_ENDPOINT  
-  return new Web3( endpointFromEnv || 'http://localhost:8545/')
+  const endpointFromEnv = process.env.ETHEREUM_JSONRPC_ENDPOINT
+  return new Web3(endpointFromEnv || 'http://localhost:8545/')
 }
 
 async function deployContract(web3, artefacts, params = [], account) {
@@ -97,16 +97,16 @@ async function deployContract(web3, artefacts, params = [], account) {
 }
 
 async function deployStandardContract(web3, contractName, account = null, params = []) {
-    const artefacts = await compileContract(contractName)
-    const contractAddress = await deploy(
-        web3,
-        artefacts.abi,
-        artefacts.bytecode,
-        50000000,
-        params,
-        account
-    )
-    return new web3.eth.Contract(artefacts.abi, contractAddress)
+  const artefacts = await compileContract(contractName)
+  const contractAddress = await deploy(
+    web3,
+    artefacts.abi,
+    artefacts.bytecode,
+    50000000,
+    params,
+    account
+  )
+  return new web3.eth.Contract(artefacts.abi, contractAddress)
 }
 
 function toUnits(input) {
@@ -130,16 +130,18 @@ function randomBytesHex(len = 32) {
 }
 
 async function prompt() {
-  console.log()
-  const response = await inquirer.prompt({
-    type: 'confirm',
-    name: 'continue',
-    message: 'Continue?'
-  })
-  if (!response.continue) {
-    process.exit(0)
+  if (process.env.PROMPT === 'true') {
+    console.log()
+    const response = await inquirer.prompt({
+      type: 'confirm',
+      name: 'continue',
+      message: 'Continue?'
+    })
+    if (!response.continue) {
+      process.exit(0)
+    }
+    console.log()
   }
-  console.log()
 }
 
 module.exports = {
