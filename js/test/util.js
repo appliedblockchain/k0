@@ -7,6 +7,8 @@ const path = require('path')
 const proofFromFile = require('../proof-from-file')
 const sendTransaction = require('../send-transaction')
 const Web3 = require('web3')
+const inquirer = require('inquirer')
+const clear = require('clear')
 
 const baseDir = path.join(__dirname, '..', '..')
 const cppDir = process.env.CPP_DIR || path.join(baseDir, 'cpp')
@@ -127,7 +129,21 @@ function randomBytesHex(len = 32) {
   return '0x' + crypto.randomBytes(len).toString('hex')
 }
 
+async function prompt() {
+  console.log()
+  const response = await inquirer.prompt({
+    type: 'confirm',
+    name: 'continue',
+    message: 'Continue?'
+  })
+  if (!response.continue) {
+    process.exit(0)
+  }
+  console.log()
+}
+
 module.exports = {
+  clear,
   convertVk,
   convertProof,
   deployContract,
@@ -136,6 +152,7 @@ module.exports = {
   randomBytes,
   paths,
   pack256Bits,
+  prompt,
   proofFromFile,
   randomBytesHex,
   sha256Instance,

@@ -45,6 +45,7 @@ async function commonTradingInit() {
     web3, artefacts.CarToken, [], carManufacturer)
   const carId = "1"
 
+  util.clear()
   write('Making a car for Alice...')
   await sendTransaction(
     web3,

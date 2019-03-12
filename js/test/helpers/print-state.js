@@ -2,7 +2,7 @@ const chalk = require('chalk')
 const log = console.log
 const Table = require('cli-table')
 
-async function printState(dollarCoin, carToken, accounts, accountNames, carIds) {
+async function printState(dollarCoin, carToken, accountAddresses, accountNames, carIds) {
   log()
   log(chalk.underline('DollarCoin'))
   const dollarTable = new Table({
@@ -10,8 +10,7 @@ async function printState(dollarCoin, carToken, accounts, accountNames, carIds) 
     colAligns: ['left', 'right']
   });
   const dollarTableData = await Promise.all(
-    Object.keys(accounts).map(async identifier => {
-      const address = accounts[identifier].address
+    accountAddresses.map(async address => {
       const name = accountNames[address] || 'unknown'
       const balance = await dollarCoin.methods.balanceOf(address).call()
       return [`${name} (${address})`, balance]

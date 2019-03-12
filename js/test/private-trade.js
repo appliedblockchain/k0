@@ -20,10 +20,14 @@ describe('Private trade', async function () {
 
   this.timeout(20000)
 
-  let web3, accounts, accountNames, carIds, tokenMaster, carManufacturer,
-    artefacts, dollarCoin, carToken, carId, mvppt, server
+  let web3, accounts, accountAddresses, accountNames, carIds, tokenMaster,
+    carManufacturer, artefacts, dollarCoin, carToken, carId, mvppt, server
 
   before(async () => {
+
+    server = makeClient()
+    await server.ready()
+
     const initResult = await commonTradingInit()
     web3 = initResult.web3
     accounts = initResult.accounts
@@ -36,8 +40,8 @@ describe('Private trade', async function () {
     carToken = initResult.carToken
     carId = initResult.carId
 
-    server = makeClient()
-    await server.ready()
+    accountAddresses = _.map(accounts, 'address')
+
     await server.reset()
     const initialRoot = await server.root()
     const verifierAddresses = await Promise.all([
@@ -58,6 +62,8 @@ describe('Private trade', async function () {
         await util.pack256Bits(initialRoot)
       ]
     )
+    accountAddresses.push(mvppt._address)
+    accountNames[mvppt._address] = "K0Cash"
   })
 
   function sampleCoin(a_sk, v) {
@@ -70,16 +76,19 @@ describe('Private trade', async function () {
     }
   }
 
-  it('Full cycle', async () => {
+  it('Full cycle', async function() {
+    this.timeout(3600 * 1000)
     // bob: Pay in 2x
-    printState(dollarCoin, carToken, accounts, accountNames, carIds)
+    await printState(dollarCoin, carToken, accountAddresses, accountNames, carIds)
 
+    await util.prompt()
 
     const [a_sk_alice, a_sk_bob] = _.times(2, () => util.randomBytes(32))
     const [a_pk_alice, a_pk_bob] = await Promise.all(
       [a_sk_alice, a_sk_bob].map(a_sk => server.prf_addr(a_sk))
     )
 
+    write("Bob: Shield 70000...")
     const coins = [
       sampleCoin(a_sk_bob, new BN("30000")),
       sampleCoin(a_sk_bob, new BN("40000"))
@@ -121,10 +130,15 @@ describe('Private trade', async function () {
 
     }
 
+    log('done.')
+
+    await printState(dollarCoin, carToken, accountAddresses, accountNames, carIds)
+
+    await util.prompt()
+
     const askPrice = new BN("50000")
 
     // Set up trade
-    write(`Alice: Generate expected hidden note of ${askPrice}...`)
     const expected_coin = sampleCoin(a_sk_alice, askPrice)
     const cm = await server.cm(
       a_pk_alice,
@@ -133,17 +147,14 @@ describe('Private trade', async function () {
       expected_coin.v.toString()
     )
     coins.push()
-    console.log({cm})
-    write('done.\n')
 
-    log(`Expected hidden note: ${cm}`)
+    // log(`Expected hidden note: ${cm}`)
 
     write([
       `Alice: Deploying offer smart contract (offer to sell car ${carId} for `,
-      `hidden note ${cm})...`
+      `payment output ${cm})...`
     ].join(''))
     const cm_packed = await util.pack256Bits(cm)
-    log({ cm_packed })
     const tradeContract = await util.deployContract(
       web3,
       artefacts.HiddenPriceCarTrade,
@@ -152,7 +163,6 @@ describe('Private trade', async function () {
     )
     write('done.\n')
 
-    write(`Alice: Allow smart contract to transfer CarToken ${carId}...`)
     await sendTransaction(
       web3,
       carToken._address,
@@ -160,16 +170,17 @@ describe('Private trade', async function () {
       5000000,
       accounts.alice
     )
-    write('done.\n')
+
+    await util.prompt()
 
     write([
-      `Bob: Send a private payment that generates the hidden note ${cm} and `,
-      `references the smart contract (and consequently finalises the trade)...`
+      `Bob: Send a private payment that generates the payment output ${cm} `,
+      `and references the smart contract (and consequently finalises the `,
+      `trade)...`
     ].join(''))
-    write('done.\n')
 
     const change_coin = sampleCoin(a_sk_bob, coins[0].v.add(coins[1].v).sub(expected_coin.v))
-    log(change_coin)
+    // log(change_coin)
 
 
     const params = [
@@ -202,15 +213,14 @@ describe('Private trade', async function () {
     const cm0Packed = await util.pack256Bits(res.output_0_cm)
     const cm1Packed = await util.pack256Bits(res.output_1_cm)
 
-    log(`Hidden notes: ${res.output_0_cm}, ${res.output_1_cm}`)
-    log('cm actual', await util.pack256Bits(res.output_0_cm))
+    // log(`Hidden notes: ${res.output_0_cm}, ${res.output_1_cm}`)
+    // log('cm actual', await util.pack256Bits(res.output_0_cm))
 
     // TODO this should be simulated (and the actual addition should come
     // after the transaction is processed)
     await server.add(res.output_0_cm)
     const add_res = await server.add(res.output_1_cm)
 
-    console.log(add_res)
     const newRoot = await util.pack256Bits(add_res.newRoot)
 
     const transferProofCompact = flattenProof(res.transfer_proof)
@@ -226,13 +236,11 @@ describe('Private trade', async function () {
     const x = mvppt.methods.transfer(...transferParams)
     const data = x.encodeABI()
 
-    console.log(accounts.bob.address)
     const receipt = await sendTransaction(web3, mvppt._address, data, 5000000, accounts.bob)
-    console.log(receipt)
-    console.log("Transfer successful?", receipt.status)
 
+    write('done.\n')
 
-    printState(dollarCoin, carToken, accounts, accountNames, carIds)
+    await printState(dollarCoin, carToken, accountAddresses, accountNames, carIds)
   })
 
 })

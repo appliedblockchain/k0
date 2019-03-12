@@ -1,7 +1,6 @@
 const _ = require('lodash')
 
 async function request(jc, methodName, params = []) {
-  console.log(params)
   const response = await jc.request(methodName, params)
   if (!response.result) {
     console.log(response)

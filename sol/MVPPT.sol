@@ -150,8 +150,10 @@ contract MVPPT {
                 [proof[16], proof[17]], // k
                 inputs
             )) {
-            Callee callee = Callee(callee_address);
-            callee.handle(cm_out_0[0], cm_out_0[1]);
+            if (callee_address != address(0)) {
+                Callee callee = Callee(callee_address);
+                callee.handle(cm_out_0[0], cm_out_0[1]);
+            }
             snUsed[sn0Hash] = true;
             snUsed[sn1Hash] = true;
             root = new_root;

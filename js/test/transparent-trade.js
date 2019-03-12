@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const assert = require('assert')
 const compileContracts = require('./helpers/compile-contracts')
 const util = require('./util')
@@ -10,7 +11,7 @@ const BN = require('bn.js')
 const commonTradingInit = require('./helpers/common-trading-init')
 
 describe('Transparent trade', async () => {
-  let web3, accounts, accountNames, carIds, tokenMaster, carManufacturer,
+  let web3, accounts, accountAddresses, accountNames, carIds, tokenMaster, carManufacturer,
     artefacts, dollarCoin, carToken, carId
 
   before(async () => {
@@ -25,13 +26,18 @@ describe('Transparent trade', async () => {
     dollarCoin = initResult.dollarCoin
     carToken = initResult.carToken
     carId = initResult.carId
+    accountAddresses = _.map(accounts, 'address')
   })
 
-  it('Full cycle', async () => {
+  it('Full cycle', async function() {
 
-    await printState(dollarCoin, carToken, accounts, accountNames, carIds)
+    this.timeout(3600 * 1000)
+
+    await printState(dollarCoin, carToken, accountAddresses, accountNames, carIds)
 
     const askPrice = new BN("50000")
+
+    await util.prompt()
 
     write([
       `Alice: Deploying offer smart contract (offer to sell car ${carId} for `,
@@ -54,6 +60,8 @@ describe('Transparent trade', async () => {
       accounts.alice
     )
     write('done.\n')
+
+    await util.prompt()
 
     write(`Bob: Allow smart contract to withdraw ${askPrice} DollarCoin...`)
     await sendTransaction(
@@ -100,7 +108,7 @@ describe('Transparent trade', async () => {
     assert(bobDollarsAfter.eq(bobDollarsBefore.sub(askPrice)))
 
 
-    await printState(dollarCoin, carToken, accounts, accountNames, carIds)
+    await printState(dollarCoin, carToken, accountAddresses, accountNames, carIds)
   })
 
 })
