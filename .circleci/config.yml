@@ -22,6 +22,7 @@ jobs:
           root: .
           paths:
             - cpp/build/src
+            - cpp/build/test
   prepare_node:
     docker:
       - image: appliedblockchain/snarkapps-base
