@@ -19,7 +19,6 @@ target_link_libraries(
         ff
         snark
         zktrade
-        sodium
         ${GTEST_LDFLAGS}
 )
 
