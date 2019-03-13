@@ -56,7 +56,8 @@ TEST(TransferCircuit, CannotCreateMoney) {
     auto mt_root = mt.root();
     auto circuit = make_transfer_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(
             tree_height);
-    populate(circuit, tree_height, mt_root, in[0], in[1], out[0], out[1]);
+    FieldT callee("0");
+    populate(circuit, tree_height, mt_root, in[0], in[1], out[0], out[1], callee);
     ASSERT_FALSE(circuit.pb->is_satisfied());
     generate_witness(circuit);
     ASSERT_FALSE(circuit.pb->is_satisfied());
@@ -65,7 +66,7 @@ TEST(TransferCircuit, CannotCreateMoney) {
     out[1].v = out_1_v;
     circuit = make_transfer_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(
             tree_height);
-    populate(circuit, tree_height, mt_root, in[0], in[1], out[0], out[1]);
+    populate(circuit, tree_height, mt_root, in[0], in[1], out[0], out[1], callee);
     generate_witness(circuit);
     ASSERT_TRUE(circuit.pb->is_satisfied());
 }

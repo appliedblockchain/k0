@@ -202,8 +202,9 @@ TEST(Lifecycle, Full) {
         }
 
         bit_vector mt_root = mt.root();
+        FieldT callee("0");
         populate(xfer_circuit, tree_height, mt_root, in[0], in[1], out[0],
-                 out[1]);
+                 out[1], callee);
         print(xfer_circuit);
         ASSERT_FALSE(xfer_circuit.pb->is_satisfied());
 
