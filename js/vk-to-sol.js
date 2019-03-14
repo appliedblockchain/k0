@@ -1,9 +1,9 @@
 function g2(label, p) {
-  return `\t\tvk.${label} = Pairing.G2Point([${p[0][0]}, ${p[0][1]}], [${p[1][0]}, ${p[1][1]}]);`
+  return `\t\tvk.${label} = Pairing.G2Point([uint256(${p[0][0]}), uint256(${p[0][1]})], [uint256(${p[1][0]}), uint256(${p[1][1]})]);`
 }
 
 function g1(label, p) {
-  return `\t\tvk.${label} = Pairing.G1Point(${p[0]}, ${p[1]});`
+  return `\t\tvk.${label} = Pairing.G1Point(uint256(${p[0]}), uint256(${p[1]}));`
 }
 
 function vkToSol(A, B, C, gamma, gammaBeta1, gammaBeta2, Z, IC) {
