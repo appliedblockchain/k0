@@ -61,8 +61,8 @@ jobs:
           command: |
             for x in commitment addition transfer withdrawal
             do
-            cpp/build/src/setup commitment 2 /tmp/zktrade_$x_pk /tmp/zktrade_$x_vk
-            cpp/build/src/convert_vk /tmp/zktrade_$x_vk /tmp/zktrade_$x_vk_alt
+            cpp/build/src/setup commitment 2 /tmp/zktrade_${x}_pk /tmp/zktrade_${x}_vk
+            cpp/build/src/convert_vk /tmp/zktrade_${x}_vk /tmp/zktrade_$x_vk_alt
             done
       - run:
           name: Start server
