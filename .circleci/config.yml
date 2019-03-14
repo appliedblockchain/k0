@@ -82,12 +82,7 @@ workflows:
           context: org-global
       - prepare_node:
           context: org-global
-      - run_merkle_tree_test:
-          context: org-global
-          requires:
-            - build_cpp
-            - prepare_node
-      - run_mixer_test:
+      - run_private_trade_test:
           context: org-global
           requires:
             - build_cpp
