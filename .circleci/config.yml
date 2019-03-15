@@ -20,7 +20,7 @@ jobs:
             - zktrading-{{ checksum "srchash.txt" }}
       - run:
           name: "C++: CMake"
-          command: mkdir cpp/build && cd cpp/build && cmake ..
+          command: mkdir -p cpp/build && cd cpp/build && cmake ..
       - run:
           name: "C++: Make"
           command: cd cpp/build && make
