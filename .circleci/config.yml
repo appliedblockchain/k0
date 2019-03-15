@@ -13,11 +13,21 @@ jobs:
           name: Init Git submodules
           command: git submodule update --init --recursive
       - run:
+          name: "Create hash of src contents"
+          command: find cpp/src -type f -exec cat {} \; | md5sum | cut -d ' ' -f 1 > srchash.txt
+      - restore_cache:
+          keys:
+            - zktrading-{{ checksum "srchash.txt" }}
+      - run:
           name: "C++: CMake"
           command: mkdir cpp/build && cd cpp/build && cmake ..
       - run:
           name: "C++: Make"
           command: cd cpp/build && make
+      - save_cache:
+         key: zktrading-{{ checksum "srchash.txt" }}
+         paths:
+           - cpp/build
       - persist_to_workspace:
           root: .
           paths:
