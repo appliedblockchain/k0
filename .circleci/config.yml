@@ -61,7 +61,7 @@ jobs:
           command: |
             for x in commitment addition transfer withdrawal
             do
-            cpp/build/src/setup commitment 16 /tmp/zktrade_${x}_pk /tmp/zktrade_${x}_vk
+            cpp/build/src/setup ${x} 16 /tmp/zktrade_${x}_pk /tmp/zktrade_${x}_vk
             cpp/build/src/convert_vk /tmp/zktrade_${x}_vk /tmp/zktrade_${x}_vk_alt
             done
       - run:
