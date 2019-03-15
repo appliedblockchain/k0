@@ -10,7 +10,8 @@ const expect = require('code').expect
 const BN = require('bn.js')
 const commonTradingInit = require('./helpers/common-trading-init')
 
-describe('Transparent trade', async () => {
+describe('Transparent trade', async function() {
+  this.timeout(100 * 1000)
   let web3, accounts, accountAddresses, accountNames, carIds, tokenMaster, carManufacturer,
     artefacts, dollarCoin, carToken, carId
 

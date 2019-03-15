@@ -12,7 +12,7 @@ const clear = require('clear')
 
 const baseDir = path.join(__dirname, '..', '..')
 const cppDir = process.env.CPP_DIR || path.join(baseDir, 'cpp')
-const cppUtilDir = process.env.CPP_UTIL_DIR || path.join(cppDir, 'cmake-build-debug', 'src')
+const cppUtilDir = process.env.CPP_UTIL_DIR || path.join(cppDir, 'build', 'src')
 
 async function convertVk(vkPath, vkAltPath) {
   const executablePath = path.join(cppUtilDir, 'convert_vk')
