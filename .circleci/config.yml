@@ -84,7 +84,10 @@ jobs:
             /tmp/zktrade_withdrawal_vk
           background: true
       - run:
-          name: Run tests
+          name: Run MVPPT test
+          command: cd js && node_modules/.bin/mocha test/mvppt.js
+      - run:
+          name: Run private trade test
           command: cd js && node_modules/.bin/mocha test/private-trade.js
 
 workflows:
