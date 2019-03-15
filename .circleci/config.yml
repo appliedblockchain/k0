@@ -14,7 +14,7 @@ jobs:
           command: git submodule update --init --recursive
       - run:
           name: "Create hash of src contents"
-          command: find src -type f | sort | xargs cat | md5sum > srchash.txt
+          command: find cpp/src -type f | sort | xargs cat | md5sum > srchash.txt
       - restore_cache:
           keys:
             - zktrading-{{ checksum "srchash.txt" }}
