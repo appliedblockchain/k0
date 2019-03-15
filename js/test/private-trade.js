@@ -266,7 +266,6 @@ describe('Private trade', async function () {
 
     await printState(dollarCoin, carToken, accountAddresses, accountNames, carIds)
 
-
     await util.prompt()
 
     write('Bob: Withdraw 20000...')
