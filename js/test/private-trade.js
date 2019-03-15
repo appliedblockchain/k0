@@ -18,7 +18,7 @@ const flattenProof = require('../flatten-proof')
 
 describe('Private trade', async function () {
 
-  this.timeout(20000)
+  this.timeout(600 * 1000)
 
   let web3, accounts, accountAddresses, accountNames, carIds, tokenMaster,
     carManufacturer, artefacts, dollarCoin, carToken, carId, mvppt, server
