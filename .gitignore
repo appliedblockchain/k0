@@ -8,3 +8,5 @@
 cpp/cmake-build-debug-remote-host
 /*/node_modules
 /*/package-lock.json
+/js/demo/addresses.json
+/js/demo/artefacts.json

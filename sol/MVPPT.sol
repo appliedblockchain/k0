@@ -16,16 +16,14 @@ contract MVPPT {
     WithdrawalVerifier withdrawalVerifier;
     IERC20 tokenContract;
 
-    event Log(string);
-    event Log(uint);
-    event Log(uint, uint);
-    event PrimaryInput(uint, uint, uint, uint, uint, uint);
-    event PrimaryInput(uint, uint, uint, uint, uint, uint, uint);
-    event PrimaryInput(uint, uint, uint, uint, uint, uint, uint, uint, uint, uint);
-    event PrimaryInput(uint, uint, uint, uint, uint, uint, uint, uint, uint, uint, uint);
-    event NeedToCall(address);
-
     mapping(bytes32 => bool) snUsed;
+
+    event Deposit(uint[2] cm, uint[2] new_root);
+
+    event Transfer(uint[2] sn_in_0, uint[2] sn_in_1, uint[2] cm_out_0,
+                   uint[2] cm_out_1, uint[2] new_root, address callee);
+
+    event Withdrawal(uint[2] snj);
 
     constructor(address tokenContractAddress,
         address commitmentVerifierAddress,
@@ -51,7 +49,6 @@ contract MVPPT {
         uint[18] memory commitmentProof,
         uint[18] memory additionProof
     ) public {
-
         require(
             tokenContract.transferFrom(msg.sender, address(this), v),
             "ERC20 transfer failed (sufficient allowance?)"
@@ -71,7 +68,6 @@ contract MVPPT {
         addInputs[4] = comm_cm[1];
         addInputs[5] = new_root[0];
         addInputs[6] = new_root[1];
-        emit PrimaryInput(addInputs[0], addInputs[1], addInputs[2], addInputs[3], addInputs[4], addInputs[5], addInputs[6]);
 
         if (
             commitmentVerifier.verifyProof(
@@ -104,8 +100,8 @@ contract MVPPT {
         ) {
             root = new_root;
             num_leaves++;
+            emit Deposit(comm_cm, new_root);
         } else {
-            emit Log(0xdead, 0xbeef);
             revert();
         }
     }
@@ -135,7 +131,6 @@ contract MVPPT {
         inputs[8] = cm_out_1[0];
         inputs[9] = cm_out_1[1];
         inputs[10] = uint256(callee_address);
-       emit PrimaryInput(inputs[0], inputs[1], inputs[2], inputs[3], inputs[4], inputs[5], inputs[6], inputs[7], inputs[8], inputs[9], inputs[10]);
         if (transferVerifier.verifyProof(
                 [proof[0], proof[1]], // a
                 [proof[2], proof[3]], // a_p
@@ -156,7 +151,10 @@ contract MVPPT {
             }
             snUsed[sn0Hash] = true;
             snUsed[sn1Hash] = true;
+            num_leaves += 2;
             root = new_root;
+            emit Transfer(sn_in_0, sn_in_1, cm_out_0, cm_out_1, new_root,
+                          callee_address);
         } else {
             revert();
         }
@@ -184,7 +182,6 @@ contract MVPPT {
         inputs[3] = sn[0];
         inputs[4] = sn[1];
         inputs[5] = uint256(msg.sender);
-        emit PrimaryInput(inputs[0], inputs[1], inputs[2], inputs[3], inputs[4], inputs[5]);
         // TODO verify Merkle tree additions
         if (withdrawalVerifier.verifyProof(
                 a,
@@ -199,6 +196,7 @@ contract MVPPT {
             )) {
             snUsed[snHash] = true;
             tokenContract.transfer(msg.sender, v);
+            emit Withdrawal(sn);
         } else {
             revert();
         }
