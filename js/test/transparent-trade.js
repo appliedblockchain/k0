@@ -39,20 +39,15 @@ describe('Transparent trade', async function() {
     const askPrice = new BN("50000")
 
     await util.prompt()
-
-    write([
-      `Alice: Deploying offer smart contract (offer to sell car ${carId} for `,
-      `${askPrice})...`
-    ].join(''))
     const tradeContract = await util.deployStandardContract(
       web3,
       'CarTrade',
       accounts.alice,
       [carToken._address, dollarCoin._address, carId, askPrice.toString()]
     )
-    write('done.\n')
+    log(`Transaction from ${accounts.alice.address} (Alice):`)
+    log(`- Deployment of a trading smart contract ${tradeContract._address} (offer to sell car ${carId} for ${askPrice})`)
 
-    write(`Alice: Allow smart contract to transfer CarToken ${carId}...`)
     await sendTransaction(
       web3,
       carToken._address,
@@ -60,11 +55,9 @@ describe('Transparent trade', async function() {
       5000000,
       accounts.alice
     )
-    write('done.\n')
 
     await util.prompt()
 
-    write(`Bob: Allow smart contract to withdraw ${askPrice} DollarCoin...`)
     await sendTransaction(
       web3,
       dollarCoin._address,
@@ -72,7 +65,6 @@ describe('Transparent trade', async function() {
       5000000,
       accounts.bob
     )
-    write('done.\n')
 
     const [aliceDollarsBefore, bobDollarsBefore] = await Promise.all(
       ['alice', 'bob'].map(async id => {
@@ -82,7 +74,6 @@ describe('Transparent trade', async function() {
       })
     )
 
-    write('Bob: Call smart contract function "buy" (finalise the trade)...')
     await sendTransaction(
       web3,
       tradeContract._address,
@@ -90,7 +81,12 @@ describe('Transparent trade', async function() {
       5000000,
       accounts.bob
     )
-    write('done.\n')
+    log(`Transaction from ${accounts.bob.address} (Bob):`)
+    log(`- Calling of smart contract function "buy" on ${tradeContract._address}`)
+    log(`- Transfer of ${askPrice} DollarCoin from Bob to Alice`)
+    log(`- Transfer of CarToken ${carId} from Alice to Bob`)
+
+    await util.prompt()
 
     const [aliceDollarsAfter, bobDollarsAfter] = await Promise.all(
       ['alice', 'bob'].map(async id => {
@@ -107,7 +103,6 @@ describe('Transparent trade', async function() {
     assert(aliceDollarsAfter.eq(aliceDollarsBefore.add(askPrice)))
     // Bob's balance has decreased by the ask price
     assert(bobDollarsAfter.eq(bobDollarsBefore.sub(askPrice)))
-
 
     await printState(dollarCoin, carToken, accountAddresses, accountNames, carIds)
   })

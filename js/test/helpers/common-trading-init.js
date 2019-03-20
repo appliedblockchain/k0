@@ -61,7 +61,7 @@ async function commonTradingInit(fancy = false) {
     ].join('\n')))
   }
 
-  write('Making a car for Alice...')
+//  write('Making a car for Alice...')
   await sendTransaction(
     web3,
     carToken._address,
@@ -70,9 +70,9 @@ async function commonTradingInit(fancy = false) {
     carManufacturer
   )
   carIds.push(carId)
-  write('done.\n')
+//  write('done.\n')
 
-  write('Giving Bob some money...')
+//  write('Giving Bob some money...')
   const moneyCreationData = await sendTransaction(
     web3,
     dollarCoin._address,
@@ -80,7 +80,7 @@ async function commonTradingInit(fancy = false) {
     5000000,
     tokenMaster
   )
-  write('done.\n')
+//  write('done.\n')
 
   return {
     web3,

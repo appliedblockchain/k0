@@ -7,7 +7,7 @@ const util = require('./util')
 const sendTransaction = require('../send-transaction')
 const log = console.log
 const write = x => process.stdout.write(x)
-const printState = require('./helpers/print-state')
+const printState2 = require('./helpers/print-state-2')
 const expect = require('code').expect
 const BN = require('bn.js')
 const compileContracts = require('./helpers/compile-contracts')
@@ -21,7 +21,7 @@ describe('Private trade', async function () {
   this.timeout(600 * 1000)
 
   let web3, accounts, accountAddresses, accountNames, carIds, tokenMaster,
-    carManufacturer, artefacts, dollarCoin, carToken, carId, mvppt, server
+      carManufacturer, artefacts, dollarCoin, carToken, carId, mvppt, server
 
   before(async () => {
 
@@ -79,20 +79,16 @@ describe('Private trade', async function () {
   it('Full cycle', async function () {
     this.timeout(3600 * 1000)
 
-     // bob: Pay in 2x
-    await printState(dollarCoin, carToken, accountAddresses, accountNames, carIds)
-
-    await util.prompt()
+    const k0State = _.times(10, () => util.randomBytes(32))
 
     const [a_sk_alice, a_sk_bob] = _.times(2, () => util.randomBytes(32))
     const [a_pk_alice, a_pk_bob] = await Promise.all(
       [a_sk_alice, a_sk_bob].map(a_sk => server.prf_addr(a_sk))
     )
 
-    write("Bob: Deposit 70000...")
     const coins = [
-      sampleCoin(a_sk_bob, new BN("30000")),
-      sampleCoin(a_sk_bob, new BN("40000"))
+      sampleCoin(a_sk_bob, new BN("50000")),
+      sampleCoin(a_sk_bob, new BN("50000"))
     ]
     for (let i = 0; i < 2; i++) {
 
@@ -131,13 +127,14 @@ describe('Private trade', async function () {
 
     }
 
-    log('done.')
-
-    await printState(dollarCoin, carToken, accountAddresses, accountNames, carIds)
+    await printState2(k0State, carToken, accountAddresses, accountNames, carIds)
 
     await util.prompt()
 
     const askPrice = new BN("50000")
+
+    // Create anonymous account
+    const anon = web3.eth.accounts.create()
 
     // Set up trade
     const expected_coin = sampleCoin(a_sk_alice, askPrice)
@@ -149,12 +146,6 @@ describe('Private trade', async function () {
     )
     coins.push()
 
-    // log(`Expected hidden note: ${cm}`)
-
-    write([
-      `Alice: Deploying offer smart contract (offer to sell car ${carId} for `,
-      `payment output ${cm})...`
-    ].join(''))
     const cm_packed = await util.pack256Bits(cm)
     const tradeContract = await util.deployContract(
       web3,
@@ -162,7 +153,8 @@ describe('Private trade', async function () {
       [carToken._address, mvppt._address, carId, cm_packed[0], cm_packed[1]],
       accounts.alice
     )
-    write('done.\n')
+    log(`Transaction from ${accounts.alice.address} (Alice):`)
+    log(`- Deployment of a trading smart contract ${tradeContract._address} (offer to sell car ${carId} for K0Cash payment output ${cm})`)
 
     await sendTransaction(
       web3,
@@ -174,14 +166,7 @@ describe('Private trade', async function () {
 
     await util.prompt()
 
-    write([
-      `Bob: Send a private payment that generates the payment output ${cm} `,
-      `and references the smart contract (and consequently finalises the `,
-      `trade)...`
-    ].join(''))
-
     const change_coin = sampleCoin(a_sk_bob, coins[0].v.add(coins[1].v).sub(expected_coin.v))
-
 
     const params = [
       "0",
@@ -213,11 +198,6 @@ describe('Private trade', async function () {
     const cm0Packed = await util.pack256Bits(res.output_0_cm)
     const cm1Packed = await util.pack256Bits(res.output_1_cm)
 
-    // log(`Hidden notes: ${res.output_0_cm}, ${res.output_1_cm}`)
-    // log('cm actual', await util.pack256Bits(res.output_0_cm))
-
-    // TODO this should be simulated (and the actual addition should come
-    // after the transaction is processed)
     await server.add(res.output_0_cm)
     const add_res = await server.add(res.output_1_cm)
 
@@ -236,58 +216,22 @@ describe('Private trade', async function () {
     const x = mvppt.methods.transfer(...transferParams)
     const data = x.encodeABI()
 
-    const receipt = await sendTransaction(web3, mvppt._address, data, 5000000, accounts.bob)
+    const receipt = await sendTransaction(web3, mvppt._address, data, 5000000, anon)
 
-    write('done.\n')
+    k0State.push(res.output_0_cm)
+    k0State.push(res.output_1_cm)
+    k0State.push(res.input_0_sn)
+    k0State.push(res.input_1_sn)
 
-    await printState(dollarCoin, carToken, accountAddresses, accountNames, carIds)
-
-    await util.prompt()
-
-    // WITHDRAW
-    // Alice
-    write('Alice: Withdraw 50000...')
-    {
-      const wdRes = await server.prepare_withdrawal(
-        "2",
-        expected_coin.a_sk,
-        expected_coin.rho,
-        expected_coin.r,
-        expected_coin.v.toString(),
-        accounts.alice.address
-      )
-      const {sn, proof} = wdRes
-      const snPacked = await util.pack256Bits(sn)
-      const x = mvppt.methods.withdraw(expected_coin.v.toString(), snPacked, ...proof)
-      const data = x.encodeABI()
-      const receipt = await sendTransaction(web3, mvppt._address, data, 5000000, accounts.alice)
-    }
-    write('done.\n')
-
-    await printState(dollarCoin, carToken, accountAddresses, accountNames, carIds)
+    log(`Transaction from ${anon.address} (unknown):`)
+    log(`- Some K0Cash transfer (someone transferred some value to someone else)`)
+    log(`- Addition of values to K0Cash state: ${res.output_0_cm}, ${res.output_1_cm}, ${res.input_0_sn}, ${res.input_1_sn}`)
+    log(`- Transaction included an instruction to notify the smart contract ${tradeContract._address} of the payment output ${res.output_0_cm}`)
+    log(`- Transfer of CarToken ${carId} from ${accounts.alice.address} (Alice) to ${anon.address} (unknown)`)
 
     await util.prompt()
 
-    write('Bob: Withdraw 20000...')
-    {
-      const wdRes = await server.prepare_withdrawal(
-        "3",
-        change_coin.a_sk,
-        change_coin.rho,
-        change_coin.r,
-        change_coin.v.toString(),
-        accounts.bob.address
-      )
-
-      const {sn, proof} = wdRes
-      const snPacked = await util.pack256Bits(sn)
-      const x = mvppt.methods.withdraw(change_coin.v.toString(), snPacked, ...proof)
-      const data = x.encodeABI()
-      const receipt = await sendTransaction(web3, mvppt._address, data, 5000000, accounts.bob)
-    }
-    write('done.\n')
-
-    await printState(dollarCoin, carToken, accountAddresses, accountNames, carIds)
+    await printState2(k0State, carToken, accountAddresses, accountNames, carIds)
   })
 
 })
