@@ -1,6 +1,6 @@
 const BN = require('bn.js')
 const request = require('./request')
-const u = require('../util')
+const u = require('../../util')
 
 async function add(jc, cm) {
   u.checkBuf(cm, 32)

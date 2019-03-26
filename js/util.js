@@ -11,10 +11,18 @@ function checkBN(x) {
 }
 
 function checkBuf(buf, len) {
-	assert(len !== undefined)
-	assert(Buffer.isBuffer(buf) && buf.length === len)
+	assert(Buffer.isBuffer(buf))
+  if (len !== undefined) {
+    assert(buf.length === len)
+  }
 }
 
+function checkString(input) {
+	assert(
+		Object.prototype.toString.call(input) === "[object String]",
+		`Input is not a string: ${input}`
+	)
+}
 const hex2buf = bufferOfHex0x
 
 function parseG1Point(data) {
@@ -35,6 +43,7 @@ module.exports = {
 	buf2hex,
 	checkBN,
 	checkBuf,
+	checkString,
 	hex2buf,
   parseG1Point,
   parseG2Point,

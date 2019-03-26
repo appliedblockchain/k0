@@ -5,17 +5,17 @@
 
 int main(int argc, char* argv[])
 {
-  if (argc != 10) {
+  if (argc != 11) {
     std::cerr << "Need exactly 9 arguments (tree height, paths to commitment ";
     std::cerr << "pk, commitment vk, addition pk, addition vk, transfer pk, ";
-    std::cerr << "transfer vk, withdrawal pk, withdrawal vk)";
+    std::cerr << "transfer vk, withdrawal pk, withdrawal vk, port)";
     std::cerr << std::endl;
     return 1;
   }
 
   default_r1cs_ppzksnark_pp::init_public_params();
 
-  HttpServer httpserver(4000);
+  HttpServer httpserver(atoi(argv[10]));
   Server<FieldT, CommitmentHashT, MerkleTreeHashT> server(std::stoi(argv[1]), httpserver, jsonrpc::JSONRPC_SERVER_V2);
 
   server.StartListening();

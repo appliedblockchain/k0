@@ -9,6 +9,16 @@ async function prepareDeposit(server, keys, v) {
   const r = crypto.randomBytes(48)
   const data = await server.prepare_deposit(keys.a_pk, rho, r, v)
   console.log(data)
+  return {
+    rho,
+    r,
+    cm: u.hex2buf(data.cm),
+    k: u.hex2buf(data.k),
+    nextRoot: u.hex2buf(data.nextRoot),
+    // TODO hex2buf
+    additionProof: data.additionProof,
+    commitmentProof: data.commitmentProof
+  }
 }
 
 module.exports = prepareDeposit

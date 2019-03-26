@@ -9,6 +9,7 @@ const sendTransaction = require('../send-transaction')
 const Web3 = require('web3')
 const inquirer = require('inquirer')
 const clear = require('clear')
+const globalUtil = require('../util')
 
 const baseDir = path.join(__dirname, '..', '..')
 const cppDir = process.env.CPP_DIR || path.join(baseDir, 'cpp')
@@ -43,6 +44,7 @@ function paths(label) {
 }
 
 async function pack256Bits(hex) {
+  globalUtil.checkString(hex)
   const executablePath = path.join(cppUtilDir, 'pack_256_bits')
   const command = `${executablePath} ${hex}`
   const result = await execAsync(command)
@@ -81,7 +83,7 @@ async function sha256Instance() {
 
 function initWeb3() {
   const endpointFromEnv = process.env.ETHEREUM_JSONRPC_ENDPOINT
-  return new Web3(endpointFromEnv || 'http://localhost:8545/')
+  return new Web3(endpointFromEnv || 'ws://localhost:8546/')
 }
 
 async function deployContract(web3, artefacts, params = [], account) {

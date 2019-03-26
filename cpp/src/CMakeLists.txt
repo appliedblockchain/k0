@@ -53,8 +53,8 @@ target_sources(
         hash/sha256_compression.hpp
         scheme/comms.hpp
         scheme/prfs.h
-        server/Server.hpp
-        server/Server.tcc
+        server/prover/Server.hpp
+        server/prover/Server.tcc
         util.h
         MerkleTree.hpp
         MerkleTree.tcc
@@ -94,10 +94,11 @@ target_include_directories(
         ${DEPENDS_DIR}/libsnark/depends/libff
         ${DEPENDS_DIR}/libsnark/depends/libfqfft
 )
+
 add_executable(
         server
 
-        server/run_server.cpp
+        server/prover/run_server.cpp
 )
 target_link_libraries(
         server
@@ -117,6 +118,7 @@ target_include_directories(
         ${DEPENDS_DIR}/libsnark/depends/libff
         ${DEPENDS_DIR}/libsnark/depends/libfqfft
 )
+
 add_executable(
         hash
 
@@ -136,3 +138,48 @@ target_include_directories(
         ${DEPENDS_DIR}/libsnark/depends/libff
         ${DEPENDS_DIR}/libsnark/depends/libfqfft
 )
+
+add_executable(
+        unpack_256_bits
+
+        unpack_256_bits.cpp
+)
+target_link_libraries(
+        unpack_256_bits
+
+        snark
+        zktrade
+)
+target_include_directories(
+        unpack_256_bits
+
+        PUBLIC
+        ${DEPENDS_DIR}/libsnark
+        ${DEPENDS_DIR}/libsnark/depends/libff
+        ${DEPENDS_DIR}/libsnark/depends/libfqfft
+)
+
+add_executable(
+        mtserver
+
+        server/mt/run_mtserver.cpp
+)
+target_link_libraries(
+        mtserver
+
+        snark
+        zktrade
+        jsoncpp
+        microhttpd
+        jsonrpccpp-common
+        jsonrpccpp-server
+)
+target_include_directories(
+        mtserver
+
+        PUBLIC
+        ${DEPENDS_DIR}/libsnark
+        ${DEPENDS_DIR}/libsnark/depends/libff
+        ${DEPENDS_DIR}/libsnark/depends/libfqfft
+)
+

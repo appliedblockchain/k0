@@ -14,7 +14,9 @@ const compileContracts = require('./helpers/compile-contracts')
 const commonTradingInit = require('./helpers/common-trading-init')
 const jayson = require('jayson/promise')
 const makeClient = require('../client')
-const flattenProof = require('../flatten-proof')
+const flattenProof = require('../eth/flatten-proof')
+const ethUtil = require('../eth/util')
+const globalUtil = require('../util')
 
 describe('Private trade', async function () {
 
@@ -69,8 +71,8 @@ describe('Private trade', async function () {
   function sampleCoin(a_sk, v) {
     assert(BN.isBN(v))
     return {
-      rho: util.randomBytes(32),
-      r: util.randomBytes(48),
+      rho: crypto.randomBytes(32),
+      r: crypto.randomBytes(48),
       a_sk,
       v
     }
@@ -84,7 +86,7 @@ describe('Private trade', async function () {
 
     await util.prompt()
 
-    const [a_sk_alice, a_sk_bob] = _.times(2, () => util.randomBytes(32))
+    const [a_sk_alice, a_sk_bob] = _.times(2, () => crypto.randomBytes(32))
     const [a_pk_alice, a_pk_bob] = await Promise.all(
       [a_sk_alice, a_sk_bob].map(a_sk => server.prf_addr(a_sk))
     )
@@ -105,15 +107,15 @@ describe('Private trade', async function () {
         accounts.bob
       )
 
-      const data = await server.prepare_deposit(a_pk_bob, c.rho, c.r, c.v.toString())
+      const data = await server.prepare_deposit(a_pk_bob, c.rho, c.r, c.v)
       const commitmentProofCompact = flattenProof(data.commitmentProof)
       const additionProofCompact = flattenProof(data.additionProof)
 
       const params = [
         c.v.toString(),
-        await util.pack256Bits(data.k),
-        await util.pack256Bits(data.cm),
-        await util.pack256Bits(data.nextRoot),
+        (await ethUtil.pack256Bits(data.k)).map(x => x.toString()),
+        (await ethUtil.pack256Bits(data.cm)).map(x => x.toString()),
+        (await ethUtil.pack256Bits(data.nextRoot)).map(x => x.toString()),
         commitmentProofCompact,
         additionProofCompact
       ]
@@ -145,7 +147,7 @@ describe('Private trade', async function () {
       a_pk_alice,
       expected_coin.rho,
       expected_coin.r,
-      expected_coin.v.toString()
+      expected_coin.v
     )
     coins.push()
 
@@ -153,9 +155,9 @@ describe('Private trade', async function () {
 
     write([
       `Alice: Deploying offer smart contract (offer to sell car ${carId} for `,
-      `payment output ${cm})...`
+      `payment output ${globalUtil.buf2hex(cm)})...`
     ].join(''))
-    const cm_packed = await util.pack256Bits(cm)
+    const cm_packed = await util.pack256Bits(globalUtil.buf2hex(cm))
     const tradeContract = await util.deployContract(
       web3,
       artefacts.HiddenPriceCarTrade,
@@ -175,43 +177,41 @@ describe('Private trade', async function () {
     await util.prompt()
 
     write([
-      `Bob: Send a private payment that generates the payment output ${cm} `,
-      `and references the smart contract (and consequently finalises the `,
-      `trade)...`
+      `Bob: Send a private payment that generates the payment output `,
+      `${globalUtil.buf2hex(cm)} and references the smart contract (and `,
+      `consequently finalises the trade)...`
     ].join(''))
 
     const change_coin = sampleCoin(a_sk_bob, coins[0].v.add(coins[1].v).sub(expected_coin.v))
 
-
-    const params = [
-      "0",
+    const timestampStart = Date.now()
+    const res = await server.prepare_transfer(
+      new BN("0"),
       coins[0].a_sk,
       coins[0].rho,
       coins[0].r,
-      coins[0].v.toString(),
-      "1",
+      coins[0].v,
+      new BN("1"),
       coins[1].a_sk,
       coins[1].rho,
       coins[1].r,
-      coins[1].v.toString(),
+      coins[1].v,
       a_pk_alice,
       expected_coin.rho,
       expected_coin.r,
-      expected_coin.v.toString(),
+      expected_coin.v,
       a_pk_bob,
       change_coin.rho,
       change_coin.r,
-      change_coin.v.toString(),
-      tradeContract._address
-    ]
-    const timestampStart = Date.now()
-    const res = await server.prepare_transfer(params)
+      change_coin.v,
+      globalUtil.hex2buf(tradeContract._address)
+    )
     const proofDuration = Date.now() - timestampStart
 
-    const sn0Packed = await util.pack256Bits(res.input_0_sn)
-    const sn1Packed = await util.pack256Bits(res.input_1_sn)
-    const cm0Packed = await util.pack256Bits(res.output_0_cm)
-    const cm1Packed = await util.pack256Bits(res.output_1_cm)
+    const sn0Packed = await ethUtil.pack256Bits(res.input_0_sn)
+    const sn1Packed = await ethUtil.pack256Bits(res.input_1_sn)
+    const cm0Packed = await ethUtil.pack256Bits(res.output_0_cm)
+    const cm1Packed = await ethUtil.pack256Bits(res.output_1_cm)
 
     // log(`Hidden notes: ${res.output_0_cm}, ${res.output_1_cm}`)
     // log('cm actual', await util.pack256Bits(res.output_0_cm))
@@ -221,15 +221,15 @@ describe('Private trade', async function () {
     await server.add(res.output_0_cm)
     const add_res = await server.add(res.output_1_cm)
 
-    const newRoot = await util.pack256Bits(add_res.newRoot)
+    const newRoot = await ethUtil.pack256Bits(add_res.newRoot)
 
     const transferProofCompact = flattenProof(res.transfer_proof)
     const transferParams = [
-      sn0Packed,
-      sn1Packed,
-      cm0Packed,
-      cm1Packed,
-      newRoot,
+      sn0Packed.map(x => x.toString()),
+      sn1Packed.map(x => x.toString()),
+      cm0Packed.map(x => x.toString()),
+      cm1Packed.map(x => x.toString()),
+      newRoot.map(x => x.toString()),
       tradeContract._address,
       transferProofCompact
     ]
@@ -249,16 +249,20 @@ describe('Private trade', async function () {
     write('Alice: Withdraw 50000...')
     {
       const wdRes = await server.prepare_withdrawal(
-        "2",
+        new BN("2"),
         expected_coin.a_sk,
         expected_coin.rho,
         expected_coin.r,
-        expected_coin.v.toString(),
-        accounts.alice.address
+        expected_coin.v,
+        globalUtil.hex2buf(accounts.alice.address)
       )
       const {sn, proof} = wdRes
-      const snPacked = await util.pack256Bits(sn)
-      const x = mvppt.methods.withdraw(expected_coin.v.toString(), snPacked, ...proof)
+      const snPacked = await ethUtil.pack256Bits(sn)
+      const x = mvppt.methods.withdraw(
+        expected_coin.v.toString(),
+        snPacked.map(x => x.toString()),
+        ...proof
+      )
       const data = x.encodeABI()
       const receipt = await sendTransaction(web3, mvppt._address, data, 5000000, accounts.alice)
     }
@@ -271,17 +275,21 @@ describe('Private trade', async function () {
     write('Bob: Withdraw 20000...')
     {
       const wdRes = await server.prepare_withdrawal(
-        "3",
+        new BN("3"),
         change_coin.a_sk,
         change_coin.rho,
         change_coin.r,
-        change_coin.v.toString(),
-        accounts.bob.address
+        change_coin.v,
+        globalUtil.hex2buf(accounts.bob.address)
       )
 
       const {sn, proof} = wdRes
-      const snPacked = await util.pack256Bits(sn)
-      const x = mvppt.methods.withdraw(change_coin.v.toString(), snPacked, ...proof)
+      const snPacked = await ethUtil.pack256Bits(sn)
+      const x = mvppt.methods.withdraw(
+        change_coin.v.toString(),
+        snPacked.map(x => x.toString()),
+        ...proof
+      )
       const data = x.encodeABI()
       const receipt = await sendTransaction(web3, mvppt._address, data, 5000000, accounts.bob)
     }

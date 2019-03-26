@@ -30,6 +30,7 @@ option(
 
 set(
         OPT_FLAGS
+#        "-g -O0"
         ""
         CACHE
         STRING

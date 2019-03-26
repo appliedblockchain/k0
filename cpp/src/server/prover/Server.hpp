@@ -3,7 +3,7 @@
 #include "zktradestubserver.h"
 #include <libsnark/common/default_types/r1cs_ppzksnark_pp.hpp>
 #include <libsnark/zk_proof_systems/ppzksnark/r1cs_ppzksnark/r1cs_ppzksnark.hpp>
-#include "../MerkleTree.hpp"
+#include "MerkleTree.hpp"
 
 using namespace jsonrpc;
 using namespace libsnark;

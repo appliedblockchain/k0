@@ -10,3 +10,4 @@ cpp/cmake-build-debug-remote-host
 /*/package-lock.json
 /js/demo/addresses.json
 /js/demo/artefacts.json
+/js/demo/mnemonics.json

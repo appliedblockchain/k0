@@ -1,9 +1,14 @@
 'use strict'
 
+const bip39 = require('bip39')
 const compileContracts = require('../test/helpers/compile-contracts')
 const fs = require('fs')
 const testUtil = require('../test/util')
-const client = require('../client')
+const _ = require('lodash')
+const hdkey = require('ethereumjs-wallet/hdkey')
+const addressOfPublicKey = require('@appliedblockchain/helpers/address-of-public-key')
+const sendTransaction = require('../send-transaction')
+const makeState = require('../state')
 
 async function run() {
 
@@ -35,8 +40,8 @@ async function run() {
     return contract._address
   }))
 
-  const server = client()
-  const initialRoot = await server.root()
+  const state = await makeState()
+  const initialRoot = await state.root()
   const mvppt = await testUtil.deployContract(
     web3,
     artefacts.MVPPT,
@@ -47,12 +52,65 @@ async function run() {
     ]
   )
 
+  const moneyShower = await testUtil.deployContract(web3, artefacts.MoneyShower)
+
+  const [ alice, bob ] = _.times(2, () => {
+    const mnemonic = bip39.generateMnemonic()
+    const seed = bip39.mnemonicToSeed(mnemonic)
+    const root = hdkey.fromMasterSeed(seed)
+    const path = "m/44'/60'/0'/0/0"
+    const wallet = root.derivePath(path).getWallet()
+    console.log(wallet.getAddress())
+    return { mnemonic, wallet }
+  })
+
+  // Make some money
+  await sendTransaction(
+    web3,
+    dollarCoin._address,
+    dollarCoin.methods.mint(tokenMaster.address, "1000000000000000").encodeABI(),
+    5000000,
+    tokenMaster
+  )
+
+  const numInitialCoins = 2
+
+  // Money to the people
+  await sendTransaction(
+    web3,
+    dollarCoin._address,
+    dollarCoin.methods.approve(
+      moneyShower._address, web3.utils.toWei((numInitialCoins).toString())
+    ).encodeABI(),
+    5000000,
+    tokenMaster
+  )
+
+  await sendTransaction(
+    web3,
+    moneyShower._address,
+    moneyShower.methods.transfer(
+      dollarCoin._address,
+      _.map([ alice, bob ], x => x.wallet.getAddressString()),
+      _.times(2, () => "1000000000000")
+    ).encodeABI(),
+    5000000,
+    tokenMaster
+  )
+
   fs.writeFileSync('artefacts.json', JSON.stringify(artefacts))
   fs.writeFileSync('addresses.json', JSON.stringify({
     DollarCoin: dollarCoin._address,
     CarToken: carToken._address,
-    MVPPT: mvppt._address
+    MVPPT: mvppt._address,
+    alice: alice.wallet.getAddressString(),
+    bob: bob.wallet.getAddressString()
   }))
+  fs.writeFileSync('mnemonics.json', JSON.stringify({
+    alice: alice.mnemonic,
+    bob: bob.mnemonic
+  }))
+
 }
 
 run().then(console.log).catch(console.log)

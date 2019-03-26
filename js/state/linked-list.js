@@ -24,7 +24,7 @@ function makeLinkedList() {
     return { next }
   }
 
-  return { add, iterator }
+  return { add, getLatest, iterator }
 }
 
 module.exports = makeLinkedList
