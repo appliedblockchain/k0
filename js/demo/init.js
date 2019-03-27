@@ -8,7 +8,8 @@ const _ = require('lodash')
 const hdkey = require('ethereumjs-wallet/hdkey')
 const addressOfPublicKey = require('@appliedblockchain/helpers/address-of-public-key')
 const sendTransaction = require('../send-transaction')
-const makeState = require('../state')
+const makePlatformState = require('../platform-state')
+const u = require('../util')
 
 async function run() {
 
@@ -40,15 +41,15 @@ async function run() {
     return contract._address
   }))
 
-  const state = await makeState()
-  const initialRoot = await state.root()
+  const platformState = await makePlatformState()
+  const initialRoot = await platformState.merkleTreeRoot()
   const mvppt = await testUtil.deployContract(
     web3,
     artefacts.MVPPT,
     [
       dollarCoin._address,
       ...verifierAddresses,
-      await testUtil.pack256Bits(initialRoot)
+      await testUtil.pack256Bits(u.buf2hex(initialRoot))
     ]
   )
 

@@ -5,14 +5,14 @@
 
 int main(int argc, char* argv[])
 {
-  if (argc != 2) {
-    std::cerr << "Need exactly 1 argument (tree height)" << std::endl;
+  if (argc != 3) {
+    std::cerr << "Need exactly 2 arguments (tree height, port)" << std::endl;
     return 1;
   }
 
   default_r1cs_ppzksnark_pp::init_public_params();
 
-  HttpServer httpserver(5000);
+  HttpServer httpserver(atoi(argv[2]));
   MTServer<FieldT, MerkleTreeHashT> mtserver(std::stoi(argv[1]), httpserver, jsonrpc::JSONRPC_SERVER_V2);
 
   mtserver.StartListening();

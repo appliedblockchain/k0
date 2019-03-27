@@ -4,10 +4,12 @@ const u = require('../../util')
 
 async function add(jc, cm) {
   u.checkBuf(cm, 32)
-  const resp = await request(jc, 'add', [ u.buf2hex(cm) ])
+  const resp = await request(jc, 'simulateAddition', [ u.buf2hex(cm) ])
+  console.log(resp)
   return {
     address: new BN(resp.address),
-    newRoot: u.hex2buf(resp.newRoot)
+    nextRoot: u.hex2buf(resp.nextRoot),
+    path: resp.path.map(u.hex2buf)
   }
 }
 

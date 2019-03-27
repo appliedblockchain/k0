@@ -61,11 +61,18 @@ namespace zktrade {
         virtual std::string
         hash(const std::string &param01, const std::string &param02);
 
-        virtual Json::Value prepare_deposit(
+        virtual Json::Value depositCommitmentProof(
                 const std::string &a_pk_str,
                 const std::string &rho_str,
                 const std::string &r_str,
                 const std::string &v_str);
+
+        virtual Json::Value merkleTreeAdditionProof(
+            const std::string& prev_root_hex,
+            const std::string& address_dec,
+            const std::string& leaf_hex,
+            const Json::Value& path,
+            const std::string& next_root_hex);
 
         virtual Json::Value prepare_transfer(
                 const std::string &input_0_address_str,

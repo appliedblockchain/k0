@@ -12,7 +12,8 @@ const mnemonics = require('./mnemonics')
 const signTransaction = require('../eth/sign-transaction')
 const compileContracts = require('../test/helpers/compile-contracts')
 const printState = require('./print-state')
-const makeState = require('../state')
+const makePlatformState = require('../platform-state')
+const makeSecretStore = require('../secret-store')
 
 async function run() {
   const web3 = testUtil.initWeb3()
@@ -27,16 +28,22 @@ async function run() {
     addresses.DollarCoin
   )
   const a_sk = crypto.randomBytes(32)
-  const state = await makeState(parseInt(process.env.SERVER_PORT || '5000', 10))
-  console.log('root before', await state.root())
-  await state.reset()
-  console.log('root after', await state.root())
-  const proverPort = parseInt(process.env.SERVER_PORT || '5000', 10)
-  const k0 = await makeK0(a_sk, k0Eth, state, proverPort)
-  const v = new BN('50000')
-  const data = await k0.prepareDeposit(v)
-  console.log(data)
+  const platformState = await makePlatformState(parseInt(process.env.MT_SERVER_PORT || '5100', 10))
+  const secretStore = makeSecretStore(a_sk)
+  console.log('root before', await platformState.merkleTreeRoot())
+  await platformState.reset()
+  console.log('root after', await platformState.merkleTreeRoot())
 
+  k0Eth.on('deposit', async (txHash, cm, nextRoot) => {
+    u.checkBuf(txHash, 32)
+    u.checkBuf(cm, 32)
+    u.checkBuf(nextRoot, 32)
+    console.log('new roor', nextRoot)
+    await platformState.add(u.buf2hex(txHash), [cm], [], nextRoot)
+  })
+
+  const proverPort = parseInt(process.env.SERVER_PORT || '5000', 10)
+  const k0 = await makeK0(proverPort)
   //web3.eth.accounts.signTransaction(tx, privateKey [, callback]);
   const mnemonic = mnemonics.bob
   const seed = bip39.mnemonicToSeed(mnemonic)
@@ -44,13 +51,13 @@ async function run() {
   const path = "m/44'/60'/0'/0/0"
   const wallet = root.derivePath(path).getWallet()
 
-  printState(dollarCoin, null, [addresses.alice, addresses.bob], ['alice', 'bob'], [])
-
+  const v1 = new BN('50000')
+  const v2 = new BN('50000')
   // approve
   const approveTx = await signTransaction(
     web3,
     u.hex2buf(dollarCoin._address),
-    u.hex2buf(dollarCoin.methods.approve(addresses.MVPPT, v.toString()).encodeABI()),
+    u.hex2buf(dollarCoin.methods.approve(addresses.MVPPT, v1.add(v2).toString()).encodeABI()),
     5000000,
     wallet.getPrivateKey()
   )
@@ -58,16 +65,32 @@ async function run() {
 
   console.log('approve done')
 
-  const depositTx = await k0Eth.deposit(
-    wallet.getPrivateKey(),
-    v,
-    data.k,
-    data.cm,
-    data.nextRoot,
-    data.commitmentProof,
-    data.additionProof
-  )
-  const receipt = await web3.eth.sendSignedTransaction(u.buf2hex(depositTx))
+  const values = [v1, v2]
+
+  for (let i = 0; i < 1; i++) {
+    const v = values[i]
+
+    const data = await k0.prepareDeposit(platformState, secretStore, v)
+    await secretStore.addNoteInfo(data.cm, data.rho, data.r, v)
+    secretStore.print()
+    console.log("available")
+    console.log(await secretStore.getAvailableNotes())
+    console.log(data)
+
+    printState(dollarCoin, null, [addresses.alice, addresses.bob], ['alice', 'bob'], [])
+
+
+    const depositTx = await k0Eth.deposit(
+      wallet.getPrivateKey(),
+      v,
+      data.k,
+      data.cm,
+      data.nextRoot,
+      data.commitmentProof,
+      data.additionProof
+    )
+    const receipt = await web3.eth.sendSignedTransaction(u.buf2hex(depositTx))
+  }
 }
 
 run().then(console.log).catch(console.log)

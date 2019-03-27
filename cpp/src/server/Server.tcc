@@ -110,7 +110,7 @@ Json::Value zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::add(
     cout << "mt root after" << bits2hex(mt.root()) << endl;
     Json::Value result;
     result["address"] = address;
-    result["newRoot"] = bits2hex(mt.root());
+    result["nextRoot"] = bits2hex(mt.root());
     return result;
 }
 
@@ -150,7 +150,7 @@ std::string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::hash(
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 Json::Value
-zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_deposit(
+zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::depositCommitmentProof(
         const std::string &a_pk_str,
         const std::string &rho_str,
         const std::string &r_str,
@@ -163,106 +163,114 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_deposit(
 
     auto k_bits = comm_r<CommitmentHashT>(a_pk_bits, rho_bits, r_bits);
     auto cm_bits = comm_s<CommitmentHashT>(k_bits, v_bits);
+    auto circuit = make_commitment_circuit<FieldT, CommitmentHashT>();
 
-
-    auto sim_result = mt.simulate_add(cm_bits);
-
-    uint address = mt.num_elements();
-
-    auto comm_circuit = make_commitment_circuit<FieldT, CommitmentHashT>();
     // Generate deposit proof
-    comm_circuit.k_bits->fill_with_bits(*comm_circuit.pb, k_bits);
-    comm_circuit.k_packer->generate_r1cs_witness_from_bits();
-    comm_circuit.pb->val(*comm_circuit.v_packed) = v;
-    comm_circuit.v_packer->generate_r1cs_witness_from_packed();
-    assert(!comm_circuit.pb->is_satisfied());
+    circuit.k_bits->fill_with_bits(*circuit.pb, k_bits);
+    circuit.k_packer->generate_r1cs_witness_from_bits();
+    circuit.pb->val(*circuit.v_packed) = v;
+    circuit.v_packer->generate_r1cs_witness_from_packed();
+    assert(!circuit.pb->is_satisfied());
 
-    comm_circuit.commitment_gadget->generate_r1cs_witness();
-    comm_circuit.cm_packer->generate_r1cs_witness_from_bits();
-    assert(comm_circuit.pb->is_satisfied());
-    assert(comm_circuit.cm_bits->get_digest() == cm_bits);
+    circuit.commitment_gadget->generate_r1cs_witness();
+    circuit.cm_packer->generate_r1cs_witness_from_bits();
+    assert(circuit.pb->is_satisfied());
+    assert(circuit.cm_bits->get_digest() == cm_bits);
 
-    if (!comm_circuit.pb->is_satisfied()) {
+    if (!circuit.pb->is_satisfied()) {
         throw JsonRpcException(-32010, "Commitment circuit not satisfied");
     }
 
-    cout << "COMM_CIRCUIT" << endl;
-    cout << "k  " << bits2hex(comm_circuit.k_bits->get_bits(*comm_circuit.pb))
+    cout << "CIRCUIT" << endl;
+    cout << "k  " << bits2hex(circuit.k_bits->get_bits(*circuit.pb))
          << endl;
-    cout << "cm " << bits2hex(comm_circuit.cm_bits->get_digest()) << endl;
-
-    auto add_circuit = make_mt_addition_circuit<FieldT, MerkleTreeHashT>(
-            tree_height);
-
-    add_circuit.prev_root_bits->generate_r1cs_witness(mt.root());
-    add_circuit.prev_root_packer->generate_r1cs_witness_from_bits();
-
-    add_circuit.pb->val(*add_circuit.address_packed) = address;
-    add_circuit.address_packer->generate_r1cs_witness_from_packed();
-
-    add_circuit.prev_path_var->generate_r1cs_witness(address, mt.path(address));
-
-    add_circuit.next_leaf_bits->generate_r1cs_witness(cm_bits);
-    add_circuit.next_leaf_packer->generate_r1cs_witness_from_bits();
-
-    add_circuit.next_root_bits->generate_r1cs_witness(get<1>(sim_result));
-    add_circuit.next_root_packer->generate_r1cs_witness_from_bits();
-
-    assert(!add_circuit.pb->is_satisfied());
-    add_circuit.mt_update_gadget->generate_r1cs_witness();
-
-    cout << "CHECKING ADDITION" << endl;
-    cout << add_circuit.pb->primary_input().size() << " "
-         << addition_pk.constraint_system.num_inputs() << endl;
+    cout << "cm " << bits2hex(circuit.cm_bits->get_digest()) << endl;
     cout << "CHECKING COMMITMENT" << endl;
-    cout << comm_circuit.pb->primary_input().size() << " "
+    cout << circuit.pb->primary_input().size() << " "
          << commitment_pk.constraint_system.num_inputs() << endl;
 
-    assert(add_circuit.pb->is_satisfied());
 
-    const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> comm_proof =
+    const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> proof =
             r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
-                    commitment_pk, comm_circuit.pb->primary_input(),
-                    comm_circuit.pb->auxiliary_input());
+                    commitment_pk, circuit.pb->primary_input(),
+                    circuit.pb->auxiliary_input());
 
-    const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> add_proof =
-            r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
-                    addition_pk, add_circuit.pb->primary_input(),
-                    add_circuit.pb->auxiliary_input());
 
-    bool comm_verified =
+    bool verified =
             r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
-                    commitment_vk, comm_circuit.pb->primary_input(),
-                    comm_proof);
-    if (comm_verified) {
+                    commitment_vk, circuit.pb->primary_input(),
+                    proof);
+    if (verified) {
         cout << "Commitment proof successfully verified." << endl;
     } else {
         cerr << "Commitment proof verification failed." << endl;
     }
 
-    cout << "ADDITION params" << endl << hex << add_circuit.pb->primary_input()
+ 
+    Json::Value result;
+    result["k"] = bits_to_hex(k_bits);
+    result["cm"] = bits_to_hex(cm_bits);
+    result["proof"] = json_conversion::to_json(proof);
+
+    return result;
+}
+template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+Json::Value
+zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::merkleTreeAdditionProof(
+            const std::string& prev_root_hex,
+            const std::string& address_dec,
+            const std::string& leaf_hex,
+            const Json::Value& path,
+            const std::string& next_root_hex) {
+
+    vector<bit_vector> path_vec(path.size());
+    for (int i = 0; i < path.size(); i++) {
+        path_vec[i] = hex2bits(path[i].asString());
+    }
+
+    auto circuit = make_mt_addition_circuit<FieldT, MerkleTreeHashT>(
+            tree_height);
+
+    circuit.prev_root_bits->generate_r1cs_witness(hex2bits(prev_root_hex));
+    circuit.prev_root_packer->generate_r1cs_witness_from_bits();
+
+    circuit.pb->val(*circuit.address_packed) = FieldT(address_dec.c_str());
+    circuit.address_packer->generate_r1cs_witness_from_packed();
+
+    circuit.prev_path_var->generate_r1cs_witness(stoi(address_dec), path_vec);
+
+    circuit.next_leaf_bits->generate_r1cs_witness(hex2bits(leaf_hex));
+    circuit.next_leaf_packer->generate_r1cs_witness_from_bits();
+
+    circuit.next_root_bits->generate_r1cs_witness(hex2bits(next_root_hex));
+    circuit.next_root_packer->generate_r1cs_witness_from_bits();
+
+    assert(!circuit.pb->is_satisfied());
+    circuit.mt_update_gadget->generate_r1cs_witness();
+
+    cout << "CHECKING ADDITION" << endl;
+    cout << circuit.pb->primary_input().size() << " "
+         << addition_pk.constraint_system.num_inputs() << endl;
+    assert(circuit.pb->is_satisfied());
+    const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> proof =
+            r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
+                    addition_pk, circuit.pb->primary_input(),
+                    circuit.pb->auxiliary_input());
+    cout << "ADDITION params" << endl << hex << circuit.pb->primary_input()
          << endl;
-    bool add_verified =
+    bool verified =
             r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
-                    addition_vk, add_circuit.pb->primary_input(), add_proof);
-    if (add_verified) {
+                    addition_vk, circuit.pb->primary_input(), proof);
+    if (verified) {
         cout << "Addition proof successfully verified." << endl;
     } else {
         cerr << "Addition proof verification failed." << endl;
     }
 
-
-    Json::Value result;
-    result["k"] = bits_to_hex(k_bits);
-    result["cm"] = bits_to_hex(cm_bits);
-    result["nextRoot"] = bits_to_hex(get<1>(sim_result));
-
-    result["address"] = (uint) address;
-    result["commitmentProof"] = json_conversion::to_json(comm_proof);
-    result["additionProof"] = json_conversion::to_json(add_proof);
-
-    return result;
+    return json_conversion::to_json(proof);
 }
+
+ 
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 Json::Value

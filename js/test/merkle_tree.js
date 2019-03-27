@@ -177,7 +177,7 @@ describe('Merkle tree', function () {
       const leafElems = await util.pack256Bits(leaf)
       const data = contract.methods.add(
         leafElems,
-        simulation.newRoot,
+        simulation.nextRoot,
         ...simulation.proof
       ).encodeABI()
       const receipt = await sendTransaction(web3, contract._address, data)
@@ -187,7 +187,7 @@ describe('Merkle tree', function () {
       assert(receipt.logs[0].topics[0] === '0x3f3cfdb26fb5f9f1786ab4f1a1f9cd4c0b5e726cbdfc26e495261731aad44e39')
       const additionResponse = await mtEngine.request('add', [leaf])
       console.log(`Added leaf ${i}: ${leaf}`)
-      console.log(`New root: ${additionResponse.result.newRoot}`)
+      console.log(`New root: ${additionResponse.result.nextRoot}`)
       for (let j = 0; j <= i; j++) {
         const [ r, sn ] = secrets[j]
         const inclusionProofResponse = await mtEngine.request('proveInclusion', [ j, r, sn ])

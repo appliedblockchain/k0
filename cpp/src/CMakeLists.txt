@@ -53,8 +53,8 @@ target_sources(
         hash/sha256_compression.hpp
         scheme/comms.hpp
         scheme/prfs.h
-        server/prover/Server.hpp
-        server/prover/Server.tcc
+        server/Server.hpp
+        server/Server.tcc
         util.h
         MerkleTree.hpp
         MerkleTree.tcc
@@ -98,7 +98,7 @@ target_include_directories(
 add_executable(
         server
 
-        server/prover/run_server.cpp
+        server/run_server.cpp
 )
 target_link_libraries(
         server
@@ -162,7 +162,7 @@ target_include_directories(
 add_executable(
         mtserver
 
-        server/mt/run_mtserver.cpp
+        mtserver/run_mtserver.cpp
 )
 target_link_libraries(
         mtserver

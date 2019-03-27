@@ -49,7 +49,7 @@ Json::Value zktrade::MTServer<FieldT, MerkleTreeHashT>::add(
   cout << "mt root after" << bits2hex(mt.root()) << endl;
   Json::Value result;
   result["address"] = address;
-  result["newRoot"] = bits2hex(mt.root());
+  result["nextRoot"] = bits2hex(mt.root());
   return result;
 }
 
@@ -72,7 +72,7 @@ Json::Value zktrade::MTServer<FieldT, MerkleTreeHashT>::simulateAddition(
   auto sim_result = mt.simulate_add(cm_bits);
   Json::Value result;
   result["address"] = get<0>(sim_result);
-  result["newRoot"] = bits2hex(get<1>(sim_result));
+  result["nextRoot"] = bits2hex(get<1>(sim_result));
   vector<bit_vector> path_vec = get<2>(sim_result);
 
   Json::Value path;

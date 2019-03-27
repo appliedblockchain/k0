@@ -15,7 +15,6 @@ function makeStateList() {
   }
   function getLatest() {
     const entry = linkedList.getLatest()
-    console.log('latest entry', entry)
     return entry.state
   }
   return { add, getLatest }

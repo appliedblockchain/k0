@@ -19,7 +19,7 @@ contract MerkleTree {
 
     function add(
         uint[2] memory leaf,
-        uint[2] memory newRoot,
+        uint[2] memory nextRoot,
         uint[2] memory a,
         uint[2] memory a_p,
         uint[2][2] memory b,
@@ -35,8 +35,8 @@ contract MerkleTree {
         inputs[2] = root[1];
         inputs[3] = leaf[0];
         inputs[4] = leaf[1];
-        inputs[5] = newRoot[0];
-        inputs[6] = newRoot[1];
+        inputs[5] = nextRoot[0];
+        inputs[6] = nextRoot[1];
         if (additionVerifier.verifyProof(
             a, 
             a_p, 
@@ -48,7 +48,7 @@ contract MerkleTree {
             k,
             inputs
         )) {
-            root = newRoot;
+            root = nextRoot;
             num_leaves++;
         } else {
             revert();

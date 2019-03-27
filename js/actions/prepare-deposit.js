@@ -2,22 +2,35 @@ const BN = require('bn.js')
 const crypto = require('crypto')
 const u = require('../util')
 
-async function prepareDeposit(server, keys, v) {
-  u.checkBuf(keys.a_pk, 32)
+async function prepareDeposit(server, platformState, secretStore, v) {
+  console.log("v", v)
   u.checkBN(v)
+  const a_pk = await server.prf_addr(secretStore.getSecretKey())
   const rho = crypto.randomBytes(32)
   const r = crypto.randomBytes(48)
-  const data = await server.prepare_deposit(keys.a_pk, rho, r, v)
-  console.log(data)
+  const cm = await server.cm(a_pk, rho, r, v)
+  console.log('got cm', cm)
+  const prevRoot = await platformState.merkleTreeRoot()
+  const mtAddSim = await platformState.simulateMerkleTreeAddition(cm)
+  console.log(mtAddSim)
+  const commProofData = await server.depositCommitmentProof(a_pk, rho, r, v)
+  assert(cm.equals(commProofData.cm))
+  const additionProof = await server.merkleTreeAdditionProof(
+    prevRoot,
+    mtAddSim.address,
+    cm,
+    mtAddSim.path,
+    mtAddSim.nextRoot
+  )
   return {
     rho,
     r,
-    cm: u.hex2buf(data.cm),
-    k: u.hex2buf(data.k),
-    nextRoot: u.hex2buf(data.nextRoot),
+    cm,
+    k: commProofData.k,
+    nextRoot: mtAddSim.nextRoot,
     // TODO hex2buf
-    additionProof: data.additionProof,
-    commitmentProof: data.commitmentProof
+    additionProof,
+    commitmentProof: commProofData.proof
   }
 }
 

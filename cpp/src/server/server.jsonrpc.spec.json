@@ -6,7 +6,7 @@
     ],
     "returns": {
       "address": 1337,
-      "newRoot": "0x1111111111111111111111111111111111111111111111111111111111111111"
+      "nextRoot": "0x1111111111111111111111111111111111111111111111111111111111111111"
     }
   },
   {
@@ -35,7 +35,7 @@
     "returns": "0x1111111111111111111111111111111111111111111111111111111111111111"
   },
   {
-    "name": "prepare_deposit",
+    "name": "depositCommitmentProof",
     "params": [
       "a_pk_as_hex_string",
       "rho_as_hex_string",
@@ -43,50 +43,9 @@
       "v_as_decimal_string"
     ],
     "returns": {
-      "address": "1337",
       "k": "0x1111111111111111111111111111111111111111111111111111111111111111",
       "cm": "0x1111111111111111111111111111111111111111111111111111111111111111",
-      "commitmentProof": [
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          [
-            "bignum",
-            "bignum"
-          ],
-          [
-            "bignum",
-            "bignum"
-          ]
-        ],
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          "bignum",
-          "bignum"
-        ]
-      ],
-      "additionProof": [
+      "proof": [
         [
           "bignum",
           "bignum"
@@ -127,6 +86,59 @@
         ]
       ]
     }
+  },
+  {
+    "name": "merkleTreeAdditionProof",
+    "params": [
+      "prev_root_hex",
+      "address_dec",
+      "leaf_hex",
+      [
+        "path_hex",
+        "path_hex"
+      ],
+      "next_root_hex"
+    ],
+    "returns": [
+      [
+        "bignum",
+        "bignum"
+      ],
+      [
+        "bignum",
+        "bignum"
+      ],
+      [
+        [
+          "bignum",
+          "bignum"
+        ],
+        [
+          "bignum",
+          "bignum"
+        ]
+      ],
+      [
+        "bignum",
+        "bignum"
+      ],
+      [
+        "bignum",
+        "bignum"
+      ],
+      [
+        "bignum",
+        "bignum"
+      ],
+      [
+        "bignum",
+        "bignum"
+      ],
+      [
+        "bignum",
+        "bignum"
+      ]
+    ]
   },
   {
     "name": "prepare_transfer",

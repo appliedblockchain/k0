@@ -3,15 +3,15 @@ const makeStateList = require('./state-list')
 const makeMT = require('./mt')
 const u = require('../util')
 
-async function makeState(serverPort = 4000) {
+async function makePlatformState(serverPort = 4100) {
   console.log('MT server port', serverPort)
   const mt = await makeMT(serverPort)
   let stateList
   reset()
 
-  async function add(snapshotLabel, newCMList, newSNList, expectedNewRoot) {
+  async function add(snapshotLabel, newCMList, newSNList, expectednextRoot) {
     u.checkString(snapshotLabel)
-    u.checkBuf(expectedNewRoot, 32)
+    u.checkBuf(expectednextRoot, 32)
     let newState = stateList.getLatest()
     console.log("new state", newState)
     for (let i = 0; i < newSNList.length; i++) {
@@ -24,15 +24,15 @@ async function makeState(serverPort = 4000) {
       console.log(currentCMList)
       newState = newState.set('cmList', currentCMList.push(newCMList[i]))
     }
-    let newRoot
+    let nextRoot
     // Add CMs to Merkle tree
     for (let i = 0; i < newCMList.length; i++) {
       const resp = await mt.add(newCMList[i])
       console.log('resp', resp)
-      newRoot = resp.newRoot
+      nextRoot = resp.nextRoot
     }
     // Check if new root of Merkle tree matches expected new root
-    assert(newRoot.equals(expectedNewRoot))
+    assert(nextRoot.equals(expectednextRoot))
     stateList.add(snapshotLabel, newState)
   }
 
@@ -40,19 +40,28 @@ async function makeState(serverPort = 4000) {
     stateList = makeStateList()
     const state = immutable.Map({
       cmList: immutable.List(),
-      snList: immutable.List()
+      snList: immutable.List(),
+      cmInfo: immutable.Map()
     })
     stateList.add('initialState', state)
     await mt.reset()
   }
 
-  const root = mt.root
+  function print() {
+    console.log(stateList.getLatest())
+  }
+
+  const merkleTreeRoot = mt.root
+
+  const simulateMerkleTreeAddition = mt.simulateAdd
 
   return {
     add,
+    print,
     reset,
-    root
+    merkleTreeRoot,
+    simulateMerkleTreeAddition
   }
 }
 
-module.exports = makeState
+module.exports = makePlatformState

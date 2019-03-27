@@ -221,7 +221,7 @@ describe('Private trade', async function () {
     await server.add(res.output_0_cm)
     const add_res = await server.add(res.output_1_cm)
 
-    const newRoot = await ethUtil.pack256Bits(add_res.newRoot)
+    const nextRoot = await ethUtil.pack256Bits(add_res.nextRoot)
 
     const transferProofCompact = flattenProof(res.transfer_proof)
     const transferParams = [
@@ -229,7 +229,7 @@ describe('Private trade', async function () {
       sn1Packed.map(x => x.toString()),
       cm0Packed.map(x => x.toString()),
       cm1Packed.map(x => x.toString()),
-      newRoot.map(x => x.toString()),
+      nextRoot.map(x => x.toString()),
       tradeContract._address,
       transferProofCompact
     ]
