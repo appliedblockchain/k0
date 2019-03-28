@@ -7,7 +7,6 @@ describe('Address to int conversion', function() {
     web3 = util.initWeb3()
   })
   it('does something', async function() {
-    console.log('hello', util)
     const account = web3.eth.accounts.create()
     const addresses = [
       '0x0000000000000000000000000000000000000001',

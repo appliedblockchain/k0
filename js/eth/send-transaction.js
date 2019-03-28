@@ -1,8 +1,6 @@
 const u = require('../util')
 
 async function sendTransaction(web3, to, data, gas = 50000000, privateKey) {
-  console.log('todatapriv', to.length, data.length, privateKey.length)
-  console.log(to, data, privateKey)
   u.checkBuf(to, 20)
   u.checkBuf(data)
   u.checkBuf(privateKey, 32)

@@ -1,0 +1,99 @@
+'use strict'
+const bip39 = require('bip39')
+const hdkey = require('ethereumjs-wallet/hdkey')
+const BN = require('bn.js')
+const crypto = require('crypto')
+const addresses = require('./addresses')
+const testUtil = require('../test/util')
+const makeEthPlatform = require('../eth')
+const makeK0 = require('../k0')
+const mnemonics = require('./mnemonics')
+const signTransaction = require('../eth/sign-transaction')
+const compileContracts = require('../test/helpers/compile-contracts')
+const printState = require('./print-state')
+const makePlatformState = require('../platform-state')
+const makeSecretStore = require('../secret-store')
+const { prompt } = require('./util')
+const u = require('../util')
+const inquirer = require('inquirer')
+
+const serverPorts = {
+  alice: 4000,
+  bob: 5000
+}
+
+const mtServerPorts = {
+  alice: 4100,
+  bob: 5100
+}
+
+async function run() {
+  const who = process.argv[2]
+  if (['alice', 'bob'].indexOf(who) === -1) {
+    console.log('Need parameter "alice" or "bob".')
+    process.exit(1)
+  }
+  const platformState = await makePlatformState(mtServerPorts[who])
+  const web3 = testUtil.initWeb3()
+  const k0Eth = await makeEthPlatform(
+    web3,
+    u.hex2buf(addresses.MVPPT)
+  )
+
+  let queue = []
+
+  let processing = false
+  async function processQueue() {
+    if (processing) {
+      return
+    }
+    processing = true
+    var item = queue.shift()
+    await platformState.add(u.buf2hex(item.txHash), [item.cm], [], item.nextRoot)
+    processing = false
+    if (queue.length > 0) {
+      processQueue()
+    }
+  }
+
+
+  k0Eth.on('deposit', async (txHash, cm, nextRoot) => {
+    queue.push({type: 'deposit', txHash, cm, nextRoot})
+    processQueue()
+  })
+
+  const secretStoreData = require(`./${who}.secrets.json`)
+  const secretStore = makeSecretStore(secretStoreData)
+
+  const k0 = await makeK0(serverPorts[who])
+
+  const artefacts = await compileContracts()
+
+  async function showState() {
+    printState(secretStore, platformState)
+  }
+
+  async function transferMoney() {
+  }
+
+  async function cycle() {
+    const questions = [
+      { type: 'list', name: 'command', message: 'Watchawannado', choices: ['Show state', 'Transfer money'] }
+    ];
+    const inquisition = await inquirer.prompt(questions)
+    if (inquisition.command === 'Show state') {
+      await showState()
+    } else if (inquisition.command === 'Transfer money') {
+      await transferMoney()
+    } else {
+      throw new Error(`Unknown command: ${inquisition.command}`)
+    }
+  }
+
+  while (true) {
+    await cycle()
+  }
+
+}
+
+run().then(console.log).catch(console.log)

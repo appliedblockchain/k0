@@ -10,7 +10,7 @@ const BN = require('bn.js')
 const u = require('../util')
 
 function initContractEventHandlers(mvppt, eventEmitter) {
-  mvppt.events.Deposit().on('data', async event => {
+  mvppt.events.Deposit({ fromBlock: 0 }).on('data', async event => {
     const cmStrings = event.returnValues.cm
     console.log(event)
     console.log(event.returnValues)
@@ -22,7 +22,7 @@ function initContractEventHandlers(mvppt, eventEmitter) {
       new BN(event.returnValues.new_root[0]),
       new BN(event.returnValues.new_root[1])
     )
-    eventEmitter.emit('deposit', u.hex2buf(event.transactionHash), cm, newRoot)
+    await eventEmitter.emit('deposit', u.hex2buf(event.transactionHash), cm, newRoot)
   })
   mvppt.events.Transfer().on('data', async event => {
     console.log('got Transfer event', event)

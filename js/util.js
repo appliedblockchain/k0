@@ -25,6 +25,16 @@ function checkString(input) {
 }
 const hex2buf = bufferOfHex0x
 
+function shorthex(buf) {
+  checkBuf(buf)
+  if (buf.length <= 4) {
+    return buf2hex(buf)
+  } else {
+    const str = `0x${buf.slice(0,4).toString('hex')}...${buf.slice(-4).toString('hex')}`
+    return str
+  }
+}
+
 function parseG1Point(data) {
 	const X = data[0]
 	const Y = data[1]
@@ -47,5 +57,6 @@ module.exports = {
 	hex2buf,
   parseG1Point,
   parseG2Point,
-	wait
+	wait,
+  shorthex
 }

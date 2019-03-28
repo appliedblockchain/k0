@@ -5,12 +5,14 @@ const u = require('../util')
 async function prepareDeposit(server, platformState, secretStore, v) {
   console.log("v", v)
   u.checkBN(v)
-  const a_pk = await server.prf_addr(secretStore.getSecretKey())
+  console.log(secretStore)
+  const a_pk = await server.prfAddr(secretStore.getPrivateKey())
   const rho = crypto.randomBytes(32)
   const r = crypto.randomBytes(48)
   const cm = await server.cm(a_pk, rho, r, v)
   console.log('got cm', cm)
   const prevRoot = await platformState.merkleTreeRoot()
+  console.log('prevRoot', prevRoot)
   const mtAddSim = await platformState.simulateMerkleTreeAddition(cm)
   console.log(mtAddSim)
   const commProofData = await server.depositCommitmentProof(a_pk, rho, r, v)
@@ -23,6 +25,7 @@ async function prepareDeposit(server, platformState, secretStore, v) {
     mtAddSim.nextRoot
   )
   return {
+    a_pk,
     rho,
     r,
     cm,

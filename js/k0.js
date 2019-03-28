@@ -7,7 +7,8 @@ const u = require('./util')
 async function makeK0(serverPort = 4000) {
   const server = await makeClient(serverPort)
   return {
-    prepareDeposit: prepareDeposit.bind(null, server)
+    prepareDeposit: prepareDeposit.bind(null, server),
+    prfAddr: server.prfAddr
   }
 }
 

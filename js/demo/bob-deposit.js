@@ -1,5 +1,6 @@
 'use strict'
 const bip39 = require('bip39')
+const fs = require('fs')
 const hdkey = require('ethereumjs-wallet/hdkey')
 const BN = require('bn.js')
 const crypto = require('crypto')
@@ -8,12 +9,12 @@ const testUtil = require('../test/util')
 const makeEthPlatform = require('../eth')
 const makeK0 = require('../k0')
 const u = require('../util')
-const mnemonics = require('./mnemonics')
 const signTransaction = require('../eth/sign-transaction')
 const compileContracts = require('../test/helpers/compile-contracts')
 const printState = require('./print-state')
 const makePlatformState = require('../platform-state')
 const makeSecretStore = require('../secret-store')
+const mnemonics = require('./mnemonics')
 
 async function run() {
   const web3 = testUtil.initWeb3()
@@ -27,19 +28,16 @@ async function run() {
     artefacts.DollarCoin.abi,
     addresses.DollarCoin
   )
-  const a_sk = crypto.randomBytes(32)
   const mtServerPort = parseInt(process.env.MT_SERVER_PORT || '5100', 10)
   const platformState = await makePlatformState(mtServerPort)
-  const secretStore = makeSecretStore(a_sk)
-  console.log('root before', await platformState.merkleTreeRoot())
+  const secretStoreData = require('./bob.secrets.json')
+  const secretStore = makeSecretStore(secretStoreData)
   await platformState.reset()
-  console.log('root after', await platformState.merkleTreeRoot())
 
   k0Eth.on('deposit', async (txHash, cm, nextRoot) => {
     u.checkBuf(txHash, 32)
     u.checkBuf(cm, 32)
     u.checkBuf(nextRoot, 32)
-    console.log('new roor', nextRoot)
     await platformState.add(u.buf2hex(txHash), [cm], [], nextRoot)
   })
 
@@ -54,28 +52,26 @@ async function run() {
 
   const v1 = new BN('50000')
   const v2 = new BN('50000')
+  const total = v1.add(v2)
   // approve
   const approveTx = await signTransaction(
     web3,
     u.hex2buf(dollarCoin._address),
-    u.hex2buf(dollarCoin.methods.approve(addresses.MVPPT, v1.add(v2).toString()).encodeABI()),
+    u.hex2buf(dollarCoin.methods.approve(addresses.MVPPT, total.toString()).encodeABI()),
     5000000,
     wallet.getPrivateKey()
   )
   await web3.eth.sendSignedTransaction(u.buf2hex(approveTx))
 
-  console.log('approve done')
 
   const values = [v1, v2]
 
-  for (let i = 0; i < 1; i++) {
+  for (let i = 0; i < values.length; i++) {
     const v = values[i]
 
     const data = await k0.prepareDeposit(platformState, secretStore, v)
-    await secretStore.addNoteInfo(data.cm, data.rho, data.r, v)
-    console.log("available")
-    console.log(await secretStore.getAvailableNotes())
-    console.log(data)
+    await secretStore.addNoteInfo(data.cm, data.a_pk, data.rho, data.r, v)
+
 
     const depositTx = await k0Eth.deposit(
       wallet.getPrivateKey(),
@@ -87,8 +83,11 @@ async function run() {
       data.additionProof
     )
     const receipt = await web3.eth.sendSignedTransaction(u.buf2hex(depositTx))
-    console.log('store content', secretStore.serialize())
+
+    await u.wait(1000)
   }
+
+  fs.writeFileSync('bob.secrets.json', JSON.stringify(secretStore.spit()))
 }
 
 run().then(console.log).catch(console.log)

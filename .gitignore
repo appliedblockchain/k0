@@ -11,3 +11,4 @@ cpp/cmake-build-debug-remote-host
 /js/demo/addresses.json
 /js/demo/artefacts.json
 /js/demo/mnemonics.json
+/js/demo/*.secrets.json

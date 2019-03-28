@@ -4,7 +4,7 @@ const depositCommitmentProof = require('./deposit-commitment-proof')
 const merkleTreeAdditionProof = require('./merkle-tree-addition-proof')
 const prepare_transfer = require('./prepare_transfer')
 const prepare_withdrawal = require('./prepare_withdrawal')
-const prf_addr = require('./prf_addr')
+const prfAddr = require('./prf-addr')
 const ready = require('./ready')
 
 function client(serverPort = 4000) {
@@ -15,7 +15,7 @@ function client(serverPort = 4000) {
     merkleTreeAdditionProof: merkleTreeAdditionProof.bind(null, jc),
     prepare_transfer: prepare_transfer.bind(null, jc),
     prepare_withdrawal: prepare_withdrawal.bind(null, jc),
-    prf_addr: prf_addr.bind(null, jc),
+    prfAddr: prfAddr.bind(null, jc),
     ready: ready.bind(null, jc)
   }
 }

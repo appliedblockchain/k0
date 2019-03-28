@@ -2,6 +2,7 @@
 
 const bip39 = require('bip39')
 const compileContracts = require('../test/helpers/compile-contracts')
+const crypto = require('crypto')
 const fs = require('fs')
 const testUtil = require('../test/util')
 const _ = require('lodash')
@@ -10,6 +11,7 @@ const addressOfPublicKey = require('@appliedblockchain/helpers/address-of-public
 const sendTransaction = require('../send-transaction')
 const makePlatformState = require('../platform-state')
 const u = require('../util')
+const makeK0 = require('../k0')
 
 async function run() {
 
@@ -61,7 +63,6 @@ async function run() {
     const root = hdkey.fromMasterSeed(seed)
     const path = "m/44'/60'/0'/0/0"
     const wallet = root.derivePath(path).getWallet()
-    console.log(wallet.getAddress())
     return { mnemonic, wallet }
   })
 
@@ -111,6 +112,27 @@ async function run() {
     alice: alice.mnemonic,
     bob: bob.mnemonic
   }))
+
+  const aliceSecretKey = crypto.randomBytes(32)
+  const bobSecretKey = crypto.randomBytes(32)
+
+  const k0 = await makeK0()
+  const alicePublicKey = await k0.prfAddr(aliceSecretKey)
+  const bobPublicKey = await k0.prfAddr(bobSecretKey)
+  fs.writeFileSync('public-keys.json', JSON.stringify({
+    alice: u.buf2hex(alicePublicKey),
+    bob: u.buf2hex(bobPublicKey)
+  }))
+  fs.writeFileSync('alice.secrets.json', JSON.stringify({
+    privateKey: u.buf2hex(aliceSecretKey),
+    publicKey: u.buf2hex(alicePublicKey)
+  }))
+  fs.writeFileSync('bob.secrets.json', JSON.stringify({
+    privateKey: u.buf2hex(bobSecretKey),
+    publicKey: u.buf2hex(bobPublicKey)
+  }))
+
+
 
 }
 
