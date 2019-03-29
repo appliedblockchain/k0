@@ -22,6 +22,8 @@ namespace zktrade {
 
         virtual std::string element(int param01);
 
+        virtual Json::Value path(const std::string &address_dec);
+
         virtual std::string reset();
 
         virtual std::string root();

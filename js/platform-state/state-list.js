@@ -13,11 +13,33 @@ function makeStateList() {
       label, state
     })
   }
+
   function getLatest() {
     const entry = linkedList.getLatest()
     return entry.state
   }
-  return { add, getLatest }
+
+  function getLatestLabel() {
+    const entry = linkedList.getLatest()
+    return entry.label
+  }
+
+  function rollbackTo(label) {
+    const it = linkedList.iterator()
+    let done = false
+    while (!done) {
+      const next = it.next()
+      if (next.value.label === label) {
+        linkedList.rollbackTo(next.value)
+        return
+      } else {
+        done = next.done
+      }
+    }
+    throw new Error(`Rollback failed. No state with label ${label} found.`)
+  }
+
+  return { add, getLatest, getLatestLabel, rollbackTo }
 }
 
 module.exports = makeStateList

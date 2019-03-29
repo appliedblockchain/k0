@@ -3,10 +3,8 @@ const crypto = require('crypto')
 const u = require('../util')
 
 async function prepareDeposit(server, platformState, secretStore, v) {
-  console.log("v", v)
   u.checkBN(v)
-  console.log(secretStore)
-  const a_pk = await server.prfAddr(secretStore.getPrivateKey())
+  const a_pk = secretStore.getPublicKey()
   const rho = crypto.randomBytes(32)
   const r = crypto.randomBytes(48)
   const cm = await server.cm(a_pk, rho, r, v)

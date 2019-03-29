@@ -12,6 +12,10 @@ const sendTransaction = require('../send-transaction')
 const makePlatformState = require('../platform-state')
 const u = require('../util')
 const makeK0 = require('../k0')
+const log4js = require('log4js')
+
+const logger = log4js.getLogger()
+logger.level = process.env.LOG_LEVEL || 'info'
 
 async function run() {
 
@@ -57,7 +61,7 @@ async function run() {
 
   const moneyShower = await testUtil.deployContract(web3, artefacts.MoneyShower)
 
-  const [ alice, bob ] = _.times(2, () => {
+  const [alice, bob] = _.times(2, () => {
     const mnemonic = bip39.generateMnemonic()
     const seed = bip39.mnemonicToSeed(mnemonic)
     const root = hdkey.fromMasterSeed(seed)
@@ -93,7 +97,7 @@ async function run() {
     moneyShower._address,
     moneyShower.methods.transfer(
       dollarCoin._address,
-      _.map([ alice, bob ], x => x.wallet.getAddressString()),
+      _.map([alice, bob], x => x.wallet.getAddressString()),
       _.times(2, () => "1000000000000")
     ).encodeABI(),
     5000000,
@@ -132,8 +136,14 @@ async function run() {
     publicKey: u.buf2hex(bobPublicKey)
   }))
 
-
-
+  logger.info([
+    `Alice: public key ${u.buf2hex(alicePublicKey)}, `,
+    `private key ${u.buf2hex(aliceSecretKey)}`
+  ].join(''))
+  logger.info([
+    `Bob: public key ${u.buf2hex(bobPublicKey)}, `,
+    `private key ${u.buf2hex(bobSecretKey)}`
+  ].join(''))
 }
 
 run().then(console.log).catch(console.log)

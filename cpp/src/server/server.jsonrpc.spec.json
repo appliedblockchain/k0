@@ -9,6 +9,7 @@
       "nextRoot": "0x1111111111111111111111111111111111111111111111111111111111111111"
     }
   },
+
   {
     "name": "cm",
     "params": [
@@ -19,6 +20,7 @@
     ],
     "returns": "0x1111111111111111111111111111111111111111111111111111111111111111"
   },
+
   {
     "name": "element",
     "params": [
@@ -26,6 +28,7 @@
     ],
     "returns": "0x1111111111111111111111111111111111111111111111111111111111111111"
   },
+
   {
     "name": "hash",
     "params": [
@@ -34,6 +37,7 @@
     ],
     "returns": "0x1111111111111111111111111111111111111111111111111111111111111111"
   },
+
   {
     "name": "depositCommitmentProof",
     "params": [
@@ -87,6 +91,7 @@
       ]
     }
   },
+
   {
     "name": "merkleTreeAdditionProof",
     "params": [
@@ -140,19 +145,29 @@
       ]
     ]
   },
+
   {
-    "name": "prepare_transfer",
+    "name": "prepareTransfer",
     "params": [
+      "prev_root_hex",
       "input_0_address_as_decimal_string",
       "input_0_a_sk_as_hex_string",
       "input_0_rho_as_hex_string",
       "input_0_r_as_hex_string",
       "input_0_v_as_decimal_string",
+      [
+        "input_0_path_hex",
+        "input_0_path_hex"
+      ],
       "input_1_address_as_decimal_string",
       "input_1_a_sk_as_hex_string",
       "input_1_rho_as_hex_string",
       "input_1_r_as_hex_string",
       "input_1_v_as_decimal_string",
+      [
+        "input_1_path_hex",
+        "input_1_path_hex"
+      ],
       "output_0_a_pk_as_hex_string",
       "output_0_rho_as_hex_string",
       "output_0_r_as_hex_string",
@@ -166,132 +181,12 @@
     "returns": {
       "input_0_sn": "0x1111111111111111111111111111111111111111111111111111111111111111",
       "input_1_sn": "0x1111111111111111111111111111111111111111111111111111111111111111",
-      "output_0_address": 1337,
       "output_0_cm": "0x1111111111111111111111111111111111111111111111111111111111111111",
-      "output_1_address": 1337,
       "output_1_cm": "0x1111111111111111111111111111111111111111111111111111111111111111",
-      "transfer_proof": [
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          [
-            "bignum",
-            "bignum"
-          ],
-          [
-            "bignum",
-            "bignum"
-          ]
-        ],
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          "bignum",
-          "bignum"
-        ]
-      ],
-      "addition_0_proof": [
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          [
-            "bignum",
-            "bignum"
-          ],
-          [
-            "bignum",
-            "bignum"
-          ]
-        ],
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          "bignum",
-          "bignum"
-        ]
-      ],
-      "addition_1_proof": [
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          [
-            "bignum",
-            "bignum"
-          ],
-          [
-            "bignum",
-            "bignum"
-          ]
-        ],
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          "bignum",
-          "bignum"
-        ],
-        [
-          "bignum",
-          "bignum"
-        ]
-      ]
+      "proof": [ "bignum", "bignum" ]
     }
   },
+
   {
     "name": "prepare_withdrawal",
     "params": [
@@ -346,6 +241,7 @@
       ]
     }
   },
+
   {
     "name": "prf_addr",
     "params": [
@@ -353,16 +249,19 @@
     ],
     "returns": "a_pk_as_hex_string"
   },
+
   {
     "name": "reset",
     "params": [],
     "returns": "0x1111111111111111111111111111111111111111111111111111111111111111"
   },
+
   {
     "name": "root",
     "params": [],
     "returns": "0x1111111111111111111111111111111111111111111111111111111111111111"
   },
+
   {
     "name": "status",
     "params": [],

@@ -9,7 +9,6 @@ using namespace jsonrpc;
 using namespace libsnark;
 
 namespace zktrade {
-
     template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
     class Server : public ZKTradeStubServer {
         r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp> commitment_pk;
@@ -61,47 +60,50 @@ namespace zktrade {
         virtual std::string
         hash(const std::string &param01, const std::string &param02);
 
-        virtual Json::Value depositCommitmentProof(
-                const std::string &a_pk_str,
-                const std::string &rho_str,
-                const std::string &r_str,
-                const std::string &v_str);
+        virtual Json::Value
+        depositCommitmentProof(const std::string &a_pk_str,
+                               const std::string &rho_str,
+                               const std::string &r_str,
+                               const std::string &v_str);
 
-        virtual Json::Value merkleTreeAdditionProof(
-            const std::string& prev_root_hex,
-            const std::string& address_dec,
-            const std::string& leaf_hex,
-            const Json::Value& path,
-            const std::string& next_root_hex);
+        virtual Json::Value
+        merkleTreeAdditionProof(const std::string &prev_root_hex,
+                                const std::string &address_dec,
+                                const std::string &leaf_hex,
+                                const Json::Value &path,
+                                const std::string &next_root_hex);
 
-        virtual Json::Value prepare_transfer(
-                const std::string &input_0_address_str,
-                const std::string &input_0_a_sk_str,
-                const std::string &input_0_rho_str,
-                const std::string &input_0_r_str,
-                const std::string &input_0_v_str,
-                const std::string &input_1_address_str,
-                const std::string &input_1_a_sk_str,
-                const std::string &input_1_rho_str,
-                const std::string &input_1_r_str,
-                const std::string &input_1_v_str,
-                const std::string &output_0_a_pk_str,
-                const std::string &output_0_rho_str,
-                const std::string &output_0_r_str,
-                const std::string &output_0_v_str,
-                const std::string &output_1_a_pk_str,
-                const std::string &output_1_rho_str,
-                const std::string &output_1_r_str,
-                const std::string &output_1_v_str,
-                const std::string &callee_hex_str);
+        virtual Json::Value
+        prepareTransfer(const std::string &prev_root_hex,
+                        const std::string &input_0_address_str,
+                        const std::string &input_0_a_sk_str,
+                        const std::string &input_0_rho_str,
+                        const std::string &input_0_r_str,
+                        const std::string &input_0_v_str,
+                        const Json::Value &input_0_path,
+                        const std::string &input_1_address_str,
+                        const std::string &input_1_a_sk_str,
+                        const std::string &input_1_rho_str,
+                        const std::string &input_1_r_str,
+                        const std::string &input_1_v_str,
+                        const Json::Value &input_1_path,
+                        const std::string &output_0_a_pk_str,
+                        const std::string &output_0_rho_str,
+                        const std::string &output_0_r_str,
+                        const std::string &output_0_v_str,
+                        const std::string &output_1_a_pk_str,
+                        const std::string &output_1_rho_str,
+                        const std::string &output_1_r_str,
+                        const std::string &output_1_v_str,
+                        const std::string &callee_hex_str);
 
-        virtual Json::Value prepare_withdrawal(
-                const std::string &address_str,
-                const std::string &a_sk_str,
-                const std::string &rho_str,
-                const std::string &r_str,
-                const std::string &v_str,
-                const std::string &recipient_str);
+        virtual Json::Value
+        prepare_withdrawal(const std::string &address_str,
+                           const std::string &a_sk_str,
+                           const std::string &rho_str,
+                           const std::string &r_str,
+                           const std::string &v_str,
+                           const std::string &recipient_str);
 
         virtual std::string prf_addr(const std::string &a_sk);
 

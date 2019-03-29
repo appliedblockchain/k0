@@ -25,6 +25,8 @@ contract MVPPT {
 
     event Withdrawal(uint[2] snj);
 
+    event Log(uint,uint,uint,uint,uint,uint,uint,uint,uint,uint,uint);
+
     constructor(address tokenContractAddress,
         address commitmentVerifierAddress,
         address additionVerifierAddress,
@@ -131,6 +133,7 @@ contract MVPPT {
         inputs[8] = cm_out_1[0];
         inputs[9] = cm_out_1[1];
         inputs[10] = uint256(callee_address);
+        emit Log(inputs[0],inputs[1],inputs[2],inputs[3],inputs[4],inputs[5],inputs[6],inputs[7],inputs[8],inputs[9],inputs[10]);
         if (transferVerifier.verifyProof(
                 [proof[0], proof[1]], // a
                 [proof[2], proof[3]], // a_p

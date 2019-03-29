@@ -14,6 +14,7 @@ class MTStubServer : public jsonrpc::AbstractServer<MTStubServer>
         {
             this->bindAndAddMethod(jsonrpc::Procedure("add", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING, NULL), &MTStubServer::addI);
             this->bindAndAddMethod(jsonrpc::Procedure("element", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING, "param01",jsonrpc::JSON_INTEGER, NULL), &MTStubServer::elementI);
+            this->bindAndAddMethod(jsonrpc::Procedure("path", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_ARRAY, "param01",jsonrpc::JSON_STRING, NULL), &MTStubServer::pathI);
             this->bindAndAddMethod(jsonrpc::Procedure("reset", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING,  NULL), &MTStubServer::resetI);
             this->bindAndAddMethod(jsonrpc::Procedure("root", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING,  NULL), &MTStubServer::rootI);
             this->bindAndAddMethod(jsonrpc::Procedure("simulateAddition", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING, NULL), &MTStubServer::simulateAdditionI);
@@ -27,6 +28,10 @@ class MTStubServer : public jsonrpc::AbstractServer<MTStubServer>
         inline virtual void elementI(const Json::Value &request, Json::Value &response)
         {
             response = this->element(request[0u].asInt());
+        }
+        inline virtual void pathI(const Json::Value &request, Json::Value &response)
+        {
+            response = this->path(request[0u].asString());
         }
         inline virtual void resetI(const Json::Value &/*request*/, Json::Value &response)
         {
@@ -46,6 +51,7 @@ class MTStubServer : public jsonrpc::AbstractServer<MTStubServer>
         }
         virtual Json::Value add(const std::string& param01) = 0;
         virtual std::string element(int param01) = 0;
+        virtual Json::Value path(const std::string& param01) = 0;
         virtual std::string reset() = 0;
         virtual std::string root() = 0;
         virtual Json::Value simulateAddition(const std::string& param01) = 0;

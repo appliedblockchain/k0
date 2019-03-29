@@ -330,6 +330,8 @@ zktrade::print(TransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> &c) {
             << "************************ TRANSFER CIRCUIT *************************"
             << endl;
     cout << endl;
+    cout << "ROOT " << bits2hex(c.rt_bits->get_digest()) << endl;
+    cout << endl;
     cout << "IN 0" << endl;
     cout << "v_bits       " << bits2hex(c.in_0_v_bits->get_bits(*c.pb)) << endl;
     cout << "v val        " << c.in_0_v_bits->get_field_element_from_bits(*c.pb)

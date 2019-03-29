@@ -18,6 +18,7 @@ async function printState(secretStore, platformState) {
     let owner = ''
     if (info !== null) {
       let ownerName
+      console.log(info.a_pk, ourPublicKey)
       if (info.a_pk.equals(ourPublicKey)) {
         ownerName = 'us'
       } else {

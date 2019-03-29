@@ -15,6 +15,10 @@ const printState = require('./print-state')
 const makePlatformState = require('../platform-state')
 const makeSecretStore = require('../secret-store')
 const mnemonics = require('./mnemonics')
+const log4js = require('log4js')
+
+const logger = log4js.getLogger()
+logger.level = process.env.LOG_LEVEL || 'info'
 
 async function run() {
   const web3 = testUtil.initWeb3()
@@ -32,7 +36,11 @@ async function run() {
   const platformState = await makePlatformState(mtServerPort)
   const secretStoreData = require('./bob.secrets.json')
   const secretStore = makeSecretStore(secretStoreData)
-  await platformState.reset()
+
+  logger.info([
+    `Public key ${u.buf2hex(secretStore.getPublicKey())}`,
+    `private key ${u.buf2hex(secretStore.getPrivateKey())}`
+  ].join(''))
 
   k0Eth.on('deposit', async (txHash, cm, nextRoot) => {
     u.checkBuf(txHash, 32)

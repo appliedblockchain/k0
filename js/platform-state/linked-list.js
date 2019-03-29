@@ -1,8 +1,10 @@
 function makeLinkedList() {
   let latest = null
+
   function add(content) {
     latest = { content, prev: latest }
   }
+
   function getLatest() {
     if (latest === null) {
       return null
@@ -10,6 +12,18 @@ function makeLinkedList() {
       return latest.content
     }
   }
+
+  function rollbackTo(content) {
+    let current = latest
+    while (current.content !== content) {
+      if (current.prev === null) {
+        return Error('set latest failed')
+      }
+      current = current.prev
+    }
+    latest = current
+  }
+
   function iterator() {
     let current = latest
     function next() {
@@ -24,7 +38,7 @@ function makeLinkedList() {
     return { next }
   }
 
-  return { add, getLatest, iterator }
+  return { add, getLatest, rollbackTo, iterator }
 }
 
 module.exports = makeLinkedList

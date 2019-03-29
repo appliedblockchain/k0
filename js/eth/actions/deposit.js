@@ -6,7 +6,7 @@ const ethU = require('../util')
 
 async function deposit(web3, mvppt, privateKey, v, k, cm, nextRoot, commitmentProof,
                        additionProof) {
-  console.log('privateKey', privateKey)
+  console.log('eth privateKey', privateKey)
   console.log('v', v)
   assert(Buffer.isBuffer(privateKey) && privateKey.length == 32)
   assert(BN.isBN(v))

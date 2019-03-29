@@ -16,6 +16,13 @@ const makeSecretStore = require('../secret-store')
 const { prompt } = require('./util')
 const u = require('../util')
 const inquirer = require('inquirer')
+const publicKeysInput = require('./public-keys')
+const transferMoney = require('./transfer-money')
+
+const publicKeys = {}
+Object.keys(publicKeysInput).forEach(name => {
+  publicKeys[name] = u.hex2buf(publicKeysInput[name])
+})
 
 const serverPorts = {
   alice: 4000,
@@ -64,6 +71,9 @@ async function run() {
 
   const secretStoreData = require(`./${who}.secrets.json`)
   const secretStore = makeSecretStore(secretStoreData)
+  console.log('private key', secretStore.getPrivateKey())
+  console.log('public key', secretStore.getPublicKey())
+
 
   const k0 = await makeK0(serverPorts[who])
 
@@ -73,20 +83,23 @@ async function run() {
     printState(secretStore, platformState)
   }
 
-  async function transferMoney() {
-  }
-
   async function cycle() {
     const questions = [
       { type: 'list', name: 'command', message: 'Watchawannado', choices: ['Show state', 'Transfer money'] }
-    ];
-    const inquisition = await inquirer.prompt(questions)
-    if (inquisition.command === 'Show state') {
+    ]
+    const inquiryResult = await inquirer.prompt(questions)
+    try {
+      
+    if (inquiryResult.command === 'Show state') {
       await showState()
-    } else if (inquisition.command === 'Transfer money') {
-      await transferMoney()
+    } else if (inquiryResult.command === 'Transfer money') {
+      await transferMoney(web3, platformState, secretStore, k0Eth, k0, publicKeys)
     } else {
-      throw new Error(`Unknown command: ${inquisition.command}`)
+      throw new Error(`Unknown command: ${inquiryResult.command}`)
+    }
+    } catch(e) {
+      console.log(e.stack)
+      console.log('Error!', e.message)
     }
   }
 

@@ -30,10 +30,10 @@ int main(int argc, char* argv[])
   std::cout << "Loading addition verification key..." << std::endl;
   server.setAdditionVk(argv[5]);
 
-  // std::cout << "Loading transfer proving key..." << std::endl;
-  // server.setTransferPk(argv[6]);
-  // std::cout << "Loading transfer verification key..." << std::endl;
-  // server.setTransferVk(argv[7]);
+  std::cout << "Loading transfer proving key..." << std::endl;
+  server.setTransferPk(argv[6]);
+  std::cout << "Loading transfer verification key..." << std::endl;
+  server.setTransferVk(argv[7]);
 
   // std::cout << "Loading withdrawal proving key..." << std::endl;
   // server.setWithdrawalPk(argv[8]);

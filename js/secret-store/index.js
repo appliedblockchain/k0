@@ -13,7 +13,9 @@ const slurp = require('./slurp')
 function makeSecretStore(importDump) {
   let state = slurp(importDump)
   return {
-    addNoteInfo: (cm, a_pk, rho, r, v) => state = addNoteInfo(state, cm, a_pk, rho, r, v),
+    addNoteInfo: (cm, a_pk, rho, r, v) => {
+      state = addNoteInfo(state, cm, a_pk, rho, r, v)
+    },
     getAvailableNotes: () => getAvailableNotes(state),
     getPrivateKey: () => getPrivateKey(state),
     getPublicKey: () => getPublicKey(state),

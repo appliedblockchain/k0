@@ -65,6 +65,21 @@ string zktrade::MTServer<FieldT, MerkleTreeHashT>::element(
 }
 
 template <typename FieldT, typename MerkleTreeHashT>
+Json::Value zktrade::MTServer<FieldT, MerkleTreeHashT>::path(
+    const std::string &address_dec)
+{
+    auto address = stoul(address_dec);
+    vector<bit_vector> path_vec = mt.path(address);
+
+    Json::Value result;
+    for (int i = 0; i < path_vec.size(); i++) {
+        result[i] = bits2hex(path_vec[i]);
+    }
+
+    return result;
+}
+
+template <typename FieldT, typename MerkleTreeHashT>
 Json::Value zktrade::MTServer<FieldT, MerkleTreeHashT>::simulateAddition(
     const std::string &cm_str)
 {

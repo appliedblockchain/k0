@@ -1,4 +1,5 @@
 const immutable = require('immutable')
+const cmAtIndex = require('./cm-at-index')
 const makeStateList = require('./state-list')
 const makeMT = require('./mt')
 const u = require('../util')
@@ -13,7 +14,9 @@ async function makePlatformState(serverPort = 4100) {
     u.checkString(snapshotLabel)
     newCMList.forEach(cm => u.checkBuf(cm, 32))
     newSNList.forEach(sn => u.checkBuf(sn, 32))
-    u.checkBuf(expectedNextRoot, 32)
+    if (expectedNextRoot !== undefined) {
+      u.checkBuf(expectedNextRoot, 32)
+    }
     let newState = stateList.getLatest()
     for (let i = 0; i < newSNList.length; i++) {
       const currentSNList = newState.get('snList')
@@ -29,8 +32,11 @@ async function makePlatformState(serverPort = 4100) {
       const resp = await mt.add(newCMList[i])
       nextRoot = resp.nextRoot
     }
-    // Check if new root of Merkle tree matches expected new root
-    assert(nextRoot.equals(expectedNextRoot))
+
+    if (expectedNextRoot !== undefined) {
+      // Check if new root of Merkle tree matches expected new root
+      assert(nextRoot.equals(expectedNextRoot))
+    }
     stateList.add(snapshotLabel, newState)
   }
 
@@ -45,16 +51,30 @@ async function makePlatformState(serverPort = 4100) {
     await mt.reset()
   }
 
+  async function rollbackTo(label) {
+    stateList.rollbackTo(label)
+    await mt.reset()
+    const state = stateList.getLatest()
+    const cmList = state.get('cmList').toJS()
+    for (let i = 0; i < cmList.length; i++) {
+      await mt.add(u.hex2buf(cmList[i]))
+    }
+  }
+
   const merkleTreeRoot = mt.root
 
   const simulateMerkleTreeAddition = mt.simulateAdd
 
   return {
     add,
+    cmAtIndex: idx => cmAtIndex(stateList, idx),
+    cmPath: mt.path,
     reset,
     merkleTreeRoot,
     simulateMerkleTreeAddition,
-    currentState: () => currentState(stateList)
+    currentState: () => currentState(stateList),
+    currentStateLabel: stateList.getLatestLabel,
+    rollbackTo
   }
 }
 
