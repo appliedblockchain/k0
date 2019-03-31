@@ -19,6 +19,7 @@ const inquirer = require('inquirer')
 const publicKeysInput = require('./public-keys')
 const transferMoney = require('./transfer-money')
 const generatePaymentData = require('./generate-payment-data')
+const deployTradingContract = require('./deploy-trading-contract')
 const initEventHandlers = require('./init-event-handlers')
 
 process.on('unhandledRejection', error => {
@@ -72,6 +73,16 @@ async function run() {
   const k0 = await makeK0(serverPorts[who])
 
   const artefacts = await compileContracts()
+  const dollarCoin = new web3.eth.Contract(
+    artefacts.DollarCoin.abi,
+    addresses.DollarCoin
+  )
+
+  const mnemonic = mnemonics[who]
+  const seed = bip39.mnemonicToSeed(mnemonic)
+  const root = hdkey.fromMasterSeed(seed)
+  const path = "m/44'/60'/0'/0/0"
+  const ethWallet = root.derivePath(path).getWallet()
 
   const carToken = new web3.eth.Contract(
     artefacts.CarToken.abi,
@@ -88,8 +99,13 @@ async function run() {
       {
         type: 'list',
         name: 'command',
-        message: 'Watchawannado',
-        choices: ['Show state', 'Transfer money', 'Generate payment data']
+        message: 'What do you want to do?',
+        choices: [
+          'Show state',
+          'Transfer money',
+          'Generate payment data',
+          'Deploy car trading smart contract'
+        ]
       }
     ]
     const inquiryResult = await inquirer.prompt(questions)
@@ -103,6 +119,11 @@ async function run() {
       )
     } else if (inquiryResult.command === 'Generate payment data') {
       await generatePaymentData(secretStore, k0)
+    } else if (inquiryResult.command === 'Deploy car trading smart contract') {
+      await deployTradingContract(
+        web3, artefacts, secretStore, ethWallet.getPrivateKey(), k0,
+        carToken, u.hex2buf(addresses.MVPPT)
+      )
     } else {
       throw new Error(`Unknown command: ${inquiryResult.command}`)
     }
