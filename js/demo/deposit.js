@@ -67,56 +67,13 @@ async function run() {
     addresses.DollarCoin
   )
 
-
-
-
-
-
-
-
-
-
-
-
-  // const who = process.argv[2]
-  // if (['alice', 'bob'].indexOf(who) === -1) {
-  //   console.log('Need parameter "alice" or "bob".')
-  //   process.exit(1)
-  // }
-
-  // const web3 = testUtil.initWeb3()
-  // const k0Eth = await makeEthPlatform(
-  //   web3,
-  //   u.hex2buf(addresses.MVPPT)
-  // )
-
-  // const artefacts = await compileContracts()
-  // const dollarCoin = new web3.eth.Contract(
-  //   artefacts.DollarCoin.abi,
-  //   addresses.DollarCoin
-  // )
-  // const platformState = await makePlatformState(mtServerPorts[who])
-  // const secretStoreData = require(`./${who}.secrets.json`)
-  // const secretStore = makeSecretStore(secretStoreData)
-
-  // logger.info([
-  //   `Public key ${u.buf2hex(secretStore.getPublicKey())}`,
-  //   `private key ${u.buf2hex(secretStore.getPrivateKey())}`
-  // ].join(''))
-
-  // initEventHandlers(platformState, secretStore, k0Eth)
-
-  // const k0 = await makeK0(serverPorts[who])
-
-
-  //web3.eth.accounts.signTransaction(tx, privateKey [, callback]);
   const mnemonic = mnemonics[who]
   const seed = bip39.mnemonicToSeed(mnemonic)
   const root = hdkey.fromMasterSeed(seed)
   const path = "m/44'/60'/0'/0/0"
   const wallet = root.derivePath(path).getWallet()
 
-  const values = _.times(7, () => new BN(_.random(50).toString() + '000'))
+  const values = _.times(3, () => new BN(_.random(50).toString() + '000'))
   console.log(values)
 
   const total = values.reduce((acc, el) => acc.add(el), new BN('0'))
@@ -125,7 +82,12 @@ async function run() {
   console.log(await dollarCoin.methods.balanceOf(u.buf2hex(wallet.getAddress())).call())
 
   await demoUtil.prompt()
-  printState(secretStore, k0Eth, platformState)
+  const platformRoot = await k0Eth.merkleTreeRoot()
+  console.log(`Platform Merkle tree root: ${u.buf2hex(platformRoot)}`)
+  const localRoot = await platformState.merkleTreeRoot()
+  console.log(`Local Merkle tree root: ${u.buf2hex(localRoot)}`)
+  assert(localRoot.equals(platformRoot))
+
   // approve
   const approveTx = await signTransaction(
     web3,
@@ -142,7 +104,6 @@ async function run() {
 
     const data = await k0.prepareDeposit(platformState, secretStore, v)
     await secretStore.addNoteInfo(data.cm, data.a_pk, data.rho, data.r, v)
-
 
     const depositTx = await k0Eth.deposit(
       wallet.getPrivateKey(),

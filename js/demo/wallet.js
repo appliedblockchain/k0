@@ -18,6 +18,7 @@ const u = require('../util')
 const inquirer = require('inquirer')
 const publicKeysInput = require('./public-keys')
 const transferMoney = require('./transfer-money')
+const generatePaymentData = require('./generate-payment-data')
 const initEventHandlers = require('./init-event-handlers')
 
 process.on('unhandledRejection', error => {
@@ -69,7 +70,12 @@ async function run() {
 
   async function cycle() {
     const questions = [
-      { type: 'list', name: 'command', message: 'Watchawannado', choices: ['Show state', 'Transfer money'] }
+      {
+        type: 'list',
+        name: 'command',
+        message: 'Watchawannado',
+        choices: ['Show state', 'Transfer money', 'Generate payment data']
+      }
     ]
     const inquiryResult = await inquirer.prompt(questions)
     try {
@@ -78,6 +84,8 @@ async function run() {
       await showState()
     } else if (inquiryResult.command === 'Transfer money') {
       await transferMoney(web3, platformState, secretStore, k0Eth, k0, publicKeys)
+    } else if (inquiryResult.command === 'Generate payment data') {
+      await generatePaymentData(secretStore, k0)
     } else {
       throw new Error(`Unknown command: ${inquiryResult.command}`)
     }
