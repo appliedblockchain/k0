@@ -3,7 +3,9 @@ const signTransaction = require('../sign-transaction')
 const u = require('../../util')
 const ethU = require('../util')
 
-async function transfer(web3, mvppt, privateKey, in_0_sn, in_1_sn, out_0_cm, out_1_cm, out_0_data, out_1_data, nextRoot, calleeAddress, proof) {
+async function transfer(web3, mvppt, privateKey, in_0_sn, in_1_sn, out_0_cm,
+                        out_1_cm, out_0_data, out_1_data, nextRoot,
+                        calleeAddress, proof) {
   [ privateKey, in_0_sn, in_1_sn, out_0_cm, out_1_cm, nextRoot ].map(buf => {
     u.checkBuf(buf, 32)
   })

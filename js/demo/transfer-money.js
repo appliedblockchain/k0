@@ -1,6 +1,7 @@
 const crypto = require('crypto')
 const inquireInputNote = require('./inquire-input-note')
 const inquireOutputNote = require('./inquire-output-note')
+const inquirer = require('inquirer')
 const u = require('../util')
 
 function makeData(a_pk, rho, r, v) {
@@ -11,15 +12,28 @@ function makeData(a_pk, rho, r, v) {
   return Buffer.concat([ a_pk, rho, r, v.toBuffer('le', 64)])
 }
 
-async function transferMoney(web3, platformState, secretStore, k0Eth, k0, publicKeys) {
-  console.log('Transfer: initial root: ', await platformState.merkleTreeRoot())
+async function transferMoney(web3, platformState, secretStore, k0Eth, k0,
+                             publicKeys, smartPayment = false, ethPrivateKey) {
+  if (ethPrivateKey) u.checkBuf(ethPrivateKey, 32)
   const inquireInput = inquireInputNote.bind(null, platformState, secretStore)
   const in0 = await inquireInput('First input note')
   const in1 = await inquireInput('Second input note')
   const totalValue = in0.v.add(in1.v)
-  const out0 = await inquireOutputNote(publicKeys, 'First output note', totalValue)
-  const out1 = await inquireOutputNote(publicKeys, 'Second output note', totalValue.sub(out0.v), true)
-  const transferData = await k0.prepareTransfer(platformState, secretStore, in0.address, in1.address, out0, out1)
+  const out0 = await inquireOutputNote(publicKeys, 'First output note', totalValue, false, smartPayment)
+  let callee
+  if (smartPayment) {
+    const calleeInquiryResult = await inquirer.prompt([{
+      type: 'input',
+      name: 'callee',
+      message: `Smart contract address`
+    }])
+    callee = u.hex2buf(calleeInquiryResult.callee)
+    u.checkBuf(callee, 20)
+  } else {
+    callee = u.hex2buf('0x0000000000000000000000000000000000000000')
+  }
+  const out1 = await inquireOutputNote(publicKeys, 'Second output note', totalValue.sub(out0.v), true, false)
+  const transferData = await k0.prepareTransfer(platformState, secretStore, in0.address, in1.address, out0, out1, callee)
   secretStore.addSNToNote(in0.cm, transferData.input_0_sn)
   secretStore.addSNToNote(in1.cm, transferData.input_1_sn)
   secretStore.addNoteInfo(transferData.output_0_cm, out0.a_pk, out0.rho, out0.r, out0.v)
@@ -42,7 +56,7 @@ async function transferMoney(web3, platformState, secretStore, k0Eth, k0, public
   const out_1_data = makeData(out1.a_pk, out1.rho, out1.r, out1.v)
 
   const ethParams = [
-    crypto.randomBytes(32),
+    ethPrivateKey || crypto.randomBytes(32),
     transferData.input_0_sn,
     transferData.input_1_sn,
     transferData.output_0_cm,
@@ -50,12 +64,15 @@ async function transferMoney(web3, platformState, secretStore, k0Eth, k0, public
     out_0_data,
     out_1_data,
     newRoot,
-    u.hex2buf('0x0000000000000000000000000000000000000000'),
+    callee,
     transferData.proof
   ]
   const tx = await k0Eth.transfer(...ethParams)
 
   const receipt = await web3.eth.sendSignedTransaction(u.buf2hex(tx))
+  if (!receipt.success) {
+    console.log(receipt)
+  }
 }
 
 module.exports = transferMoney

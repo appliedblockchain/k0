@@ -103,6 +103,7 @@ async function run() {
         choices: [
           'Show state',
           'Transfer money',
+          'Smart payment',
           'Generate payment data',
           'Deploy car trading smart contract'
         ]
@@ -116,6 +117,11 @@ async function run() {
     } else if (inquiryResult.command === 'Transfer money') {
       await transferMoney(
         web3, platformState, secretStore, k0Eth, k0, publicKeys
+      )
+    } else if (inquiryResult.command === 'Smart payment') {
+      await transferMoney(
+        web3, platformState, secretStore, k0Eth, k0, publicKeys, true,
+        ethWallet.getPrivateKey()
       )
     } else if (inquiryResult.command === 'Generate payment data') {
       await generatePaymentData(secretStore, k0)
