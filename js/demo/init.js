@@ -17,6 +17,11 @@ const log4js = require('log4js')
 const logger = log4js.getLogger()
 logger.level = process.env.LOG_LEVEL || 'info'
 
+process.on('unhandledRejection', error => {
+  logger.error(error)
+  process.exit(1)
+})
+
 async function run() {
 
   const web3 = testUtil.initWeb3()

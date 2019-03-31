@@ -27,6 +27,7 @@ async function makePlatformState(serverPort = 4100) {
       newState = newState.set('cmList', currentCMList.push(u.buf2hex(newCMList[i])))
     }
     let nextRoot
+
     // Add CMs to Merkle tree
     for (let i = 0; i < newCMList.length; i++) {
       const resp = await mt.add(newCMList[i])

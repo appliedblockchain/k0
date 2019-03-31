@@ -10,6 +10,7 @@ async function inquireInputNote(platformState, secretStore, message) {
   const info = secretStore.getNoteInfo(cm)
   return {
     address,
+    cm,
     ...info
   }
 }

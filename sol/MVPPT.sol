@@ -28,6 +28,12 @@ contract MVPPT {
 
     event Log(uint,uint,uint,uint,uint,uint,uint,uint,uint,uint,uint);
 
+    event SNRegistration(bytes32 hash);
+    event SNReuseAttemptError(uint pos, bytes32 hash);
+    event DepositFailure();
+    event TransferFailure();
+    event TransferFromFailure();
+
     constructor(address tokenContractAddress,
         address commitmentVerifierAddress,
         address additionVerifierAddress,
@@ -52,10 +58,9 @@ contract MVPPT {
         uint[18] memory commitmentProof,
         uint[18] memory additionProof
     ) public {
-        require(
-            tokenContract.transferFrom(msg.sender, address(this), v),
-            "ERC20 transfer failed (sufficient allowance?)"
-        );
+        if (!tokenContract.transferFrom(msg.sender, address(this), v)) {
+            emit TransferFromFailure();
+        }
         uint[] memory commInputs = new uint[](5);
         commInputs[0] = comm_k[0];
         commInputs[1] = comm_k[1];
@@ -105,7 +110,8 @@ contract MVPPT {
             num_leaves++;
             emit Deposit(comm_cm, new_root);
         } else {
-            revert();
+            emit DepositFailure();
+            // revert();
         }
     }
 
@@ -122,8 +128,12 @@ contract MVPPT {
     ) public {
         bytes32 sn0Hash = keccak256(abi.encode(sn_in_0));
         bytes32 sn1Hash = keccak256(abi.encode(sn_in_1));
-        require(!snUsed[sn0Hash], "sn_in 0 has already been used.");
-        require(!snUsed[sn1Hash], "sn_in 1 has already been used.");
+        if (snUsed[sn0Hash]) {
+            emit SNReuseAttemptError(0, sn0Hash);
+        }
+        if (snUsed[sn1Hash]) {
+            emit SNReuseAttemptError(1, sn1Hash);
+        }
         uint[] memory inputs = new uint[](11);
         inputs[0] = root[0];
         inputs[1] = root[1];
@@ -157,12 +167,15 @@ contract MVPPT {
             }
             snUsed[sn0Hash] = true;
             snUsed[sn1Hash] = true;
+            emit SNRegistration(sn0Hash);
+            emit SNRegistration(sn1Hash);
             num_leaves += 2;
             root = new_root;
             emit Transfer(sn_in_0, sn_in_1, cm_out_0, cm_out_1, data_out_0, data_out_1, new_root,
                           callee_address);
         } else {
-            revert();
+            emit TransferFailure();
+            // revert();
         }
     }
 

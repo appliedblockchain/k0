@@ -89,7 +89,6 @@ async function prepareTransfer(
       calleeAddress !== undefined ? u.buf2hex(calleeAddress) : ZERO_ADDRESS
    ]
 
-  console.log(params)
   const res = await request(jc, 'prepareTransfer', params)
   return {
     input_0_sn: u.hex2buf(res.input_0_sn),

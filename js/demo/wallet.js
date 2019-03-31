@@ -18,6 +18,7 @@ const u = require('../util')
 const inquirer = require('inquirer')
 const publicKeysInput = require('./public-keys')
 const transferMoney = require('./transfer-money')
+const initEventHandlers = require('./init-event-handlers')
 
 process.on('unhandledRejection', error => {
   console.log(error)
@@ -52,37 +53,18 @@ async function run() {
     u.hex2buf(addresses.MVPPT)
   )
 
-  k0Eth.on('deposit', async (txHash, cm, nextRoot) => {
-    console.log("************* DEPOSIT ***************")
-    await platformState.add(u.buf2hex(txHash), [], [ cm ], nextRoot)
-  })
-
-  k0Eth.on(
-    'transfer',
-    async function (txHash, in0sn, in1sn, out0cm, out1cm, out0data, out1data,
-                    nextRoot, callee) {
-      console.log("************* DEPOSIT ***************")
-      await platformState.add(
-        u.buf2hex(txHash),
-        [ in0sn, in1sn ],
-        [ out0cm, out1cm ],
-        nextRoot
-      )
-    }
-  )
-
   const secretStoreData = require(`./${who}.secrets.json`)
   const secretStore = makeSecretStore(secretStoreData)
   console.log('private key', secretStore.getPrivateKey())
   console.log('public key', secretStore.getPublicKey())
-
+  initEventHandlers(platformState, secretStore, k0Eth)
 
   const k0 = await makeK0(serverPorts[who])
 
   const artefacts = await compileContracts()
 
   async function showState() {
-    printState(secretStore, platformState)
+    printState(secretStore, k0Eth, platformState)
   }
 
   async function cycle() {

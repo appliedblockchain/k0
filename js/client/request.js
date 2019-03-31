@@ -3,7 +3,6 @@ const _ = require('lodash')
 async function request(jc, methodName, params = []) {
   const response = await jc.request(methodName, params)
   if (!response.result) {
-    console.log(response)
     throw new Error([
       methodName,
       ' errored: ',

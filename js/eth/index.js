@@ -5,6 +5,7 @@ const compileContracts = require('../test/helpers/compile-contracts')
 const hex0xOfHex = require('@appliedblockchain/helpers/hex0x-of-hex')
 const hexOfBuffer = require('@appliedblockchain/helpers/hex-of-buffer')
 const deposit = require('./actions/deposit')
+const merkleTreeRoot = require('./actions/merkle-tree-root')
 const transfer = require('./actions/transfer')
 const ethUtil = require('./util')
 const BN = require('bn.js')
@@ -28,6 +29,7 @@ async function makeEth(web3, mvpptAddress) {
   const k0Eth = new K0Eth()
   initEventHandlers(mvppt, k0Eth)
   k0Eth.deposit = deposit.bind(null, web3, mvppt)
+  k0Eth.merkleTreeRoot = merkleTreeRoot.bind(null, web3, mvppt)
   k0Eth.transfer = transfer.bind(null, web3, mvppt)
   return k0Eth
 }

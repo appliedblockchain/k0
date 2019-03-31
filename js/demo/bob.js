@@ -31,15 +31,12 @@ async function run() {
   const mtServerPort = parseInt(process.env.MT_SERVER_PORT || '5100', 10)
   const platformState = await makePlatformState(mtServerPort)
   const secretStore = makeSecretStore(a_sk)
-  console.log('root before', await platformState.merkleTreeRoot())
   await platformState.reset()
-  console.log('root after', await platformState.merkleTreeRoot())
 
   k0Eth.on('deposit', async (txHash, cm, nextRoot) => {
     u.checkBuf(txHash, 32)
     u.checkBuf(cm, 32)
     u.checkBuf(nextRoot, 32)
-    console.log('new roor', nextRoot)
     await platformState.add(u.buf2hex(txHash), [cm], [], nextRoot)
   })
 
@@ -64,7 +61,6 @@ async function run() {
   )
   await web3.eth.sendSignedTransaction(u.buf2hex(approveTx))
 
-  console.log('approve done')
 
   const values = [v1, v2]
 
@@ -73,9 +69,6 @@ async function run() {
 
     const data = await k0.prepareDeposit(platformState, secretStore, v)
     await secretStore.addNoteInfo(data.cm, data.rho, data.r, v)
-    console.log("available")
-    console.log(await secretStore.getAvailableNotes())
-    console.log(data)
 
     const depositTx = await k0Eth.deposit(
       wallet.getPrivateKey(),
@@ -87,7 +80,6 @@ async function run() {
       data.additionProof
     )
     const receipt = await web3.eth.sendSignedTransaction(u.buf2hex(depositTx))
-    console.log('store content', secretStore.serialize())
   }
 }
 

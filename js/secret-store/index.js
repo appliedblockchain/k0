@@ -1,6 +1,7 @@
 'use strict'
 
 const addNoteInfo = require('./add-note-info')
+const addSNToNote = require('./add-sn-to-note')
 const getAvailableNotes = require('./get-available-notes')
 const getPrivateKey = require('./get-private-key')
 const getPublicKey = require('./get-public-key')
@@ -15,6 +16,9 @@ function makeSecretStore(importDump) {
   return {
     addNoteInfo: (cm, a_pk, rho, r, v) => {
       state = addNoteInfo(state, cm, a_pk, rho, r, v)
+    },
+    addSNToNote: (cm, sn) => {
+      state = addSNToNote(state, cm, sn)
     },
     getAvailableNotes: () => getAvailableNotes(state),
     getPrivateKey: () => getPrivateKey(state),

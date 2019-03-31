@@ -19,7 +19,6 @@ async function prepareTransfer(server, platformState, secretStore, in0idx, in1id
     }
   })
   const outputs = [out0data, out1data].map(data => {
-    console.log({ output: data })
     u.checkBuf(data.a_pk, 32)
     u.checkBuf(data.rho, 32)
     u.checkBuf(data.r, 48)
@@ -27,7 +26,7 @@ async function prepareTransfer(server, platformState, secretStore, in0idx, in1id
     return data
   })
   if (calleeAddress) u.checkBuf(calleeAddress, 20)
-  return server.prepareTransfer(
+  const params = [
     mtRoot,
     inputs[0].address,
     inputs[0].a_sk,
@@ -50,7 +49,9 @@ async function prepareTransfer(server, platformState, secretStore, in0idx, in1id
     outputs[1].r,
     outputs[1].v,
     calleeAddress
-  )
+  ]
+  console.log('TRANSFER PARAMS', params)
+  return server.prepareTransfer(...params)
 }
 
 module.exports = prepareTransfer

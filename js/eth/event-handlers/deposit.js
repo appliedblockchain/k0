@@ -2,6 +2,7 @@ const ethUtil = require('../util')
 const u = require('../../util')
 
 async function handleDeposit(eventEmitter, event) {
+  console.log('handling deposit!')
   const cmStrings = event.returnValues.cm
   const [ cm, newRoot ] = await Promise.all([
     ethUtil.unpack(event.returnValues.cm),

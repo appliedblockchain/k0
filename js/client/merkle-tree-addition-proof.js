@@ -4,7 +4,6 @@ const BN = require('bn.js')
 
 async function merkleTreeAdditionProof(
   jc, prevRoot, address, leaf, path, nextRoot) {
-    console.log({ prevRoot, address, leaf, path, nextRoot })
   u.checkBuf(prevRoot, 32)
   u.checkBN(address)
   u.checkBuf(leaf, 32)

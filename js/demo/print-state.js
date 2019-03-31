@@ -3,7 +3,7 @@ const log = console.log
 const Table = require('cli-table')
 const u = require('../util')
 
-async function printState(secretStore, platformState) {
+async function printState(secretStore, platform, platformState) {
   log()
   log(chalk.underline('Notes'))
   const notesTable = new Table({
@@ -30,7 +30,8 @@ async function printState(secretStore, platformState) {
       i,
       u.shorthex(cm),
       owner,
-      info === null ? '' : info.v.toString(),
+      info !== null ? info.v.toString() : '',
+      info !== null && info.sn ? u.shorthex(info.sn) : '',
       ''
     ])
   }
@@ -60,6 +61,10 @@ async function printState(secretStore, platformState) {
   // )
   // log(carTable.toString())
   log()
+  const platformRoot = await platform.merkleTreeRoot()
+  console.log(`Platform Merkle tree root: ${u.buf2hex(platformRoot)}`)
+  const localRoot = await platformState.merkleTreeRoot()
+  console.log(`Local Merkle tree root: ${u.buf2hex(localRoot)}`)
 }
 
 module.exports = printState
