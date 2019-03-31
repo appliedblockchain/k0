@@ -16,6 +16,13 @@ async function pack256Bits(buf) {
   return result.stdout.trim().split(',').map(str => new BN(str))
 }
 
+function unpack(decStringPair) {
+  return unpack256Bits(
+    new BN(decStringPair[0]),
+    new BN(decStringPair[1])
+  )
+}
+
 async function unpack256Bits(val1, val2) {
   globalUtil.checkBN(val1)
   globalUtil.checkBN(val2)
@@ -27,5 +34,6 @@ async function unpack256Bits(val1, val2) {
 
 module.exports = {
   pack256Bits,
+  unpack,
   unpack256Bits
 }

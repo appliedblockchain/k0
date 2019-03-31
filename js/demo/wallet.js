@@ -19,6 +19,11 @@ const inquirer = require('inquirer')
 const publicKeysInput = require('./public-keys')
 const transferMoney = require('./transfer-money')
 
+process.on('unhandledRejection', error => {
+  console.log(error)
+  process.exit(1)
+})
+
 const publicKeys = {}
 Object.keys(publicKeysInput).forEach(name => {
   publicKeys[name] = u.hex2buf(publicKeysInput[name])
@@ -47,27 +52,24 @@ async function run() {
     u.hex2buf(addresses.MVPPT)
   )
 
-  let queue = []
-
-  let processing = false
-  async function processQueue() {
-    if (processing) {
-      return
-    }
-    processing = true
-    var item = queue.shift()
-    await platformState.add(u.buf2hex(item.txHash), [item.cm], [], item.nextRoot)
-    processing = false
-    if (queue.length > 0) {
-      processQueue()
-    }
-  }
-
-
   k0Eth.on('deposit', async (txHash, cm, nextRoot) => {
-    queue.push({type: 'deposit', txHash, cm, nextRoot})
-    processQueue()
+    console.log("************* DEPOSIT ***************")
+    await platformState.add(u.buf2hex(txHash), [], [ cm ], nextRoot)
   })
+
+  k0Eth.on(
+    'transfer',
+    async function (txHash, in0sn, in1sn, out0cm, out1cm, out0data, out1data,
+                    nextRoot, callee) {
+      console.log("************* DEPOSIT ***************")
+      await platformState.add(
+        u.buf2hex(txHash),
+        [ in0sn, in1sn ],
+        [ out0cm, out1cm ],
+        nextRoot
+      )
+    }
+  )
 
   const secretStoreData = require(`./${who}.secrets.json`)
   const secretStore = makeSecretStore(secretStoreData)

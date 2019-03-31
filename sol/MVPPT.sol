@@ -21,7 +21,8 @@ contract MVPPT {
     event Deposit(uint[2] cm, uint[2] new_root);
 
     event Transfer(uint[2] sn_in_0, uint[2] sn_in_1, uint[2] cm_out_0,
-                   uint[2] cm_out_1, uint[2] new_root, address callee);
+                   uint[2] cm_out_1, bytes data_out_0, bytes data_out_1,
+                   uint[2] new_root, address callee);
 
     event Withdrawal(uint[2] snj);
 
@@ -113,6 +114,8 @@ contract MVPPT {
         uint[2] memory sn_in_1,
         uint[2] memory cm_out_0,
         uint[2] memory cm_out_1,
+        bytes memory data_out_0,
+        bytes memory data_out_1,
         uint[2] memory new_root,
         address callee_address,
         uint[18] memory proof
@@ -156,7 +159,7 @@ contract MVPPT {
             snUsed[sn1Hash] = true;
             num_leaves += 2;
             root = new_root;
-            emit Transfer(sn_in_0, sn_in_1, cm_out_0, cm_out_1, new_root,
+            emit Transfer(sn_in_0, sn_in_1, cm_out_0, cm_out_1, data_out_0, data_out_1, new_root,
                           callee_address);
         } else {
             revert();

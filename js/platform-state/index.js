@@ -10,7 +10,7 @@ async function makePlatformState(serverPort = 4100) {
   let stateList
   reset()
 
-  async function add(snapshotLabel, newCMList, newSNList, expectedNextRoot) {
+  async function add(snapshotLabel, newSNList, newCMList, expectedNextRoot) {
     u.checkString(snapshotLabel)
     newCMList.forEach(cm => u.checkBuf(cm, 32))
     newSNList.forEach(sn => u.checkBuf(sn, 32))
@@ -35,7 +35,10 @@ async function makePlatformState(serverPort = 4100) {
 
     if (expectedNextRoot !== undefined) {
       // Check if new root of Merkle tree matches expected new root
-      assert(nextRoot.equals(expectedNextRoot))
+      assert(
+        nextRoot.equals(expectedNextRoot),
+        `New root is ${u.buf2hex(nextRoot)}, expected ${u.buf2hex(expectedNextRoot)}`
+      )
     }
     stateList.add(snapshotLabel, newState)
   }
