@@ -3,7 +3,9 @@ const log = console.log
 const Table = require('cli-table')
 const u = require('../util')
 
-async function printState(secretStore, platform, platformState) {
+async function printState(secretStore, addressBook, platform, platformState, carToken, carIds) {
+  carIds.forEach(u.checkBN)
+  log()
   log()
   log(chalk.underline('Notes'))
   const notesTable = new Table({
@@ -46,21 +48,22 @@ async function printState(secretStore, platform, platformState) {
 
   log(notesTable.toString())
 
-  // log(chalk.underline('CarToken'))
+  log(chalk.underline('CarToken'))
 
-  // const carTable = new Table({
-  //   head: ['Car ID', 'Owner'].map(x => chalk.cyan(x)),
-  //   colAligns: ['right', 'left']
-  // })
-  // await Promise.all(
-  //   carIds.map(async id => {
-  //     const address = await carToken.methods.ownerOf(id).call()
-  //     const name = accountNames[address] || 'unknown'
-  //     carTable.push([id, `${name} (${address})`])
-  //   })
-  // )
-  // log(carTable.toString())
+  const carTable = new Table({
+    head: ['Car ID', 'Owner'].map(x => chalk.cyan(x)),
+    colAligns: ['right', 'left']
+  })
+  await Promise.all(
+    carIds.map(async id => {
+      const address = u.hex2buf(await carToken.methods.ownerOf(id.toString()).call())
+      const name = addressBook(address) || 'unknown'
+      carTable.push([id, `${name} (${u.buf2hex(address)})`])
+    })
+  )
+  log(carTable.toString())
   log()
+
   const platformRoot = await platform.merkleTreeRoot()
   console.log(`Platform Merkle tree root: ${u.buf2hex(platformRoot)}`)
   const localRoot = await platformState.merkleTreeRoot()

@@ -41,6 +41,15 @@ const mtServerPorts = {
   bob: 5100
 }
 
+const addressBookData = {}
+addressBookData[addresses.alice] = 'Alice'
+addressBookData[addresses.bob] = 'Bob'
+
+function addressBook(address) {
+  u.checkBuf(address, 20)
+  return addressBookData[u.buf2hex(address)] || null
+}
+
 async function run() {
   const who = process.argv[2]
   if (['alice', 'bob'].indexOf(who) === -1) {
@@ -64,8 +73,14 @@ async function run() {
 
   const artefacts = await compileContracts()
 
+  const carToken = new web3.eth.Contract(
+    artefacts.CarToken.abi,
+    addresses.CarToken
+  )
+
+  const carIds = [ new BN('1') ]
   async function showState() {
-    printState(secretStore, k0Eth, platformState)
+    printState(secretStore, addressBook, k0Eth, platformState, carToken, carIds)
   }
 
   async function cycle() {
@@ -83,7 +98,9 @@ async function run() {
     if (inquiryResult.command === 'Show state') {
       await showState()
     } else if (inquiryResult.command === 'Transfer money') {
-      await transferMoney(web3, platformState, secretStore, k0Eth, k0, publicKeys)
+      await transferMoney(
+        web3, platformState, secretStore, k0Eth, k0, publicKeys
+      )
     } else if (inquiryResult.command === 'Generate payment data') {
       await generatePaymentData(secretStore, k0)
     } else {

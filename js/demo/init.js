@@ -109,6 +109,16 @@ async function run() {
     tokenMaster
   )
 
+  // Make a car for Alice
+  const carId = 1
+  await sendTransaction(
+    web3,
+    carToken._address,
+    carToken.methods.mint(alice.wallet.getAddressString(), carId).encodeABI(),
+    5000000,
+    carManufacturer
+  )
+
   fs.writeFileSync('artefacts.json', JSON.stringify(artefacts))
   fs.writeFileSync('addresses.json', JSON.stringify({
     DollarCoin: dollarCoin._address,
