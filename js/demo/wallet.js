@@ -51,6 +51,15 @@ function addressBook(address) {
   return addressBookData[u.buf2hex(address)] || null
 }
 
+const mvpptAddressBookData = {}
+mvpptAddressBookData[publicKeysInput.alice] = 'Alice'
+mvpptAddressBookData[publicKeysInput.bob] = 'Bob'
+
+function mvpptAddressBook(a_pk) {
+  u.checkBuf(a_pk, 32)
+  return mvpptAddressBookData[u.buf2hex(a_pk)] || null
+}
+
 async function run() {
   const who = process.argv[2]
   if (['alice', 'bob'].indexOf(who) === -1) {
@@ -66,8 +75,6 @@ async function run() {
 
   const secretStoreData = require(`./${who}.secrets.json`)
   const secretStore = makeSecretStore(secretStoreData)
-  console.log('private key', secretStore.getPrivateKey())
-  console.log('public key', secretStore.getPublicKey())
   initEventHandlers(platformState, secretStore, k0Eth)
 
   const k0 = await makeK0(serverPorts[who])
@@ -90,8 +97,8 @@ async function run() {
   )
 
   const carIds = [ new BN('1') ]
-  async function showState() {
-    printState(secretStore, addressBook, k0Eth, platformState, carToken, carIds)
+  function showState() {
+    return printState(secretStore, addressBook, mvpptAddressBook, k0Eth, platformState, carToken, carIds)
   }
 
   async function cycle() {
@@ -111,32 +118,32 @@ async function run() {
     ]
     const inquiryResult = await inquirer.prompt(questions)
     try {
-      
-    if (inquiryResult.command === 'Show state') {
-      await showState()
-    } else if (inquiryResult.command === 'Transfer money') {
-      await transferMoney(
-        web3, platformState, secretStore, k0Eth, k0, publicKeys
-      )
-    } else if (inquiryResult.command === 'Smart payment') {
-      await transferMoney(
-        web3, platformState, secretStore, k0Eth, k0, publicKeys, true,
-        ethWallet.getPrivateKey()
-      )
-    } else if (inquiryResult.command === 'Generate payment data') {
-      await generatePaymentData(secretStore, k0)
-    } else if (inquiryResult.command === 'Deploy car trading smart contract') {
-      await deployTradingContract(
-        web3, artefacts, secretStore, ethWallet.getPrivateKey(), k0,
-        carToken, u.hex2buf(addresses.MVPPT)
-      )
-    } else {
-      throw new Error(`Unknown command: ${inquiryResult.command}`)
-    }
+      if (inquiryResult.command === 'Show state') {
+        await showState()
+      } else if (inquiryResult.command === 'Transfer money') {
+        await transferMoney(
+          web3, platformState, secretStore, k0Eth, k0, publicKeys
+        )
+      } else if (inquiryResult.command === 'Smart payment') {
+        await transferMoney(
+          web3, platformState, secretStore, k0Eth, k0, publicKeys, true,
+          ethWallet.getPrivateKey()
+        )
+      } else if (inquiryResult.command === 'Generate payment data') {
+        await generatePaymentData(secretStore, k0)
+      } else if (inquiryResult.command === 'Deploy car trading smart contract') {
+        await deployTradingContract(
+          web3, artefacts, secretStore, ethWallet.getPrivateKey(), k0,
+          carToken, u.hex2buf(addresses.MVPPT)
+        )
+      } else {
+        throw new Error(`Unknown command: ${inquiryResult.command}`)
+      }
     } catch(e) {
       console.log(e.stack)
       console.log('Error!', e.message)
     }
+    console.log()
   }
 
   while (true) {

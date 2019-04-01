@@ -2,11 +2,10 @@ const chalk = require('chalk')
 const log = console.log
 const Table = require('cli-table')
 const u = require('../util')
+const inquirer = require('inquirer')
 
-async function printState(secretStore, addressBook, platform, platformState, carToken, carIds) {
+async function printState(secretStore, ethAddressBook, mvpptAddressBook, platform, platformState, carToken, carIds) {
   carIds.forEach(u.checkBN)
-  log()
-  log()
   log(chalk.underline('Notes'))
   const notesTable = new Table({
     head: ['ID', 'CM', 'Owner', 'Value', 'SN'].map(x => chalk.cyan(x)),
@@ -20,22 +19,24 @@ async function printState(secretStore, addressBook, platform, platformState, car
     let owner = ''
     if (info !== null) {
       let ownerName
-      console.log(info.a_pk, ourPublicKey)
       if (info.a_pk.equals(ourPublicKey)) {
         ownerName = 'us'
       } else {
-        ownerName = 'someone'
+        ownerName = mvpptAddressBook(info.a_pk) || 'unknown'
       }
       owner = `${ownerName} (${u.shorthex(info.a_pk)})`
     }
-    notesTable.push([
+    let cells = [
       i,
       u.shorthex(cm),
       owner,
       info !== null ? info.v.toString() : '',
       info !== null && info.sn ? u.shorthex(info.sn) : '',
-      ''
-    ])
+    ]
+    if (info !== null && info.sn) {
+      cells = cells.map(cell => chalk.grey(chalk.strikethrough(cell)))
+    }
+    notesTable.push(cells)
   }
   // await Promise.all(
   //   accountAddresses.map(async address => {
@@ -46,6 +47,7 @@ async function printState(secretStore, addressBook, platform, platformState, car
   // )
   // dollarTableData.forEach(row => dollarTable.push(row))
 
+  log()
   log(notesTable.toString())
 
   log(chalk.underline('CarToken'))
@@ -57,17 +59,12 @@ async function printState(secretStore, addressBook, platform, platformState, car
   await Promise.all(
     carIds.map(async id => {
       const address = u.hex2buf(await carToken.methods.ownerOf(id.toString()).call())
-      const name = addressBook(address) || 'unknown'
+      const name = ethAddressBook(address) || 'unknown'
       carTable.push([id, `${name} (${u.buf2hex(address)})`])
     })
   )
   log(carTable.toString())
-  log()
 
-  const platformRoot = await platform.merkleTreeRoot()
-  console.log(`Platform Merkle tree root: ${u.buf2hex(platformRoot)}`)
-  const localRoot = await platformState.merkleTreeRoot()
-  console.log(`Local Merkle tree root: ${u.buf2hex(localRoot)}`)
 }
 
 module.exports = printState

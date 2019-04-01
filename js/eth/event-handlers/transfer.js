@@ -12,7 +12,6 @@ async function handleTransfer(eventEmitter, event) {
       return u.hex2buf(event.returnValues[label])
     })
   )
-  console.log(event.returnValues.callee)
   eventEmitter.emit(
     'transfer',
     u.hex2buf(event.transactionHash),

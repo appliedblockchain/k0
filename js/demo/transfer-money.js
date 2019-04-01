@@ -32,7 +32,7 @@ async function transferMoney(web3, platformState, secretStore, k0Eth, k0,
   } else {
     callee = u.hex2buf('0x0000000000000000000000000000000000000000')
   }
-  const out1 = await inquireOutputNote(publicKeys, 'Second output note', totalValue.sub(out0.v), true, false)
+  const out1 = await inquireOutputNote(publicKeys, 'Second output note (change)', totalValue.sub(out0.v), true, false)
   const transferData = await k0.prepareTransfer(platformState, secretStore, in0.address, in1.address, out0, out1, callee)
   secretStore.addSNToNote(in0.cm, transferData.input_0_sn)
   secretStore.addSNToNote(in1.cm, transferData.input_1_sn)
@@ -40,16 +40,13 @@ async function transferMoney(web3, platformState, secretStore, k0Eth, k0,
   secretStore.addNoteInfo(transferData.output_1_cm, out1.a_pk, out1.rho, out1.r, out1.v)
 
   const rootBefore = await platformState.merkleTreeRoot()
-  console.log('Transfer: root after prepareTransfer (before temp addition): ', rootBefore)
   const labelBefore = platformState.currentStateLabel()
   const tmpLabel = ('temporary_mt_addition_' + crypto.randomBytes(16).toString('hex'))
   await platformState.add(tmpLabel, [], [ transferData.output_0_cm, transferData.output_1_cm ])
   const newRoot = await platformState.merkleTreeRoot()
-  console.log('Transfer: root after temp addition: ', newRoot)
   await platformState.rollbackTo(labelBefore)
 
   const finalRoot = await platformState.merkleTreeRoot()
-  console.log('Transfer: root after rollback: ', finalRoot)
   assert(finalRoot.equals(rootBefore))
 
   const out_0_data = makeData(out0.a_pk, out0.rho, out0.r, out0.v)
@@ -70,8 +67,9 @@ async function transferMoney(web3, platformState, secretStore, k0Eth, k0,
   const tx = await k0Eth.transfer(...ethParams)
 
   const receipt = await web3.eth.sendSignedTransaction(u.buf2hex(tx))
-  if (!receipt.success) {
+  if (receipt.status !== true) {
     console.log(receipt)
+    process.exit(1)
   }
 }
 

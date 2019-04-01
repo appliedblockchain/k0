@@ -47,6 +47,7 @@ target_sources(
         util.cpp
         serialization.cpp
         json_conversion.cpp
+        server/proof_serialization.cpp
 
         PUBLIC
         hash/sha256.hpp
@@ -176,6 +177,26 @@ target_link_libraries(
 )
 target_include_directories(
         mtserver
+
+        PUBLIC
+        ${DEPENDS_DIR}/libsnark
+        ${DEPENDS_DIR}/libsnark/depends/libff
+        ${DEPENDS_DIR}/libsnark/depends/libfqfft
+)
+
+add_executable(
+        iotest
+
+        iotest.cpp
+)
+target_link_libraries(
+        iotest
+
+        snark
+        zktrade
+)
+target_include_directories(
+        iotest
 
         PUBLIC
         ${DEPENDS_DIR}/libsnark

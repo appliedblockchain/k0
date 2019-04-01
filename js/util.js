@@ -1,10 +1,7 @@
 const assert = require('assert')
 const BN = require('bn.js')
-const hexOfBuffer = require('@appliedblockchain/helpers/hex-of-buffer')
-const hex0xOfHex = require('@appliedblockchain/helpers/hex0x-of-hex')
-const bufferOfHex0x = require('@appliedblockchain/helpers/buffer-of-hex0x')
 
-const buf2hex = buf => hex0xOfHex(hexOfBuffer(buf))
+const buf2hex = buf => '0x' + buf.toString('hex')
 
 function checkBN(x) {
 	assert(BN.isBN(x))
@@ -23,7 +20,7 @@ function checkString(input) {
 		`Input is not a string: ${input}`
 	)
 }
-const hex2buf = bufferOfHex0x
+const hex2buf = hex => Buffer.from(hex.substr(2), 'hex')
 
 function shorthex(buf) {
   checkBuf(buf)

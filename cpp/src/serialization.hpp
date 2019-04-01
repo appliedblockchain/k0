@@ -9,4 +9,5 @@ std::vector<bool> hex2bits(std::string input);
 std::vector<std::vector<bool>> hex2bitsVec(std::vector<std::string> input);
 std::vector<std::vector<std::vector<bool>>> hex2bitsVecVec(std::vector<std::vector<std::string>> input);
 std::string bits2hex(std::vector<bool> input);
+
 #endif // SERIALIZATION_H

@@ -15,6 +15,7 @@
 #include "serialization.hpp"
 #include "Server.hpp"
 #include "util.h"
+#include "proof_serialization.hpp"
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
     zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::Server(size_t height,
@@ -430,6 +431,7 @@ template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
     result["output_1_cm"] = bits2hex(
         xfer_circuit.out_1_cm_bits->get_digest());
     result["proof"] = json_conversion::to_json(xfer_proof);
+    result["proofstring"] = proof_to_string(xfer_proof);
     return result;
 }
 
@@ -527,3 +529,15 @@ template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
     result["ready"] = ready;
     return result;
 }
+
+template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+bool
+zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::verifyProof(
+    const std::string& proofType,
+    const Json::Value& public_inputs,
+    const Json::Value& proof)
+    {
+        
+    }
+
+

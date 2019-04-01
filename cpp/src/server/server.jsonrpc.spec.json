@@ -243,6 +243,22 @@
   },
 
   {
+    "name": "verifyProof",
+    "params": [
+      "what",
+      [
+        "param",
+        "param"
+      ],
+      [
+        "proof",
+        "proof"
+      ]
+    ],
+    "returns": true
+  },
+
+  {
     "name": "prf_addr",
     "params": [
       "a_sk_as_hex_string"

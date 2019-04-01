@@ -1,5 +1,5 @@
 const BN = require('bn.js')
-const logger = require('../../logger')
+const chalk = require('chalk')
 const u = require('../../util')
 
 function decodeData(data) {
@@ -38,11 +38,14 @@ async function handleTransfer(platformState, secretStore, txHash, in0sn, in1sn,
     [ out0cm, out1cm ],
     nextRoot
   )
-  logger.info([
-    `Transfer: SNs ${u.buf2hex(in0sn)}, ${u.buf2hex(in1sn)}, `,
-    `CMs ${u.buf2hex(out0cm)}, ${u.buf2hex(out1cm)}, `,
-    `new Merkle tree root ${u.buf2hex(nextRoot)}`
-  ].join(''))
+  console.log(chalk.grey([
+    `TRANSFER`,
+    `SN 0 ${u.buf2hex(in0sn)}`,
+    `SN 1 ${u.buf2hex(in1sn)}`,
+    `CM 0 ${u.buf2hex(out0cm)}`,
+    `CM 1 ${u.buf2hex(out1cm)}`,
+    `New Merkle tree root ${u.buf2hex(nextRoot)}`
+  ].join('\n')))
 }
 
 module.exports = handleTransfer

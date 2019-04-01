@@ -4,7 +4,8 @@ const conv = require('./conversion')
 function addSNToNote(state, cm, sn) {
   u.checkBuf(cm, 32)
   u.checkBuf(sn, 32)
-  return state.setIn(['cms', u.buf2hex(cm), 'sn' ], u.buf2hex(sn))
+  const newState = state.setIn(['cms', u.buf2hex(cm), 'sn' ], u.buf2hex(sn))
+  return newState
 }
 
 module.exports = addSNToNote

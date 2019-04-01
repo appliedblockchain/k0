@@ -50,7 +50,6 @@ async function prepareTransfer(server, platformState, secretStore, in0idx, in1id
     outputs[1].v,
     calleeAddress
   ]
-  console.log('TRANSFER PARAMS', params)
   return server.prepareTransfer(...params)
 }
 

@@ -58,7 +58,7 @@ option(
 option(
         BINARY_OUTPUT
         "In serialization, output raw binary data (instead of decimal), which is smaller and faster."
-        ON
+        OFF
 )
 
 if (CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
