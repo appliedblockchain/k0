@@ -35,6 +35,8 @@ async function printState(secretStore, ethAddressBook, mvpptAddressBook, platfor
     ]
     if (info !== null && info.sn) {
       cells = cells.map(cell => chalk.grey(chalk.strikethrough(cell)))
+    } else if (info !== null && info.a_pk.equals(ourPublicKey)) {
+      cells = cells.map(cell => chalk.cyan(cell))
     }
     notesTable.push(cells)
   }

@@ -27,7 +27,7 @@ function shorthex(buf) {
   if (buf.length <= 4) {
     return buf2hex(buf)
   } else {
-    const str = `0x${buf.slice(0,4).toString('hex')}...${buf.slice(-4).toString('hex')}`
+    const str = `0x${buf.slice(0,2).toString('hex')}...${buf.slice(-2).toString('hex')}`
     return str
   }
 }

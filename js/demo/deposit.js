@@ -20,6 +20,8 @@ const mnemonics = require('./mnemonics')
 const log4js = require('log4js')
 const initEventHandlers = require('./init-event-handlers')
 const demoUtil = require('./util')
+const serverPorts = require('./server-ports')
+const mtServerPorts = require('./mt-server-ports')
 
 const logger = log4js.getLogger()
 logger.level = process.env.LOG_LEVEL || 'info'
@@ -29,21 +31,11 @@ process.on('unhandledRejection', error => {
   process.exit(1)
 })
 
-const serverPorts = {
-  alice: 4000,
-  bob: 5000
-}
-
-const mtServerPorts = {
-  alice: 4100,
-  bob: 5100
-}
-
 async function run() {
 
   const who = process.argv[2]
-  if (['alice', 'bob'].indexOf(who) === -1) {
-    console.log('Need parameter "alice" or "bob".')
+  if (['alice', 'bob', 'carol'].indexOf(who) === -1) {
+    console.log('Need parameter "alice", "bob" or "carol".')
     process.exit(1)
   }
   const platformState = await makePlatformState(mtServerPorts[who])
@@ -116,7 +108,7 @@ async function run() {
     )
     const receipt = await web3.eth.sendSignedTransaction(u.buf2hex(depositTx))
 
-    await u.wait(1000)
+    await u.wait(200)
   }
 
   fs.writeFileSync(`${who}.secrets.json`, JSON.stringify(secretStore.spit()))

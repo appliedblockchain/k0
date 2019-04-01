@@ -21,6 +21,10 @@ const transferMoney = require('./transfer-money')
 const generatePaymentData = require('./generate-payment-data')
 const deployTradingContract = require('./deploy-trading-contract')
 const initEventHandlers = require('./init-event-handlers')
+const serverPorts = require('./server-ports')
+const mtServerPorts = require('./mt-server-ports')
+const chalk = require('chalk')
+const clear = require('clear')
 
 process.on('unhandledRejection', error => {
   console.log(error)
@@ -32,19 +36,10 @@ Object.keys(publicKeysInput).forEach(name => {
   publicKeys[name] = u.hex2buf(publicKeysInput[name])
 })
 
-const serverPorts = {
-  alice: 4000,
-  bob: 5000
-}
-
-const mtServerPorts = {
-  alice: 4100,
-  bob: 5100
-}
-
 const addressBookData = {}
 addressBookData[addresses.alice] = 'Alice'
 addressBookData[addresses.bob] = 'Bob'
+addressBookData[addresses.carol] = 'Carol'
 
 function addressBook(address) {
   u.checkBuf(address, 20)
@@ -54,6 +49,7 @@ function addressBook(address) {
 const mvpptAddressBookData = {}
 mvpptAddressBookData[publicKeysInput.alice] = 'Alice'
 mvpptAddressBookData[publicKeysInput.bob] = 'Bob'
+mvpptAddressBookData[publicKeysInput.carol] = 'Carol'
 
 function mvpptAddressBook(a_pk) {
   u.checkBuf(a_pk, 32)
@@ -62,8 +58,8 @@ function mvpptAddressBook(a_pk) {
 
 async function run() {
   const who = process.argv[2]
-  if (['alice', 'bob'].indexOf(who) === -1) {
-    console.log('Need parameter "alice" or "bob".')
+  if (['alice', 'bob', 'carol'].indexOf(who) === -1) {
+    console.log('Need parameter "alice", "bob" or "carol".')
     process.exit(1)
   }
   const platformState = await makePlatformState(mtServerPorts[who])
@@ -145,6 +141,21 @@ async function run() {
     }
     console.log()
   }
+
+  await u.wait(1000)
+
+  clear()
+
+  console.log(chalk.cyan([
+    '',
+    '██╗  ██╗ ██████╗',
+    '██║ ██╔╝██╔═████╗',
+    '█████╔╝ ██║██╔██║',
+    '██╔═██╗ ████╔╝██║',
+    '██║  ██╗╚██████╔╝',
+    '╚═╝  ╚═╝ ╚═════╝',
+    ''
+  ].join('\n')))
 
   while (true) {
     await cycle()

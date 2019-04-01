@@ -65,7 +65,7 @@ async function run() {
 
   const moneyShower = await testUtil.deployContract(web3, artefacts.MoneyShower)
 
-  const [alice, bob] = _.times(2, () => {
+  const [ alice, bob, carol ] = _.times(3, () => {
     const mnemonic = bip39.generateMnemonic()
     const seed = bip39.mnemonicToSeed(mnemonic)
     const root = hdkey.fromMasterSeed(seed)
@@ -124,22 +124,27 @@ async function run() {
     CarToken: carToken._address,
     MVPPT: mvppt._address,
     alice: alice.wallet.getAddressString(),
-    bob: bob.wallet.getAddressString()
+    bob: bob.wallet.getAddressString(),
+    carol: carol.wallet.getAddressString()
   }))
   fs.writeFileSync('mnemonics.json', JSON.stringify({
     alice: alice.mnemonic,
-    bob: bob.mnemonic
+    bob: bob.mnemonic,
+    carol: carol.mnemonic
   }))
 
   const aliceSecretKey = crypto.randomBytes(32)
   const bobSecretKey = crypto.randomBytes(32)
+  const carolSecretKey = crypto.randomBytes(32)
 
   const k0 = await makeK0()
   const alicePublicKey = await k0.prfAddr(aliceSecretKey)
   const bobPublicKey = await k0.prfAddr(bobSecretKey)
+  const carolPublicKey = await k0.prfAddr(carolSecretKey)
   fs.writeFileSync('public-keys.json', JSON.stringify({
     alice: u.buf2hex(alicePublicKey),
-    bob: u.buf2hex(bobPublicKey)
+    bob: u.buf2hex(bobPublicKey),
+    carol: u.buf2hex(carolPublicKey)
   }))
   fs.writeFileSync('alice.secrets.json', JSON.stringify({
     privateKey: u.buf2hex(aliceSecretKey),
@@ -149,6 +154,11 @@ async function run() {
     privateKey: u.buf2hex(bobSecretKey),
     publicKey: u.buf2hex(bobPublicKey)
   }))
+  fs.writeFileSync('carol.secrets.json', JSON.stringify({
+    privateKey: u.buf2hex(carolSecretKey),
+    publicKey: u.buf2hex(carolPublicKey)
+  }))
+
 
   logger.info([
     `Alice: public key ${u.buf2hex(alicePublicKey)}, `,
