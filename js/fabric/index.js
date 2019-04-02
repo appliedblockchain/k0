@@ -1,40 +1,45 @@
+const EventEmitter = require('events')
 const makeClient = require('./client')
 const get = require('./actions/get')
 const set = require('./actions/set')
+const mint = require('./actions/mint')
 const u = require('../util')
+const initEventHandlers = require('./init-event-handlers')
+
+class K0Fabric extends EventEmitter {}
 
 async function makeFabric(chaincodeId) {
   const { client, channel, peers, queryPeer } = await makeClient()
-  console.log(queryPeer)
 
   const channelEventHub = channel.newChannelEventHub(queryPeer)
 
-  channelEventHub.connect(true)
+  const fabric = new K0Fabric()
 
-  const regId1 = channelEventHub.registerChaincodeEvent(
-    chaincodeId,
-    '^.*',
-    (event, block_num, txnid, status) => {
-      console.log('Successfully got a chaincode event with transid:'+ txnid + ' with status:'+status);
-      console.log({ event, block_num, txnid, status })
+  let regId1
 
-      console.log('connected?', channelEventHub.isconnected())
-      // to see the event payload, the channel_event_hub must be connected(true)
-      let event_payload = event.payload.toString('utf8');
-      console.log({ event_payload })
-    })
+  async function startEventMonitoring() {
+    console.log('starting eventMonitoring')
+    let queue = []
+    let processing = false
 
-  await u.wait(1000)
-  console.log('connected?', channelEventHub.isconnected())
-  channelEventHub.checkConnection(true)
-  await u.wait(1000)
-  console.log('connected?', channelEventHub.isconnected())
-
-
-  return {
-    get: get.bind(null, channel, chaincodeId, queryPeer),
-    set: set.bind(null, client, channel, chaincodeId, peers)
+    regId1 = initEventHandlers(channelEventHub, chaincodeId, fabric)
+    channelEventHub.connect(true)
+    await u.wait(1000)
+    console.log('connected 1?', channelEventHub.isconnected())
+    channelEventHub.checkConnection(true)
+    await u.wait(1000)
+    console.log('connected 2?', channelEventHub.isconnected())
   }
+  function off() {
+    channelEventHub.unregisterChaincodeEvent(regId1)
+    channelEventHub.disconnect()
+  }
+
+
+  fabric.mint = mint.bind(null, client, channel, chaincodeId, peers)
+  fabric.startEventMonitoring = startEventMonitoring
+  fabric.off = off
+  return fabric
 }
 
 module.exports = makeFabric

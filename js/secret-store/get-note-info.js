@@ -3,6 +3,7 @@ const u = require('../util')
 
 function getNoteInfo(state, cm) {
   u.checkBuf(cm, 32)
+  console.log('secret store', state)
   const noteInfo = state.get('cms').get(u.buf2hex(cm))
   if (noteInfo !== undefined) {
     const data = {
