@@ -20,6 +20,7 @@ const chalk = require('chalk')
 const inquirer = require('inquirer')
 const printState = require('./print-state')
 const publicKeysInput = require('./public-keys')
+const transferMoney = require('./transfer-money')
 
 const logger = log4js.getLogger()
 logger.level = process.env.LOG_LEVEL || 'info'
@@ -27,6 +28,11 @@ logger.level = process.env.LOG_LEVEL || 'info'
 process.on('unhandledRejection', error => {
   logger.error(error)
   process.exit(1)
+})
+
+const publicKeys = {}
+Object.keys(publicKeysInput).forEach(name => {
+  publicKeys[name] = u.hex2buf(publicKeysInput[name])
 })
 
 const addressBookData = {}
@@ -60,7 +66,6 @@ async function run() {
 
 
   function showState() {
-    console.log('state')
     return printState(secretStore, addressBook, k0Fabric, platformState)
   }
 
@@ -75,10 +80,7 @@ async function run() {
         message: 'What do you want to do?',
         choices: [
           'Show state',
-          'Transfer money',
-          'Smart payment',
-          'Generate payment data',
-          'Deploy car trading smart contract'
+          'Transfer money'
         ]
       }
     ]
@@ -87,9 +89,7 @@ async function run() {
       if (inquiryResult.command === 'Show state') {
         await showState()
       } else if (inquiryResult.command === 'Transfer money') {
-        // await transferMoney(
-        //   web3, platformState, secretStore, k0Eth, k0, publicKeys
-        // )
+        await transferMoney(platformState, secretStore, k0Fabric, k0, publicKeys)
       } else {
         throw new Error(`Unknown command: ${inquiryResult.command}`)
       }
@@ -102,16 +102,16 @@ async function run() {
 
   await u.wait(1000)
 
-  //clear()
+  clear()
 
   console.log(chalk.cyan([
     '',
-    '██╗  ██╗ ██████╗',
-    '██║ ██╔╝██╔═████╗',
-    '█████╔╝ ██║██╔██║',
-    '██╔═██╗ ████╔╝██║',
-    '██║  ██╗╚██████╔╝',
-    '╚═╝  ╚═╝ ╚═════╝',
+    '██╗  ██╗ ██████╗     ███████╗ █████╗ ██████╗ ██████╗ ██╗ ██████╗',
+    '██║ ██╔╝██╔═████╗    ██╔════╝██╔══██╗██╔══██╗██╔══██╗██║██╔════╝',
+    '█████╔╝ ██║██╔██║    █████╗  ███████║██████╔╝██████╔╝██║██║     ',
+    '██╔═██╗ ████╔╝██║    ██╔══╝  ██╔══██║██╔══██╗██╔══██╗██║██║     ',
+    '██║  ██╗╚██████╔╝    ██║     ██║  ██║██████╔╝██║  ██║██║╚██████╗',
+    '╚═╝  ╚═╝ ╚═════╝     ╚═╝     ╚═╝  ╚═╝╚═════╝ ╚═╝  ╚═╝╚═╝ ╚═════╝',
     ''
   ].join('\n')))
 

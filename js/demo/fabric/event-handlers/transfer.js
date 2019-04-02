@@ -1,6 +1,6 @@
 const BN = require('bn.js')
 const chalk = require('chalk')
-const u = require('../../util')
+const u = require('../../../util')
 
 function decodeData(data) {
   u.checkBuf(data, 176)
@@ -12,13 +12,14 @@ function decodeData(data) {
   }
 }
 
-async function handleTransfer(platformState, secretStore, txHash, in0sn, in1sn,
-                              out0cm, out1cm, out0data, out1data, nextRoot,
-                              callee) {
+async function handleTransfer(platformState, secretStore, txnid, in0sn, in1sn,
+                              out0cm, out1cm, out0data, out1data, nextRoot) {
+
   const outputs = [
-    [ out0cm, out0data ],
-    [ out1cm, out1data ]
+    [ u.hex2buf(out0cm), u.hex2buf(out0data) ],
+    [ u.hex2buf(out1cm), u.hex2buf(out1data) ]
   ]
+
   for(let i = 0; i < 2; i = i + 1) {
     const info = decodeData(outputs[i][1])
     if (info.a_pk.equals(secretStore.getPublicKey())) {
@@ -33,18 +34,18 @@ async function handleTransfer(platformState, secretStore, txHash, in0sn, in1sn,
   }
 
   await platformState.add(
-    u.buf2hex(txHash),
-    [ in0sn, in1sn ],
-    [ out0cm, out1cm ],
-    nextRoot
+    txnid,
+    [ u.hex2buf(in0sn), u.hex2buf(in1sn) ],
+    [ u.hex2buf(out0cm), u.hex2buf(out1cm) ],
+    u.hex2buf(nextRoot)
   )
   console.log(chalk.grey([
     `TRANSFER`,
-    `SN 0 ${u.buf2hex(in0sn)}`,
-    `SN 1 ${u.buf2hex(in1sn)}`,
-    `CM 0 ${u.buf2hex(out0cm)}`,
-    `CM 1 ${u.buf2hex(out1cm)}`,
-    `New Merkle tree root ${u.buf2hex(nextRoot)}`
+    `SN 0 ${in0sn}`,
+    `SN 1 ${in1sn}`,
+    `CM 0 ${out0cm}`,
+    `CM 1 ${out1cm}`,
+    `New Merkle tree root ${nextRoot}`
   ].join('\n')))
 }
 

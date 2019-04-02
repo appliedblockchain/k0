@@ -21,7 +21,7 @@ async function printState(secretStore, addressBook, platform, platformState) {
       if (info.a_pk.equals(ourPublicKey)) {
         ownerName = 'us'
       } else {
-        ownerName = mvpptAddressBook(info.a_pk) || 'unknown'
+        ownerName = addressBook(info.a_pk) || 'unknown'
       }
       owner = `${ownerName} (${u.shorthex(info.a_pk)})`
     }

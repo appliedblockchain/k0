@@ -3,6 +3,7 @@ const makeClient = require('./client')
 const get = require('./actions/get')
 const set = require('./actions/set')
 const mint = require('./actions/mint')
+const transfer = require('./actions/transfer')
 const u = require('../util')
 const initEventHandlers = require('./init-event-handlers')
 
@@ -18,18 +19,13 @@ async function makeFabric(chaincodeId) {
   let regId1
 
   async function startEventMonitoring() {
-    console.log('starting eventMonitoring')
     let queue = []
     let processing = false
-
     regId1 = initEventHandlers(channelEventHub, chaincodeId, fabric)
     channelEventHub.connect(true)
     await u.wait(1000)
-    console.log('connected 1?', channelEventHub.isconnected())
-    channelEventHub.checkConnection(true)
-    await u.wait(1000)
-    console.log('connected 2?', channelEventHub.isconnected())
   }
+
   function off() {
     channelEventHub.unregisterChaincodeEvent(regId1)
     channelEventHub.disconnect()
@@ -37,6 +33,7 @@ async function makeFabric(chaincodeId) {
 
 
   fabric.mint = mint.bind(null, client, channel, chaincodeId, peers)
+  fabric.transfer = transfer.bind(null, client, channel, chaincodeId, peers)
   fabric.startEventMonitoring = startEventMonitoring
   fabric.off = off
   return fabric

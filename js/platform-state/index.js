@@ -11,8 +11,6 @@ async function makePlatformState(serverPort = 4100) {
   reset()
 
   async function add(snapshotLabel, newSNList, newCMList, expectedNextRoot) {
-    console.log('ADDING')
-    console.log('args', { snapshotLabel, newSNList, newCMList, expectedNextRoot})
     u.checkString(snapshotLabel)
     newCMList.forEach(cm => u.checkBuf(cm, 32))
     newSNList.forEach(sn => u.checkBuf(sn, 32))
@@ -20,7 +18,6 @@ async function makePlatformState(serverPort = 4100) {
       u.checkBuf(expectedNextRoot, 32)
     }
     let newState = stateList.getLatest()
-    console.log('state', newState)
     for (let i = 0; i < newSNList.length; i++) {
       const currentSNList = newState.get('snList')
       newState = newState.set('snList', currentSNList.push(u.buf2hex(newSNList[i])))
@@ -44,7 +41,6 @@ async function makePlatformState(serverPort = 4100) {
         `New root is ${u.buf2hex(nextRoot)}, expected ${u.buf2hex(expectedNextRoot)}`
       )
     }
-    console.log('state after', newState)
     stateList.add(snapshotLabel, newState)
   }
 

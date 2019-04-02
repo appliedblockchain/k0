@@ -43,10 +43,8 @@ async function run() {
   const k0 = await makeK0(serverPorts[who])
 
   const values = _.times(3, () => new BN(_.random(50).toString() + '000'))
-  console.log(values)
 
   const total = values.reduce((acc, el) => acc.add(el), new BN('0'))
-  console.log(total.toString())
 
   await demoUtil.prompt()
 
