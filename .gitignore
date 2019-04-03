@@ -12,7 +12,9 @@ cpp/cmake-build-debug-remote-host
 /js/demo/artefacts.json
 /js/demo/mnemonics.json
 /js/demo/*.secrets.json
+/js/demo/public-keys.json
 /js/demo/fabric/addresses.json
 /js/demo/fabric/artefacts.json
 /js/demo/fabric/mnemonics.json
 /js/demo/fabric/*.secrets.json
+/js/demo/fabric/public-keys.json
