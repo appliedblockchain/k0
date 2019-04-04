@@ -5,8 +5,10 @@
 
 int main(int argc, char* argv[])
 {
+    cout << "argc " << argc << endl;
+    cout << argv[0] << endl;
   if (argc != 11) {
-    std::cerr << "Need exactly 9 arguments (tree height, paths to commitment ";
+    std::cerr << "Need exactly 10 arguments (tree height, paths to commitment ";
     std::cerr << "pk, commitment vk, addition pk, addition vk, transfer pk, ";
     std::cerr << "transfer vk, withdrawal pk, withdrawal vk, port)";
     std::cerr << std::endl;

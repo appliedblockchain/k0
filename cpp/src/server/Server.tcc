@@ -207,11 +207,14 @@ template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
         cerr << "Commitment proof verification failed." << endl;
     }
 
- 
+
+    r1cs_ppzksnark_proof<alt_bn128_pp> prooof;
+    G2<alt_bn128_pp> g2{};
+
     Json::Value result;
     result["k"] = bits_to_hex(k_bits);
     result["cm"] = bits_to_hex(cm_bits);
-    result["proof"] = json_conversion::to_json(proof);
+    result["proof"] = json_conversion::proof_to_json_affine(proof);
 
     return result;
 }
@@ -268,7 +271,7 @@ template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
         cerr << "Addition proof verification failed." << endl;
     }
 
-    return json_conversion::to_json(proof);
+    return json_conversion::proof_to_json_affine(proof);
 }
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
@@ -430,7 +433,7 @@ template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
         xfer_circuit.out_0_cm_bits->get_digest());
     result["output_1_cm"] = bits2hex(
         xfer_circuit.out_1_cm_bits->get_digest());
-    result["proof"] = json_conversion::to_json(xfer_proof);
+    result["proof"] = json_conversion::proof_to_json_affine(xfer_proof);
     result["proofstring"] = proof_to_string(xfer_proof);
     return result;
 }
@@ -505,7 +508,7 @@ template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 
     Json::Value result;
     result["sn"] = bits_to_hex(wd_circuit.sn_bits->get_digest());
-    result["proof"] = json_conversion::to_json(proof);
+    result["proof"] = json_conversion::proof_to_json_affine(proof);
     return result;
 }
 

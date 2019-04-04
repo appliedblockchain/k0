@@ -4,6 +4,7 @@ add_executable(
         bits_and_numbers.cpp
         comms.cpp
         hashes.cpp
+        json.cpp
         lifecycle.cpp
         main.cpp
         merkle_tree.cpp
@@ -19,6 +20,7 @@ target_link_libraries(
         ff
         snark
         zktrade
+        jsoncpp
         ${GTEST_LDFLAGS}
 )
 

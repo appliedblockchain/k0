@@ -7,6 +7,13 @@ using namespace libsnark;
 namespace json_conversion
 {
 
-Json::Value to_json(r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> proof);
+Json::Value proof_to_json_jacobian(
+  r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> proof);
+
+r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> json_to_proof_jacobian(
+  Json::Value input);
+
+Json::Value proof_to_json_affine(
+  r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> proof);
 
 }
