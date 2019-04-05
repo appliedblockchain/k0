@@ -6,16 +6,16 @@ function flattenProof(proof) {
     proof.g_A.h.x, // 2 a_p
     proof.g_A.h.y, // 3
 
-    proof.g_B.g.x.c0, // 4 b (0)
-    proof.g_B.g.x.c1, // 5
-    proof.g_B.g.y.c0, // 6 b (1)
-    proof.g_B.g.y.c1, // 7
+    proof.g_B.g.x.c1, // 4 b (0)
+    proof.g_B.g.x.c0, // 5
+    proof.g_B.g.y.c1, // 6 b (1)
+    proof.g_B.g.y.c0, // 7
 
     proof.g_B.h.x, // 8 b_p
     proof.g_B.h.y, // 9
 
     proof.g_C.g.x, // 10 c
-    proof.g_C.h.y, // 11
+    proof.g_C.g.y, // 11
 
     proof.g_C.h.x, // 12 c_p
     proof.g_C.h.y, // 13
