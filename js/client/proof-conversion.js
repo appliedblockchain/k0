@@ -1,49 +1,63 @@
-const BN = require('bn.js')
+'use strict'
 
-function affineG1(point) {
+const u = require('../util')
+
+function convertG1Affine(convert, point) {
   return {
-    x: new BN(point.x),
-    y: new BN(point.y)
+    x: convert(point.x),
+    y: convert(point.y)
   }
 }
 
-function affineG2(point) {
+const bnifyG1Affine = convertG1Affine.bind(null, u.string2bn)
+const stringifyG1Affine = convertG1Affine.bind(null, u.bn2string)
+
+function convertG2Affine(convert, point) {
   return {
     x: {
-      c0: new BN(point.x.c0),
-      c1: new BN(point.x.c1)
+      c0: convert(point.x.c0),
+      c1: convert(point.x.c1)
     },
     y: {
-      c0: new BN(point.y.c0),
-      c1: new BN(point.y.c1)
+      c0: convert(point.y.c0),
+      c1: convert(point.y.c1)
     }
   }
 }
 
-function jacobianG1(point) {
+const bnifyG2Affine = convertG2Affine.bind(null, u.string2bn)
+const stringifyG2Affine = convertG2Affine.bind(null, u.bn2string)
+
+function convertG1Jacobian(convert, point) {
   return {
-    x: new BN(point.x),
-    y: new BN(point.y),
-    z: new BN(point.z)
+    x: convert(point.x),
+    y: convert(point.y),
+    z: convert(point.z)
   }
 }
 
-function jacobianG2(point) {
+const bnifyG1Jacobian = convertG1Jacobian.bind(null, u.string2bn)
+const stringifyG1Jacobian = convertG1Jacobian.bind(null, u.bn2string)
+
+function convertG2Jacobian(convert, point) {
   return {
     x: {
-      c0: new BN(point.x.c0),
-      c1: new BN(point.x.c1)
+      c0: convert(point.x.c0),
+      c1: convert(point.x.c1)
     },
     y: {
-      c0: new BN(point.y.c0),
-      c1: new BN(point.y.c1)
+      c0: convert(point.y.c0),
+      c1: convert(point.y.c1)
     },
     z: {
-      c0: new BN(point.z.c0),
-      c1: new BN(point.z.c1)
+      c0: convert(point.z.c0),
+      c1: convert(point.z.c1)
     }
   }
 }
+const bnifyG2Jacobian = convertG2Jacobian.bind(null, u.string2bn)
+const stringifyG2Jacobian = convertG2Jacobian.bind(null, u.bn2string)
+
 
 function convertProof(g1fnc, g2fnc, input) {
   return {
@@ -65,6 +79,16 @@ function convertProof(g1fnc, g2fnc, input) {
 }
 
 module.exports = {
-  convertAffine: convertProof.bind(null, affineG1, affineG2),
-  convertJacobian: convertProof.bind(null, jacobianG1, jacobianG2),
+  bnifyAffine: convertProof.bind(null, bnifyG1Affine, bnifyG2Affine),
+  bnifyJacobian: convertProof.bind(null, bnifyG1Jacobian, bnifyG2Jacobian),
+  stringifyAffine: convertProof.bind(
+    null,
+    stringifyG1Affine,
+    stringifyG2Affine
+  ),
+  stringifyJacobian: convertProof.bind(
+    null,
+    stringifyG1Jacobian,
+    stringifyG2Jacobian
+  )
 }

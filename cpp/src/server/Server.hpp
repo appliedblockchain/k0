@@ -114,8 +114,8 @@ namespace zktrade {
         virtual Json::Value status();
 
         virtual bool verifyProof(const std::string& proofType,
-        const Json::Value& public_inputs,
-        const Json::Value& proof);
+        const Json::Value& proof,
+        const Json::Value& public_inputs);
     };
 
 }

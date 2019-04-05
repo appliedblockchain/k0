@@ -23,8 +23,8 @@ async function merkleTreeAdditionProof(
   )
   console.log(res)
   return {
-    proof_affine: conv.convertAffine(res.proof_affine),
-    proof_jacobian: conv.convertJacobian(res.proof_jacobian)
+    proof_affine: conv.bnifyAffine(res.proof_affine),
+    proof_jacobian: conv.bnifyJacobian(res.proof_jacobian)
   }
 }
 

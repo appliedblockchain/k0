@@ -99,7 +99,15 @@ function parseG2Point(data) {
 	return [X, Y]
 }
 
-const stringifyBN = bn => bn.toString()
+function bn2string(bn) {
+	checkBN(bn)
+	return bn.toString()
+}
+
+function string2bn(str) {
+	checkString(str)
+	return new BN(str)
+}
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -107,11 +115,14 @@ module.exports = {
 	buf2hex,
 	checkBN,
 	checkBuf,
+	checkProofAffine,
+	checkProofJacobian,
 	checkString,
 	hex2buf,
   parseG1Point,
   parseG2Point,
 	wait,
 	shorthex,
-	stringifyBN
+	bn2string,
+	string2bn
 }

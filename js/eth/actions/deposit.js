@@ -18,14 +18,12 @@ async function deposit(web3, mvppt, privateKey, v, k, cm, nextRoot, commitmentPr
 
   const params = [
     v.toString(),
-    (await ethU.pack256Bits(k)).map(u.stringifyBN),
-    (await ethU.pack256Bits(cm)).map(u.stringifyBN),
-    (await ethU.pack256Bits(nextRoot)).map(u.stringifyBN),
-    commitmentProofCompact.map(u.stringifyBN),
-    additionProofCompact.map(u.stringifyBN)
+    (await ethU.pack256Bits(k)).map(u.bn2string),
+    (await ethU.pack256Bits(cm)).map(u.bn2string),
+    (await ethU.pack256Bits(nextRoot)).map(u.bn2string),
+    commitmentProofCompact.map(u.bn2string),
+    additionProofCompact.map(u.bn2string)
   ]
-
-  console.log(params)
 
   return signTransaction(
     web3,

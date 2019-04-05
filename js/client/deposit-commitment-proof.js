@@ -18,13 +18,11 @@ async function depositCommitmentProof(jc, a_pk, rho, r, v) {
       v.toString()
     ]
   )
-  console.log({ res })
   return {
     cm: u.hex2buf(res.cm),
     k: u.hex2buf(res.k),
-    // TODO hex2buf
-    proof_affine: conv.convertAffine(res.proof_affine),
-    proof_jacobian: conv.convertJacobian(res.proof_jacobian)
+    proof_affine: conv.bnifyAffine(res.proof_affine),
+    proof_jacobian: conv.bnifyJacobian(res.proof_jacobian)
   }
 }
 

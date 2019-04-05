@@ -246,10 +246,9 @@
     "name": "verifyProof",
     "params": [
       "what",
-      [
-        "param",
-        "param"
-      ],
+      {
+        "label": "val"
+      },
       [
         "public_input_value",
         "public_input_value"
