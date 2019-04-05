@@ -100,6 +100,7 @@ add_executable(
         server
 
         server/run_server.cpp
+        json_conversion.cpp
 )
 target_link_libraries(
         server

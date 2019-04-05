@@ -1,6 +1,7 @@
 const BN = require('bn.js')
 const request = require('./request')
 const u = require('../util')
+const conv = require('./proof-conversion')
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
@@ -97,8 +98,8 @@ async function prepareTransfer(
     output_0_cm: u.hex2buf(res.output_0_cm),
     output_1_address: new BN(res.output_1_address),
     output_1_cm: u.hex2buf(res.output_1_cm),
-    // TODO convert to BNs
-    proof: res.proof
+    proofAffine: conv.convertAffine(res.proof),
+    proofJacobian: conv.convertJacobian(res.proof)
   }
 }
 

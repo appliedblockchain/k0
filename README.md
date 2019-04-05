@@ -22,8 +22,8 @@ cmake ..
 ```
 Or, on Mac OS X:
 ```
-CPPFLAGS=-I/usr/local/opt/openssl/include \
-LDFLAGS=-L/usr/local/opt/openssl/lib \
+CPPFLAGS="-I/usr/local/opt/openssl/include -I/usr/local/include/sodium" \
+LDFLAGS="-L/usr/local/opt/openssl/lib -L/usr/local/lib" \
 PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig \
 cmake -DWITH_PROCPS=OFF -DWITH_SUPERCOP=OFF -DMULTICORE=OFF ..
 ```

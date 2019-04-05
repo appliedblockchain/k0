@@ -214,7 +214,8 @@ template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
     Json::Value result;
     result["k"] = bits_to_hex(k_bits);
     result["cm"] = bits_to_hex(cm_bits);
-    result["proof"] = json_conversion::proof_to_json_affine(proof);
+    result["proof_affine"] = json_conversion::proof_to_json_affine(proof);
+    result["proof_jacobian"] = json_conversion::proof_to_json_jacobian(proof);
 
     return result;
 }
@@ -271,7 +272,10 @@ template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
         cerr << "Addition proof verification failed." << endl;
     }
 
-    return json_conversion::proof_to_json_affine(proof);
+    Json::Value result;
+    result["proof_affine"] = json_conversion::proof_to_json_affine(proof);
+    result["proof_jacobian"] = json_conversion::proof_to_json_jacobian(proof);
+    return result;
 }
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
@@ -540,7 +544,7 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::verifyProof(
     const Json::Value& public_inputs,
     const Json::Value& proof)
     {
-        
+        return true;
     }
 
 

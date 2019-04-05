@@ -97,14 +97,15 @@ async function run() {
     const data = await k0.prepareDeposit(platformState, secretStore, v)
     await secretStore.addNoteInfo(data.cm, data.a_pk, data.rho, data.r, v)
 
+    console.log(data)
     const depositTx = await k0Eth.deposit(
       wallet.getPrivateKey(),
       v,
       data.k,
       data.cm,
       data.nextRoot,
-      data.commitmentProof,
-      data.additionProof
+      data.commitmentProofAffine,
+      data.additionProofAffine
     )
     const receipt = await web3.eth.sendSignedTransaction(u.buf2hex(depositTx))
 

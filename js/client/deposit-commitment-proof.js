@@ -1,6 +1,7 @@
 const request = require('./request')
 const u = require('../util')
 const BN = require('bn.js')
+const conv = require('./proof-conversion')
 
 async function depositCommitmentProof(jc, a_pk, rho, r, v) {
   u.checkBuf(a_pk, 32)
@@ -17,11 +18,13 @@ async function depositCommitmentProof(jc, a_pk, rho, r, v) {
       v.toString()
     ]
   )
+  console.log({ res })
   return {
     cm: u.hex2buf(res.cm),
     k: u.hex2buf(res.k),
     // TODO hex2buf
-    proof: res.proof
+    proof_affine: conv.convertAffine(res.proof_affine),
+    proof_jacobian: conv.convertJacobian(res.proof_jacobian)
   }
 }
 

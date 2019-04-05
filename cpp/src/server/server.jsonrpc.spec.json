@@ -251,8 +251,8 @@
         "param"
       ],
       [
-        "proof",
-        "proof"
+        "public_input_value",
+        "public_input_value"
       ]
     ],
     "returns": true
