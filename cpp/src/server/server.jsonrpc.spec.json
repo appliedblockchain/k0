@@ -30,6 +30,17 @@
   },
 
   {
+    "name": "exampleWitnessAndProof",
+    "params": [
+      "input_as_decimal_string"
+    ],
+    "returns": {
+      "out": "bignum",
+      "proof": [ "bignum", "bignum" ]
+    }
+  },
+
+  {
     "name": "hash",
     "params": [
       "0x1111111111111111111111111111111111111111111111111111111111111111",

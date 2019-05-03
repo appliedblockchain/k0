@@ -19,6 +19,8 @@ namespace zktrade {
         r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp> transfer_vk;
         r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp> withdrawal_pk;
         r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp> withdrawal_vk;
+        r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp> example_pk;
+        r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp> example_vk;
         size_t tree_height;
         MerkleTree<MerkleTreeHashT> mt;
         bool commitment_pk_loaded;
@@ -29,25 +31,31 @@ namespace zktrade {
         bool transfer_vk_loaded;
         bool withdrawal_pk_loaded;
         bool withdrawal_vk_loaded;
+        bool example_pk_loaded;
+        bool example_vk_loaded;
     public:
         Server(size_t tree_height, AbstractServerConnector &connector,
                serverVersion_t type);
 
         void setCommitmentPk(std::string pk_path);
 
-        void setCommitmentVk(std::string pk_path);
+        void setCommitmentVk(std::string vk_path);
 
         void setAdditionPk(std::string pk_path);
 
-        void setAdditionVk(std::string pk_path);
+        void setAdditionVk(std::string vk_path);
 
         void setTransferPk(std::string pk_path);
 
-        void setTransferVk(std::string pk_path);
+        void setTransferVk(std::string vk_path);
 
         void setWithdrawalPk(std::string pk_path);
 
-        void setWithdrawalVk(std::string pk_path);
+        void setWithdrawalVk(std::string vk_path);
+
+        void setExamplePk(std::string pk_path);
+
+        void setExampleVk(std::string vk_path);
 
         virtual Json::Value add(const std::string &param01);
 
@@ -56,6 +64,9 @@ namespace zktrade {
            const std::string &param03, const std::string &param04);
 
         virtual std::string element(int param01);
+
+        virtual Json::Value
+        exampleWitnessAndProof(const std::string &x);
 
         virtual std::string
         hash(const std::string &param01, const std::string &param02);

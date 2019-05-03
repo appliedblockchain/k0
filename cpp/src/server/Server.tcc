@@ -3,6 +3,7 @@
 #include <libsnark/gadgetlib1/protoboard.hpp>
 #include <stdlib.h>
 #include "circuitry/CommitmentCircuit.hpp"
+#include "circuitry/ExampleCircuit.hpp"
 #include "circuitry/MTAdditionCircuit.hpp"
 #include "circuitry/TransferCircuit.hpp"
 #include "circuitry/WithdrawalCircuit.hpp"
@@ -112,6 +113,25 @@ void zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setWithdrawalVk(
 }
 
 template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+void zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setExamplePk(
+    string pk_path)
+{
+    example_pk = loadFromFile<r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp>>(
+        pk_path);
+    example_pk_loaded = true;
+}
+
+template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+void zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setExampleVk(
+    string vk_path)
+{
+    example_vk = loadFromFile<r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp>>(
+        vk_path);
+    example_vk_loaded = true;
+}
+
+
+template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 Json::Value zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::add(
     const string &leaf_hex)
 {
@@ -151,6 +171,51 @@ string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::element(
         throw JsonRpcException(-32602, "Address too big");
     }
     return bits2hex(mt[address]);
+}
+
+template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+Json::Value zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::exampleWitnessAndProof(
+    const std::string &x)
+{
+    ExampleCircuit<FieldT> circuit;
+    circuit.pb.val(circuit.x) = FieldT(x.c_str());
+    circuit.example_gadget->generate_r1cs_witness();
+    if (circuit.pb.is_satisfied()) {
+        cout << "SATISFIED" << endl;
+    } else {
+        cout << "NOT SATISFIED" << endl;
+    }
+
+    const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> proof =
+        r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
+            example_pk, circuit.pb.primary_input(),
+            circuit.pb.auxiliary_input());
+
+    bool verified =
+        r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
+            example_vk, circuit.pb.primary_input(),
+            proof);
+    if (verified)
+    {
+        cout << "Example proof successfully verified." << endl;
+    }
+    else
+    {
+        cerr << "Example proof verification failed." << endl;
+    }
+
+    cout << "PROOF RAW" << endl;
+    cout << proof << endl;
+
+    Json::Value res;
+    res["out"] = field_element_to_string(circuit.pb.val(circuit.out));
+    res["proofAffine"] = json_conversion::proof_to_json_affine(proof);
+    res["proofJacobian"] = json_conversion::proof_to_json_jacobian(proof);
+
+    cout << "PROOF JSON" << endl;
+    cout << res["proofJacobian"] << endl;
+
+    return res;
 }
 
 template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
@@ -578,7 +643,12 @@ bool zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::verifyProof(
     {
         public_inputs[i] = FieldT(public_inputs_json[i].asString().c_str());
     }
+    cout << "PROOF JSON" << endl;
+    cout << proof_json << endl;
     auto proof = json_conversion::json_to_proof_jacobian(proof_json);
+    cout << "PROOF RAW" << endl;
+    cout << proof << endl;
+
     r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp> vk;
     if (!strcmp(proof_type.c_str(), "commitment"))
     {
@@ -596,12 +666,16 @@ bool zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::verifyProof(
     {
         vk = withdrawal_vk;
     }
+    else if (!strcmp(proof_type.c_str(), "example"))
+    {
+        vk = example_vk;
+    }
     else
     {
         throw JsonRpcException(-32602, "Invalid proof type");
     }
     bool verified = r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
-        commitment_vk,
+        vk,
         public_inputs,
         proof);
     if (verified)
