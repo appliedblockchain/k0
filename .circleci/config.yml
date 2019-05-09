@@ -126,12 +126,12 @@ jobs:
             hyperledger/fabric-tools:1.2.0 \
             peer chaincode package -n k0chaincode -v 1 -p github.com/appliedblockchain/nftchaincode/fabric/chaincode/cash \
             /artefacts/k0chaincode.1.out
-       - run:
+      - run:
           name: "Spin up Fabric network"
           command: |
             cd fabric/test/network
             ./spin_up.sh
-       - run:
+      - run:
           name: "Install chaincode"
           command: |
             cd fabric/test/network
