@@ -1,0 +1,148 @@
+version: '2'
+
+services:
+  orderer.orderer.org:
+    container_name: orderer.orderer.org
+    image: hyperledger/fabric-orderer:1.2.0
+    environment:
+      - ORDERER_GENERAL_LOGLEVEL=debug
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/orderer_genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererOrgMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/msp
+      - ORDERER_GENERAL_TLS_ENABLED=true
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
+    command: orderer
+    ports:
+      - 7050:7050
+    volumes:
+      - ./artefacts/orderer_genesis.block:/orderer_genesis.block:ro
+      - ./crypto-config/ordererOrganizations/orderer.org/orderers/orderer.orderer.org/msp:/msp:ro
+      - ./crypto-config/ordererOrganizations/orderer.org/orderers/orderer.orderer.org/tls:/etc/hyperledger/fabric/tls:ro
+
+  peer0.alpha.com:
+    extends:
+      file: docker-compose-base.yaml
+      service: peer
+    container_name: peer0.alpha.com
+    environment:
+      - CORE_PEER_ID=peer0.alpha.com
+      - CORE_PEER_LOCALMSPID=AlphaCoMSP
+      - CORE_PEER_ADDRESS=peer0.alpha.com:7051
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=alphacouch:5984
+    ports:
+      - 11751:7051
+      - 11753:7053
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./crypto-config/peerOrganizations/alpha.com/peers/peer0.alpha.com/msp:/msp:ro
+        - ./crypto-config/peerOrganizations/alpha.com/peers/peer0.alpha.com/tls:/etc/hyperledger/fabric/tls:ro
+        - ./crypto-config/peerOrganizations/alpha.com/users:/etc/hyperledger/msp/users:ro
+    depends_on:
+      - orderer.orderer.org
+      - alphacouch
+
+  alphacouch:
+    extends:
+      file: docker-compose-base.yaml
+      service: couchdb
+    container_name: alphacouch
+    ports:
+      - 11584:5984
+
+  alphatools:
+    container_name: alphatools
+    extends:
+      file: docker-compose-base.yaml
+      service: tools
+    environment:
+      - CORE_PEER_ADDRESS=peer0.alpha.com:7051
+      - CORE_PEER_LOCALMSPID=AlphaCoMSP
+    volumes:
+      - ./crypto-config/peerOrganizations/alpha.com/peers/peer0.alpha.com/tls/ca.crt:/tls/ca.crt:ro
+      - ./crypto-config/peerOrganizations/alpha.com/users/Admin@alpha.com/msp:/msp:ro
+
+  peer0.beta.com:
+    extends:
+      file: docker-compose-base.yaml
+      service: peer
+    container_name: peer0.beta.com
+    environment:
+      - CORE_PEER_ID=peer0.beta.com
+      - CORE_PEER_LOCALMSPID=BetaCoMSP
+      - CORE_PEER_ADDRESS=peer0.beta.com:7051
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=betacouch:5984
+    ports:
+      - 12751:7051
+      - 12753:7053
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./crypto-config/peerOrganizations/beta.com/peers/peer0.beta.com/msp:/msp:ro
+        - ./crypto-config/peerOrganizations/beta.com/peers/peer0.beta.com/tls:/etc/hyperledger/fabric/tls:ro
+        - ./crypto-config/peerOrganizations/beta.com/users:/etc/hyperledger/msp/users:ro
+    depends_on:
+      - orderer.orderer.org
+      - betacouch
+
+  betacouch:
+    extends:
+      file: docker-compose-base.yaml
+      service: couchdb
+    container_name: betacouch
+    ports:
+      - 12584:5984
+
+  betatools:
+    container_name: betatools
+    extends:
+      file: docker-compose-base.yaml
+      service: tools
+    environment:
+      - CORE_PEER_ADDRESS=peer0.beta.com:7051
+      - CORE_PEER_LOCALMSPID=BetaCoMSP
+    volumes:
+      - ./crypto-config/peerOrganizations/beta.com/peers/peer0.beta.com/tls/ca.crt:/tls/ca.crt:ro
+      - ./crypto-config/peerOrganizations/beta.com/users/Admin@beta.com/msp:/msp:ro
+
+  peer0.gamma.com:
+    extends:
+      file: docker-compose-base.yaml
+      service: peer
+    container_name: peer0.gamma.com
+    environment:
+      - CORE_PEER_ID=peer0.gamma.com
+      - CORE_PEER_LOCALMSPID=GammaCoMSP
+      - CORE_PEER_ADDRESS=peer0.gamma.com:7051
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=gammacouch:5984
+    ports:
+      - 13751:7051
+      - 13753:7053
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./crypto-config/peerOrganizations/gamma.com/peers/peer0.gamma.com/msp:/msp:ro
+        - ./crypto-config/peerOrganizations/gamma.com/peers/peer0.gamma.com/tls:/etc/hyperledger/fabric/tls:ro
+        - ./crypto-config/peerOrganizations/gamma.com/users:/etc/hyperledger/msp/users:ro
+    depends_on:
+      - orderer.orderer.org
+      - gammacouch
+
+  gammacouch:
+    extends:
+      file: docker-compose-base.yaml
+      service: couchdb
+    container_name: gammacouch
+    ports:
+      - 13584:5984
+
+  gammatools:
+    container_name: gammatools
+    extends:
+      file: docker-compose-base.yaml
+      service: tools
+    environment:
+      - CORE_PEER_ADDRESS=peer0.gamma.com:7051
+      - CORE_PEER_LOCALMSPID=GammaCoMSP
+    volumes:
+      - ./crypto-config/peerOrganizations/gamma.com/peers/peer0.gamma.com/tls/ca.crt:/tls/ca.crt:ro
+      - ./crypto-config/peerOrganizations/gamma.com/users/Admin@gamma.com/msp:/msp:ro

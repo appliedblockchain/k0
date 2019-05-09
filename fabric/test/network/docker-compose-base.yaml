@@ -1,0 +1,41 @@
+version: '2'
+
+services:
+  peer:
+    image: hyperledger/fabric-peer:1.2.0
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_PEER=debug
+      - CORE_CHAINCODE_LOGGING_LEVEL=debug
+      - CORE_PEER_MSPCONFIGPATH=/msp
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_VM_DOCKER_ATTACHSTDOUT=true
+
+      # This has to be changed if the directory the docker-compose config files
+      # are in is not named "network"!
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=network_default
+
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=user
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=foo
+
+      # This can be used to load another chaincode base image
+      # - CORE_CHAINCODE_BUILDER=appliedblockchain/ccenv-foobar
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: peer node start --logging-level=debug
+
+  couchdb:
+    image: hyperledger/fabric-couchdb:0.4.10
+    environment:
+      - COUCHDB_USER=user
+      - COUCHDB_PASSWORD=foo
+
+  tools:
+    image: hyperledger/fabric-tools:1.2.0
+    environment:
+      - CORE_PEER_MSPCONFIGPATH=/msp
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_ROOTCERT_FILE=/tls/ca.crt
+    volumes:
+      - ./crypto-config/ordererOrganizations/orderer.org/orderers/orderer.orderer.org/tls/ca.crt:/orderer/ca.crt:ro
+      - ./artefacts:/artefacts
