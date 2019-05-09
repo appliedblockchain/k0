@@ -53,16 +53,16 @@ async function generateVerifierContractAlt(pathToVk, filePath, contractName) {
 
 }
 
-async function compileContracts(tmpDir = '/tmp') {
+async function compileContracts(tmpDir = '/tmp/k0keys') {
   const paths = {
-    commitmentPk: path.join(tmpDir, 'zktrade_commitment_pk'),
-    commitmentVkAlt: path.join(tmpDir, 'zktrade_commitment_vk_alt'),
-    additionPk: path.join(tmpDir, 'zktrade_addition_pk'),
-    additionVkAlt: path.join(tmpDir, 'zktrade_addition_vk_alt'),
-    transferPk: path.join(tmpDir, 'zktrade_transfer_pk'),
-    transferVkAlt: path.join(tmpDir, 'zktrade_transfer_vk_alt'),
-    withdrawalPk: path.join(tmpDir, 'zktrade_withdrawal_pk'),
-    withdrawalVkAlt: path.join(tmpDir, 'zktrade_withdrawal_vk_alt')
+    commitmentPk: path.join(tmpDir, 'commitment_pk'),
+    commitmentVkAlt: path.join(tmpDir, 'commitment_vk_alt'),
+    additionPk: path.join(tmpDir, 'addition_pk'),
+    additionVkAlt: path.join(tmpDir, 'addition_vk_alt'),
+    transferPk: path.join(tmpDir, 'transfer_pk'),
+    transferVkAlt: path.join(tmpDir, 'transfer_vk_alt'),
+    withdrawalPk: path.join(tmpDir, 'withdrawal_pk'),
+    withdrawalVkAlt: path.join(tmpDir, 'withdrawal_vk_alt')
   }
   const contractsDir = path.join(tmpDir, crypto.randomBytes(32).toString('hex'))
   await asyncFs.mkdir(contractsDir)

@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  parity:
+    image: appliedblockchain/parity-solo-instant:latest
+    restart: always
+    ports:
+      - 8545:8545
+      - 8546:8546
