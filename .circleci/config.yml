@@ -6,6 +6,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: "Get Git submodules"
+          command: git submodule update --init --recursive
+      - run:
           name: "Docker login"
           command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
       - run:
