@@ -112,7 +112,7 @@ jobs:
             docker run \
             -v ~/.go_workspace/src/github.com/hyperledger/fabric:/opt/gopath/src/github.com/hyperledger/fabric:ro \
             -v ~/.go_workspace/src/github.com/appliedblockchain/zktrading/fabric/chaincode:/opt/gopath/src/github.com/appliedblockchain/zktrading/fabric/chaincode:ro \
-            -w /opt/gopath/src/github.com/appliedblockchain/zktrading/fabric/chaincode \
+            -w /opt/gopath/src/github.com/appliedblockchain/zktrading/fabric/chaincode/cash \
             hyperledger/fabric-tools:1.2.0 \
             go test
       - run:
