@@ -1,6 +1,21 @@
 version: 2
 
 jobs:
+  build_cpp_docker:
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: "Build main image"
+          command: |
+            cd cpp
+            docker build -f docker/zktrading.Dockerfile -t zktrading .
+      - run:
+          name: "Build app images"
+          command: |
+            cd cpp
+            docker build -f docker/setup.Dockerfile -t zktrading-setup .
+            docker build -f docker/server.Dockerfile -t zktrading-server .
   build_cpp:
     docker:
       - image: appliedblockchain/snarkapps-base
@@ -142,3 +157,4 @@ workflows:
             - build_cpp
             - prepare_node
       - fabric
+      - build_cpp_docker
