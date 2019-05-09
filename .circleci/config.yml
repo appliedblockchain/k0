@@ -90,6 +90,45 @@ jobs:
           name: Run private trade test
           command: cd js && node_modules/.bin/mocha test/private-trade.js
 
+  fabric:
+    machine:
+      docker_layer_caching: true
+    steps:
+      - checkout
+      - run:
+          name: "Start Fabric network: Create crypto config"
+          command: |
+            docker run -v $PWD/test/network/crypto-config.yaml:/crypto-config.yaml:ro -v $PWD/test/network/crypto-config:/crypto-config hyperledger/fabric-tools:1.2.0 cryptogen generate --config=/crypto-config.yaml --output=/crypto-config
+            sudo chmod -R +r $PWD/test/network/crypto-config
+      - run:
+          name: "Start Fabric network: Create orderer genesis block"
+          command: docker run -it -v $PWD/test/network:/config hyperledger/fabric-tools:1.2.0 configtxgen -configPath /config -profile TheGenesis -channelID orderer-system-channel -outputBlock /config/artefacts/orderer_genesis.block
+      - run:
+          name: "Start Fabric network: Start Docker containers"
+          command: cd test/network && docker-compose up -d
+      - run:
+          name: "Start Fabric network: Generate channel creation tx"
+          command: docker run -it -v $PWD/test/network:/config hyperledger/fabric-tools:1.2.0 configtxgen -configPath /config -profile TheChannel -channelID the-channel -outputCreateChannelTx ./config/artefacts/channel_creation.tx
+      - run:
+          name: "Start Fabric network: Create channel"
+          command: cd test/network && docker-compose run -w /artefacts alphatools peer channel create -o orderer.orderer.org:7050 -c the-channel -f channel_creation.tx --tls true --cafile /orderer/ca.crt
+      - run:
+          name: "Start Fabric network: Join channel"
+          command: |
+            cd test/network
+            for org in alpha beta gamma; do docker-compose run ${org}tools peer channel join -b /artefacts/the-channel.block; done
+      - run:
+          name: "Start Fabric network: Generate anchor definition txs"
+          command: |
+            docker run -it -v $PWD/test/network:/config hyperledger/fabric-tools:1.2.0 configtxgen -configPath /config -profile TheChannel -channelID the-channel -outputAnchorPeersUpdate ./config/artefacts/alphaco_anchor_peers_definition.tx -asOrg AlphaCo
+            docker run -it -v $PWD/test/network:/config hyperledger/fabric-tools:1.2.0 configtxgen -configPath /config -profile TheChannel -channelID the-channel -outputAnchorPeersUpdate ./config/artefacts/betaco_anchor_peers_definition.tx -asOrg BetaCo
+            docker run -it -v $PWD/test/network:/config hyperledger/fabric-tools:1.2.0 configtxgen -configPath /config -profile TheChannel -channelID the-channel -outputAnchorPeersUpdate ./config/artefacts/gammaco_anchor_peers_definition.tx -asOrg GammaCo
+      - run:
+          name: "Start Fabric network: Send anchor definition txs"
+          command: |
+            cd test/network
+            for org in alpha beta gamma; do docker-compose run ${org}tools peer channel update -o orderer.orderer.org:7050 -c the-channel -f /artefacts/${org}co_anchor_peers_definition.tx --tls true --cafile /orderer/ca.crt; done
+
 workflows:
   version: 2
   main:
@@ -103,3 +142,4 @@ workflows:
           requires:
             - build_cpp
             - prepare_node
+      - fabric
