@@ -129,7 +129,7 @@ jobs:
       - run:
           name: "Start Fabric network: Send anchor definition txs"
           command: |
-            cde fabric/test/network
+            cd fabric/test/network
             for org in alpha beta gamma; do docker-compose run ${org}tools peer channel update -o orderer.orderer.org:7050 -c the-channel -f /artefacts/${org}co_anchor_peers_definition.tx --tls true --cafile /orderer/ca.crt; done
 
 workflows:
