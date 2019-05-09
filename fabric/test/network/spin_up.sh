@@ -1,5 +1,5 @@
 echo Clearing everything...
-rm -rf crypto-config && rm -f artefacts/* && docker rm $(docker ps -aq)
+rm -rf crypto-config && docker rm $(docker ps -aq)
 
 echo Creating crypto config...
 docker run -v $PWD/crypto-config.yaml:/crypto-config.yaml:ro -v $PWD/crypto-config:/crypto-config hyperledger/fabric-tools:1.2.0 cryptogen generate --config=/crypto-config.yaml --output=/crypto-config
