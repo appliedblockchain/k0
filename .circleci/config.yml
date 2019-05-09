@@ -6,6 +6,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: "Docker login"
+          run: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+      - run:
           name: "Build main image"
           command: |
             cd cpp
@@ -157,4 +160,5 @@ workflows:
             - build_cpp
             - prepare_node
       - fabric
-      - build_cpp_docker
+      - build_cpp_docker:
+          context: org-global
