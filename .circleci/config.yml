@@ -2,7 +2,8 @@ version: 2
 
 jobs:
   build_cpp_docker:
-    machine: true
+    machine:
+      docker_layer_caching: true
     steps:
       - checkout
       - run:
@@ -122,6 +123,8 @@ jobs:
     working_directory: ~/.go_workspace/src/github.com/appliedblockchain/zktrading
     steps:
       - checkout
+      - attach_workspace:
+          at: .
       - run:
           name: "Get Fabric source code"
           command: |
@@ -135,7 +138,7 @@ jobs:
       - run:
           name: "Package chaincode"
           command: |
-            cd fabric/test/network
+            cd js/test/fabric/network
             docker run \
             -v $PWD/artefacts:/artefacts \
             -v ~/.go_workspace/src/github.com/hyperledger/fabric:/opt/gopath/src/github.com/hyperledger/fabric:ro \
@@ -146,12 +149,12 @@ jobs:
       - run:
           name: "Spin up Fabric network"
           command: |
-            cd fabric/test/network
+            cd js/test/fabric/network
             ./spin_up.sh
       - run:
           name: "Install chaincode"
           command: |
-            cd fabric/test/network
+            cd js/test/fabric/network
             for org in alpha beta gamma; do docker-compose run ${org}tools peer chaincode install /artefacts/k0chaincode.1.out; done
 
 workflows:
