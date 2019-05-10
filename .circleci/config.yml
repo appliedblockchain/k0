@@ -28,6 +28,7 @@ jobs:
             cd cpp
             docker build -f docker/setup.Dockerfile -t zktrading-setup .
             docker build -f docker/server.Dockerfile -t zktrading-server .
+            docker build -f docker/convert-vk.Dockerfile -t zktrading-convert-vk .
   # build_cpp:
   #   docker:
   #     - image: appliedblockchain/snarkapps-base
@@ -132,7 +133,7 @@ jobs:
             for circuit in commitment transfer addition withdrawal example
             do
               docker run -v /tmp/k0keys:/tmp/k0keys zktrading-setup $circuit 7 /tmp/k0keys/${circuit}_pk /tmp/k0keys/${circuit}_vk
-              docker run -v /tmp/k0keys:/tmp/k0keys zktrading /project/build/src/convert_vk /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt
+              docker run -v /tmp/k0keys:/tmp/k0keys zktrading-convert-vk /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt
             done
       - run:
           name: "Get Fabric source code"
