@@ -14,7 +14,7 @@ const expect = require('code').expect
 const sendTransaction = require('../send-transaction')
 const compileContracts = require('./helpers/compile-contracts')
 const mtEngineReady = require('../client/ready')
-const flattenProof = require('../flatten-proof')
+const flattenProof = require('../eth/flatten-proof')
 
 const numInitialCoins = 2
 
