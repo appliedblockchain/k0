@@ -162,7 +162,7 @@ workflows:
           context: org-global
       - prepare_node:
           context: org-global
-       - fabric:
+      - fabric:
           requires:
             - prepare_node
             - build_cpp_docker
