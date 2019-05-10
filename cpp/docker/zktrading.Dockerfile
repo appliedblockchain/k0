@@ -1,7 +1,10 @@
-FROM appliedblockchain/snarkapps-base
+FROM zktrading-builder
 
-COPY / /project/
+COPY src /project/src
+COPY test /project/test
+COPY depends /project/depends
+COPY CMakeLists.txt /project/
 
-WORKDIR /project
+RUN mkdir /project/build
 
-RUN mkdir build && cd build && cmake .. && make
+RUN cd /project/build && cmake .. && make

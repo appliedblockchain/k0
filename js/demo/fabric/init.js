@@ -19,15 +19,14 @@ process.on('unhandledRejection', error => {
 })
 
 async function run() {
-
-  const platformState = await makePlatformState()
+  const platformState = await makePlatformState(4410)
   const initialRoot = await platformState.merkleTreeRoot()
 
   const aliceSecretKey = crypto.randomBytes(32)
   const bobSecretKey = crypto.randomBytes(32)
   const carolSecretKey = crypto.randomBytes(32)
 
-  const k0 = await makeK0()
+  const k0 = await makeK0(4400)
   const alicePublicKey = await k0.prfAddr(aliceSecretKey)
   const bobPublicKey = await k0.prfAddr(bobSecretKey)
   const carolPublicKey = await k0.prfAddr(carolSecretKey)

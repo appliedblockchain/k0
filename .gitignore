@@ -18,3 +18,5 @@ cpp/cmake-build-debug-remote-host
 /js/demo/fabric/mnemonics.json
 /js/demo/fabric/*.secrets.json
 /js/demo/fabric/public-keys.json
+/js/test/fabric/network/artefacts
+/js/test/fabric/network/crypto-config
