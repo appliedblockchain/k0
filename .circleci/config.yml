@@ -71,17 +71,17 @@ jobs:
           command: |
             for x in commitment addition transfer withdrawal
             do
-            cpp/build/src/setup ${x} 16 /tmp/zktrade_${x}_pk /tmp/zktrade_${x}_vk
-            cpp/build/src/convert_vk /tmp/zktrade_${x}_vk /tmp/zktrade_${x}_vk_alt
+            cpp/build/src/setup ${x} 16 /tmp/k0keys/${x}_pk /tmp/k0keys/${x}_vk
+            cpp/build/src/convert_vk /tmp/k0keys/${x}_vk /tmp/k0keys/${x}_vk_alt
             done
       - run:
           name: Start server
           command: |
-            cpp/build/src/server 16 /tmp/zktrade_commitment_pk \
-            /tmp/zktrade_commitment_vk /tmp/zktrade_addition_pk \
-            /tmp/zktrade_addition_vk /tmp/zktrade_transfer_pk \
-            /tmp/zktrade_transfer_vk /tmp/zktrade_withdrawal_pk \
-            /tmp/zktrade_withdrawal_vk 4000
+            cpp/build/src/server 16 /tmp/k0keys/commitment_pk \
+            /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk \
+            /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk \
+            /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk \
+            /tmp/k0keys/withdrawal_vk 4000
           background: true
       - run:
           name: Run MVPPT test
