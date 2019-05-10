@@ -12,10 +12,10 @@ jobs:
           name: "Docker login"
           command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
       - run:
-          name: "Build base image"
+          name: "Build builder image"
           command: |
             cd cpp
-            docker build -f docker/base.Dockerfile -t zktrading-base .
+            docker build -f docker/builder.Dockerfile -t zktrading-builder .
       - run:
           name: "Build main image"
           command: |
