@@ -1,5 +1,3 @@
-FROM appliedblockchain/snarkapps-base
+FROM zktrading
 
-COPY --from=zktrading /project/build/src/server /server
-
-ENTRYPOINT ["/server"]
+ENTRYPOINT ["/project/build/src/server"]

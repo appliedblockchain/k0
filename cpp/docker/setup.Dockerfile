@@ -1,5 +1,3 @@
-FROM appliedblockchain/snarkapps-base
+FROM zktrading
 
-COPY --from=zktrading /project/build/src/setup /setup
-
-ENTRYPOINT ["/setup"]
+ENTRYPOINT ["/project/build/src/setup"]
