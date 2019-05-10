@@ -76,13 +76,17 @@ jobs:
             cpp/build/src/convert_vk /tmp/k0keys/${x}_vk /tmp/k0keys/${x}_vk_alt
             done
       - run:
-          name: Start server
+          name: Start Proving server
           command: |
             cpp/build/src/server 16 /tmp/k0keys/commitment_pk \
             /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk \
             /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk \
             /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk \
             /tmp/k0keys/withdrawal_vk 4000
+          background: true
+      - run:
+          name: Start Merkle server
+          command: cpp/build/src/mtserver 7 4100
           background: true
       - run:
           name: Run MVPPT test

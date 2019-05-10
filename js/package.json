@@ -15,11 +15,31 @@
     "openzeppelin-solidity": "^2.1.2",
     "web3": "1.0.0-beta.37"
   },
+  "scripts": {
+    "test": "mocha test",
+    "lint": "eslint . --ignore-path .gitignore",
+    "parity": "docker run -p 8545:8545 appliedblockchain/parity-solo-instant"
+  },
   "devDependencies": {
     "chalk": "^2.4.2",
     "clear": "^0.1.0",
     "cli-table": "^0.3.1",
     "code": "^5.2.4",
-    "mocha": "^5.2.0"
+    "mocha": "^5.2.0",
+    "@appliedblockchain/eslint-config": "^2.2.0",
+    "eslint": "^4.19.1"
+  },
+  "eslintConfig": {
+    "extends": "@appliedblockchain/eslint-config",
+    "rules": {
+      "no-param-reassign": 0
+    },
+    "env": {
+      "mocha": true
+    },
+    "globals": {
+      "def": true,
+      "subject": true
+    }
   }
 }
