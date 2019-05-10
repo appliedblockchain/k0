@@ -21,6 +21,14 @@ services:
       - ./crypto-config/ordererOrganizations/orderer.org/orderers/orderer.orderer.org/msp:/msp:ro
       - ./crypto-config/ordererOrganizations/orderer.org/orderers/orderer.orderer.org/tls:/etc/hyperledger/fabric/tls:ro
 
+  verifier:
+    container_name: verifier
+    image: zktrading
+    volumes:
+      - /tmp/k0keys:/tmp/k0keys:ro
+    command: /project/build/src/server 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 80
+    ports: 4000:80
+
   peer0.alpha.com:
     extends:
       file: docker-compose-base.yaml
