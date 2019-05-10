@@ -81,7 +81,7 @@ jobs:
             /tmp/zktrade_commitment_vk /tmp/zktrade_addition_pk \
             /tmp/zktrade_addition_vk /tmp/zktrade_transfer_pk \
             /tmp/zktrade_transfer_vk /tmp/zktrade_withdrawal_pk \
-            /tmp/zktrade_withdrawal_vk
+            /tmp/zktrade_withdrawal_vk 4000
           background: true
       - run:
           name: Run MVPPT test
