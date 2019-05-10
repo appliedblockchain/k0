@@ -69,6 +69,7 @@ jobs:
       - run:
           name: Setup
           command: |
+            mkdir /tmp/k0keys
             for x in commitment addition transfer withdrawal
             do
             cpp/build/src/setup ${x} 16 /tmp/k0keys/${x}_pk /tmp/k0keys/${x}_vk
