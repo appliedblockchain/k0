@@ -23,8 +23,6 @@ brew install openssl
 
 # probably some other to figure out, can all be installed by brew
 
-cd /usr/local/include
-ln -s ../opt/openssl/include/openssl .
 ```
 
 ### install google test:
@@ -64,6 +62,16 @@ Then:
 make
 cd ../..
 ```
+
+
+In certain cases, on mac, pkgconfig can't find open ssl, this can be fixed by running:
+
+```
+cd /usr/local/include
+ln -s ../opt/openssl/include/openssl .
+```
+
+and then running the cmake and make commands again.
 
 ## Running the demo
 

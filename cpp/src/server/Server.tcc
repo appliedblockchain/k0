@@ -529,8 +529,6 @@ template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
         transfer_pk_loaded & transfer_vk_loaded &
         withdrawal_pk_loaded & withdrawal_vk_loaded;
 
-    // std::cout <<  (commitment_vk_loaded ? 1 : 0) << (addition_pk_loaded ? 1 : 0) <<  (addition_vk_loaded ? 1 : 0) << (transfer_pk_loaded ? 1 : 0) <<  (transfer_vk_loaded ? 1 : 0) << (withdrawal_pk_loaded ? 1 : 0) <<  (withdrawal_vk_loaded ? 1 : 0) << std::endl;
-
     Json::Value result;
     result["ready"] = ready;
     return result;
