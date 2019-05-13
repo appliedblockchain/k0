@@ -528,6 +528,7 @@ template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
         addition_pk_loaded & addition_vk_loaded &
         transfer_pk_loaded & transfer_vk_loaded &
         withdrawal_pk_loaded & withdrawal_vk_loaded;
+
     Json::Value result;
     result["ready"] = ready;
     return result;
@@ -540,7 +541,9 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::verifyProof(
     const Json::Value& public_inputs,
     const Json::Value& proof)
     {
-        
+
     }
+
+
 
 

@@ -17,7 +17,10 @@ int main(int argc, char* argv[])
 
   default_r1cs_ppzksnark_pp::init_public_params();
 
-  HttpServer httpserver(atoi(argv[10]));
+  int port = atoi(argv[10]);
+
+  HttpServer httpserver(port);
+
   Server<FieldT, CommitmentHashT, MerkleTreeHashT> server(std::stoi(argv[1]), httpserver, jsonrpc::JSONRPC_SERVER_V2);
 
   server.StartListening();
@@ -37,12 +40,12 @@ int main(int argc, char* argv[])
   std::cout << "Loading transfer verification key..." << std::endl;
   server.setTransferVk(argv[7]);
 
-  // std::cout << "Loading withdrawal proving key..." << std::endl;
-  // server.setWithdrawalPk(argv[8]);
-  // std::cout << "Loading withdrawal verification key..." << std::endl;
-  // server.setWithdrawalVk(argv[9]);
+  std::cout << "Loading withdrawal proving key..." << std::endl;
+  server.setWithdrawalPk(argv[8]);
+  std::cout << "Loading withdrawal verification key..." << std::endl;
+  server.setWithdrawalVk(argv[9]);
 
-  std::cout << "Server started. Enter \"end\" to shut down." << std::endl;
+  std::cout << "Server started on port " << port << ". Enter \"end\" to shut down." << std::endl;
 
   bool need_to_shut_down = false;
   while(!need_to_shut_down) {
