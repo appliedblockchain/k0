@@ -110,7 +110,7 @@ jobs:
   #           - cpp/build/test
   prepare_node:
     docker:
-      - image: cirlcleci/node:8-alpine
+      - image: circleci/node:8.15.1-jessie
         auth:
           username: $DOCKER_USER
           password: $DOCKER_PASSWORD
