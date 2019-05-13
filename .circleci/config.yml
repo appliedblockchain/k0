@@ -30,6 +30,8 @@ jobs:
             docker build -f docker/server.Dockerfile -t zktrading-server .
             docker build -f docker/mtserver.Dockerfile -t zktrading-mtserver .
             docker build -f docker/convert-vk.Dockerfile -t zktrading-convert-vk .
+            docker build -f docker/pack_256.Dockerfile -t zktrading-pack .
+            docker build -f docker/unpack_256.Dockerfile -t zktrading-unpack .
 
   ethereum_integration_tests:
     machine:
@@ -48,6 +50,16 @@ jobs:
               docker run -v /tmp/k0keys:/tmp/k0keys zktrading-setup $circuit 7 /tmp/k0keys/${circuit}_pk /tmp/k0keys/${circuit}_vk
               docker run -v /tmp/k0keys:/tmp/k0keys zktrading-convert-vk /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt
             done
+      - run:
+          name: Setup node 8
+          command: nvm install 8 && nvm alias default 8
+      - run:
+          name: Install Solidity
+          command: |
+            if [ ! -e solc-static-linux ]; then
+              wget https://github.com/ethereum/solidity/releases/download/v0.5.3/solc-static-linux && chmod +x solc-static-linux
+            fi
+            chmod +x solc-static-linux && sudo cp solc-static-linux /usr/bin/solc
       - run:
           name: Docker login
           command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
@@ -98,7 +110,7 @@ jobs:
   #           - cpp/build/test
   prepare_node:
     docker:
-      - image: appliedblockchain/snarkapps-base
+      - image: cirlcleci/node:8-alpine
         auth:
           username: $DOCKER_USER
           password: $DOCKER_PASSWORD

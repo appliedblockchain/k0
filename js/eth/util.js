@@ -1,3 +1,5 @@
+'use strict'
+
 const execAsync = require('../exec-async')
 const path = require('path')
 const BN = require('bn.js')
@@ -10,7 +12,14 @@ const cppUtilDir = process.env.CPP_UTIL_DIR || path.join(cppDir, 'build', 'src')
 async function pack256Bits(buf) {
   globalUtil.checkBuf(buf, 32)
   const hex = globalUtil.buf2hex(buf)
-  const executablePath = path.join(cppUtilDir, 'pack_256_bits')
+
+  let executablePath
+  if (process.env.CIRCLECI) {
+    executablePath = 'docker run zktrading-pack'
+  } else {
+    executablePath = path.join(cppUtilDir, 'pack_256_bits')
+  }
+
   const command = `${executablePath} ${hex}`
   const result = await execAsync(command)
   return result.stdout.trim().split(',').map(str => new BN(str))
@@ -26,7 +35,14 @@ function unpack(decStringPair) {
 async function unpack256Bits(val1, val2) {
   globalUtil.checkBN(val1)
   globalUtil.checkBN(val2)
-  const executablePath = path.join(cppUtilDir, 'unpack_256_bits')
+
+  let executablePath
+  if (process.env.CIRCLECI) {
+    executablePath = 'docker run zktrading-unpack'
+  } else {
+    executablePath = path.join(cppUtilDir, 'unpack_256_bits')
+  }
+
   const command = `${executablePath} ${val1.toString()} ${val2.toString()}`
   const result = await execAsync(command)
   return globalUtil.hex2buf(result.stdout.trim())
