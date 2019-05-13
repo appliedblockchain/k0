@@ -88,12 +88,12 @@ jobs:
           name: Start Merkle server
           command: cpp/build/src/mtserver 7 4100
           background: true
-      - run:
-          name: Run MVPPT test
-          command: cd js && node_modules/.bin/mocha test/mvppt.js
-      - run:
-          name: Run private trade test
-          command: cd js && node_modules/.bin/mocha test/private-trade.js
+      # - run:
+      #     name: Run MVPPT test
+      #     command: cd js && node_modules/.bin/mocha test/mvppt.js
+      # - run:
+      #     name: Run private trade test
+      #     command: cd js && node_modules/.bin/mocha test/private-trade.js
 
 workflows:
   version: 2

@@ -5,7 +5,8 @@ const bip39 = require('bip39')
 const fs = require('fs')
 const hdkey = require('ethereumjs-wallet/hdkey')
 const BN = require('bn.js')
-const crypto = require('crypto')
+// const crypto = require('crypto')
+const assert = require('assert')
 const addresses = require('./addresses')
 const testUtil = require('../test/util')
 const makeEthPlatform = require('../eth')
@@ -13,7 +14,7 @@ const makeK0 = require('../k0')
 const u = require('../util')
 const signTransaction = require('../eth/sign-transaction')
 const compileContracts = require('../test/helpers/compile-contracts')
-const printState = require('./print-state')
+// const printState = require('./print-state')
 const makePlatformState = require('../platform-state')
 const makeSecretStore = require('../secret-store')
 const mnemonics = require('./mnemonics')
@@ -34,7 +35,7 @@ process.on('unhandledRejection', error => {
 async function run() {
 
   const who = process.argv[2]
-  if (['alice', 'bob', 'carol'].indexOf(who) === -1) {
+  if ([ 'alice', 'bob', 'carol' ].indexOf(who) === -1) {
     console.log('Need parameter "alice", "bob" or "carol".')
     process.exit(1)
   }
@@ -62,7 +63,7 @@ async function run() {
   const mnemonic = mnemonics[who]
   const seed = bip39.mnemonicToSeed(mnemonic)
   const root = hdkey.fromMasterSeed(seed)
-  const path = "m/44'/60'/0'/0/0"
+  const path = "m/44'/60'/0'/0/0" // eslint-disable-line
   const wallet = root.derivePath(path).getWallet()
 
   const values = _.times(3, () => new BN(_.random(50).toString() + '000'))

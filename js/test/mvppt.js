@@ -171,14 +171,16 @@ describe('Minimum viable private payment token', function () {
 
       console.log({ response })
 
-      const contractRoot = await Promise.all([
+      // const contractRoot =
+      await Promise.all([
         MVPPT.methods.root(0).call(),
         MVPPT.methods.root(1).call()
       ])
 
       const serverRootResponse = await mtEngine.request('root', [])
       console.log(serverRootResponse)
-      const serverRoot = await util.pack256Bits(serverRootResponse.result)
+      // const serverRoot =
+      await util.pack256Bits(serverRootResponse.result)
 
       const data = response.result
 
@@ -265,9 +267,9 @@ describe('Minimum viable private payment token', function () {
         callee
       ]
 
-      const timestampStart = Date.now()
+      // const timestampStart = Date.now()
       const response = await mtEngine.request('prepare_transfer', params)
-      const proofDuration = Date.now() - timestampStart
+      // const proofDuration = Date.now() - timestampStart
 
       const res = response.result
 
