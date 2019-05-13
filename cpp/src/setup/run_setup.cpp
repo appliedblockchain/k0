@@ -43,5 +43,6 @@ int main(int argc, char *argv[]) {
         std::cerr << "Invalid circuit type" << endl;
         return 1;
     }
+    
     return 0;
 }
