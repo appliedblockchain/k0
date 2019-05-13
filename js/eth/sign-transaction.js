@@ -7,7 +7,8 @@ async function signTransaction(web3, to, data, gas = 50000000, privateKey) {
   const txParams = {
     to: u.buf2hex(to),
     data: u.buf2hex(data),
-    gas
+    gas,
+    gasPrice: "0"
   }
   const tx = await web3.eth.accounts.signTransaction(txParams, u.buf2hex(privateKey))
   return u.hex2buf(tx.rawTransaction)

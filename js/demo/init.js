@@ -167,6 +167,8 @@ async function run() {
     `Bob: public key ${u.buf2hex(bobPublicKey)}, `,
     `private key ${u.buf2hex(bobSecretKey)}`
   ].join(''))
+
+
 }
 
-run()//.then(console.log).catch(console.log)
+run().then(console.log).then(process.exit.bind(null, 0)).catch(console.log)

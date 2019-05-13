@@ -52,11 +52,18 @@ jobs:
           name: Docker login
           command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
       - run:
-          name: Run the servers
+          name: Pull parity and run the servers
           command: |
+            docker pull appliedblockchain/parity-solo-instant:latest
             cd js/test/eth/network
-            docker-compose pull parity
-            docker-compose up
+            docker-compose up -d
+      - run:
+          name: init the demo state
+          command: |
+            cd js/demo
+            node init
+            node deposit alice
+            node deposit bob
   # build_cpp:
   #   docker:
   #     - image: appliedblockchain/snarkapps-base

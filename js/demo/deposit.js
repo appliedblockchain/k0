@@ -74,7 +74,9 @@ async function run() {
 
   console.log(await dollarCoin.methods.balanceOf(u.buf2hex(wallet.getAddress())).call())
 
-  await demoUtil.prompt()
+  // TODO: uncomment, commented only to check the server setup on cci
+  // await demoUtil.prompt()
+
   const platformRoot = await k0Eth.merkleTreeRoot()
   console.log(`Platform Merkle tree root: ${u.buf2hex(platformRoot)}`)
   const localRoot = await platformState.merkleTreeRoot()
@@ -96,6 +98,7 @@ async function run() {
     const v = values[i]
 
     const data = await k0.prepareDeposit(platformState, secretStore, v)
+
     await secretStore.addNoteInfo(data.cm, data.a_pk, data.rho, data.r, v)
 
     const depositTx = await k0Eth.deposit(
@@ -115,4 +118,4 @@ async function run() {
   fs.writeFileSync(`${who}.secrets.json`, JSON.stringify(secretStore.spit()))
 }
 
-run().then(console.log).catch(console.log)
+run().then(console.log).then(process.exit.bind(null,0)).catch(console.log)
