@@ -1,10 +1,12 @@
 'use strict'
 const _ = require('lodash')
-const sendTransaction = require('./send-transaction')
+const sendTransaction = require('../send-transaction')
 
-async function mint(client, channel, chaincodeId, peers, cm, newRoot) {
+async function mint(logger, client, channel, chaincodeId, peers, queryPeer, cm,
+                    newRoot) {
 	const params = [ cm, newRoot ]
-  await sendTransaction(client, channel, chaincodeId, peers, 'mint', params)
+  await sendTransaction(logger, client, channel, chaincodeId, peers, queryPeer,
+                        'mint', params)
 }
 
 module.exports = mint

@@ -12,7 +12,6 @@ async function deposit(web3, mvppt, privateKey, v, k, cm, nextRoot, commitmentPr
   assert(Buffer.isBuffer(k) && k.length === 32)
   assert(Buffer.isBuffer(cm) && k.length === 32)
   assert(Buffer.isBuffer(nextRoot))
-  console.log(commitmentProof)
   const commitmentProofCompact = flattenProof(commitmentProof)
   const additionProofCompact = flattenProof(additionProof)
 

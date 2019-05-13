@@ -21,7 +21,6 @@ async function merkleTreeAdditionProof(
       u.buf2hex(nextRoot)
     ]
   )
-  console.log(res)
   return {
     proof_affine: conv.bnifyAffine(res.proof_affine),
     proof_jacobian: conv.bnifyJacobian(res.proof_jacobian)

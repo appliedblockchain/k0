@@ -17,9 +17,9 @@ async function run() {
   await instantiateOrUpgrade(
     alphaAdmin,
     endorsementPolicy,
-    config.chaincodeId,
+    'k0chaincode',
     process.env.CHAINCODE_VERSION || '1',
-    [ 'NO', '' ],
+    [ 'bar' ],
     true
   )
 }

@@ -11,12 +11,14 @@ const orgs = [ 'alpha', 'beta', 'gamma' ]
 const usernames = [ 'Admin', 'User1' ]
 
 function getConfig(org, username) {
-  if (orgs.indexOf(org) === -1) {
+  const orgIndex = orgs.indexOf(org)
+  if (orgIndex === -1) {
     throw new Error(`Invalid org: ${org}`)
   }
   if (usernames.indexOf(username) === -1) {
     throw new Error(`Invalid username: ${username}`)
   }
+  const orgNum = (4 + orgIndex) * 11
   return {
     username,
     mspid: org.charAt(0).toUpperCase() + org.slice(1) + 'CoMSP',
@@ -27,7 +29,9 @@ function getConfig(org, username) {
     ordererTlsHostnameOverride: 'orderer.orderer.org',
     queryPeerIndex: orgs.indexOf(org),
     channelName: 'the-channel',
-    peers: getPeers()
+    peers: getPeers(),
+    proverPort: orgNum * 100,
+    mtServerPort: orgNum * 100 + 10,
   }
 }
 

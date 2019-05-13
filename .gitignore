@@ -5,7 +5,8 @@
 /cpp/build
 /cpp/cmake-build-debug
 /cpp/cmake-build-debug-remote
-cpp/cmake-build-debug-remote-host
+/cpp/cmake-build-debug-remote-host
+/cpp/depends
 /*/node_modules
 /*/package-lock.json
 /js/demo/addresses.json

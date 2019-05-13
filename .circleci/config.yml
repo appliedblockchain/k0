@@ -29,6 +29,7 @@ jobs:
             docker build -f docker/setup.Dockerfile -t zktrading-setup .
             docker build -f docker/server.Dockerfile -t zktrading-server .
             docker build -f docker/convert-vk.Dockerfile -t zktrading-convert-vk .
+
   # build_cpp:
   #   docker:
   #     - image: appliedblockchain/snarkapps-base
@@ -166,6 +167,16 @@ jobs:
           command: |
             cd js/test/fabric/network
             for org in alpha beta gamma; do docker-compose run ${org}tools peer chaincode install /artefacts/k0chaincode.1.out; done
+      - run:
+          name: "Instantiate chaincode"
+          command: |
+            cd js/test/fabric
+            node instantiate
+      - run:
+          name: "Run integration tests"
+          command: |
+            cd js
+            node_modules/.bin/mocha test/fabric/test.js
 
 workflows:
   version: 2
