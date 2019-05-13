@@ -40,7 +40,7 @@ jobs:
       - attach_workspace:
           at: .
       - run:
-          name: "Generate proving and verification keys"
+          name: Generate proving and verification keys
           command: |
             mkdir /tmp/k0keys
             for circuit in commitment transfer addition withdrawal
@@ -49,14 +49,14 @@ jobs:
               docker run -v /tmp/k0keys:/tmp/k0keys zktrading-convert-vk /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt
             done
       - run:
-          name: "Docker login"
+          name: Docker login
           command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
       - run:
-          name:
-            command: |
-              cd js/test/eth/network
-              docker-compose pull parity
-              docker-compose up
+          name: Run the servers
+          command: |
+            cd js/test/eth/network
+            docker-compose pull parity
+            docker-compose up
   # build_cpp:
   #   docker:
   #     - image: appliedblockchain/snarkapps-base

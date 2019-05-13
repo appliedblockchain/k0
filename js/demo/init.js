@@ -22,7 +22,6 @@ process.on('unhandledRejection', error => {
 })
 
 async function run() {
-
   const web3 = testUtil.initWeb3()
   // DollarCoin minter
   const tokenMaster = web3.eth.accounts.create()
@@ -170,4 +169,4 @@ async function run() {
   ].join(''))
 }
 
-run().then(console.log).catch(console.log)
+run()//.then(console.log).catch(console.log)
