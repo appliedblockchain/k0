@@ -28,10 +28,18 @@ jobs:
           name: "Build app images"
           command: |
             cd cpp
-            docker build -f docker/setup.Dockerfile -t zktrading-setup .
-            docker build -f docker/server.Dockerfile -t zktrading-server .
-            docker build -f docker/convert-vk.Dockerfile -t zktrading-convert-vk .
-            docker build -f docker/mtserver.Dockerfile -t zktrading-mtserver .
+            for IMAGE in setup server mtserver convert-vk
+            do
+              docker build -f docker/$IMAGE.Dockerfile -t appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1 .
+            done
+      - run:
+          name: "Push app images"
+          command: |
+            cd cpp
+            for IMAGE in setup server mtserver convert-vk
+            do
+              docker push appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
+            done
 
   # build_cpp:
   #   docker:
@@ -129,6 +137,15 @@ jobs:
     working_directory: ~/.go_workspace/src/github.com/appliedblockchain/zktrading
     steps:
       - checkout
+      - run:
+          name: "Pull and tag app images"
+          command: |
+            cd cpp
+            for IMAGE in setup server mtserver convert-vk
+            do
+              docker pull appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
+              docker tag appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1 zktrading-$IMAGE
+            done
       - attach_workspace:
           at: .
       - run:
