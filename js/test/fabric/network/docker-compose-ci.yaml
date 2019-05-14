@@ -16,34 +16,34 @@ services:
     << : *server
     container_name: alphaprover
     ports:
-      - 4400:80
+      - 11400:80
 
   alphatree:
     << : *mtserver
     container_name: alphatree
     ports:
-      - 4410:80
+      - 11410:80
 
   betaprover:
     << : *server
     container_name: betaprover
     ports:
-      - 5500:80
+      - 12400:80
 
   betatree:
     << : *mtserver
     container_name: betatree
     ports:
-      - 5510:80
+      - 12410:80
 
   gammaprover:
     << : *server
     container_name: gammaprover
     ports:
-      - 6600:80
+      - 13400:80
 
   gammatree:
     << : *mtserver
     container_name: gammatree
     ports:
-      - 6610:80
+      - 13410:80

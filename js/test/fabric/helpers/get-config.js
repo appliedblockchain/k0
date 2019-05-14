@@ -18,7 +18,7 @@ function getConfig(org, username) {
   if (usernames.indexOf(username) === -1) {
     throw new Error(`Invalid username: ${username}`)
   }
-  const orgNum = (4 + orgIndex) * 11
+  const orgNum = orgIndex + 1
   return {
     username,
     mspid: org.charAt(0).toUpperCase() + org.slice(1) + 'CoMSP',
@@ -30,8 +30,8 @@ function getConfig(org, username) {
     queryPeerIndex: orgs.indexOf(org),
     channelName: 'the-channel',
     peers: getPeers(),
-    proverPort: orgNum * 100,
-    mtServerPort: orgNum * 100 + 10,
+    proverPort: 10000 + orgNum * 1000 + 400,
+    mtServerPort: 10000 + orgNum * 1000 + 410
   }
 }
 
