@@ -16,7 +16,7 @@ jobs:
           command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
       - run:
           name: "Download previously generated images"
-          command:
+          command: |
             docker pull appliedblockchain/zktrading-builder-$CIRCLE_BRANCH
             docker pull appliedblockchain/zktrading-$CIRCLE_BRANCH
             for IMAGE in setup server mtserver convert-vk
