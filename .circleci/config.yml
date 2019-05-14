@@ -23,16 +23,15 @@ jobs:
             cd cpp
             docker build -f docker/zktrading.Dockerfile -t zktrading .
       - run:
-          name: "Build app images"
+          name: "Build && push the images"
           command: |
             cd cpp
-            docker build -f docker/setup.Dockerfile -t zktrading-setup .
-            docker build -f docker/server.Dockerfile -t zktrading-server .
-            docker build -f docker/mtserver.Dockerfile -t zktrading-mtserver .
-            docker build -f docker/convert-vk.Dockerfile -t zktrading-convert-vk .
-            docker build -f docker/pack_256.Dockerfile -t zktrading-pack .
-            docker build -f docker/unpack_256.Dockerfile -t zktrading-unpack .
-            # TODO: push images
+
+            for IMAGE in setup server mtserver convert-vk pack unpack
+            do
+              docker build -f docker/$IMAGE.Dockerfile -t appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1 .
+              docker push appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
+            done
 
   ethereum_integration_tests:
     machine:
@@ -43,13 +42,20 @@ jobs:
       - attach_workspace:
           at: .
       - run:
+          name: Docker login
+          command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+      - run:
+          name: Pull the images
+          command: |
+            cd js/test/eth/network && docker-compose pull
+      - run:
           name: Generate proving and verification keys
           command: |
             mkdir /tmp/k0keys
             for circuit in commitment transfer addition withdrawal
             do
-              docker run -v /tmp/k0keys:/tmp/k0keys zktrading-setup $circuit 7 /tmp/k0keys/${circuit}_pk /tmp/k0keys/${circuit}_vk
-              docker run -v /tmp/k0keys:/tmp/k0keys zktrading-convert-vk /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt
+              docker run -v /tmp/k0keys:/tmp/k0keys appliedblockchain/zktrading-setup:$CIRCLE_BRANCH-$CIRCLE_SHA1 $circuit 7 /tmp/k0keys/${circuit}_pk /tmp/k0keys/${circuit}_vk
+              docker run -v /tmp/k0keys:/tmp/k0keys appliedblockchain/zktrading-convert-vk:$CIRCLE_BRANCH-$CIRCLE_SHA1 /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt
             done
       - run:
           name: "Enable NVM"
@@ -67,18 +73,13 @@ jobs:
             fi
             chmod +x solc-static-linux && sudo cp solc-static-linux /usr/bin/solc
       - run:
-          name: Docker login
-          command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
-      - run:
-          name: Pull parity and run the servers
+          name: Run the Docker servers
           command: |
-            docker pull appliedblockchain/parity-solo-instant:latest
-            cd js/test/eth/network
-            docker-compose up -d
+            cd js/test/eth/network && docker-compose up -d
       - run:
           name: init the demo state
           command: |
-            cd js/demo && npm install
+            cd js/demo
             node init
             node deposit alice
             node deposit bob
@@ -184,13 +185,13 @@ workflows:
       #     context: org-global
       - build_cpp_docker:
           context: org-global
-      # - prepare_node:
-      #     context: org-global
+      - prepare_node:
+          context: org-global
       - ethereum_integration_tests:
           context: org-global
           requires:
             - build_cpp_docker
-            # - prepare_node
+            - prepare_node
       # - run_private_trade_test:
       #     context: org-global
       #     requires:

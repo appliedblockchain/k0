@@ -49,7 +49,7 @@ async function pack256Bits(hex) {
   let executablePath
 
   if (process.env.CIRCLECI) {
-    executablePath = 'docker run zktrading-pack'
+    executablePath = 'docker run appliedblockchain/zktrading-pack'
   } else {
     executablePath = path.join(cppUtilDir, 'pack_256_bits')
   }
