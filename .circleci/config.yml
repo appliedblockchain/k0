@@ -92,14 +92,23 @@ jobs:
   #           - cpp/build/src
   #           - cpp/build/test
   prepare_node:
-    docker:
-      - image: appliedblockchain/snarkapps-base
-        auth:
-          username: $DOCKER_USER
-          password: $DOCKER_PASSWORD
-    steps:
+    machine:
+      image: circleci/classic:201808-01
+    working_directory: ~/.go_workspace/src/github.com/appliedblockchain/nftchaincode
+     steps:
       - checkout
       - run:
+          name: "Enable NVM"
+          command: |
+            echo 'export NVM_DIR="/opt/circleci/.nvm"' >> $BASH_ENV
+            echo ' [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+      - run: 
+          name: "Update node"
+          command: |
+            nvm install v8
+            node -v
+            nvm alias default v8
+     - run:
           name: Install npm modules
           command: cd js && npm i
       - persist_to_workspace:
@@ -155,6 +164,17 @@ jobs:
     working_directory: ~/.go_workspace/src/github.com/appliedblockchain/zktrading
     steps:
       - checkout
+      - run:
+          name: "Enable NVM"
+          command: |
+            echo 'export NVM_DIR="/opt/circleci/.nvm"' >> $BASH_ENV
+            echo ' [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+      - run: 
+          name: "Update node"
+          command: |
+            nvm install v8
+            node -v
+            nvm alias default v8
       - run:
           name: "Docker login"
           command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
