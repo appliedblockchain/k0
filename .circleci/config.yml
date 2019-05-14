@@ -32,6 +32,7 @@ jobs:
             docker build -f docker/convert-vk.Dockerfile -t zktrading-convert-vk .
             docker build -f docker/pack_256.Dockerfile -t zktrading-pack .
             docker build -f docker/unpack_256.Dockerfile -t zktrading-unpack .
+            # TODO: push images
 
   ethereum_integration_tests:
     machine:
@@ -50,6 +51,11 @@ jobs:
               docker run -v /tmp/k0keys:/tmp/k0keys zktrading-setup $circuit 7 /tmp/k0keys/${circuit}_pk /tmp/k0keys/${circuit}_vk
               docker run -v /tmp/k0keys:/tmp/k0keys zktrading-convert-vk /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt
             done
+      - run:
+          name: "Enable NVM"
+          command: |
+            echo 'export NVM_DIR="/opt/circleci/.nvm"' >> $BASH_ENV
+            echo ' [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
       - run:
           name: Setup node 8
           command: nvm install 8 && nvm alias default 8
@@ -72,7 +78,7 @@ jobs:
       - run:
           name: init the demo state
           command: |
-            cd js/demo
+            cd js/demo && npm install
             node init
             node deposit alice
             node deposit bob
@@ -178,13 +184,13 @@ workflows:
       #     context: org-global
       - build_cpp_docker:
           context: org-global
-      - prepare_node:
-          context: org-global
+      # - prepare_node:
+      #     context: org-global
       - ethereum_integration_tests:
           context: org-global
           requires:
             - build_cpp_docker
-            - prepare_node
+            # - prepare_node
       # - run_private_trade_test:
       #     context: org-global
       #     requires:

@@ -10,6 +10,7 @@ const Web3 = require('web3')
 const inquirer = require('inquirer')
 const clear = require('clear')
 const globalUtil = require('../util')
+const BN = require('bn.js')
 
 const baseDir = path.join(__dirname, '..', '..')
 const cppDir = process.env.CPP_DIR || path.join(baseDir, 'cpp')
@@ -29,7 +30,7 @@ async function convertProof(proofPath, proofAltPath) {
 
 function paths(label) {
   const tmpDir = process.env.TMP_DIR || path.join('/', 'tmp')
-  const baseDir = path.join(__dirname, '..', '..')
+
   return {
     tmpDir,
     baseDir,
@@ -45,7 +46,14 @@ function paths(label) {
 
 async function pack256Bits(hex) {
   globalUtil.checkString(hex)
-  const executablePath = path.join(cppUtilDir, 'pack_256_bits')
+  let executablePath
+
+  if (process.env.CIRCLECI) {
+    executablePath = 'docker run zktrading-pack'
+  } else {
+    executablePath = path.join(cppUtilDir, 'pack_256_bits')
+  }
+
   const command = `${executablePath} ${hex}`
   const result = await execAsync(command)
   return result.stdout.trim().split(',')
@@ -161,5 +169,7 @@ module.exports = {
   randomBytesHex,
   sha256Instance,
   verifyOnChain,
-  verifyOnChainWithProof
+  verifyOnChainWithProof,
+  toUnits,
+  fromUnits
 }
