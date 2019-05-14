@@ -1,0 +1,49 @@
+version: '3.7'
+
+x-custom:
+  server: &server
+    image: zktrading-server
+    volumes:
+      - /tmp/k0keys:/tmp/k0keys:ro
+    command: 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 80
+ 
+  mtserver: &mtserver
+    image: zktrading-mtserver
+    command: 7 80
+
+services:
+  alphaprover:
+    << : *server
+    container_name: alphaprover
+    ports:
+      - 4400:80
+
+  alphatree:
+    << : *mtserver
+    container_name: alphatree
+    ports:
+      - 4410:80
+
+  betaprover:
+    << : *server
+    container_name: betaprover
+    ports:
+      - 5500:80
+
+  betatree:
+    << : *mtserver
+    container_name: betatree
+    ports:
+      - 5510:80
+
+  gammaprover:
+    << : *server
+    container_name: gammaprover
+    ports:
+      - 6600:80
+
+  gammatree:
+    << : *mtserver
+    container_name: gammatree
+    ports:
+      - 6610:80

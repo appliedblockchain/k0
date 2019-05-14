@@ -1,3 +1,8 @@
+if [ "$CI" = "true" ]
+then
+  maybe_ci_dc_file="-f docker-compose-ci.yaml"
+fi
+
 echo Clearing everything...
 rm -rf crypto-config && docker rm $(docker ps -aq)
 
@@ -8,7 +13,7 @@ echo Generating orderer genesis block...
 docker run -it -v $PWD:/config hyperledger/fabric-tools:1.2.0 configtxgen -configPath /config -profile TheGenesis -channelID orderer-system-channel -outputBlock /config/artefacts/orderer_genesis.block
 
 echo Starting network...
-docker-compose up -d
+docker-compose -f docker-compose.yaml $maybe_ci_dc_file up -d
 
 echo Generating channel creation tx...
 
@@ -17,6 +22,11 @@ docker run -it -v $PWD:/config hyperledger/fabric-tools:1.2.0 configtxgen -confi
 echo Creating channel...
 
 docker-compose run -w /artefacts alphatools peer channel create -o orderer.orderer.org:7050 -c the-channel -f channel_creation.tx --tls true --cafile /orderer/ca.crt
+
+echo Wait for CouchDBs...
+bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:11584)" != "200" ]]; do sleep 1; done'
+bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:12584)" != "200" ]]; do sleep 1; done'
+bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:13584)" != "200" ]]; do sleep 1; done'
 
 echo Joining channel...
 

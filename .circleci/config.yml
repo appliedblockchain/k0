@@ -29,6 +29,7 @@ jobs:
             docker build -f docker/setup.Dockerfile -t zktrading-setup .
             docker build -f docker/server.Dockerfile -t zktrading-server .
             docker build -f docker/convert-vk.Dockerfile -t zktrading-convert-vk .
+            docker build -f docker/mtserver.Dockerfile -t zktrading-mtserver .
 
   # build_cpp:
   #   docker:
@@ -161,7 +162,7 @@ jobs:
           name: "Spin up Fabric network"
           command: |
             cd js/test/fabric/network
-            ./spin_up.sh
+            ./start.sh
       - run:
           name: "Install chaincode"
           command: |

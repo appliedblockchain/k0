@@ -1,6 +1,25 @@
-version: '2'
+version: '3.7'
+
+x-custom:
+  peer: &peer
+    image: hyperledger/fabric-peer:1.2.0
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: peer node start --logging-level=debug
+
+  server: &server
+    image: zktrading-server
+    volumes:
+      - /tmp/k0keys:/tmp/k0keys:ro
+    command: 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 80
+
+  couchdb: &couch
+    image: hyperledger/fabric-couchdb:0.4.10
+    environment:
+      - COUCHDB_USER=user
+      - COUCHDB_PASSWORD=foo
 
 services:
+
   orderer.orderer.org:
     container_name: orderer.orderer.org
     image: hyperledger/fabric-orderer:1.2.0
@@ -22,20 +41,26 @@ services:
       - ./crypto-config/ordererOrganizations/orderer.org/orderers/orderer.orderer.org/tls:/etc/hyperledger/fabric/tls:ro
 
   verifier:
+    << : *server
     container_name: verifier
-    image: zktrading
-    volumes:
-      - /tmp/k0keys:/tmp/k0keys:ro
-    command: /project/build/src/server 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 80
     ports:
       - 4000:80
 
   peer0.alpha.com:
-    extends:
-      file: docker-compose-base.yaml
-      service: peer
+    << : *peer
     container_name: peer0.alpha.com
     environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_PEER=debug
+      - CORE_CHAINCODE_LOGGING_LEVEL=debug
+      - CORE_PEER_MSPCONFIGPATH=/msp
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_VM_DOCKER_ATTACHSTDOUT=true
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=network_default
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=user
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=foo
+
       - CORE_PEER_ID=peer0.alpha.com
       - CORE_PEER_LOCALMSPID=AlphaCoMSP
       - CORE_PEER_ADDRESS=peer0.alpha.com:7051
@@ -44,40 +69,50 @@ services:
       - 11751:7051
       - 11753:7053
     volumes:
-        - /var/run/:/host/var/run/
-        - ./crypto-config/peerOrganizations/alpha.com/peers/peer0.alpha.com/msp:/msp:ro
-        - ./crypto-config/peerOrganizations/alpha.com/peers/peer0.alpha.com/tls:/etc/hyperledger/fabric/tls:ro
-        - ./crypto-config/peerOrganizations/alpha.com/users:/etc/hyperledger/msp/users:ro
+      - /var/run/:/host/var/run/
+      - ./crypto-config/peerOrganizations/alpha.com/peers/peer0.alpha.com/msp:/msp:ro
+      - ./crypto-config/peerOrganizations/alpha.com/peers/peer0.alpha.com/tls:/etc/hyperledger/fabric/tls:ro
+      - ./crypto-config/peerOrganizations/alpha.com/users:/etc/hyperledger/msp/users:ro
     depends_on:
       - orderer.orderer.org
       - alphacouch
 
   alphacouch:
-    extends:
-      file: docker-compose-base.yaml
-      service: couchdb
+    << : *couch
     container_name: alphacouch
     ports:
       - 11584:5984
 
   alphatools:
     container_name: alphatools
-    extends:
-      file: docker-compose-base.yaml
-      service: tools
+    image: hyperledger/fabric-tools:1.2.0
     environment:
+      - CORE_PEER_MSPCONFIGPATH=/msp
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_ROOTCERT_FILE=/tls/ca.crt
       - CORE_PEER_ADDRESS=peer0.alpha.com:7051
       - CORE_PEER_LOCALMSPID=AlphaCoMSP
     volumes:
+      - ./crypto-config/ordererOrganizations/orderer.org/orderers/orderer.orderer.org/tls/ca.crt:/orderer/ca.crt:ro
+      - ./artefacts:/artefacts
       - ./crypto-config/peerOrganizations/alpha.com/peers/peer0.alpha.com/tls/ca.crt:/tls/ca.crt:ro
       - ./crypto-config/peerOrganizations/alpha.com/users/Admin@alpha.com/msp:/msp:ro
 
   peer0.beta.com:
-    extends:
-      file: docker-compose-base.yaml
-      service: peer
+    << : *peer
     container_name: peer0.beta.com
     environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_PEER=debug
+      - CORE_CHAINCODE_LOGGING_LEVEL=debug
+      - CORE_PEER_MSPCONFIGPATH=/msp
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_VM_DOCKER_ATTACHSTDOUT=true
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=network_default
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=user
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=foo
+
       - CORE_PEER_ID=peer0.beta.com
       - CORE_PEER_LOCALMSPID=BetaCoMSP
       - CORE_PEER_ADDRESS=peer0.beta.com:7051
@@ -95,31 +130,41 @@ services:
       - betacouch
 
   betacouch:
-    extends:
-      file: docker-compose-base.yaml
-      service: couchdb
+    << : *couch
     container_name: betacouch
     ports:
       - 12584:5984
 
   betatools:
     container_name: betatools
-    extends:
-      file: docker-compose-base.yaml
-      service: tools
+    image: hyperledger/fabric-tools:1.2.0
     environment:
+      - CORE_PEER_MSPCONFIGPATH=/msp
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_ROOTCERT_FILE=/tls/ca.crt
       - CORE_PEER_ADDRESS=peer0.beta.com:7051
       - CORE_PEER_LOCALMSPID=BetaCoMSP
     volumes:
+      - ./crypto-config/ordererOrganizations/orderer.org/orderers/orderer.orderer.org/tls/ca.crt:/orderer/ca.crt:ro
+      - ./artefacts:/artefacts
       - ./crypto-config/peerOrganizations/beta.com/peers/peer0.beta.com/tls/ca.crt:/tls/ca.crt:ro
       - ./crypto-config/peerOrganizations/beta.com/users/Admin@beta.com/msp:/msp:ro
 
   peer0.gamma.com:
-    extends:
-      file: docker-compose-base.yaml
-      service: peer
+    << : *peer
     container_name: peer0.gamma.com
     environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_PEER=debug
+      - CORE_CHAINCODE_LOGGING_LEVEL=debug
+      - CORE_PEER_MSPCONFIGPATH=/msp
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_VM_DOCKER_ATTACHSTDOUT=true
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=network_default
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=user
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=foo
+
       - CORE_PEER_ID=peer0.gamma.com
       - CORE_PEER_LOCALMSPID=GammaCoMSP
       - CORE_PEER_ADDRESS=peer0.gamma.com:7051
@@ -137,21 +182,22 @@ services:
       - gammacouch
 
   gammacouch:
-    extends:
-      file: docker-compose-base.yaml
-      service: couchdb
+    << : *couch
     container_name: gammacouch
     ports:
       - 13584:5984
 
   gammatools:
     container_name: gammatools
-    extends:
-      file: docker-compose-base.yaml
-      service: tools
+    image: hyperledger/fabric-tools:1.2.0
     environment:
+      - CORE_PEER_MSPCONFIGPATH=/msp
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_ROOTCERT_FILE=/tls/ca.crt
       - CORE_PEER_ADDRESS=peer0.gamma.com:7051
       - CORE_PEER_LOCALMSPID=GammaCoMSP
     volumes:
+      - ./crypto-config/ordererOrganizations/orderer.org/orderers/orderer.orderer.org/tls/ca.crt:/orderer/ca.crt:ro
+      - ./artefacts:/artefacts
       - ./crypto-config/peerOrganizations/gamma.com/peers/peer0.gamma.com/tls/ca.crt:/tls/ca.crt:ro
       - ./crypto-config/peerOrganizations/gamma.com/users/Admin@gamma.com/msp:/msp:ro
