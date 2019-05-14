@@ -15,6 +15,15 @@ jobs:
           name: "Docker login"
           command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
       - run:
+          name: "Download previously generated images"
+          command:
+            docker pull appliedblockchain/zktrading-builder-$CIRCLE_BRANCH
+            docker pull appliedblockchain/zktrading-$CIRCLE_BRANCH
+            for IMAGE in setup server mtserver convert-vk
+            do
+              docker pull appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH
+            done
+      - run:
           name: "Build builder image"
           command: |
             cd cpp
@@ -30,15 +39,19 @@ jobs:
             cd cpp
             for IMAGE in setup server mtserver convert-vk
             do
-              docker build -f docker/$IMAGE.Dockerfile -t appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1 .
+              docker build -f docker/$IMAGE.Dockerfile -t appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH .
             done
       - run:
-          name: "Push app images"
+          name: "Push images"
           command: |
             cd cpp
+            docker push appliedblockchain/zktrading-builder-$CIRCLE_BRANCH
+            docker push appliedblockchain/zktrading-$CIRCLE_BRANCH
             for IMAGE in setup server mtserver convert-vk
             do
-              docker push appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
+              docker push appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH
+              docker tag appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
+              docker tag appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
             done
 
   # build_cpp:
