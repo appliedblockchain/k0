@@ -118,4 +118,13 @@ async function run() {
   fs.writeFileSync(`${who}.secrets.json`, JSON.stringify(secretStore.spit()))
 }
 
-run().then(console.log).then(process.exit.bind(null,0)).catch(console.log)
+(async () => {
+  try {
+    await run()
+    process.exit(0)
+  } catch (err) {
+    console.log(err)
+    console.log('Deposit failed...')
+    process.exit(1)
+  }
+})()

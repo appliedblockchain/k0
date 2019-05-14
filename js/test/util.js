@@ -12,6 +12,7 @@ const clear = require('clear')
 const globalUtil = require('../util')
 const BN = require('bn.js')
 
+const { env } = process
 const baseDir = path.join(__dirname, '..', '..')
 const cppDir = process.env.CPP_DIR || path.join(baseDir, 'cpp')
 const cppUtilDir = process.env.CPP_UTIL_DIR || path.join(cppDir, 'build', 'src')
@@ -48,8 +49,8 @@ async function pack256Bits(hex) {
   globalUtil.checkString(hex)
   let executablePath
 
-  if (process.env.CIRCLECI) {
-    executablePath = 'docker run appliedblockchain/zktrading-pack'
+  if (env.CIRCLECI) {
+    executablePath = `docker run appliedblockchain/zktrading-pack:${env.CIRCLE_BRANCH}-${env.CIRCLE_SHA1}`
   } else {
     executablePath = path.join(cppUtilDir, 'pack_256_bits')
   }
