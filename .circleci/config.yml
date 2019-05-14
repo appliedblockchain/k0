@@ -17,11 +17,11 @@ jobs:
       - run:
           name: "Download previously generated images"
           command: |
-            docker pull appliedblockchain/zktrading-builder-$CIRCLE_BRANCH
-            docker pull appliedblockchain/zktrading-$CIRCLE_BRANCH
+            docker pull appliedblockchain/zktrading-builder-$CIRCLE_BRANCH || true
+            docker pull appliedblockchain/zktrading-$CIRCLE_BRANCH || true
             for IMAGE in setup server mtserver convert-vk
             do
-              docker pull appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH
+              docker pull appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH || true
             done
       - run:
           name: "Build builder image"
