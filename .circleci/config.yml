@@ -15,10 +15,12 @@ jobs:
           name: "Docker login"
           command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
       - run:
-          name: "Download previously generated images"
+          name: "Download and tag previously generated images"
           command: |
-            docker pull appliedblockchain/zktrading-builder-$CIRCLE_BRANCH || true
-            docker pull appliedblockchain/zktrading-$CIRCLE_BRANCH || true
+            docker pull appliedblockchain/zktrading-builder:$CIRCLE_BRANCH || true
+            docker tag appliedblockchain/zktrading-builder:$CIRCLE_BRANCH zktrading-builder || true
+            docker pull appliedblockchain/zktrading:$CIRCLE_BRANCH || true
+            docker tag appliedblockchain/zktrading:$CIRCLE_BRANCH zktrading || true
             for IMAGE in setup server mtserver convert-vk
             do
               docker pull appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH || true
@@ -47,8 +49,8 @@ jobs:
             cd cpp
             for IMAGE in zktrading-builder zktrading
             do
-              docker tag $IMAGE appliedblockchain/$IMAGE-$CIRCLE_BRANCH
-              docker push appliedblockchain/$IMAGE-$CIRCLE_BRANCH
+              docker tag $IMAGE appliedblockchain/$IMAGE:$CIRCLE_BRANCH
+              docker push appliedblockchain/$IMAGE:$CIRCLE_BRANCH
             done
             for IMAGE in setup server mtserver convert-vk
             do
