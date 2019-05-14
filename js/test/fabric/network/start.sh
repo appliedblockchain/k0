@@ -15,6 +15,12 @@ docker run -it -v $PWD:/config hyperledger/fabric-tools:1.2.0 configtxgen -confi
 echo Starting network...
 docker-compose -f docker-compose.yaml $maybe_ci_dc_file up -d
 
+echo Waiting for CouchDBs...
+
+bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:11584)" != "200" ]]; do sleep 1; done'
+bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:12584)" != "200" ]]; do sleep 1; done'
+bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:13584)" != "200" ]]; do sleep 1; done'
+
 echo Generating channel creation tx...
 
 docker run -it -v $PWD:/config hyperledger/fabric-tools:1.2.0 configtxgen -configPath /config -profile TheChannel -channelID the-channel -outputCreateChannelTx ./config/artefacts/channel_creation.tx
@@ -23,14 +29,12 @@ echo Creating channel...
 
 docker-compose run -w /artefacts alphatools peer channel create -o orderer.orderer.org:7050 -c the-channel -f channel_creation.tx --tls true --cafile /orderer/ca.crt
 
-echo Wait for CouchDBs...
-bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:11584)" != "200" ]]; do sleep 1; done'
-bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:12584)" != "200" ]]; do sleep 1; done'
-bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:13584)" != "200" ]]; do sleep 1; done'
-
 echo Joining channel...
 
-for org in alpha beta gamma; do docker-compose run ${org}tools peer channel join -b /artefacts/the-channel.block; done
+for org in alpha beta gamma
+do
+  docker-compose run ${org}tools peer channel join -b /artefacts/the-channel.block
+done
 
 echo Generating anchor definition txs...
 
