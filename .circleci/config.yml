@@ -95,7 +95,7 @@ jobs:
     machine:
       image: circleci/classic:201808-01
     working_directory: ~/.go_workspace/src/github.com/appliedblockchain/nftchaincode
-     steps:
+    steps:
       - checkout
       - run:
           name: "Enable NVM"
@@ -108,7 +108,7 @@ jobs:
             nvm install v8
             node -v
             nvm alias default v8
-     - run:
+      - run:
           name: Install npm modules
           command: cd js && npm i
       - persist_to_workspace:
