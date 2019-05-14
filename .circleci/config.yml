@@ -151,6 +151,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: "Docker login"
+          command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+      - run:
           name: "Pull and tag app images"
           command: |
             cd cpp
