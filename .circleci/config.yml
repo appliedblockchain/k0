@@ -163,7 +163,7 @@ jobs:
           name: "Spin up Fabric network"
           command: |
             cd js/test/fabric/network
-            ./start.sh
+            CI=true ./start.sh
       - run:
           name: "Install chaincode"
           command: |
