@@ -56,7 +56,7 @@ jobs:
             do
               docker push appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH
               docker tag appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
-              docker tag appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
+              docker push appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
             done
 
   # build_cpp:
