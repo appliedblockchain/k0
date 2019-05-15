@@ -206,6 +206,11 @@ jobs:
       #         docker run -v /tmp/k0keys:/tmp/k0keys zktrading-convert-vk /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt
       #       done
       - run:
+          name: "Remove old chaincode images"
+          command: |
+            docker rmi $(docker images --filter=reference="*simplechaincode*" -q)
+            docker rmi $(docker images --filter=reference="*k0chaincode*" -q)
+      - run:
           name: "Get Fabric source code"
           command: |
             cd ~/.go_workspace/src/github.com
@@ -258,7 +263,7 @@ jobs:
             cd js/test/fabric
             node instantiatesimple
       - run:
-          name: "Instantiate simple chaincode"
+          name: "Instantiate K0 chaincode"
           command: |
             cd js/test/fabric
             node instantiate

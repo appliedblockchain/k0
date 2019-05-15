@@ -1,7 +1,6 @@
 const BN = require('bn.js')
 const crypto = require('crypto')
 const u = require('../util')
-const ethUtil = require('../eth/util')
 
 async function prepareDeposit(server, platformState, secretStore, v) {
   u.checkBN(v)
@@ -12,8 +11,8 @@ async function prepareDeposit(server, platformState, secretStore, v) {
   const prevRoot = await platformState.merkleTreeRoot()
   const mtAddSim = await platformState.simulateMerkleTreeAddition(cm)
   const commProofData = await server.depositCommitmentProof(a_pk, rho, r, v)
-  const kPacked = await ethUtil.pack256Bits(commProofData.k)
-  const cmPacked = await ethUtil.pack256Bits(cm)
+  const kPacked = await u.pack256Bits(commProofData.k)
+  const cmPacked = await u.pack256Bits(cm)
   const additionProof = await server.merkleTreeAdditionProof(
     prevRoot,
     mtAddSim.address,

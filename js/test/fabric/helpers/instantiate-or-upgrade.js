@@ -33,10 +33,10 @@ async function instantiateOrUpgrade(clientBundle, endorsementPolicy, chaincodeId
   if (proposalResponses
       && proposalResponses[0].response
       && proposalResponses[0].response.status === 200) {
-    console.log('got good proposals')
-    console.log(proposalResponses)
+    // everything ok
   } else {
     console.log(proposalResponses[0])
+    eh.close()
     throw new Error('Proposal was bad')
   }
   const tx = {
