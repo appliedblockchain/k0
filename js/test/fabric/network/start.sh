@@ -8,7 +8,10 @@ rm -rf crypto-config && docker rm $(docker ps -aq)
 
 echo Creating crypto config...
 docker run -v $PWD/crypto-config.yaml:/crypto-config.yaml:ro -v $PWD/crypto-config:/crypto-config hyperledger/fabric-tools:1.2.0 cryptogen generate --config=/crypto-config.yaml --output=/crypto-config
-chmod -R +r crypto-config
+if [ "$CI" = "true" ]
+then
+  sudo chmod -R +r crypto-config
+fi
 
 echo Generating orderer genesis block...
 docker run -it -v $PWD:/config hyperledger/fabric-tools:1.2.0 configtxgen -configPath /config -profile TheGenesis -channelID orderer-system-channel -outputBlock /config/artefacts/orderer_genesis.block
