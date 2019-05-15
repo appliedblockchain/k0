@@ -110,14 +110,14 @@ jobs:
             nvm alias default v8
       - restore_cache:
           keys:
-            - zktrading-js-deps-$CIRCLE_BRANCH-{{ checksum "package.json" }}
+            - zktrading-js-deps-$CIRCLE_BRANCH-{{ checksum "js/package.json" }}
       - run:
           name: Install npm modules
           command: cd js && npm i
       - save_cache:
-         key: zktrading-js-deps-$CIRCLE_BRANCH-{{ checksum "package.json" }}
+         key: zktrading-js-deps-$CIRCLE_BRANCH-{{ checksum "js/package.json" }}
          paths:
-           - node_modules
+           - js/node_modules
       - persist_to_workspace:
           root: .
           paths:
