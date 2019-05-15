@@ -6,17 +6,18 @@ import (
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
 
+var logger = shim.NewLogger("k0Chaincode")
+
 type SimpleChaincode struct {
 }
 
 func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
-	println("Hello world!")
+	logger.Info("logger Init info")
 	var err error
 	_, args := stub.GetFunctionAndParameters()
 	if len(args) != 1 {
 		return shim.Error("Incorrect number of arguments. Expecting 1")
 	}
-	fmt.Printf("Setting value to: %s", args[0])
 	err = stub.PutState("value", []byte(args[0]))
 	if err != nil {
 		return shim.Error(err.Error())
@@ -25,6 +26,7 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 }
 
 func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
+	logger.Info("logger Invoke")
 	function, args := stub.GetFunctionAndParameters()
 	switch function {
 	case "get":
@@ -48,11 +50,11 @@ func (t *SimpleChaincode) get(stub shim.ChaincodeStubInterface, args []string) p
 }
 
 func (t *SimpleChaincode) set(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	logger.Info("logger set")
 	var err error
 	if len(args) != 1 {
 		return shim.Error("Incorrect number of arguments. Expecting 1")
 	}
-	fmt.Printf("Setting value to: %s", args[0])
 	err = stub.PutState("value", []byte(args[0]))
 	if err != nil {
 		return shim.Error(err.Error())

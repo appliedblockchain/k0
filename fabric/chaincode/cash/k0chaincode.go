@@ -7,6 +7,8 @@ import (
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
 
+var logger = shim.NewLogger("k0Chaincode")
+
 type K0Chaincode struct {
 }
 
@@ -14,11 +16,9 @@ func (t *K0Chaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 	var err error
 	_, args := stub.GetFunctionAndParameters()
 	if len(args) != 1 {
-		print("len")
-		print(len(args))
 		return shim.Error("Incorrect number of arguments. Expecting 1, got: " + string(len(args)))
 	}
-	fmt.Printf("Setting value to: %s", args[0])
+	logger.Infof("Setting value to: %s", args[0])
 	err = stub.PutState("value", []byte(args[0]))
 	if err != nil {
 		return shim.Error(err.Error())
@@ -40,7 +40,6 @@ func (t *K0Chaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 }
 
 func (t *K0Chaincode) mint(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	var logger = shim.NewLogger("mint")
 	logger.Infof("MINT %s", string(args[0]))
 	var err error
 	cm := args[0]
@@ -66,7 +65,6 @@ func (t *K0Chaincode) mint(stub shim.ChaincodeStubInterface, args []string) pb.R
 }
 
 func (t *K0Chaincode) transfer(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	var logger = shim.NewLogger("transfer")
 	var err error
 	sn_in_0 := args[0]
 	sn_in_1 := args[1]
