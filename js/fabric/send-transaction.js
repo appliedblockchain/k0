@@ -1,5 +1,6 @@
 'use strict'
 const _ = require('lodash')
+const assert = require('assert')
 const waitForTx = require('./wait-for-tx')
 
 async function sendTransaction(logger, client, channel, chaincodeId, peers,
