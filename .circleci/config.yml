@@ -208,8 +208,8 @@ jobs:
       - run:
           name: "Remove old chaincode images"
           command: |
-            docker rmi $(docker images --filter=reference="*simplechaincode*" -q)
-            docker rmi $(docker images --filter=reference="*k0chaincode*" -q)
+            docker rmi $(docker images --filter=reference="*simplechaincode*" -q) || true
+            docker rmi $(docker images --filter=reference="*k0chaincode*" -q) || true
       - run:
           name: "Get Fabric source code"
           command: |
