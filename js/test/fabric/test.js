@@ -45,7 +45,7 @@ describe('Fabric workflow', function() {
     for (let i = 0; i < 2; i = i + 1) {
       const who = initialHodlers[i]
       const config = getConfig(who, 'User1')
-      const platformState = await makePlatformState(config.proverPort)
+      const platformState = await makePlatformState(config.mtServerPort)
       const k0Fabric = await makeFabricPlatform(logger, config, 'k0chaincode')
       const privateKey = u.buf2hex(privKeys[who])
       const publicKey = u.buf2hex(pubKeys[who])
