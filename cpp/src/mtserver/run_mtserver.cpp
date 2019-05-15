@@ -17,20 +17,11 @@ int main(int argc, char* argv[])
 
   mtserver.StartListening();
 
-  std::cout << "Server started. Enter \"end\" to shut down." << std::endl;
+  std::cout << "Server started." << std::endl;
+  cout << "Hit enter to stop the server." << endl;
+  getchar();
 
-  bool need_to_shut_down = false;
-  while(!need_to_shut_down) {
-    std::string x;
-    std::cin >> x;
-    if (x == "") {
-      // somehow there is constantly some input on circleci, ignore this
-    } else if (x == "end") {
-      need_to_shut_down = true;
-    } else {
-      std::cout << "You entered \"" << x << "\". Enter \"end\" to shut down." << std::endl;
-    }
-  }
+  mtserver.StopListening();
 
   return 0;
 }

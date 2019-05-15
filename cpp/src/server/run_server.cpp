@@ -54,21 +54,11 @@ int main(int argc, char *argv[]) {
     server.StartListening();
 
     std::cout << "Server started (port " << port << "). ";
-    std::cout << "Enter \"end\" to shut down." << std::endl;
 
-    bool need_to_shut_down = false;
-    while (!need_to_shut_down) {
-        std::string x;
-        std::cin >> x;
-        if (x == "") {
-            // somehow there is constantly some input on circleci, ignore this
-        } else if (x == "end") {
-            need_to_shut_down = true;
-        } else {
-            std::cout << "You entered \"" << x
-                      << "\". Enter \"end\" to shut down." << std::endl;
-        }
-    }
+    cout << "Hit enter to stop the server." << endl;
+    getchar();
+
+    server.StopListening();
 
     return 0;
 }
