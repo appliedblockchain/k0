@@ -182,18 +182,18 @@ jobs:
             nvm install v8
             node -v
             nvm alias default v8
-      # - run:
-      #     name: "Docker login"
-      #     command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
-      # - run:
-      #     name: "Pull and tag app images"
-      #     command: |
-      #       cd cpp
-      #       for IMAGE in setup server mtserver convert-vk
-      #       do
-      #         docker pull appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
-      #         docker tag appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1 zktrading-$IMAGE
-      #       done
+      - run:
+          name: "Docker login"
+          command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+      - run:
+          name: "Pull and tag app images"
+          command: |
+            cd cpp
+            for IMAGE in setup server mtserver convert-vk
+            do
+              docker pull appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
+              docker tag appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1 zktrading-$IMAGE
+            done
       - attach_workspace:
           at: .
       # - run:
@@ -282,15 +282,15 @@ workflows:
   version: 2
   main:
     jobs:
-      # - build_cpp_docker:
-      #     context: org-global
+      - build_cpp_docker:
+          context: org-global
       - prepare_node:
           context: org-global
       - fabric:
           context: org-global
           requires:
+            - build_cpp_docker
             - prepare_node
-          #   - build_cpp_docker
     #  - build_cpp:
     #       context: org-global
     #  - run_private_trade_test:
