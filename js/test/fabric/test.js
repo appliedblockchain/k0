@@ -25,15 +25,15 @@ describe('Fabric workflow', function() {
     logger = log4js.getLogger()
     logger.level = process.env.LOG_LEVEL || 'info'
 
-    const platformState = await makePlatformState(4410)
+    const alphaConfig = getConfig('alpha', 'Admin')
+    const platformState = await makePlatformState(alphaConfig.mtServerPort)
     const initialRoot = await platformState.merkleTreeRoot()
 
     privKeys.alpha = crypto.randomBytes(32)
     privKeys.beta = crypto.randomBytes(32)
     privKeys.gamma = crypto.randomBytes(32)
 
-    const alphaConfig = getConfig('alpha', 'Admin')
-    const k0 = await makeK0(alphaConfig.mtServerPort)
+    const k0 = await makeK0(alphaConfig.proverPort)
 
     pubKeys.alpha = await k0.prfAddr(privKeys.alpha)
     pubKeys.beta = await k0.prfAddr(privKeys.beta)
