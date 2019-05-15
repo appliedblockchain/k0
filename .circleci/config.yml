@@ -246,8 +246,8 @@ workflows:
     jobs:
       # - build_cpp_docker:
       #     context: org-global
-      # - prepare_node:
-      #     context: org-global
+      - prepare_node:
+          context: org-global
       - fabric:
           context: org-global
           requires:
