@@ -169,22 +169,13 @@ describe('Minimum viable private payment token', function () {
       const response = await proverEngine.request('prepare_deposit', [ a_pk, rho, r, v ]) // check demo
       const proofDuration = Date.now() - timestampStart
 
-      console.log({ response })
-
-      // const contractRoot =
       await Promise.all([
         MVPPT.methods.root(0).call(),
         MVPPT.methods.root(1).call()
       ])
 
-      const serverRootResponse = await mtEngine.request('root', [])
-      console.log(serverRootResponse)
-      // const serverRoot =
-      await util.pack256Bits(serverRootResponse.result)
-
       const data = response.result
 
-      console.log(data.commitmentProof)
       const commitmentProofCompact = flattenProof(data.commitmentProof)
       const additionProofCompact = flattenProof(data.additionProof)
 
@@ -196,7 +187,6 @@ describe('Minimum viable private payment token', function () {
         commitmentProofCompact,
         additionProofCompact
       ]
-      console.log({ params })
 
       const txData = MVPPT.methods.deposit(
         ...params
@@ -273,7 +263,6 @@ describe('Minimum viable private payment token', function () {
 
       const res = response.result
 
-      console.log(response)
       const sn0Packed = await util.pack256Bits(res.input_0_sn)
       const sn1Packed = await util.pack256Bits(res.input_1_sn)
       const cm0Packed = await util.pack256Bits(res.output_0_cm)
@@ -341,4 +330,5 @@ describe('Minimum viable private payment token', function () {
     }
 
   })
+
 })

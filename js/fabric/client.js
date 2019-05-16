@@ -36,8 +36,7 @@ process.on('unhandledRejection', error => {
   console.log(error.stack)
 })
 
-async function makeClient() {
-  const config = getConfig()
+async function makeClient(config) {
   const client = new Client()
   client.setStateStore(dummyKeyValueStore)
   const cryptoSuite = Client.newCryptoSuite()

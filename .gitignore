@@ -5,7 +5,8 @@
 /cpp/build
 /cpp/cmake-build-debug
 /cpp/cmake-build-debug-remote
-cpp/cmake-build-debug-remote-host
+/cpp/cmake-build-debug-remote-host
+/cpp/depends
 /*/node_modules
 /*/package-lock.json
 /js/demo/addresses.json
@@ -18,3 +19,5 @@ cpp/cmake-build-debug-remote-host
 /js/demo/fabric/mnemonics.json
 /js/demo/fabric/*.secrets.json
 /js/demo/fabric/public-keys.json
+/js/test/fabric/network/artefacts
+/js/test/fabric/network/crypto-config

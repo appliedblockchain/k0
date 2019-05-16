@@ -92,7 +92,6 @@ async function compileContracts() {
   // TODO Delete directory
   //await asyncFs.unlink(tmpFilePath)
   const result = JSON.parse(json)
-  //console.log(result)
   return {
     MerkleTree: extractContractArtefacts(result, 'MerkleTree'),
     AdditionVerifier: extractContractArtefacts(result, 'AdditionVerifier'),

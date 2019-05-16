@@ -100,6 +100,7 @@ add_executable(
         server
 
         server/run_server.cpp
+        json_conversion.cpp
 )
 target_link_libraries(
         server
@@ -203,4 +204,3 @@ target_include_directories(
         ${DEPENDS_DIR}/libsnark/depends/libff
         ${DEPENDS_DIR}/libsnark/depends/libfqfft
 )
-

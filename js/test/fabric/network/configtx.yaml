@@ -1,0 +1,54 @@
+Organizations:
+  - &OrdererOrg
+    Name: OrdererOrg
+    Name: OrdererOrg
+    ID: OrdererOrgMSP
+    MSPDir: crypto-config/ordererOrganizations/orderer.org/msp
+  - &AlphaCo
+    Name: AlphaCo
+    ID: AlphaCoMSP
+    MSPDir: crypto-config/peerOrganizations/alpha.com/msp
+    AnchorPeers:
+      - Host: peer0.alpha.com
+        Port: 7051
+  - &BetaCo
+    Name: BetaCo
+    ID: BetaCoMSP
+    MSPDir: crypto-config/peerOrganizations/beta.com/msp
+    AnchorPeers:
+      - Host: peer0.beta.com
+        Port: 7051
+  - &GammaCo
+    Name: GammaCo
+    ID: GammaCoMSP
+    MSPDir: crypto-config/peerOrganizations/gamma.com/msp
+    AnchorPeers:
+      - Host: peer0.gamma.com
+        Port: 7051
+
+Profiles:
+  TheGenesis:
+    Orderer:
+      OrdererType: solo
+      Addresses:
+        - orderer.orderer.org:7050
+      BatchTimeout: 2s
+      BatchSize:
+        MaxMessageCount: 10
+        AbsoluteMaxBytes: 99 MB
+        PreferredMaxBytes: 512 KB
+      Organizations:
+        - *OrdererOrg
+    Consortiums:
+      TheConsortium: &TheConsortium
+        Organizations:
+          - *AlphaCo
+          - *BetaCo
+          - *GammaCo
+  TheChannel:
+    Consortium: TheConsortium
+    Application:
+      Organizations:
+        - *AlphaCo
+        - *BetaCo
+        - *GammaCo
