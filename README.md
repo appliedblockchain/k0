@@ -5,7 +5,7 @@ If you want to run the Fabric tests/demo, the project should be checked out in y
 [Set up the project dependencies](#set-up-the-project-dependencies)  
 [Build](#build)  
 [C++ tests](#c-tests)  
-[ZKP setup (needed for all tests and demos)](#zkp-setup-needed-for-all-tests-and-demos)  
+[ZKP setup](#zkp-setup-needed-for-all-tests-and-demos)  
 [Ethereum demo](#ethereum-demo)  
 [Fabric integration tests](#fabric-integration-tests)  
 
@@ -115,6 +115,8 @@ done
 
 ## Ethereum demo
 
+ZKP setup as described [above](#zkp-setup-needed-for-all-tests-and-demos)
+
 Note: you will need 7 terminals (consider using iTerm2 on Mac for ease of use).
 
 Run the proving servers(one terminal each):
@@ -170,7 +172,7 @@ node wallet carol
 
 The project needs to be checked out in the GOPATH (`$GOPATH/src/github.com/appliedblockchain/zktrading`)
 
-ZKP setup as above
+ZKP setup as described [above](#zkp-setup-needed-for-all-tests-and-demos)
 
 ### Spin up a Fabric network
 In `js/test/fabric/network`:
