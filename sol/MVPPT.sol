@@ -7,6 +7,7 @@ import "TransferVerifier.sol";
 import "WithdrawalVerifier.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
+// k0Cash, a minimum viable private payment token
 contract MVPPT {
     uint[2] public root;
     uint public num_leaves = 0;

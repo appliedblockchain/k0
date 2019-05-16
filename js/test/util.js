@@ -155,7 +155,17 @@ async function prompt() {
   }
 }
 
+async function sleep(seconds = 0, message = '') {
+  if (message) {
+    console.log('Sleeping for ${sec} seconds')
+  }
+  return new Promise(a => {
+    setTimemout(sec * 1000, a)
+  })
+}
+
 module.exports = {
+  sleep,
   clear,
   convertVk,
   convertProof,

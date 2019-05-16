@@ -39,6 +39,9 @@ async function run() {
     console.log('Need parameter "alice", "bob" or "carol".')
     process.exit(1)
   }
+
+  // TODO: put back to initial state
+  // const platformState = await makePlatformState(mtServerPorts[who]) 
   const platformState = await makePlatformState(mtServerPorts[who])
   const web3 = testUtil.initWeb3()
   const k0Eth = await makeEthPlatform(
@@ -48,11 +51,12 @@ async function run() {
 
   const secretStoreData = require(`./${who}.secrets.json`)
   const secretStore = makeSecretStore(secretStoreData)
-  console.log('private key', secretStore.getPrivateKey())
-  console.log('public key', secretStore.getPublicKey())
+  console.log('private key', u.buf2hex(secretStore.getPrivateKey()))
+  console.log('public key', u.buf2hex(secretStore.getPublicKey()))
   initEventHandlers(platformState, secretStore, k0Eth)
 
-  const k0 = await makeK0(serverPorts[who])
+  // const k0 = await makeK0(serverPorts[who]) 
+  const k0 = await makeK0(serverPorts[4000]) // attempting to use same verification server for all 
 
   const artefacts = await compileContracts()
   const dollarCoin = new web3.eth.Contract(
@@ -75,7 +79,7 @@ async function run() {
   console.log(await dollarCoin.methods.balanceOf(u.buf2hex(wallet.getAddress())).call())
 
   // TODO: uncomment, commented only to check the server setup on cci
-  // await demoUtil.prompt()
+  await demoUtil.prompt()
 
   const platformRoot = await k0Eth.merkleTreeRoot()
   console.log(`Platform Merkle tree root: ${u.buf2hex(platformRoot)}`)
@@ -93,7 +97,7 @@ async function run() {
   )
   await web3.eth.sendSignedTransaction(u.buf2hex(approveTx))
 
-  console.log('approval done!')
+  console.log('Approval done!')
   for (let i = 0; i < values.length; i++) {
     const v = values[i]
 
@@ -110,9 +114,10 @@ async function run() {
       data.commitmentProof,
       data.additionProof
     )
-    const receipt = await web3.eth.sendSignedTransaction(u.buf2hex(depositTx))
+    // const receipt = 
+    await web3.eth.sendSignedTransaction(u.buf2hex(depositTx))
 
-    await u.wait(200)
+    await u.wait(2000)
   }
 
   fs.writeFileSync(`${who}.secrets.json`, JSON.stringify(secretStore.spit()))

@@ -17,17 +17,18 @@
   },
   "scripts": {
     "test": "mocha test",
+    "test:integration:eth": "mocha test/eth/integration.js",
     "lint": "eslint . --ignore-path .gitignore",
     "parity": "docker run -p 8545:8545 appliedblockchain/parity-solo-instant"
   },
   "devDependencies": {
+    "@appliedblockchain/eslint-config": "^2.6.0",
     "chalk": "^2.4.2",
     "clear": "^0.1.0",
     "cli-table": "^0.3.1",
     "code": "^5.2.4",
-    "mocha": "^5.2.0",
-    "@appliedblockchain/eslint-config": "^2.2.0",
-    "eslint": "^4.19.1"
+    "eslint": "^4.19.1",
+    "mocha": "^5.2.0"
   },
   "eslintConfig": {
     "extends": "@appliedblockchain/eslint-config",

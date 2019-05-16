@@ -99,7 +99,8 @@ Generate proving keys and verification keys for the commitment, transfer, additi
 ```
 mkdir /tmp/k0keys
 for circuit in commitment transfer addition withdrawal;
- do $ZKTRADING_PATH/cpp/build/src/setup $circuit 7 /tmp/k0keys/${circuit}_pk /tmp/k0keys/${circuit}_vk && $ZKTRADING_PATH/cpp/build/src/convert_vk /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt; done
+ do $ZKTRADING_PATH/cpp/build/src/setup $circuit 7 /tmp/k0keys/${circuit}_pk /tmp/k0keys/${circuit}_vk && $ZKTRADING_PATH/cpp/build/src/convert_vk /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt;
+done
 ```
 
 Running the demo(note: you will need 7 terminals, install iterm2 on mac for ease of use):

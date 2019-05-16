@@ -12,6 +12,9 @@ const spit = require('./spit')
 const slurp = require('./slurp')
 
 function makeSecretStore(importDump) {
+
+  console.log({importDump})
+
   let state = slurp(importDump)
   return {
     addNoteInfo: (cm, a_pk, rho, r, v) => {

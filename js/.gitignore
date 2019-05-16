@@ -1,1 +1,7 @@
 node_modules
+alice.secrets.json
+bob.secrets.json
+carol.secrets.json
+public-keys.json
+test/.DS_Store
+

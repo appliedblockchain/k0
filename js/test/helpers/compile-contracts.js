@@ -125,9 +125,10 @@ async function compileContracts(tmpDir = '/tmp/k0keys') {
     cwd: contractsDir,
     maxBuffer: 1024 * 1024
   }
-  const {stdout, stderr} = await execAsync(command, options)
+  const {stdout, stderr } = await execAsync(command, options)
+
   if (stderr) {
-    console.log(stderr)
+    // console.log(stderr)
   }
   const json = await asyncFs.readTextFile(outputPath)
   await Promise.all(contractNames.map(name => {

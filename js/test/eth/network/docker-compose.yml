@@ -1,8 +1,11 @@
 version: '3'
 
 services:
-  proofServer1:
+  server1:
     image: appliedblockchain/zktrading-server:${CIRCLE_BRANCH}-${CIRCLE_SHA1}
+    build:
+      context: ../../../../cpp
+      dockerfile: docker/server.Dockerfile
     command: 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk 4000
     restart: on-failure
     volumes:
@@ -11,44 +14,59 @@ services:
       - 4000:4000
     networks:
       - main
-  proofServer2:
-    image: appliedblockchain/zktrading-server:${CIRCLE_BRANCH}-${CIRCLE_SHA1}
-    command: 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk 5000
-    restart: on-failure
-    volumes:
-      - /tmp/k0keys/:/tmp/k0keys:ro
-    ports:
-      - 5000:5000
-    networks:
-      - main
-  proofServer3:
-    image: appliedblockchain/zktrading-server:${CIRCLE_BRANCH}-${CIRCLE_SHA1}
-    command: 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk 6000
-    restart: on-failure
-    volumes:
-      - /tmp/k0keys/:/tmp/k0keys:ro
-    ports:
-      - 6000:6000
-    networks:
-      - main
-  mtServer1:
+  # server2:
+  #   image: appliedblockchain/zktrading-server:${CIRCLE_BRANCH}-${CIRCLE_SHA1}
+  #   build:
+  #     context: ../../../../cpp
+  #     dockerfile: docker/server.Dockerfile
+  #   command: 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk 5000
+  #   restart: on-failure
+  #   volumes:
+  #     - /tmp/k0keys/:/tmp/k0keys:ro
+  #   ports:
+  #     - 5000:5000
+  #   networks:
+  #     - main
+  # server3:
+  #   image: appliedblockchain/zktrading-server:${CIRCLE_BRANCH}-${CIRCLE_SHA1}
+  #   build:
+  #     context: ../../../../cpp
+  #     dockerfile: docker/server.Dockerfile
+  #   command: 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk 6000
+  #   restart: on-failure
+  #   volumes:
+  #     - /tmp/k0keys/:/tmp/k0keys:ro
+  #   ports:
+  #     - 6000:6000
+  #   networks:
+  #     - main
+  mtserver1:
     image: appliedblockchain/zktrading-mtserver:${CIRCLE_BRANCH}-${CIRCLE_SHA1}
+    build:
+      context: ../../../../cpp
+      dockerfile: docker/mtserver.Dockerfile
     command: 7 4100
     restart: on-failure
     ports:
       - 4100:4100
     networks:
       - main
-  mtServer2:
+  mtserver2:
     image: appliedblockchain/zktrading-mtserver:${CIRCLE_BRANCH}-${CIRCLE_SHA1}
+    build:
+      context: ../../../../cpp
+      dockerfile: docker/mtserver.Dockerfile
     command: 7 5100
     restart: on-failure
     ports:
       - 5100:5100
     networks:
       - main
-  mtServer3:
+  mtserver3:
     image: appliedblockchain/zktrading-mtserver:${CIRCLE_BRANCH}-${CIRCLE_SHA1}
+    build:
+      context: ../../../../cpp
+      dockerfile: docker/mtserver.Dockerfile
     command: 7 6100
     restart: on-failure
     ports:

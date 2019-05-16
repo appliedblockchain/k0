@@ -1,3 +1,5 @@
+'use strict'
+
 const BN = require('bn.js')
 const chalk = require('chalk')
 const u = require('../../util')
@@ -12,14 +14,12 @@ function decodeData(data) {
   }
 }
 
-async function handleTransfer(platformState, secretStore, txHash, in0sn, in1sn,
-                              out0cm, out1cm, out0data, out1data, nextRoot,
-                              callee) {
+async function handleTransfer(platformState, secretStore, txHash, in0sn, in1sn, out0cm, out1cm, out0data, out1data, nextRoot) {
   const outputs = [
     [ out0cm, out0data ],
     [ out1cm, out1data ]
   ]
-  for(let i = 0; i < 2; i = i + 1) {
+  for (let i = 0; i < 2; i = i + 1) {
     const info = decodeData(outputs[i][1])
     if (info.a_pk.equals(secretStore.getPublicKey())) {
       secretStore.addNoteInfo(
@@ -39,7 +39,7 @@ async function handleTransfer(platformState, secretStore, txHash, in0sn, in1sn,
     nextRoot
   )
   console.log(chalk.grey([
-    `TRANSFER`,
+    'TRANSFER',
     `SN 0 ${u.buf2hex(in0sn)}`,
     `SN 1 ${u.buf2hex(in1sn)}`,
     `CM 0 ${u.buf2hex(out0cm)}`,
