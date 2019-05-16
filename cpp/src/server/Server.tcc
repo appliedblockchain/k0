@@ -624,9 +624,10 @@ Json::Value
 zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::status()
 {
     const bool ready = commitment_pk_loaded & commitment_vk_loaded &
-                       addition_pk_loaded & addition_vk_loaded &
-                       transfer_pk_loaded & transfer_vk_loaded &
-                       withdrawal_pk_loaded & withdrawal_vk_loaded;
+        addition_pk_loaded & addition_vk_loaded &
+        transfer_pk_loaded & transfer_vk_loaded &
+        withdrawal_pk_loaded & withdrawal_vk_loaded;
+
     Json::Value result;
     result["ready"] = ready;
     return result;
@@ -680,11 +681,11 @@ bool zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::verifyProof(
         proof);
     if (verified)
     {
-        cout << "proof verified!" << endl;
+        cout << "Proof verified!" << endl;
     }
     else
     {
-        cout << "proof NOT verified :(" << endl;
+        cout << "Proof NOT verified :(" << endl;
     }
     return verified;
 }

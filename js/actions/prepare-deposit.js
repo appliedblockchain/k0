@@ -1,4 +1,4 @@
-const BN = require('bn.js')
+const assert = require('assert')
 const crypto = require('crypto')
 const u = require('../util')
 

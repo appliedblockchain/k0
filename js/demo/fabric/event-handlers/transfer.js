@@ -12,15 +12,14 @@ function decodeData(data) {
   }
 }
 
-async function handleTransfer(platformState, secretStore, txnid, in0sn, in1sn,
-                              out0cm, out1cm, out0data, out1data, nextRoot) {
+async function handleTransfer(platformState, secretStore, txnid, in0sn, in1sn, out0cm, out1cm, out0data, out1data, nextRoot) {
 
   const outputs = [
     [ u.hex2buf(out0cm), u.hex2buf(out0data) ],
     [ u.hex2buf(out1cm), u.hex2buf(out1data) ]
   ]
 
-  for(let i = 0; i < 2; i = i + 1) {
+  for (let i = 0; i < 2; i = i + 1) {
     const info = decodeData(outputs[i][1])
     if (info.a_pk.equals(secretStore.getPublicKey())) {
       secretStore.addNoteInfo(
