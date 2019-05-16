@@ -15,12 +15,13 @@ class ZKTradeStubServer : public jsonrpc::AbstractServer<ZKTradeStubServer>
             this->bindAndAddMethod(jsonrpc::Procedure("add", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::addI);
             this->bindAndAddMethod(jsonrpc::Procedure("cm", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_STRING,"param03",jsonrpc::JSON_STRING,"param04",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::cmI);
             this->bindAndAddMethod(jsonrpc::Procedure("element", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING, "param01",jsonrpc::JSON_INTEGER, NULL), &ZKTradeStubServer::elementI);
+            this->bindAndAddMethod(jsonrpc::Procedure("exampleWitnessAndProof", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::exampleWitnessAndProofI);
             this->bindAndAddMethod(jsonrpc::Procedure("hash", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::hashI);
             this->bindAndAddMethod(jsonrpc::Procedure("depositCommitmentProof", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_STRING,"param03",jsonrpc::JSON_STRING,"param04",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::depositCommitmentProofI);
             this->bindAndAddMethod(jsonrpc::Procedure("merkleTreeAdditionProof", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_ARRAY, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_STRING,"param03",jsonrpc::JSON_STRING,"param04",jsonrpc::JSON_ARRAY,"param05",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::merkleTreeAdditionProofI);
             this->bindAndAddMethod(jsonrpc::Procedure("prepareTransfer", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_STRING,"param03",jsonrpc::JSON_STRING,"param04",jsonrpc::JSON_STRING,"param05",jsonrpc::JSON_STRING,"param06",jsonrpc::JSON_STRING,"param07",jsonrpc::JSON_ARRAY,"param08",jsonrpc::JSON_STRING,"param09",jsonrpc::JSON_STRING,"param10",jsonrpc::JSON_STRING,"param11",jsonrpc::JSON_STRING,"param12",jsonrpc::JSON_STRING,"param13",jsonrpc::JSON_ARRAY,"param14",jsonrpc::JSON_STRING,"param15",jsonrpc::JSON_STRING,"param16",jsonrpc::JSON_STRING,"param17",jsonrpc::JSON_STRING,"param18",jsonrpc::JSON_STRING,"param19",jsonrpc::JSON_STRING,"param20",jsonrpc::JSON_STRING,"param21",jsonrpc::JSON_STRING,"param22",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::prepareTransferI);
             this->bindAndAddMethod(jsonrpc::Procedure("prepare_withdrawal", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_STRING,"param03",jsonrpc::JSON_STRING,"param04",jsonrpc::JSON_STRING,"param05",jsonrpc::JSON_STRING,"param06",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::prepare_withdrawalI);
-            this->bindAndAddMethod(jsonrpc::Procedure("verifyProof", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_BOOLEAN, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_ARRAY,"param03",jsonrpc::JSON_ARRAY, NULL), &ZKTradeStubServer::verifyProofI);
+            this->bindAndAddMethod(jsonrpc::Procedure("verifyProof", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_BOOLEAN, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_OBJECT,"param03",jsonrpc::JSON_ARRAY, NULL), &ZKTradeStubServer::verifyProofI);
             this->bindAndAddMethod(jsonrpc::Procedure("prf_addr", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING, "param01",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::prf_addrI);
             this->bindAndAddMethod(jsonrpc::Procedure("reset", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING,  NULL), &ZKTradeStubServer::resetI);
             this->bindAndAddMethod(jsonrpc::Procedure("root", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING,  NULL), &ZKTradeStubServer::rootI);
@@ -38,6 +39,10 @@ class ZKTradeStubServer : public jsonrpc::AbstractServer<ZKTradeStubServer>
         inline virtual void elementI(const Json::Value &request, Json::Value &response)
         {
             response = this->element(request[0u].asInt());
+        }
+        inline virtual void exampleWitnessAndProofI(const Json::Value &request, Json::Value &response)
+        {
+            response = this->exampleWitnessAndProof(request[0u].asString());
         }
         inline virtual void hashI(const Json::Value &request, Json::Value &response)
         {
@@ -82,6 +87,7 @@ class ZKTradeStubServer : public jsonrpc::AbstractServer<ZKTradeStubServer>
         virtual Json::Value add(const std::string& param01) = 0;
         virtual std::string cm(const std::string& param01, const std::string& param02, const std::string& param03, const std::string& param04) = 0;
         virtual std::string element(int param01) = 0;
+        virtual Json::Value exampleWitnessAndProof(const std::string& param01) = 0;
         virtual std::string hash(const std::string& param01, const std::string& param02) = 0;
         virtual Json::Value depositCommitmentProof(const std::string& param01, const std::string& param02, const std::string& param03, const std::string& param04) = 0;
         virtual Json::Value merkleTreeAdditionProof(const std::string& param01, const std::string& param02, const std::string& param03, const Json::Value& param04, const std::string& param05) = 0;

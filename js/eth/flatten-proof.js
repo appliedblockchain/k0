@@ -1,30 +1,30 @@
 function flattenProof(proof) {
   return [
-    proof[0][0], // 0 a
-    proof[0][1], // 1
+    proof.g_A.g.x, // 0 a
+    proof.g_A.g.y, // 1
 
-    proof[1][0], // 2 a_p
-    proof[1][1], // 3
+    proof.g_A.h.x, // 2 a_p
+    proof.g_A.h.y, // 3
 
-    proof[2][0][0], // 4 b (0)
-    proof[2][0][1], // 5
-    proof[2][1][0], // 6 b (1)
-    proof[2][1][1], // 7
+    proof.g_B.g.x.c1, // 4 b (0)
+    proof.g_B.g.x.c0, // 5
+    proof.g_B.g.y.c1, // 6 b (1)
+    proof.g_B.g.y.c0, // 7
 
-    proof[3][0], // 8 b_p
-    proof[3][1], // 9
+    proof.g_B.h.x, // 8 b_p
+    proof.g_B.h.y, // 9
 
-    proof[4][0], // 10 c
-    proof[4][1], // 11
+    proof.g_C.g.x, // 10 c
+    proof.g_C.g.y, // 11
 
-    proof[5][0], // 12 c_p
-    proof[5][1], // 13
+    proof.g_C.h.x, // 12 c_p
+    proof.g_C.h.y, // 13
 
-    proof[6][0], // 14 h
-    proof[6][1], // 15
+    proof.g_H.x, // 14 h
+    proof.g_H.y, // 15
 
-    proof[7][0], // 16 k
-    proof[7][1]  // 17
+    proof.g_K.x, // 16 k
+    proof.g_K.y  // 17
   ]
 }
 

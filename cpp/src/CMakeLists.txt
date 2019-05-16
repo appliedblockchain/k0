@@ -100,6 +100,7 @@ add_executable(
         server
 
         server/run_server.cpp
+        json_conversion.cpp
 )
 target_link_libraries(
         server
@@ -203,4 +204,25 @@ target_include_directories(
         ${DEPENDS_DIR}/libsnark/depends/libff
         ${DEPENDS_DIR}/libsnark/depends/libfqfft
 )
+
+add_executable(
+        playground
+
+        playground.cpp
+)
+target_link_libraries(
+        playground
+
+        snark
+        zktrade
+)
+target_include_directories(
+        playground
+
+        PUBLIC
+        ${DEPENDS_DIR}/libsnark
+        ${DEPENDS_DIR}/libsnark/depends/libff
+        ${DEPENDS_DIR}/libsnark/depends/libfqfft
+)
+
 

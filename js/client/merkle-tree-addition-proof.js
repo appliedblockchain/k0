@@ -1,6 +1,7 @@
 const request = require('./request')
 const u = require('../util')
 const BN = require('bn.js')
+const conv = require('./proof-conversion')
 
 async function merkleTreeAdditionProof(
   jc, prevRoot, address, leaf, path, nextRoot) {
@@ -20,8 +21,10 @@ async function merkleTreeAdditionProof(
       u.buf2hex(nextRoot)
     ]
   )
-  // TODO hex2buf
-  return res
+  return {
+    proof_affine: conv.bnifyAffine(res.proof_affine),
+    proof_jacobian: conv.bnifyJacobian(res.proof_jacobian)
+  }
 }
 
 module.exports = merkleTreeAdditionProof

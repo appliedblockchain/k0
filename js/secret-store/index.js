@@ -9,10 +9,8 @@ const getNoteInfo = require('./get-note-info')
 const Immutable = require('immutable')
 const u = require('../util')
 const spit = require('./spit')
-const slurp = require('./slurp')
 
-function makeSecretStore(importDump) {
-  let state = slurp(importDump)
+function makeSecretStore(state) {
   return {
     addNoteInfo: (cm, a_pk, rho, r, v) => {
       state = addNoteInfo(state, cm, a_pk, rho, r, v)
