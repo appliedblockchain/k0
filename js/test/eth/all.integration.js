@@ -1,6 +1,5 @@
 'use strict'
 
-const fs = require('fs')
 const BN = require('bn.js')
 const _ = require('lodash')
 const bip39 = require('bip39')
@@ -10,6 +9,7 @@ const hdkey = require('ethereumjs-wallet/hdkey')
 const makeSecretStore = require('../../secret-store')
 
 const u = require('../../util')
+const { buf2hex } = u
 const makeK0 = require('../../k0')
 const testUtil = require('../util')
 const makeEthPlatform = require('../../eth')
@@ -17,6 +17,8 @@ const sendTransaction = require('../../send-transaction')
 const makePlatformState = require('../../platform-state')
 const compileContracts = require('../helpers/compile-contracts')
 const initEventHandlers = require('../../demo/init-event-handlers')
+
+const assert = require('assert')
 
 const platformPorts = [ 4100, 5100, 6100 ]
 
@@ -46,7 +48,7 @@ describe('Ethereum integration test replicating the K0 demo', () => {
       process.exit(1)
     })
 
-  
+
     web3 = testUtil.initWeb3()
     // DollarCoin minter
     const tokenMaster = web3.eth.accounts.create()
@@ -177,7 +179,7 @@ describe('Ethereum integration test replicating the K0 demo', () => {
 
       }
     )
-  
+
     bobSecretStore = makeSecretStore(
       {
         publicKey: u.buf2hex(bobPublicKey),
@@ -200,15 +202,27 @@ describe('Ethereum integration test replicating the K0 demo', () => {
     console.log('before: INITIALIZED Secrets, ')
   })
 
+  async function checkRootsConsitency() {
+    const ethRoot = await k0Eth.merkleTreeRoot()
+    const root1 = await platformState1.merkleTreeRoot()
+    const root2 = await platformState1.merkleTreeRoot()
+    const root3 = await platformState1.merkleTreeRoot()
 
+    assert(ethRoot.equals(root1))
+    assert(ethRoot.equals(root2))
+    assert(ethRoot.equals(root3))
+  }
 
   it('works, happy path', async () => {
     const values = _.times(3, () => new BN(_.random(50).toString() + '000'))
-    
+
     const total = values.reduce((acc, el) => acc.add(el), new BN('0'))
     console.log(`Notes values: ${values.map(v => v.toString()).join(' ,')} total: ${total.toString()}`)
 
+    await checkRootsConsitency()
 
+    // console.log({ r1:buf2hex(root1), r2:buf2hex(root2), r3:buf2hex(root3), r4: buf2hex(ethRoot) })
+    // assert(buf2hex(root1) === buf2hex(root2) === buf2hex(root3), 'Unconsistent platform roots')
   })
 })
 
