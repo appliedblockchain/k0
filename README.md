@@ -2,6 +2,13 @@
 
 If you want to run the Fabric tests/demo, the project should be checked out in your GOPATH (eg. at `~/go/src/github.com/appliedblockchain/zktrading`).
 
+[Set up the project dependencies](#set-up-the-project-dependencies)  
+[Build](#build)  
+[C++ tests](#c-tests)  
+[ZKP setup (needed for all tests and demos)](#zkp-setup-needed-for-all-tests-and-demos)  
+[Ethereum demo](#ethereum-demo)  
+[Fabric integration tests](#fabric-integration-tests)  
+
 ## Set up the project dependencies
 Linux:
 ```
