@@ -7,6 +7,7 @@ jobs:
       docker_layer_caching: true
     steps:
       - checkout
+#      # Run this to reset the Docker layer cache
 #      - run: docker images --no-trunc --format '{{.ID}}' | xargs docker rmi || true
       - run:
           name: "Get Git submodules"
@@ -59,38 +60,6 @@ jobs:
               docker push appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
             done
 
-  # build_cpp:
-  #   docker:
-  #     - image: appliedblockchain/snarkapps-base
-  #       auth:
-  #         username: $DOCKER_USER
-  #         password: $DOCKER_PASSWORD
-  #   steps:
-  #     - checkout
-  #     - run:
-  #         name: Init Git submodules
-  #         command: git submodule update --init --recursive
-  #     - run:
-  #         name: "Create hash of src contents"
-  #         command: find cpp/src -type f | sort | xargs cat | md5sum > srchash.txt
-  #     - restore_cache:
-  #         keys:
-  #           - zktrading-{{ checksum "srchash.txt" }}
-  #     - run:
-  #         name: "C++: CMake"
-  #         command: mkdir -p cpp/build && cd cpp/build && cmake ..
-  #     - run:
-  #         name: "C++: Make"
-  #         command: cd cpp/build && make
-  #     - save_cache:
-  #        key: zktrading-{{ checksum "srchash.txt" }}
-  #        paths:
-  #          - cpp/build
-  #     - persist_to_workspace:
-  #         root: .
-  #         paths:
-  #           - cpp/build/src
-  #           - cpp/build/test
   prepare_node:
     machine:
       image: circleci/classic:201808-01
@@ -122,47 +91,6 @@ jobs:
           root: .
           paths:
             - js/node_modules
-
-  # run_private_trade_test:
-  #   docker:
-  #     - image: appliedblockchain/snarkapps-base
-  #       auth:
-  #         username: $DOCKER_USER
-  #         password: $DOCKER_PASSWORD
-  #     - image: appliedblockchain/parity-solo
-  #       auth:
-  #         username: $DOCKER_USER
-  #         password: $DOCKER_PASSWORD
-  #   steps:
-  #     - checkout
-  #     - attach_workspace:
-  #         at: .
-  #     - run:
-  #         name: Make sure npm modules are installed
-  #         command: cd js && npm i
-  #     - run:
-  #         name: Setup
-  #         command: |
-  #           for x in commitment addition transfer withdrawal
-  #           do
-  #           cpp/build/src/setup ${x} 16 /tmp/zktrade_${x}_pk /tmp/zktrade_${x}_vk
-  #           cpp/build/src/convert_vk /tmp/zktrade_${x}_vk /tmp/zktrade_${x}_vk_alt
-  #           done
-  #     - run:
-  #         name: Start server
-  #         command: |
-  #           cpp/build/src/server 16 /tmp/zktrade_commitment_pk \
-  #           /tmp/zktrade_commitment_vk /tmp/zktrade_addition_pk \
-  #           /tmp/zktrade_addition_vk /tmp/zktrade_transfer_pk \
-  #           /tmp/zktrade_transfer_vk /tmp/zktrade_withdrawal_pk \
-  #           /tmp/zktrade_withdrawal_vk
-  #         background: true
-  #     - run:
-  #         name: Run MVPPT test
-  #         command: cd js && node_modules/.bin/mocha test/mvppt.js
-  #     - run:
-  #         name: Run private trade test
-  #         command: cd js && node_modules/.bin/mocha test/private-trade.js
 
   fabric:
     machine:
@@ -248,30 +176,15 @@ jobs:
             cd js/test/fabric/network
             CI=true ./start.sh
       - run:
-          name: "Install simple chaincode"
-          command: |
-            cd js/test/fabric/network
-            for org in alpha beta gamma; do docker-compose run ${org}tools peer chaincode install /artefacts/simplechaincode.1.out; done
-      - run:
           name: "Install K0 chaincode"
           command: |
             cd js/test/fabric/network
             for org in alpha beta gamma; do docker-compose run ${org}tools peer chaincode install /artefacts/k0chaincode.1.out; done
       - run:
-          name: "Instantiate simple chaincode"
-          command: |
-            cd js/test/fabric
-            node instantiatesimple
-      - run:
           name: "Instantiate K0 chaincode"
           command: |
             cd js/test/fabric
             node instantiate
-      - run:
-          name: "Run simple chaincode tests"
-          command: |
-            cd js
-            node_modules/.bin/mocha test/fabric/testsimple.js
       - run:
           name: "Run integration tests"
           command: |
@@ -291,10 +204,3 @@ workflows:
           requires:
             - build_cpp_docker
             - prepare_node
-    #  - build_cpp:
-    #       context: org-global
-    #  - run_private_trade_test:
-    #       context: org-global
-    #       requires:
-    #         - build_cpp
-    #         - prepare_node
