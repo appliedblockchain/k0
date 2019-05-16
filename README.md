@@ -1,5 +1,7 @@
 # ZKTRADING
 
+If you want to run the Fabric tests/demo, the project should be checked out in your GOPATH (eg. at `~/go/src/github.com/appliedblockchain/zktrading`).
+
 ## Set up the project dependencies
 Linux:
 ```
