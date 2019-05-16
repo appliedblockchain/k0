@@ -1,6 +1,6 @@
-## ZKTRADING
+# ZKTRADING
 
-### Set up the project dependencies
+## Set up the project dependencies
 Linux:
 ```
 sudo apt-get install -y \
@@ -22,7 +22,7 @@ brew install openssl
 # probably some other to figure out, can all be installed by brew
 ```
 
-#### Install Google Test
+### Install Google Test
 
 - download https://github.com/google/googletest/releases/tag/release-1.8.1 to a directory
 - unpack it with `mkdir gtest && tar -xzf release-1.8.1.tar.gz -C gtest/ `
@@ -37,7 +37,7 @@ make
 make install
 ```
 
-#### Install JS dependencies
+### Install JS dependencies
 ```
 cd js
 npm i
@@ -45,7 +45,7 @@ cd ..
 ```
 
 
-### Build
+## Build
 ```
 cd cpp
 mkdir build
@@ -78,7 +78,7 @@ ln -s ../opt/openssl/include/openssl .
 and then running the cmake and make commands again.
 
 
-### C++ tests
+## C++ tests
 
 ```
 cd cpp
@@ -93,7 +93,7 @@ BASE_DIR=$(pwd) build/test/letest --gtest_filter=EXPRESSION*
 ```
 
 
-### ZKP setup (needed for all tests and demos)
+## ZKP setup (needed for all tests and demos)
 ```
 rm -rf /tmp/k0keys && \
 mkdir /tmp/k0keys && \
@@ -104,7 +104,7 @@ done
 ```
 
 
-### Ethereum demo
+## Ethereum demo
 
 Note: you will need 7 terminals (consider using iTerm2 on Mac for ease of use).
 
@@ -157,26 +157,20 @@ node wallet carol
 [Video example of how to use the demo](https://www.youtube.com/watch?v=h2KyMOdnbtI)
 
 
-### JS tests
-```
-cd js
-MOCHA_MERKLE_TREE_HEIGHT=2 node_modules/.bin/mocha test/mixer.js
-```
-
-### Fabric integration tests
+## Fabric integration tests
 
 The project needs to be checked out in the GOPATH (`$GOPATH/src/github.com/appliedblockchain/zktrading`)
 
 ZKP setup as above
 
-#### Spin up a Fabric network
+### Spin up a Fabric network
 In `js/test/fabric/network`:
 ```
 rm -rf artefacts/*
 ./start.sh
 ```
 
-#### Package chaincode
+### Package chaincode
 In `js/test/fabric/network`:
 ```
 export CHAINCODE_VERSION=$(($CHAINCODE_VERSION+1)) && echo $CHAINCODE_VERSION
@@ -192,7 +186,7 @@ peer chaincode package \
 /artefacts/k0chaincode.${CHAINCODE_VERSION}.out
 ```
 
-#### Install chaincode
+### Install chaincode
 In `js/test/fabric/network`:
 ```
 for org in alpha beta gamma; \
@@ -200,13 +194,13 @@ do docker-compose run ${org}tools \
 peer chaincode install /artefacts/k0chaincode.${CHAINCODE_VERSION}.out; done
 ```
 
-#### Instantiate chaincode
+### Instantiate chaincode
 In `js/test/fabric`:
 ```
 node instantiate
 ```
 
-#### Start proving and Merkle tree servers
+### Start proving and Merkle tree servers
 In separate terminal windows, start the following servers:
 
 Proving server for AlphaCo:
@@ -224,7 +218,6 @@ Proving server for GammaCo:
 cpp/build/src/server 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 13400
 ```
 
-
 Merkle tree server for AlphaCo:
 ```
 cpp/build/src/mtserver 7 11410
@@ -240,7 +233,7 @@ Merkle tree server for GammaCo:
 cpp/build/src/mtserver 7 13410
 ```
 
-#### Run tests
+### Run tests
 In `js`:
 ```
 node_modules/.bin/mocha test/fabric/test.js
