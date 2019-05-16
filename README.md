@@ -1,7 +1,7 @@
 ## ZKTRADING
 
 ### Set up the project dependencies
-Linux
+Linux:
 ```
 sudo apt-get install -y \
 build-essential cmake git libgmp3-dev libprocps-dev python-markdown \
