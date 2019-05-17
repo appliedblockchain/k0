@@ -41,7 +41,7 @@ async function run() {
   }
 
   // TODO: put back to initial state
-  // const platformState = await makePlatformState(mtServerPorts[who]) 
+  // const platformState = await makePlatformState(mtServerPorts[who])
   const platformState = await makePlatformState(mtServerPorts[who])
   const web3 = testUtil.initWeb3()
   const k0Eth = await makeEthPlatform(
@@ -55,8 +55,8 @@ async function run() {
   console.log('public key', u.buf2hex(secretStore.getPublicKey()))
   initEventHandlers(platformState, secretStore, k0Eth)
 
-  // const k0 = await makeK0(serverPorts[who]) 
-  const k0 = await makeK0(serverPorts[4000]) // attempting to use same verification server for all 
+  // const k0 = await makeK0(serverPorts[who])
+  const k0 = await makeK0(serverPorts[4000]) // attempting to use same verification server for all
 
   const artefacts = await compileContracts()
   const dollarCoin = new web3.eth.Contract(
@@ -78,7 +78,6 @@ async function run() {
 
   console.log(await dollarCoin.methods.balanceOf(u.buf2hex(wallet.getAddress())).call())
 
-  // TODO: uncomment, commented only to check the server setup on cci
   await demoUtil.prompt()
 
   const platformRoot = await k0Eth.merkleTreeRoot()
@@ -114,7 +113,7 @@ async function run() {
       data.commitmentProof,
       data.additionProof
     )
-    // const receipt = 
+    // const receipt =
     await web3.eth.sendSignedTransaction(u.buf2hex(depositTx))
 
     await u.wait(2000)

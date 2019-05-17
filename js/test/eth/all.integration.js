@@ -5,18 +5,22 @@ const _ = require('lodash')
 const bip39 = require('bip39')
 const crypto = require('crypto')
 const log4js = require('log4js')
+const { expect } = require('chai')
+const waitPort = require('wait-port')
+const jayson = require('jayson/promise')
 const hdkey = require('ethereumjs-wallet/hdkey')
-const makeSecretStore = require('../../secret-store')
 
 const u = require('../../util')
-const { buf2hex } = u
 const makeK0 = require('../../k0')
 const testUtil = require('../util')
 const makeEthPlatform = require('../../eth')
+const serverReady = require('../../client/ready')
+const makeSecretStore = require('../../secret-store')
 const sendTransaction = require('../../send-transaction')
 const makePlatformState = require('../../platform-state')
 const compileContracts = require('../helpers/compile-contracts')
 const initEventHandlers = require('../../demo/init-event-handlers')
+const signTransaction = require('../../eth/sign-transaction')
 
 const assert = require('assert')
 
@@ -26,6 +30,7 @@ let web3
 
 after(() => {
   web3.currentProvider.connection.close()
+  console.log({ T: this })
 })
 
 describe('Ethereum integration test replicating the K0 demo', () => {
@@ -48,6 +53,10 @@ describe('Ethereum integration test replicating the K0 demo', () => {
       process.exit(1)
     })
 
+    await waitPort({ port: 8546 })
+    await waitPort({ port: platformPorts[0] }) // parity
+    await waitPort({ port: platformPorts[1] })
+    await waitPort({ port: platformPorts[2] })
 
     web3 = testUtil.initWeb3()
     // DollarCoin minter
@@ -91,6 +100,8 @@ describe('Ethereum integration test replicating the K0 demo', () => {
         await testUtil.pack256Bits(u.buf2hex(initialRoot))
       ]
     )
+
+    await serverReady(jayson.client.http({ port: 4000 }))
 
     const moneyShower = await testUtil.deployContract(web3, artefacts.MoneyShower)
 
@@ -166,11 +177,10 @@ describe('Ethereum integration test replicating the K0 demo', () => {
     const bobSecretKey = crypto.randomBytes(32)
     const carolSecretKey = crypto.randomBytes(32)
 
-    k0 = await makeK0()
+    k0 = await makeK0(4000)
     const alicePublicKey = await k0.prfAddr(aliceSecretKey)
     const bobPublicKey = await k0.prfAddr(bobSecretKey)
     const carolPublicKey = await k0.prfAddr(carolSecretKey)
-
 
     aliceSecretStore = makeSecretStore(
       {
@@ -202,7 +212,7 @@ describe('Ethereum integration test replicating the K0 demo', () => {
     console.log('before: INITIALIZED Secrets, ')
   })
 
-  async function checkRootsConsitency() {
+  async function checkRootsConsistency() {
     const ethRoot = await k0Eth.merkleTreeRoot()
     const root1 = await platformState1.merkleTreeRoot()
     const root2 = await platformState1.merkleTreeRoot()
@@ -213,16 +223,60 @@ describe('Ethereum integration test replicating the K0 demo', () => {
     assert(ethRoot.equals(root3))
   }
 
-  it('works, happy path', async () => {
-    const values = _.times(3, () => new BN(_.random(50).toString() + '000'))
-
+  // Consume  $coin in exchange for CMs
+  async function approveAndDeposit(wallet, secretStore, platformState, values) {
+    // aprove an amounts to mvptt
     const total = values.reduce((acc, el) => acc.add(el), new BN('0'))
-    console.log(`Notes values: ${values.map(v => v.toString()).join(' ,')} total: ${total.toString()}`)
 
-    await checkRootsConsitency()
+    const approveTx = await signTransaction(
+      web3,
+      u.hex2buf(dollarCoin._address),
+      u.hex2buf(dollarCoin.methods.approve(addresses.MVPPT, total.toString()).encodeABI()),
+      5000000,
+      wallet.getPrivateKey()
+    )
+    await web3.eth.sendSignedTransaction(u.buf2hex(approveTx))
 
-    // console.log({ r1:buf2hex(root1), r2:buf2hex(root2), r3:buf2hex(root3), r4: buf2hex(ethRoot) })
-    // assert(buf2hex(root1) === buf2hex(root2) === buf2hex(root3), 'Unconsistent platform roots')
+    for (let i = 0; i < values.length; i++) {
+      const v = values[i]
+
+      const data = await k0.prepareDeposit(platformState, secretStore, v)
+
+      await secretStore.addNoteInfo(data.cm, data.a_pk, data.rho, data.r, v)
+
+      const depositTx = await k0Eth.deposit(
+        wallet.getPrivateKey(),
+        v,
+        data.k,
+        data.cm,
+        data.nextRoot,
+        data.commitmentProof,
+        data.additionProof
+      )
+
+      await web3.eth.sendSignedTransaction(u.buf2hex(depositTx))
+
+      await u.wait(200)
+
+    }
+  }
+
+  it('Can mint the CMS', async () => {
+    // DEPOSIT TEST
+    let values = _.times(3, () => new BN(_.random(50).toString() + '000'))
+    await approveAndDeposit(alice.wallet, aliceSecretStore, platformState1, values)
+    values = _.times(3, () => new BN(_.random(50).toString() + '000'))
+    await approveAndDeposit(bob.wallet, bobSecretStore, platformState2, values)
+
+    await checkRootsConsistency()
+    // TODO: re add test after fix
+    // console.log({ aliceNotes: aliceSecretStore.getAvailableNotes(), bobNotes: bobSecretStore.getAvailableNotes() })
+    // expect(aliceSecretStore.getAvailableNotes().get('cms')).to.equal(3)
+    // expect(Object.keys(bobSecretStore.getAvailableNotes()).length).to.equal(3)
+  })
+
+  it('allow alice to transfer funds to bob', async () => {
+
   })
 })
 

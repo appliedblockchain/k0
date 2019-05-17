@@ -7,6 +7,7 @@ import "TransferVerifier.sol";
 import "WithdrawalVerifier.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
+
 // k0Cash, a minimum viable private payment token
 contract MVPPT {
     uint[2] public root;
@@ -59,9 +60,8 @@ contract MVPPT {
         uint[18] memory commitmentProof,
         uint[18] memory additionProof
     ) public {
-        if (!tokenContract.transferFrom(msg.sender, address(this), v)) {
-            emit TransferFromFailure();
-        }
+        require(tokenContract.transferFrom(msg.sender, address(this), v), "You must approve the more than the amount of your commitment first");
+
         uint[] memory commInputs = new uint[](5);
         commInputs[0] = comm_k[0];
         commInputs[1] = comm_k[1];

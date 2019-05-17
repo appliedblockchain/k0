@@ -54,7 +54,7 @@ jobs:
             mkdir /tmp/k0keys
             for circuit in commitment transfer addition withdrawal
             do
-              docker run -v /tmp/k0keys:/tmp/k0keys appliedblockchain/zktrading-setup:$CIRCLE_BRANCH-$CIRCLE_SHA1 $circuit 7 /tmp/k0keys/${circuit}_pk /tmp/k0keys/${circuit}_vk
+              docker run -v /tmp/k0keys:/tmp/k0keys appliedblockchain/zktrading-setup:$CIRCLE_BRANCH-$CIRCLE_SHA1 $circuit 4 /tmp/k0keys/${circuit}_pk /tmp/k0keys/${circuit}_vk
               docker run -v /tmp/k0keys:/tmp/k0keys appliedblockchain/zktrading-convert-vk:$CIRCLE_BRANCH-$CIRCLE_SHA1 /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt
             done
       - run:
@@ -78,13 +78,8 @@ jobs:
           background: true
       - run:
           name: init the demo state
-          command: |
-            cd js/demo
-            node init
-            date
-            node deposit alice
-            date
-            node deposit bob
+          command: cd js && npm run test:integration:eth
+
   # build_cpp:
   #   docker:
   #     - image: appliedblockchain/snarkapps-base

@@ -196,11 +196,12 @@ template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
             commitment_pk, circuit.pb->primary_input(),
             circuit.pb->auxiliary_input());
 
+    cout  << " PI:" <<circuit.pb->primary_input()  << endl;
 
     bool verified =
-        r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
-            commitment_vk, circuit.pb->primary_input(),
-            proof);
+    r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
+        commitment_vk, circuit.pb->primary_input(),
+        proof);
     if (verified) {
         cout << "Commitment proof successfully verified." << endl;
     } else {

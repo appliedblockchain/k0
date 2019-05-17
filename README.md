@@ -78,20 +78,10 @@ and then running the cmake and make commands again.
 ### Preparation
 
 before running the zk test:
+
 ```
+cd "Your ZK dir"
 mkdir /tmp/k0keys
-```
-
-In this section, you can either change the $ZKTRADING_PATH environment variable to your local zktrading project folder, or you can add this to your .bash_profile
-
-```
-export $ZKTRADING_PATH="YOUR OWN ABSOLUTE PATH TO THE ZKTRADING PROJECT FOLDER" # with no / at the end
-```
-
-Then, close and reopen your terminal and check that the variable is set with:
-
-```
-echo $ZKTRADING_PATH # should output your path
 ```
 
 Generate proving keys and verification keys for the commitment, transfer, addition and withdrawal circuits:
@@ -99,7 +89,7 @@ Generate proving keys and verification keys for the commitment, transfer, additi
 ```
 mkdir /tmp/k0keys
 for circuit in commitment transfer addition withdrawal;
- do $ZKTRADING_PATH/cpp/build/src/setup $circuit 7 /tmp/k0keys/${circuit}_pk /tmp/k0keys/${circuit}_vk && $ZKTRADING_PATH/cpp/build/src/convert_vk /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt;
+  do cpp/build/src/setup $circuit 7 /tmp/k0keys/${circuit}_pk /tmp/k0keys/${circuit}_vk && cpp/build/src/convert_vk /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt;
 done
 ```
 
@@ -107,19 +97,19 @@ Running the demo(note: you will need 7 terminals, install iterm2 on mac for ease
 
 Run the proving servers(one terminal each):
 ```
- $ZKTRADING_PATH/cpp/build/src/server 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk 4000
+cpp/build/src/server 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk 4000
 
-$ZKTRADING_PATH/cpp/build/src/server 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk 5000
+cpp/build/src/server 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk 5000
 
-$ZKTRADING_PATH/cpp/build/src/server 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk 6000
+cpp/build/src/server 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk 6000
 ```
 
 Run the Merkle tree servers(1 terminal each):
 
 ```
-$ZKTRADING_PATH/cpp/build/src/mtserver 7 4100
-$ZKTRADING_PATH/cpp/build/src/mtserver 7 5100
-$ZKTRADING_PATH/cpp/build/src/mtserver 7 6100
+cpp/build/src/mtserver 7 4100
+cpp/build/src/mtserver 7 5100
+cpp/build/src/mtserver 7 6100
 ```
 
 Running Parity(in another terminal):
@@ -155,42 +145,6 @@ node wallet carol
 (Video example of how to use the demo)[https://www.youtube.com/watch?v=h2KyMOdnbtI].
 
 
-# Legacy README
-
-## ZKP setup
-```
-cd cpp/build
-src/examples/merkle_tree/merkle_tree_addition_setup 2 /tmp/mt_addition_pk  /tmp/mt_addition_vk
-src/examples/merkle_tree/merkle_tree_inclusion_setup 2 /tmp/mt_inclusion_pk /tmp/mt_inclusion_vk
-src/convert_vk /tmp/mt_addition_vk /tmp/mt_addition_vk_alt
-src/convert_vk /tmp/mt_inclusion_vk /tmp/mt_inclusion_vk_alt
-```
-
-## Run server
-```
-cd cpp/build
-src/examples/merkle_tree/merkle_tree_server 2 /tmp/mt_addition_pk /tmp/mt_addition_vk \
-                                              /tmp/mt_inclusion_pk /tmp/mt_inclusion_vk
-```
-
-## Run the tests
-
-### CPP tests
-
-```
-cd cpp
-
-# then
-
-BASE_DIR=$(pwd) build/test/letest
-
-# OR, to run only specific tests
-
-BASE_DIR=$(pwd) build/test/letest --gtest_filter=EXPRESSION*
-```
-
-### JS tests
-```
-cd js
-MOCHA_MERKLE_TREE_HEIGHT=2 node_modules/.bin/mocha test/mixer.js
-```
+for circuit in commitment transfer addition withdrawal;
+  do cpp/build/src/setup $circuit 5 /tmp/k0keys/${circuit}_pk /tmp/k0keys/${circuit}_vk && $ZKTRADING_PATH/cpp/build/src/convert_vk /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt;
+done

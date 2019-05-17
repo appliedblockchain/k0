@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "dependencies": {
     "bip39": "^2.5.0",
+    "chai": "^4.2.0",
     "csv-load-sync": "^1.0.0",
     "ethereumjs-wallet": "^0.6.3",
     "fabric-client": "^1.2.1",
@@ -17,7 +18,7 @@
   },
   "scripts": {
     "test": "mocha test",
-    "test:integration:eth": "mocha test/eth/integration.js",
+    "test:integration:eth": "mocha --timeout 0 test/eth/all.integration.js",
     "lint": "eslint . --ignore-path .gitignore",
     "parity": "docker run -p 8545:8545 appliedblockchain/parity-solo-instant"
   },
@@ -28,7 +29,8 @@
     "cli-table": "^0.3.1",
     "code": "^5.2.4",
     "eslint": "^4.19.1",
-    "mocha": "^5.2.0"
+    "mocha": "^5.2.0",
+    "wait-port": "^0.2.2"
   },
   "eslintConfig": {
     "extends": "@appliedblockchain/eslint-config",
