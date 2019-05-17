@@ -11,7 +11,8 @@ async function prepareDeposit(server, platformState, secretStore, v) {
   const prevRoot = await platformState.merkleTreeRoot()
   const mtAddSim = await platformState.simulateMerkleTreeAddition(cm)
   const commProofData = await server.depositCommitmentProof(a_pk, rho, r, v)
-  assert(cm.equals(commProofData.cm))
+  const kPacked = await u.pack256Bits(commProofData.k)
+  const cmPacked = await u.pack256Bits(cm)
   const additionProof = await server.merkleTreeAdditionProof(
     prevRoot,
     mtAddSim.address,
@@ -26,9 +27,10 @@ async function prepareDeposit(server, platformState, secretStore, v) {
     cm,
     k: commProofData.k,
     nextRoot: mtAddSim.nextRoot,
-    // TODO hex2buf
-    additionProof,
-    commitmentProof: commProofData.proof
+    additionProofAffine: additionProof.proof_affine,
+    additionProofJacobian: additionProof.proof_jacobian,
+    commitmentProofAffine: commProofData.proof_affine,
+    commitmentProofJacobian: commProofData.proof_jacobian,
   }
 }
 

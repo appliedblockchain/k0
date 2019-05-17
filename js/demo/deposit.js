@@ -71,12 +71,8 @@ async function run() {
   const wallet = root.derivePath(path).getWallet()
 
   const values = _.times(3, () => new BN(_.random(50).toString() + '000'))
-  console.log(values)
 
   const total = values.reduce((acc, el) => acc.add(el), new BN('0'))
-  console.log(total.toString())
-
-  console.log(await dollarCoin.methods.balanceOf(u.buf2hex(wallet.getAddress())).call())
 
   await demoUtil.prompt()
 
@@ -96,7 +92,6 @@ async function run() {
   )
   await web3.eth.sendSignedTransaction(u.buf2hex(approveTx))
 
-  console.log('Approval done!')
   for (let i = 0; i < values.length; i++) {
     const v = values[i]
 
@@ -110,8 +105,8 @@ async function run() {
       data.k,
       data.cm,
       data.nextRoot,
-      data.commitmentProof,
-      data.additionProof
+      data.commitmentProofAffine,
+      data.additionProofAffine
     )
     // const receipt =
     await web3.eth.sendSignedTransaction(u.buf2hex(depositTx))

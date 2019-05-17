@@ -1,3 +1,3 @@
 FROM zktrading
 
-ENTRYPOINT ["/project/build/src/convert_vk"] 
+ENTRYPOINT ["/project/build/src/convert_vk"]

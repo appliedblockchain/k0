@@ -2,7 +2,7 @@ version: '3'
 
 services:
   server1:
-    image: appliedblockchain/zktrading-server:${CIRCLE_BRANCH}-${CIRCLE_SHA1}
+    image: zktrading-server
     build:
       context: ../../../../cpp
       dockerfile: docker/server.Dockerfile
@@ -14,34 +14,8 @@ services:
       - 4000:4000
     networks:
       - main
-  # server2:
-  #   image: appliedblockchain/zktrading-server:${CIRCL3E_BRANCH}-${CIRCLE_SHA1}
-  #   build:
-  #     context: ../../../../cpp
-  #     dockerfile: docker/server.Dockerfile
-  #   command: 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk 5000
-  #   restart: on-failure
-  #   volumes:
-  #     - /tmp/k0keys/:/tmp/k0keys:ro
-  #   ports:
-  #     - 5000:5000
-  #   networks:
-  #     - main
-  # server3:
-  #   image: appliedblockchain/zktrading-server:${CIRCLE_BRANCH}-${CIRCLE_SHA1}
-  #   build:
-  #     context: ../../../../cpp
-  #     dockerfile: docker/server.Dockerfile
-  #   command: 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk 6000
-  #   restart: on-failure
-  #   volumes:
-  #     - /tmp/k0keys/:/tmp/k0keys:ro
-  #   ports:
-  #     - 6000:6000
-  #   networks:
-  #     - main
   mtserver1:
-    image: appliedblockchain/zktrading-mtserver:${CIRCLE_BRANCH}-${CIRCLE_SHA1}
+    image: zktrading-mtserver
     build:
       context: ../../../../cpp
       dockerfile: docker/mtserver.Dockerfile
@@ -52,7 +26,7 @@ services:
     networks:
       - main
   mtserver2:
-    image: appliedblockchain/zktrading-mtserver:${CIRCLE_BRANCH}-${CIRCLE_SHA1}
+    image: zktrading-mtserver
     build:
       context: ../../../../cpp
       dockerfile: docker/mtserver.Dockerfile
@@ -63,7 +37,7 @@ services:
     networks:
       - main
   mtserver3:
-    image: appliedblockchain/zktrading-mtserver:${CIRCLE_BRANCH}-${CIRCLE_SHA1}
+    image: zktrading-mtserver
     build:
       context: ../../../../cpp
       dockerfile: docker/mtserver.Dockerfile

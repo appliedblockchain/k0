@@ -254,9 +254,7 @@ describe('Ethereum integration test replicating the K0 demo', () => {
       )
 
       await web3.eth.sendSignedTransaction(u.buf2hex(depositTx))
-
       await u.wait(200)
-
     }
   }
 

@@ -2,6 +2,7 @@
   "name": "libsnark-examples",
   "version": "0.0.1",
   "dependencies": {
+    "@appliedblockchain/not-a-logger": "^1.0.1",
     "bip39": "^2.5.0",
     "chai": "^4.2.0",
     "csv-load-sync": "^1.0.0",

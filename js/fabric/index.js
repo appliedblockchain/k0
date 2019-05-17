@@ -1,18 +1,18 @@
 const EventEmitter = require('events')
+const initEventHandlers = require('./init-event-handlers')
 const makeClient = require('./client')
-const get = require('./actions/get')
-const set = require('./actions/set')
 const mint = require('./actions/mint')
+const notalogger = require('@appliedblockchain/not-a-logger')
 const transfer = require('./actions/transfer')
 const u = require('../util')
-const initEventHandlers = require('./init-event-handlers')
 
 class K0Fabric extends EventEmitter {}
 
-async function makeFabric(chaincodeId) {
-  const { client, channel, peers, queryPeer } = await makeClient()
+async function makeFabric(logger, config, chaincodeId) {
+  logger = logger || notalogger
+  const { client, channel, peers, queryPeer } = await makeClient(config)
 
-  const channelEventHub = channel.newChannelEventHub(queryPeer)
+  const eh = channel.newChannelEventHub(queryPeer)
 
   const fabric = new K0Fabric()
 
@@ -21,19 +21,21 @@ async function makeFabric(chaincodeId) {
   async function startEventMonitoring() {
     let queue = []
     let processing = false
-    regId1 = initEventHandlers(channelEventHub, chaincodeId, fabric)
-    channelEventHub.connect(true)
+    regId1 = initEventHandlers(eh, chaincodeId, fabric)
+    eh.connect(true)
     await u.wait(1000)
   }
 
   function off() {
-    channelEventHub.unregisterChaincodeEvent(regId1)
-    channelEventHub.disconnect()
+    eh.unregisterChaincodeEvent(regId1)
+    eh.disconnect()
   }
 
 
-  fabric.mint = mint.bind(null, client, channel, chaincodeId, peers)
-  fabric.transfer = transfer.bind(null, client, channel, chaincodeId, peers)
+  fabric.mint = mint.bind(null, logger, client, channel, chaincodeId, peers,
+                          queryPeer)
+  fabric.transfer = transfer.bind(null, logger, client, channel, chaincodeId,
+                                  peers, queryPeer)
   fabric.startEventMonitoring = startEventMonitoring
   fabric.off = off
   return fabric

@@ -1,5 +1,3 @@
 FROM zktrading
 
-ENTRYPOINT ["/project/build/src/mtserver"] 
-
-
+ENTRYPOINT ["/project/build/src/mtserver"]

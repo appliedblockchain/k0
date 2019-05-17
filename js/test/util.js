@@ -30,8 +30,8 @@ async function convertProof(proofPath, proofAltPath) {
 }
 
 function paths(label) {
-  const tmpDir = process.env.TMP_DIR || path.join('/', 'tmp')
-
+  const tmpDir = process.env.TMP_DIR || path.join('/', 'tmp', 'k0keys')
+  const baseDir = path.join(__dirname, '..', '..') // eslint-disable-line
   return {
     tmpDir,
     baseDir,

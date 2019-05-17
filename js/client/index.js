@@ -6,6 +6,7 @@ const prepareTransfer = require('./prepare-transfer')
 const prepare_withdrawal = require('./prepare_withdrawal')
 const prfAddr = require('./prf-addr')
 const ready = require('./ready')
+const verifyProof = require('./verify-proof')
 
 function client(serverPort = 4000) {
   const jc = jayson.client.http({ port: serverPort })
@@ -16,7 +17,8 @@ function client(serverPort = 4000) {
     prepareTransfer: prepareTransfer.bind(null, jc),
     prepare_withdrawal: prepare_withdrawal.bind(null, jc),
     prfAddr: prfAddr.bind(null, jc),
-    ready: ready.bind(null, jc)
+    ready: ready.bind(null, jc),
+    verifyProof: verifyProof.bind(null, jc)
   }
 }
 

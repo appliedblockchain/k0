@@ -4,6 +4,7 @@ const signTransaction = require('../sign-transaction')
 const u = require('../../util')
 const ethU = require('../util')
 
+
 async function deposit(web3, mvppt, privateKey, v, k, cm, nextRoot, commitmentProof,
                        additionProof) {
   assert(Buffer.isBuffer(privateKey) && privateKey.length == 32)
@@ -16,11 +17,11 @@ async function deposit(web3, mvppt, privateKey, v, k, cm, nextRoot, commitmentPr
 
   const params = [
     v.toString(),
-    (await ethU.pack256Bits(k)).map(bn => bn.toString()),
-    (await ethU.pack256Bits(cm)).map(bn => bn.toString()),
-    (await ethU.pack256Bits(nextRoot)).map(bn => bn.toString()),
-    commitmentProofCompact,
-    additionProofCompact
+    (await ethU.pack256Bits(k)).map(u.bn2string),
+    (await ethU.pack256Bits(cm)).map(u.bn2string),
+    (await ethU.pack256Bits(nextRoot)).map(u.bn2string),
+    commitmentProofCompact.map(u.bn2string),
+    additionProofCompact.map(u.bn2string)
   ]
 
   return signTransaction(
