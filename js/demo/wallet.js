@@ -58,7 +58,7 @@ function mvpptAddressBook(a_pk) {
 
 async function run() {
   const who = process.argv[2]
-  if (['alice', 'bob', 'carol'].indexOf(who) === -1) {
+  if ([ 'alice', 'bob', 'carol' ].indexOf(who) === -1) {
     console.log('Need parameter "alice", "bob" or "carol".')
     process.exit(1)
   }
@@ -84,7 +84,7 @@ async function run() {
   const mnemonic = mnemonics[who]
   const seed = bip39.mnemonicToSeed(mnemonic)
   const root = hdkey.fromMasterSeed(seed)
-  const path = "m/44'/60'/0'/0/0"
+  const path = "m/44'/60'/0'/0/0" // eslint-disable-line
   const ethWallet = root.derivePath(path).getWallet()
 
   const carToken = new web3.eth.Contract(
@@ -135,7 +135,7 @@ async function run() {
       } else {
         throw new Error(`Unknown command: ${inquiryResult.command}`)
       }
-    } catch(e) {
+    } catch (e) {
       console.log(e.stack)
       console.log('Error!', e.message)
     }

@@ -2,15 +2,8 @@
 
 const _ = require('lodash')
 const assert = require('assert')
-const asyncFs = require('../async-fs')
-const compileContract = require('./helpers/compile-contract')
-const crypto = require('crypto')
-const deploy = require('../deploy')
-const execAsync = require('../exec-async')
 const jayson = require('jayson/promise')
-const path = require('path')
 const util = require('./util')
-const expect = require('code').expect
 const sendTransaction = require('../send-transaction')
 const compileContracts = require('./helpers/compile-contracts')
 const serverReady = require('../client/ready')

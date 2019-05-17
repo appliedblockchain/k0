@@ -3,18 +3,21 @@ const inquireInputNote = require('./inquire-input-note')
 const inquireOutputNote = require('./inquire-output-note')
 const inquirer = require('inquirer')
 const u = require('../util')
+const assert = require('assert')
 
 function makeData(a_pk, rho, r, v) {
   u.checkBuf(a_pk, 32)
   u.checkBuf(rho, 32)
   u.checkBuf(r, 48)
   u.checkBN(v)
-  return Buffer.concat([ a_pk, rho, r, v.toBuffer('le', 64)])
+  return Buffer.concat([ a_pk, rho, r, v.toBuffer('le', 64) ])
 }
 
-async function transferMoney(web3, platformState, secretStore, k0Eth, k0,
-                             publicKeys, smartPayment = false, ethPrivateKey) {
-  if (ethPrivateKey) u.checkBuf(ethPrivateKey, 32)
+async function transferMoney(web3, platformState, secretStore, k0Eth, k0, publicKeys, smartPayment = false, ethPrivateKey) {
+  if (ethPrivateKey) {
+    u.checkBuf(ethPrivateKey, 32)
+  }
+
   const inquireInput = inquireInputNote.bind(null, platformState, secretStore)
   const in0 = await inquireInput('First input note')
   const in1 = await inquireInput('Second input note')
@@ -22,11 +25,11 @@ async function transferMoney(web3, platformState, secretStore, k0Eth, k0,
   const out0 = await inquireOutputNote(publicKeys, 'First output note', totalValue, false, smartPayment)
   let callee
   if (smartPayment) {
-    const calleeInquiryResult = await inquirer.prompt([{
+    const calleeInquiryResult = await inquirer.prompt([ {
       type: 'input',
       name: 'callee',
-      message: `Smart contract address`
-    }])
+      message: 'Smart contract address'
+    } ])
     callee = u.hex2buf(calleeInquiryResult.callee)
     u.checkBuf(callee, 20)
   } else {

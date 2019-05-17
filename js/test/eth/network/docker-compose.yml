@@ -15,7 +15,7 @@ services:
     networks:
       - main
   # server2:
-  #   image: appliedblockchain/zktrading-server:${CIRCLE_BRANCH}-${CIRCLE_SHA1}
+  #   image: appliedblockchain/zktrading-server:${CIRCL3E_BRANCH}-${CIRCLE_SHA1}
   #   build:
   #     context: ../../../../cpp
   #     dockerfile: docker/server.Dockerfile

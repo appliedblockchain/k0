@@ -30,7 +30,6 @@ let web3
 
 after(() => {
   web3.currentProvider.connection.close()
-  console.log({ T: this })
 })
 
 describe('Ethereum integration test replicating the K0 demo', () => {
