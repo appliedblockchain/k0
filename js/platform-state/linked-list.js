@@ -1,31 +1,34 @@
 function makeLinkedList() {
-  let latest = null
+  const listState = {
+    latest: null
+  }
 
   function add(content) {
-    latest = { content, prev: latest }
+    listState.latest = { content, prev: listState.latest }
   }
 
   function getLatest() {
-    if (latest === null) {
+    let current = listState.latest
+    if (current === null) {
       return null
     } else {
-      return latest.content
+      return current.content
     }
   }
 
   function rollbackTo(content) {
-    let current = latest
+    let current = listState.latest
     while (current.content !== content) {
       if (current.prev === null) {
-        return Error('set latest failed')
+        return Error('set listState.latest failed')
       }
       current = current.prev
     }
-    latest = current
+    listState.latest = current
   }
 
   function iterator() {
-    let current = latest
+    let current = listState.latest
     function next() {
       if (current === null) {
         return { done: true }

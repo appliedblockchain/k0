@@ -14,61 +14,156 @@ const makePlatformState = require('../../platform-state')
 const makeSecretStore = require('../../secret-store')
 const testUtil = require('../../test/util')
 const u = require('../../util')
+const expect = require('code').expect
+const initEventHandlers = require('./init-event-handlers')
+
+async function generateSecretStore(k0) {
+  const privateKey = crypto.randomBytes(32)
+  const publicKey = await k0.prfAddr(privateKey)
+  return makeSecretStore(privateKey, publicKey, [])
+}
+
+function makeData(a_pk, rho, r, v) {
+  u.checkBuf(a_pk, 32)
+  u.checkBuf(rho, 32)
+  u.checkBuf(r, 48)
+  u.checkBN(v)
+  return Buffer.concat([ a_pk, rho, r, v.toBuffer('le', 64)])
+}
 
 describe('Fabric workflow', function() {
   this.timeout(3600 * 1000)
-  const privKeys = {},
-        pubKeys = {}
+  const k0s = {}
+  const platformStates = {}
+  const secretStores = {}
+  const k0Fabrics = {}
+  const publicKeys = {}
+  const orgs = [ 'alpha', 'beta', 'gamma' ]
   let logger
 
   it('Init', async function() {
     logger = log4js.getLogger()
     logger.level = process.env.LOG_LEVEL || 'info'
-
-    const alphaConfig = getConfig('alpha', 'Admin')
-    const platformState = await makePlatformState(alphaConfig.mtServerPort)
-    const initialRoot = await platformState.merkleTreeRoot()
-
-    privKeys.alpha = crypto.randomBytes(32)
-    privKeys.beta = crypto.randomBytes(32)
-    privKeys.gamma = crypto.randomBytes(32)
-
-    const k0 = await makeK0(alphaConfig.proverPort)
-
-    pubKeys.alpha = await k0.prfAddr(privKeys.alpha)
-    pubKeys.beta = await k0.prfAddr(privKeys.beta)
-    pubKeys.gamma = await k0.prfAddr(privKeys.gamma)
+    for (let i = 0; i < orgs.length; i = i + 1) {
+      const who = orgs[i]
+      const config = getConfig(who, 'User1')
+      platformStates[who] = await makePlatformState(config.mtServerPort)
+      await platformStates[who].reset()
+      k0s[who] = await makeK0(config.proverPort)
+      secretStores[who] = await generateSecretStore(k0s[who])
+      publicKeys[who] = secretStores[who].getPublicKey()
+      k0Fabrics[who] = await makeFabricPlatform(logger, config, process.env.CHAINCODE_ID || 'k0chaincode')
+      initEventHandlers(platformStates[who], secretStores[who], k0Fabrics[who])
+      k0Fabrics[who].startEventMonitoring()
+    }
+    await u.wait(5000)
+    // TODO instead: wait until Fabric Merkle tree root equals platform state Merkle root
   })
 
   it('Mint', async function() {
-    const initialHodlers = [ 'alpha', 'beta' ]
-    for (let i = 0; i < 2; i = i + 1) {
-      const who = initialHodlers[i]
-      const config = getConfig(who, 'User1')
-      const platformState = await makePlatformState(config.mtServerPort)
-      const k0Fabric = await makeFabricPlatform(logger, config, 'k0chaincode')
-      const privateKey = u.buf2hex(privKeys[who])
-      const publicKey = u.buf2hex(pubKeys[who])
-      const secretStoreData = Immutable.Map({
-        privateKey,
-        publicKey,
-        cms: Immutable.Map()
-    })
-      const secretStore = makeSecretStore(secretStoreData)
-      const values = _.times(3, () => new BN(_.random(50).toString() + '000'))
+    // Nobody should have any money
+    for (let i = 0; i < orgs.length; i = i + 1) {
+      expect(secretStores[orgs[i]].getAvailableNotes().length).to.equal(0)
+    }
+    const numInitialHodlers = 2
+    const numInitialNotesPerHodler = 3
+    for (let i = 0; i < numInitialHodlers; i = i + 1) {
+      const who = orgs[i]
+      const values = _.times(numInitialNotesPerHodler, () => new BN(_.random(50).toString() + '000'))
       const total = values.reduce((acc, el) => acc.add(el), new BN('0'))
-      const k0 = await makeK0(config.proverPort)
       for (let i = 0; i < values.length; i++) {
         const v = values[i]
-        const data = await k0.prepareDeposit(platformState, secretStore, v)
-        await secretStore.addNoteInfo(data.cm, data.a_pk, data.rho, data.r, v)
-        const depositTx = await k0Fabric.mint(
+        const data = await k0s[who].prepareDeposit(platformStates[who], secretStores[who], v)
+        await secretStores[who].addNoteInfo(data.cm, data.a_pk, data.rho, data.r, v)
+        const depositTx = await k0Fabrics[who].mint(
           u.buf2hex(data.cm),
           u.buf2hex(data.nextRoot),
           ''
         )
-        await u.wait(200)
+        await u.wait(2000)
       }
+    }
+
+    // Hodlers should now have numInitialNotesPerHodler notes each
+    for (let i = 0; i < numInitialHodlers; i = i + 1) {
+      expect(secretStores[orgs[i]].getAvailableNotes().length).to.equal(numInitialNotesPerHodler)
+    }
+    // GammaCo should still have 0
+    expect(secretStores[orgs[2]].getAvailableNotes().length).to.equal(0)
+
+  })
+
+  it('Transfer', async function() {
+
+    const labelBeforeBefore = platformStates.alpha.currentStateLabel()
+
+    const availableNotes = secretStores.alpha.getAvailableNotes()
+    // select 2 notes randomly
+    const inputs = _.sampleSize(availableNotes, 2)
+    const sum = _.map(inputs, 'v').reduce((acc, el) => acc.add(el), new BN(0))
+    const thousand = new BN(1000)
+    const in0addr = platformStates.alpha.indexOfCM(inputs[0].cm)
+    const in1addr = platformStates.alpha.indexOfCM(inputs[1].cm)
+
+    const out0 = {
+      a_pk: publicKeys.gamma,
+      rho: crypto.randomBytes(32),
+      r: crypto.randomBytes(48),
+      v: thousand.mul(new BN(_.random(sum.div(thousand).toNumber())))
+    }
+
+    const out1 = {
+      a_pk: publicKeys.alpha,
+      rho: crypto.randomBytes(32),
+      r: crypto.randomBytes(48),
+      v: sum.sub(out0.v)
+    }
+
+
+    const transferData = await k0s.alpha.prepareTransfer(
+      platformStates.alpha,
+      secretStores.alpha,
+      in0addr,
+      in1addr,
+      out0,
+      out1
+    )
+    secretStores.alpha.addSNToNote(inputs[0].cm, transferData.input_0_sn)
+    secretStores.alpha.addSNToNote(inputs[1].cm, transferData.input_1_sn)
+    secretStores.alpha.addNoteInfo(transferData.output_0_cm, out0.a_pk, out0.rho, out0.r, out0.v)
+    secretStores.alpha.addNoteInfo(transferData.output_1_cm, out1.a_pk, out1.rho, out1.r, out1.v)
+
+    // This is hacky :/
+    // We need a "simulate two additions" function on the MT server
+    const rootBefore = await platformStates.alpha.merkleTreeRoot()
+    const labelBefore = platformStates.alpha.currentStateLabel()
+    const tmpLabel = ('temporary_mt_addition_' + crypto.randomBytes(16).toString('hex'))
+    await platformStates.alpha.add(tmpLabel, [], [ transferData.output_0_cm, transferData.output_1_cm ])
+    const newRoot = await platformStates.alpha.merkleTreeRoot()
+    await platformStates.alpha.rollbackTo(labelBefore)
+
+    const finalRoot = await platformStates.alpha.merkleTreeRoot()
+    assert(finalRoot.equals(rootBefore))
+
+    const out_0_data = makeData(out0.a_pk, out0.rho, out0.r, out0.v)
+    const out_1_data = makeData(out1.a_pk, out1.rho, out1.r, out1.v)
+
+    await k0Fabrics.alpha.transfer(
+      u.buf2hex(transferData.input_0_sn),
+      u.buf2hex(transferData.input_1_sn),
+      u.buf2hex(transferData.output_0_cm),
+      u.buf2hex(transferData.output_1_cm),
+      u.buf2hex(out_0_data),
+      u.buf2hex(out_1_data),
+      u.buf2hex(newRoot)
+    )
+
+  })
+
+  after(async function() {
+    console.log('shutting down')
+    for (let i = 0; i < orgs.length; i = i + 1) {
+      k0Fabrics[orgs[i]].off()
     }
   })
 })

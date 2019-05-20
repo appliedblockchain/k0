@@ -17,7 +17,7 @@ function checkBN(x) {
 }
 
 function checkBuf(buf, len) {
-	assert(Buffer.isBuffer(buf))
+	assert(Buffer.isBuffer(buf), `Not a buffer: ${buf}`)
   if (len !== undefined) {
     assert(buf.length === len)
   }

@@ -202,6 +202,7 @@ Json::Value zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::exampleWi
     else
     {
         cerr << "Example proof verification failed." << endl;
+        throw JsonRpcException(-32010, "Example proof verification failed.");
     }
 
     cout << "PROOF RAW" << endl;
@@ -288,6 +289,7 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::depositCommitmentProo
     else
     {
         cerr << "Commitment proof verification failed." << endl;
+        throw JsonRpcException(-32010, "Commitment proof verification failed.");
     }
 
     r1cs_ppzksnark_proof<alt_bn128_pp> prooof;
@@ -336,11 +338,13 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::merkleTreeAdditionPro
 
     assert(!circuit.pb->is_satisfied());
     circuit.mt_update_gadget->generate_r1cs_witness();
-
-    cout << "CHECKING ADDITION" << endl;
-    cout << circuit.pb->primary_input().size() << " "
-         << addition_pk.constraint_system.num_inputs() << endl;
     assert(circuit.pb->is_satisfied());
+
+    if (!circuit.pb->is_satisfied())
+    {
+        throw JsonRpcException(-32010, "Addition circuit not satisfied");
+    }
+
     const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> proof =
         r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
             addition_pk, circuit.pb->primary_input(),
@@ -358,6 +362,7 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::merkleTreeAdditionPro
     else
     {
         cerr << "Addition proof verification failed." << endl;
+        throw JsonRpcException(-32010, "Addition proof verification failed.");
     }
 
     Json::Value result;
@@ -512,6 +517,7 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepareTransfer(
     else
     {
         cerr << "Transfer proof verification failed." << endl;
+        throw JsonRpcException(-32010, "Transfer proof verification failed.");
     }
 
     cout << "TRANSFER PUBLIC INPUTS" << endl;
@@ -526,8 +532,8 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepareTransfer(
         xfer_circuit.out_0_cm_bits->get_digest());
     result["output_1_cm"] = bits2hex(
         xfer_circuit.out_1_cm_bits->get_digest());
-    result["proof"] = json_conversion::proof_to_json_affine(xfer_proof);
-    result["proofstring"] = proof_to_string(xfer_proof);
+    result["proof_affine"] = json_conversion::proof_to_json_affine(xfer_proof);
+    result["proof_jacobian"] = json_conversion::proof_to_json_jacobian(xfer_proof);
     return result;
 }
 
@@ -597,6 +603,7 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_withdrawal(
     else
     {
         cerr << "Withdrawal proof verification failed." << endl;
+        throw JsonRpcException(-32010, "Withdrawal proof verification failed.");
     }
 
     cout << "WITHDRAWAL PUBLIC INPUT" << endl
