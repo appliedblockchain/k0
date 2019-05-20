@@ -1,4 +1,4 @@
-const assert = require('assert')
+
 const crypto = require('crypto')
 const u = require('../util')
 
@@ -30,7 +30,7 @@ async function prepareDeposit(server, platformState, secretStore, v) {
     additionProofAffine: additionProof.proof_affine,
     additionProofJacobian: additionProof.proof_jacobian,
     commitmentProofAffine: commProofData.proof_affine,
-    commitmentProofJacobian: commProofData.proof_jacobian,
+    commitmentProofJacobian: commProofData.proof_jacobian
   }
 }
 

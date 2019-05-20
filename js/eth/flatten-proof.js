@@ -1,4 +1,7 @@
+'use strict'
+
 function flattenProof(proof) {
+
   return [
     proof.g_A.g.x, // 0 a
     proof.g_A.g.y, // 1

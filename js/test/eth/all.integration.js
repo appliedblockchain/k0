@@ -52,6 +52,7 @@ describe('Ethereum integration test replicating the K0 demo', () => {
       process.exit(1)
     })
 
+    await waitPort({ port: 4000 })
     await waitPort({ port: 8546 })
     await waitPort({ port: platformPorts[0] }) // parity
     await waitPort({ port: platformPorts[1] })
@@ -181,28 +182,11 @@ describe('Ethereum integration test replicating the K0 demo', () => {
     const bobPublicKey = await k0.prfAddr(bobSecretKey)
     const carolPublicKey = await k0.prfAddr(carolSecretKey)
 
-    aliceSecretStore = makeSecretStore(
-      {
-        publicKey: u.buf2hex(alicePublicKey),
-        privateKey: u.buf2hex(aliceSecretKey)
+    aliceSecretStore = makeSecretStore(alicePublicKey, aliceSecretKey)
 
-      }
-    )
+    bobSecretStore = makeSecretStore(bobPublicKey, bobSecretKey)
 
-    bobSecretStore = makeSecretStore(
-      {
-        publicKey: u.buf2hex(bobPublicKey),
-        privateKey: u.buf2hex(bobSecretKey)
-
-      }
-    )
-
-    carolSecretStore = makeSecretStore(
-      {
-        publicKey: u.buf2hex(carolPublicKey),
-        privateKey: u.buf2hex(carolSecretKey)
-      }
-    )
+    carolSecretStore = makeSecretStore(carolPublicKey, carolSecretKey)
 
     initEventHandlers(platformState1, aliceSecretStore, k0Eth)
     initEventHandlers(platformState2, bobSecretStore, k0Eth)
@@ -249,8 +233,8 @@ describe('Ethereum integration test replicating the K0 demo', () => {
         data.k,
         data.cm,
         data.nextRoot,
-        data.commitmentProof,
-        data.additionProof
+        data.commitmentProofAffine,
+        data.additionProofAffine
       )
 
       await web3.eth.sendSignedTransaction(u.buf2hex(depositTx))
@@ -264,15 +248,10 @@ describe('Ethereum integration test replicating the K0 demo', () => {
     await approveAndDeposit(alice.wallet, aliceSecretStore, platformState1, values)
     values = _.times(3, () => new BN(_.random(50).toString() + '000'))
     await approveAndDeposit(bob.wallet, bobSecretStore, platformState2, values)
-
     await checkRootsConsistency()
-    // TODO: re add test after fix
-    // console.log({ aliceNotes: aliceSecretStore.getAvailableNotes(), bobNotes: bobSecretStore.getAvailableNotes() })
-    // expect(aliceSecretStore.getAvailableNotes().get('cms')).to.equal(3)
-    // expect(Object.keys(bobSecretStore.getAvailableNotes()).length).to.equal(3)
   })
 
-  it('allow alice to transfer funds to bob', async () => {
+  it('allows alice to transfer funds to bob', async () => {
 
   })
 })

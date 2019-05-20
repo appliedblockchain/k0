@@ -1,6 +1,5 @@
 const request = require('./request')
 const u = require('../util')
-const BN = require('bn.js')
 const conv = require('./proof-conversion')
 
 async function depositCommitmentProof(jc, a_pk, rho, r, v) {
@@ -18,6 +17,7 @@ async function depositCommitmentProof(jc, a_pk, rho, r, v) {
       v.toString()
     ]
   )
+
   return {
     cm: u.hex2buf(res.cm),
     k: u.hex2buf(res.k),

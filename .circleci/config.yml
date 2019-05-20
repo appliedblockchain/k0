@@ -191,10 +191,6 @@ jobs:
           name: Docker login
           command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
       - run:
-          name: Pull the images
-          command: |
-            cd js/test/eth/network && docker-compose pull
-      - run:
           name: "Pull and tag the images"
           command: |
             cd cpp
@@ -207,7 +203,7 @@ jobs:
           name: Generate proving and verification keys
           command: |
             mkdir /tmp/k0keys
-            for circuit in commitment transfer addition withdrawal
+            for circuit in commitment transfer addition withdrawal example
             do
               docker run -v /tmp/k0keys:/tmp/k0keys appliedblockchain/zktrading-setup:$CIRCLE_BRANCH-$CIRCLE_SHA1 $circuit 4 /tmp/k0keys/${circuit}_pk /tmp/k0keys/${circuit}_vk
               docker run -v /tmp/k0keys:/tmp/k0keys appliedblockchain/zktrading-convert-vk:$CIRCLE_BRANCH-$CIRCLE_SHA1 /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt

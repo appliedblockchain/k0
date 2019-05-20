@@ -8,11 +8,14 @@ function addNoteInfo(state, cm, a_pk, rho, r, v) {
   u.checkBuf(r, 48)
   u.checkBN(v)
   const cmString = u.buf2hex(cm)
+
   const cmsBefore = state.get('cms')
-  return state.set('cms', cmsBefore.set(
+  state.cms = cmsBefore.set(
     cmString,
     conv.stringifyNote(a_pk, rho, r, v)
-  ))
+  )
+
+  return state
 }
 
 module.exports = addNoteInfo

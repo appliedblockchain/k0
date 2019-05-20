@@ -3,7 +3,7 @@ const u = require('../util')
 
 function getAvailableNotes(state) {
   return state
-    .get('cms')
+    .cms
     .entrySeq()
     .filter(entry => {
       const [ val ] = entry
