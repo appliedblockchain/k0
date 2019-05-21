@@ -41,12 +41,12 @@ template <typename FieldT, typename MerkleTreeHashT>
 Json::Value zktrade::MTServer<FieldT, MerkleTreeHashT>::add(
     const string &leaf_hex)
 {
-  cout << "leaf " << leaf_hex << endl;
   bit_vector leaf_bv = hex2bits(leaf_hex);
-  cout << "mt root before" << bits2hex(mt.root()) << endl;
-  cout << "mt adding " << bits2hex(leaf_bv) << endl;
+  cout << endl;
+  cout << "mt root before " << bits2hex(mt.root()) << endl;
+  cout << "mt adding leaf " << bits2hex(leaf_bv) << endl;
   uint address = mt.add(leaf_bv);
-  cout << "mt root after" << bits2hex(mt.root()) << endl;
+  cout << "mt root after  " << bits2hex(mt.root()) << endl;
   Json::Value result;
   result["address"] = address;
   result["nextRoot"] = bits2hex(mt.root());

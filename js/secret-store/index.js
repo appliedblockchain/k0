@@ -1,16 +1,15 @@
 'use strict'
 
+const Immutable = require('immutable')
 const addNoteInfo = require('./add-note-info')
 const addSNToNote = require('./add-sn-to-note')
 const getAvailableNotes = require('./get-available-notes')
+const getNoteInfo = require('./get-note-info')
 const getPrivateKey = require('./get-private-key')
 const getPublicKey = require('./get-public-key')
-const getNoteInfo = require('./get-note-info')
 const spit = require('./spit')
-const Immutable = require('immutable')
 const u = require('../util')
 const conv = require('./conversion')
-
 
 function makeSecretStore(privateKey, publicKey, noteInfos) {
   u.checkBuf(privateKey, 32)

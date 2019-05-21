@@ -1,7 +1,7 @@
 'use strict'
 
-const BN = require('bn.js')
 const assert = require('assert')
+const BN = require('bn.js')
 const execAsync = require('./exec-async')
 const path = require('path')
 
@@ -17,7 +17,7 @@ function checkBN(x) {
 }
 
 function checkBuf(buf, len) {
-  assert(Buffer.isBuffer(buf))
+  assert(Buffer.isBuffer(buf), `Not a buffer: ${buf}`)
   if (len !== undefined) {
     assert(buf.length === len)
   }

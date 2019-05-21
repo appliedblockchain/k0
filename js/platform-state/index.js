@@ -1,9 +1,12 @@
-const immutable = require('immutable')
+'use strict'
+
 const cmAtIndex = require('./cm-at-index')
-const makeStateList = require('./state-list')
-const makeMT = require('./mt')
-const u = require('../util')
 const currentState = require('./current-state')
+const immutable = require('immutable')
+const indexOfCM = require('./index-of-cm')
+const makeMT = require('./mt')
+const makeStateList = require('./state-list')
+const u = require('../util')
 const assert = require('assert')
 
 async function makePlatformState(serverPort = 4100) {
@@ -49,8 +52,7 @@ async function makePlatformState(serverPort = 4100) {
     stateList = makeStateList()
     const state = immutable.Map({
       cmList: immutable.List(),
-      snList: immutable.List(),
-      cmInfo: immutable.Map()
+      snList: immutable.List()
     })
     stateList.add('initialState', state)
     await mt.reset()
@@ -70,16 +72,24 @@ async function makePlatformState(serverPort = 4100) {
 
   const simulateMerkleTreeAddition = mt.simulateAdd
 
+  async function print(label) {
+    console.log(label, '************************')
+    console.log(label, 'mt root' , await mt.root())
+    stateList.print(label)
+  }
+
   return {
     add,
     cmAtIndex: idx => cmAtIndex(stateList, idx),
+    indexOfCM: cm => indexOfCM(stateList, cm),
     cmPath: mt.path,
     reset,
     merkleTreeRoot,
     simulateMerkleTreeAddition,
     currentState: () => currentState(stateList),
     currentStateLabel: () => stateList.getLatestLabel(),
-    rollbackTo
+    rollbackTo,
+    print
   }
 }
 

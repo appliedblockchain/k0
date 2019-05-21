@@ -1,3 +1,5 @@
+'use strict'
+
 const u = require('../util')
 const conv = require('./conversion')
 
