@@ -25,7 +25,7 @@ function initEventHandlers(mvppt, eventEmitter) {
       console.log(item)
       throw new Error(`Received event out of order (transactionIndex: ${item.transactionIndex}, last: ${lastTransactionIndex})`)
     }
-   if (item.event === 'Deposit') {
+    if (item.event === 'Deposit') {
       await handleDeposit(eventEmitter, item)
     } else if (item.event === 'Transfer') {
       await handleTransfer(eventEmitter, item)

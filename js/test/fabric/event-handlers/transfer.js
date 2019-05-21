@@ -1,5 +1,6 @@
+'use strict'
+
 const BN = require('bn.js')
-const chalk = require('chalk')
 const u = require('../../../util')
 
 function decodeData(data) {
@@ -12,7 +13,8 @@ function decodeData(data) {
   }
 }
 
-async function handleTransfer(platformState, secretStore, txnid, in0sn, in1sn, out0cm, out1cm, out0data, out1data, nextRoot) {
+async function handleTransfer(platformState, secretStore, txnid, in0sn, in1sn,
+                              out0cm, out1cm, out0data, out1data, nextRoot) {
 
   const outputs = [
     [ u.hex2buf(out0cm), u.hex2buf(out0data) ],
@@ -38,14 +40,6 @@ async function handleTransfer(platformState, secretStore, txnid, in0sn, in1sn, o
     [ u.hex2buf(out0cm), u.hex2buf(out1cm) ],
     u.hex2buf(nextRoot)
   )
-  // console.log(chalk.grey([
-  //   `TRANSFER`,
-  //   `SN 0 ${in0sn}`,
-  //   `SN 1 ${in1sn}`,
-  //   `CM 0 ${out0cm}`,
-  //   `CM 1 ${out1cm}`,
-  //   `New Merkle tree root ${nextRoot}`
-  // ].join('\n')))
 }
 
 module.exports = handleTransfer

@@ -88,7 +88,6 @@ describe('Minimum viable private payment token', function () {
     console.log('MT ENGINE RESETTED')
     const initialRootResponse = await mtEngine.request('root', [])
 
-    console.log('here')
     const initialRoot = initialRootResponse.result
     const verifierAddresses = await Promise.all([
       'CommitmentVerifier',
