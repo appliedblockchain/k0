@@ -160,9 +160,11 @@ async function sleep(seconds = 0, message = '') {
     console.log('Sleeping for ${sec} seconds')
   }
   return new Promise(a => {
-    setTimemout(sec * 1000, a)
+    setTimeout(sec * 1000, a)
   })
 }
+
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 module.exports = {
   sleep,
@@ -182,5 +184,6 @@ module.exports = {
   verifyOnChain,
   verifyOnChainWithProof,
   toUnits,
-  fromUnits
+  fromUnits,
+  ZERO_ADDRESS
 }

@@ -77,7 +77,7 @@ async function run() {
   await sendTransaction(
     web3,
     dollarCoin._address,
-    dollarCoin.methods.mint(tokenMaster.address, "1000000000000000").encodeABI(),
+    dollarCoin.methods.mint(tokenMaster.address, '1000000000000000').encodeABI(),
     5000000,
     tokenMaster
   )
@@ -100,8 +100,8 @@ async function run() {
     moneyShower._address,
     moneyShower.methods.transfer(
       dollarCoin._address,
-      _.map([alice, bob], x => x.wallet.getAddressString()),
-      _.times(2, () => "1000000000000")
+      _.map([ alice, bob ], x => x.wallet.getAddressString()),
+      _.times(2, () => '1000000000000')
     ).encodeABI(),
     5000000,
     tokenMaster
@@ -167,7 +167,10 @@ async function run() {
     `Bob: public key ${u.buf2hex(bobPublicKey)}, `,
     `private key ${u.buf2hex(bobSecretKey)}`
   ].join(''))
-
+  logger.info([
+    `Carol: public key ${u.buf2hex(carolPublicKey)}, `,
+    `private key ${u.buf2hex(carolSecretKey)}`
+  ].join(''))
 
 }
 

@@ -159,6 +159,8 @@ async function unpack256Bits(val1, val2) {
   return hex2buf(result.stdout.trim())
 }
 
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+
 module.exports = {
   bn2string,
   buf2hex,
@@ -175,5 +177,6 @@ module.exports = {
   parseG1Point,
   parseG2Point,
   unpack,
-  unpack256Bits
+  unpack256Bits,
+  ZERO_ADDRESS
 }

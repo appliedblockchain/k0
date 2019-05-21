@@ -27,7 +27,7 @@ function flattenProof(proof) {
     proof.g_H.y, // 15
 
     proof.g_K.x, // 16 k
-    proof.g_K.y  // 17
+    proof.g_K.y // 17
   ]
 }
 

@@ -15,6 +15,7 @@ const makePlatformState = require('../platform-state')
 const makeSecretStore = require('../secret-store')
 const { prompt } = require('./util')
 const u = require('../util')
+const { hex2buf } = require('../util')
 const inquirer = require('inquirer')
 const publicKeysInput = require('./public-keys')
 const transferMoney = require('./transfer-money')
@@ -70,7 +71,26 @@ async function run() {
   )
 
   const secretStoreData = require(`./${who}.secrets.json`)
-  const secretStore = makeSecretStore(secretStoreData)
+
+  secretStoreData.cms = secretStoreData.cms || {}
+  const noteInfos = Object.values(secretStoreData.cms).map((v, k) => {
+    console.log({ k, v })
+
+    return {
+      cm: hex2buf(Object.keys(secretStoreData.cms)[k]),
+      a_pk: hex2buf(v.a_pk),
+      rho: hex2buf(v.rho),
+      r: hex2buf(v.r),
+      v: new BN(v.v)
+    }
+  })
+
+
+  const secretStore = makeSecretStore(
+    u.hex2buf(secretStoreData.privateKey),
+    u.hex2buf(secretStoreData.publicKey),
+    noteInfos
+  )
   initEventHandlers(platformState, secretStore, k0Eth)
 
   const k0 = await makeK0(serverPorts[who])

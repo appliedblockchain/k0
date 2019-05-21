@@ -50,7 +50,7 @@ async function run() {
   )
 
   const secretStoreData = require(`./${who}.secrets.json`)
-  const secretStore = makeSecretStore(secretStoreData)
+  const secretStore = makeSecretStore(u.hex2buf(secretStoreData.privateKey), u.hex2buf(secretStoreData.publicKey))
   console.log('private key', u.buf2hex(secretStore.getPrivateKey()))
   console.log('public key', u.buf2hex(secretStore.getPublicKey()))
   initEventHandlers(platformState, secretStore, k0Eth)
@@ -108,7 +108,7 @@ async function run() {
       data.commitmentProofAffine,
       data.additionProofAffine
     )
-    // const receipt =
+
     await web3.eth.sendSignedTransaction(u.buf2hex(depositTx))
 
     await u.wait(2000)

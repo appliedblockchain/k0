@@ -40,7 +40,8 @@ describe('Ethereum integration test replicating the K0 demo', () => {
   let k0, k0Eth
   let verifierAddresses, platformState1, platformState2, platformState3
   let dollarCoin, carToken
-  let aliceSecretStore, bobSecretStore, carolSecretStore
+
+  const numInitialNotes = 2
 
   // Make the accounts, deploy the contracts
   before(async () => {
@@ -88,6 +89,8 @@ describe('Ethereum integration test replicating the K0 demo', () => {
     platformState2 = await makePlatformState(platformPorts[1])
     platformState3 = await makePlatformState(platformPorts[2])
 
+    await u.wait(500)
+
     const initialRoot = await platformState1.merkleTreeRoot()
 
     // Deploying coin contract
@@ -123,14 +126,14 @@ describe('Ethereum integration test replicating the K0 demo', () => {
       tokenMaster
     )
 
-    const numInitialCoins = 2
+
 
     // Money to the people
     await sendTransaction(
       web3,
       dollarCoin._address,
       dollarCoin.methods.approve(
-        moneyShower._address, web3.utils.toWei((numInitialCoins).toString())
+        moneyShower._address, web3.utils.toWei((numInitialNotes).toString())
       ).encodeABI(), 5000000, tokenMaster)
 
     await sendTransaction(
@@ -173,24 +176,20 @@ describe('Ethereum integration test replicating the K0 demo', () => {
     bob.secretKey = crypto.randomBytes(32)
     carol.secretKey = crypto.randomBytes(32)
 
-    const aliceSecretKey = crypto.randomBytes(32)
-    const bobSecretKey = crypto.randomBytes(32)
-    const carolSecretKey = crypto.randomBytes(32)
-
     k0 = await makeK0(4000)
-    const alicePublicKey = await k0.prfAddr(aliceSecretKey)
-    const bobPublicKey = await k0.prfAddr(bobSecretKey)
-    const carolPublicKey = await k0.prfAddr(carolSecretKey)
+    alice.publicKey = await k0.prfAddr(alice.secretKey)
+    bob.publicKey = await k0.prfAddr(bob.secretKey)
+    carol.publicKey = await k0.prfAddr(carol.secretKey)
 
-    aliceSecretStore = makeSecretStore(alicePublicKey, aliceSecretKey)
+    alice.secretStore = makeSecretStore(alice.secretKey, alice.publicKey)
 
-    bobSecretStore = makeSecretStore(bobPublicKey, bobSecretKey)
+    bob.secretStore = makeSecretStore(bob.secretKey, bob.publicKey)
 
-    carolSecretStore = makeSecretStore(carolPublicKey, carolSecretKey)
+    carol.secretStore = makeSecretStore(carol.secretKey, carol.publicKey)
 
-    initEventHandlers(platformState1, aliceSecretStore, k0Eth)
-    initEventHandlers(platformState2, bobSecretStore, k0Eth)
-    initEventHandlers(platformState3, carolSecretStore, k0Eth)
+    initEventHandlers(platformState1, alice.secretStore, k0Eth)
+    initEventHandlers(platformState2, bob.secretStore, k0Eth)
+    initEventHandlers(platformState3, carol.secretStore, k0Eth)
 
     console.log('before: INITIALIZED Secrets, ')
   })
@@ -198,8 +197,8 @@ describe('Ethereum integration test replicating the K0 demo', () => {
   async function checkRootsConsistency() {
     const ethRoot = await k0Eth.merkleTreeRoot()
     const root1 = await platformState1.merkleTreeRoot()
-    const root2 = await platformState1.merkleTreeRoot()
-    const root3 = await platformState1.merkleTreeRoot()
+    const root2 = await platformState2.merkleTreeRoot()
+    const root3 = await platformState3.merkleTreeRoot()
 
     assert(ethRoot.equals(root1))
     assert(ethRoot.equals(root2))
@@ -242,16 +241,69 @@ describe('Ethereum integration test replicating the K0 demo', () => {
     }
   }
 
+  let values
   it('Can mint the CMS', async () => {
     // DEPOSIT TEST
-    let values = _.times(3, () => new BN(_.random(50).toString() + '000'))
-    await approveAndDeposit(alice.wallet, aliceSecretStore, platformState1, values)
-    values = _.times(3, () => new BN(_.random(50).toString() + '000'))
-    await approveAndDeposit(bob.wallet, bobSecretStore, platformState2, values)
+    values = _.times(numInitialNotes, () => new BN(_.random(50).toString() + '000'))
+    await approveAndDeposit(alice.wallet, alice.secretStore, platformState1, values)
+    // values = _.times(3, () => new BN(_.random(50).toString() + '000'))
+    // await approveAndDeposit(bob.wallet, bob.secretStore, platformState2, values)
     await checkRootsConsistency()
+
+    // check that we have now 6 cm in the merkle tree
+    expect(await platformState1.currentState().cmList.length).to.equal(numInitialNotes)
   })
 
+  async function getInputNote(platformState, secretStore, index) {
+    const cm = platformState.cmAtIndex(new BN(index))
+    const info = secretStore.getNoteInfo(cm)
+
+    return {
+      address: new BN(index),
+      cm,
+      ...info
+    }
+  }
+
   it('allows alice to transfer funds to bob', async () => {
+    await checkRootsConsistency()
+    const in0 = await getInputNote(platformState1, alice.secretStore, 0)
+    const in1 = await getInputNote(platformState1, alice.secretStore, 1)
+
+    console.log({ in0, in1 })
+
+    const totalValue = in0.v.add(in1.v)
+
+
+
+    const out0 = {
+      a_pk: bob.secretStore.getPublicKey(),
+      v: totalValue,
+      rho: crypto.randomBytes(32),
+      r: crypto.randomBytes(48)
+    }
+    const out1 = {
+      a_pk: alice.secretStore.getPublicKey(),
+      v: new BN('0'),
+      rho: crypto.randomBytes(32),
+      r: crypto.randomBytes(48)
+    }
+
+    console.log({ platformRoot: await platformState1.merkleTreeRoot(), ethRoot: await k0Eth.merkleTreeRoot() })
+    console.log({ totalValue: totalValue.toString(), in0: in0.v.toString(), in1: in1.v.toString() })
+
+
+    // does not throw
+    const transferData = await k0.prepareTransfer(
+      platformState1,
+      alice.secretStore,
+      new BN(0), // cms index
+      new BN(1),
+      out0,
+      out1,
+      u.hex2buf(u.ZERO_ADDRESS)
+    )
+
 
   })
 })

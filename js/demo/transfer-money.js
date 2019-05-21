@@ -21,6 +21,7 @@ async function transferMoney(web3, platformState, secretStore, k0Eth, k0, public
   const inquireInput = inquireInputNote.bind(null, platformState, secretStore)
   const in0 = await inquireInput('First input note')
   const in1 = await inquireInput('Second input note')
+
   const totalValue = in0.v.add(in1.v)
   const out0 = await inquireOutputNote(publicKeys, 'First output note', totalValue, false, smartPayment)
   let callee
@@ -35,6 +36,7 @@ async function transferMoney(web3, platformState, secretStore, k0Eth, k0, public
   } else {
     callee = u.hex2buf('0x0000000000000000000000000000000000000000')
   }
+
   const out1 = await inquireOutputNote(publicKeys, 'Second output note (change)', totalValue.sub(out0.v), true, false)
   const transferData = await k0.prepareTransfer(platformState, secretStore, in0.address, in1.address, out0, out1, callee)
   secretStore.addSNToNote(in0.cm, transferData.input_0_sn)
@@ -65,7 +67,7 @@ async function transferMoney(web3, platformState, secretStore, k0Eth, k0, public
     out_1_data,
     newRoot,
     callee,
-    transferData.proof
+    transferData.proofAffine
   ]
   const tx = await k0Eth.transfer(...ethParams)
 

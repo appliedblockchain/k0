@@ -7,12 +7,11 @@ async function prepareDeposit(server, platformState, secretStore, v) {
   const a_pk = secretStore.getPublicKey()
   const rho = crypto.randomBytes(32)
   const r = crypto.randomBytes(48)
+
   const cm = await server.cm(a_pk, rho, r, v)
   const prevRoot = await platformState.merkleTreeRoot()
   const mtAddSim = await platformState.simulateMerkleTreeAddition(cm)
   const commProofData = await server.depositCommitmentProof(a_pk, rho, r, v)
-  const kPacked = await u.pack256Bits(commProofData.k)
-  const cmPacked = await u.pack256Bits(cm)
   const additionProof = await server.merkleTreeAdditionProof(
     prevRoot,
     mtAddSim.address,
