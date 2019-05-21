@@ -265,6 +265,21 @@ describe('Ethereum integration test replicating the K0 demo', () => {
     }
   }
 
+  /**
+   * convert data to eth compatible format
+   * @param {} a_pk
+   * @param {*} rho
+   * @param {*} r
+   * @param {*} v
+   */
+  function makeData(a_pk, rho, r, v) {
+    u.checkBuf(a_pk, 32)
+    u.checkBuf(rho, 32)
+    u.checkBuf(r, 48)
+    u.checkBN(v)
+    return Buffer.concat([ a_pk, rho, r, v.toBuffer('le', 64) ])
+  }
+
   it('allows alice to transfer funds to bob', async () => {
     await checkRootsConsistency()
     const in0 = await getInputNote(platformState1, alice.secretStore, 0)
@@ -293,6 +308,7 @@ describe('Ethereum integration test replicating the K0 demo', () => {
     console.log({ totalValue: totalValue.toString(), in0: in0.v.toString(), in1: in1.v.toString() })
 
 
+    const callee = u.hex2buf(u.ZERO_ADDRESS) // zero address since we are not trading
     // does not throw
     const transferData = await k0.prepareTransfer(
       platformState1,
@@ -301,10 +317,46 @@ describe('Ethereum integration test replicating the K0 demo', () => {
       new BN(1),
       out0,
       out1,
-      u.hex2buf(u.ZERO_ADDRESS)
+      u.hex2buf(u.ZERO_ADDRESS),
+      callee
     )
 
+    alice.secretStore.addSNToNote(in0.cm, transferData.input_0_sn)
+    alice.secretStore.addSNToNote(in1.cm, transferData.input_1_sn)
+    alice.secretStore.addNoteInfo(transferData.output_0_cm, out0.a_pk, out0.rho, out0.r, out0.v)
+    alice.secretStore.addNoteInfo(transferData.output_1_cm, out1.a_pk, out1.rho, out1.r, out1.v)
 
+
+    const rootBefore = await platformState1.merkleTreeRoot()
+    const labelBefore = platformState1.currentStateLabel()
+    const tmpLabel = ('temporary_mt_addition_' + crypto.randomBytes(16).toString('hex'))
+    await platformState1.add(tmpLabel, [], [ transferData.output_0_cm, transferData.output_1_cm ])
+    const newRoot = await platformState1.merkleTreeRoot()
+    await platformState1.rollbackTo(labelBefore)
+
+    const finalRoot = await platformState1.merkleTreeRoot()
+    assert(finalRoot.equals(rootBefore))
+
+    const out_0_data = makeData(out0.a_pk, out0.rho, out0.r, out0.v)
+    const out_1_data = makeData(out1.a_pk, out1.rho, out1.r, out1.v)
+
+
+    const ethParams = [
+      crypto.randomBytes(32),
+      transferData.input_0_sn,
+      transferData.input_1_sn,
+      transferData.output_0_cm,
+      transferData.output_1_cm,
+      out_0_data,
+      out_1_data,
+      newRoot,
+      callee,
+      transferData.proofAffine
+    ]
+    const tx = await k0Eth.transfer(...ethParams)
+
+    const receipt = await web3.eth.sendSignedTransaction(u.buf2hex(tx))
+    expect(receipt.status).to.equal(true)
   })
 })
 
