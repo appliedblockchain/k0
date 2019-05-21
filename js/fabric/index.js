@@ -19,8 +19,6 @@ async function makeFabric(logger, config, chaincodeId) {
   let regId1
 
   async function startEventMonitoring() {
-    let queue = []
-    let processing = false
     regId1 = initEventHandlers(eh, chaincodeId, fabric)
     eh.connect(true)
     await u.wait(1000)

@@ -80,8 +80,6 @@ describe('Minimum viable private payment token', function () {
     const proverPort = parseInt(process.env.PROVER_PORT || '4000', 10)
     proverEngine = jayson.client.http({ port: proverPort })
 
-    console.log({ merklePort, proverPort })
-
     await serverReady(mtEngine, 'Merkle Tree')
     await serverReady(proverEngine, 'Prover')
 
@@ -90,7 +88,6 @@ describe('Minimum viable private payment token', function () {
     console.log('MT ENGINE RESETTED')
     const initialRootResponse = await mtEngine.request('root', [])
 
-    console.log('here')
     const initialRoot = initialRootResponse.result
     const verifierAddresses = await Promise.all([
       'CommitmentVerifier',

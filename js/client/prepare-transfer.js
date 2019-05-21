@@ -91,6 +91,7 @@ async function prepareTransfer(
    ]
 
   const res = await request(jc, 'prepareTransfer', params)
+
   return {
     input_0_sn: u.hex2buf(res.input_0_sn),
     input_1_sn: u.hex2buf(res.input_1_sn),
@@ -98,8 +99,8 @@ async function prepareTransfer(
     output_0_cm: u.hex2buf(res.output_0_cm),
     output_1_address: new BN(res.output_1_address),
     output_1_cm: u.hex2buf(res.output_1_cm),
-    proofAffine: conv.convertAffine(res.proof),
-    proofJacobian: conv.convertJacobian(res.proof)
+    proofAffine: conv.bnifyAffine(res.proof_affine),
+    proofJacobian: conv.bnifyJacobian(res.proof_jacobian)
   }
 }
 

@@ -33,7 +33,7 @@ function initEventHandlers(channelEventHub, chaincodeId, eventEmitter) {
     chaincodeId,
     '^.*',
     (event, block_num, txnid, status) => {
-      let event_payload = JSON.parse(event.payload)
+      const event_payload = JSON.parse(event.payload)
       queue.push({ type: event.event_name, txnid, payload: event_payload})
       processQueue()
     },

@@ -39,7 +39,18 @@ function makeStateList() {
     throw new Error(`Rollback failed. No state with label ${label} found.`)
   }
 
-  return { add, getLatest, getLatestLabel, rollbackTo }
+  function print(label) {
+    console.log(label, 'state list')
+    const it = linkedList.iterator()
+    let done = false
+    while (!done) {
+      const next = it.next()
+      console.log(label, 'next', next.value ? next.value.label : "undefined")
+      done = next.done
+    }
+  }
+
+  return { add, getLatest, getLatestLabel, rollbackTo, print }
 }
 
 module.exports = makeStateList
