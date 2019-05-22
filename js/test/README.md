@@ -36,3 +36,23 @@ for circuit in example; do \
 cpp/build/src/setup $circuit 7 /tmp/k0keys/${circuit}_pk /tmp/k0keys/${circuit}_vk && \
 cpp/build/src/convert_vk /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt; \
 done
+
+
+# Build docker images locally, create the keys with docker
+
+```
+cd cpp
+docker build -f docker/builder.Dockerfile -t zktrading-builder .
+docker build -f docker/zktrading.Dockerfile -t zktrading .
+for IMAGE in setup server mtserver convert-vk pack unpack
+do
+    docker build -f docker/$IMAGE.Dockerfile -t zktrading-$IMAGE .
+done
+```
+
+mkdir /tmp/k0keys
+for circuit in commitment transfer addition withdrawal example
+do
+    docker run -v /tmp/k0keys:/tmp/k0keys zktrading-setup $circuit 4 /tmp/k0keys/${circuit}_pk /tmp/k0keys/${circuit}_vk
+    docker run -v /tmp/k0keys:/tmp/k0keys zktrading-convert-vk /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt
+done

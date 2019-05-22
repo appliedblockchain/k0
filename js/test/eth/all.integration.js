@@ -237,12 +237,13 @@ describe('Ethereum integration test replicating the K0 demo', () => {
       )
 
       await web3.eth.sendSignedTransaction(u.buf2hex(depositTx))
-      await u.wait(200)
+      await u.wait(2000)
     }
   }
 
   let values
   it('Can mint the CMS', async () => {
+    await u.wait(2000)
     // DEPOSIT TEST
     values = _.times(numInitialNotes, () => new BN(_.random(50).toString() + '000'))
     await approveAndDeposit(alice.wallet, alice.secretStore, platformState1, values)

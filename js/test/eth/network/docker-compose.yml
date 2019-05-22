@@ -9,7 +9,7 @@ services:
     command: 4 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 4000
     restart: on-failure
     volumes:
-      - /tmp/k0keys/:/tmp/k0keys:ro
+      - /tmp/k0keys:/tmp/k0keys:ro
     ports:
       - 4000:4000
     networks:
@@ -43,8 +43,6 @@ services:
       dockerfile: docker/mtserver.Dockerfile
     command: 4 6100
     restart: on-failure
-
-
 
     ports:
       - 6100:6100

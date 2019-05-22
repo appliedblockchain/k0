@@ -6,7 +6,7 @@ function getAvailableNotes(state) {
     .get('cms')
     .entrySeq()
     .filter(entry => {
-      const [ val ] = entry
+      const [ key, val ] = entry
       return val.sn === undefined
     })
     .toArray()
