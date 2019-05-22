@@ -63,7 +63,6 @@ jobs:
   prepare_node:
     machine:
       image: circleci/classic:201808-01
-    working_directory: ~/.go_workspace/src/github.com/appliedblockchain/nftchaincode
     steps:
       - checkout
       - run:
@@ -103,18 +102,28 @@ jobs:
           name: "Docker login"
           command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
       - run:
-          name: "Pull and tag app images"
-          command: |
-            cd cpp
-            for IMAGE in setup server mtserver convert-vk pack unpack
-            do
-              docker pull appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
-              docker tag appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1 zktrading-$IMAGE
-            done
-      - run:
           name: "Start server"
           command: |
-            docker run -d -p 11400:11400 -v $PWD/fabric/chaincode/cash/testdata/:/tmp/k0keys/:ro zktrading-server cpp/build/src/server 6 /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk 11400
+            docker run -d \
+            -p 11400:11400 \
+            -v $PWD/fabric/chaincode/cash/testdata/:/tmp/k0keys/:ro \
+            appliedblockchain/zktrading-server:$CIRCLE_BRANCH-$CIRCLE_SHA1 \
+            zktrading-server 6 \
+            /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk \
+            /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk \
+            /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk \
+            /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk \
+            /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk 11400
+      - run:
+          name: "Get Fabric source code"
+          command: |
+            cd ~/.go_workspace/src/github.com
+            mkdir hyperledger
+            cd hyperledger
+            curl -LO https://github.com/hyperledger/fabric/archive/v1.2.0.tar.gz
+            tar xf v1.2.0.tar.gz
+            mv fabric-1.2.0 fabric
+            rm v1.2.0.tar.gz
       - run:
           name: "Run Go tests"
           command: |
