@@ -16,7 +16,7 @@ async function pack256Bits(buf) {
 
   let executablePath
   if (env.CIRCLECI) {
-    executablePath = `docker run appliedblockchain/zktrading-pack:${env.CIRCLE_BRANCH}-${env.CIRCLE_SHA1}`
+    executablePath = 'docker run zktrading-pack'
   } else {
     executablePath = path.join(cppUtilDir, 'pack_256_bits')
   }
@@ -39,7 +39,7 @@ async function unpack256Bits(val1, val2) {
 
   let executablePath
   if (process.env.CIRCLECI) {
-    executablePath = `docker run appliedblockchain/zktrading-unpack:${env.CIRCLE_BRANCH}-${env.CIRCLE_SHA1}`
+    executablePath = 'docker run zktrading-unpack'
   } else {
     executablePath = path.join(cppUtilDir, 'unpack_256_bits')
   }

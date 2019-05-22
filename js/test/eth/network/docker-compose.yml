@@ -53,14 +53,10 @@ services:
   parity:
     image: appliedblockchain/parity-solo-instant:latest
     restart: unless-stopped
-    volumes:
-      - parity:/solo/chains
     ports:
       - 8545:8545
       - 8546:8546
     networks:
       - main
-volumes:
-  parity:
 networks:
   main:
