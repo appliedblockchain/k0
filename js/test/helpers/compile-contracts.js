@@ -119,22 +119,23 @@ async function compileContracts(tmpDir = '/tmp/k0keys') {
   const outputPath = path.join(contractsDir, 'output.json')
   const command = [
     `solc --combined-json abi,bin openzeppelin-solidity=${ozDir}`,
-    `*.sol > output.json`
+    '*.sol > output.json'
   ].join(' ')
   const options = {
     cwd: contractsDir,
     maxBuffer: 1024 * 1024
   }
-  const {stdout, stderr } = await execAsync(command, options)
+  const { stderr } = await execAsync(command, options)
 
   if (stderr) {
-    // console.log(stderr)
+    console.log(stderr)
   }
   const json = await asyncFs.readTextFile(outputPath)
   await Promise.all(contractNames.map(name => {
     return asyncFs.unlink(path.join(contractsDir, `${name}.sol`))
   }))
-  //await asyncFs.unlink(contractsDir)
+
+  // await asyncFs.unlink(contractsDir)
   const compilationResult = JSON.parse(json)
 
   return _.zipObject(
