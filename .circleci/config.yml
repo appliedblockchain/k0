@@ -108,7 +108,7 @@ jobs:
             -p 11400:11400 \
             -v $PWD/fabric/chaincode/cash/testdata/:/tmp/k0keys/:ro \
             appliedblockchain/zktrading-server:$CIRCLE_BRANCH-$CIRCLE_SHA1 \
-            zktrading-server 6 \
+            6 \
             /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk \
             /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk \
             /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk \
