@@ -76,7 +76,7 @@ describe('Ethereum integration test replicating the K0 demo', () => {
         ready = true
       } catch (err) {
         process.stdout.write('.')
-        await u.wait(5000)
+        await u.wait(10000)
       }
     }
 
@@ -91,7 +91,7 @@ describe('Ethereum integration test replicating the K0 demo', () => {
         ready = true
       } catch (err) {
         process.stdout.write('.')
-        await u.wait(5000)
+        await u.wait(10000)
       }
     }
 
@@ -297,7 +297,7 @@ describe('Ethereum integration test replicating the K0 demo', () => {
       )
 
       await web3.eth.sendSignedTransaction(u.buf2hex(depositTx))
-      await u.wait(2000)
+      await u.wait(5000)
     }
   }
 

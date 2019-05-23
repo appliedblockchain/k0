@@ -202,6 +202,7 @@ jobs:
       - run:
           name: Generate proving and verification keys
           command: |
+            rm -rf /tmp/k0keys
             mkdir /tmp/k0keys
             for circuit in commitment transfer addition withdrawal example
             do
