@@ -36,8 +36,7 @@ describe('Ethereum integration test replicating the K0 demo', () => {
   let alice, bob, carol // web3 accounts, and secretKeys
   let artefacts
   let addresses // contract and user addresses, indexed by name
-  let k0, k0Eth
-  let verifierAddresses, platformState1, platformState2, platformState3
+  let verifierAddresses
   let dollarCoin // , carToken
 
   const numInitialNotes = 2
@@ -52,11 +51,15 @@ describe('Ethereum integration test replicating the K0 demo', () => {
       process.exit(1)
     })
 
-    await waitPort({ port: 4000 })
-    await waitPort({ port: 8546 })
-    await waitPort({ port: platformPorts[0] }) // parity
-    await waitPort({ port: platformPorts[1] })
-    await waitPort({ port: platformPorts[2] })
+    await Promise.all([
+      waitPort({ port: 4000 }), // k01
+      waitPort({ port: 5000 }), // k02
+      waitPort({ port: 6000 }), // k03
+      waitPort({ port: 8546 }), // parity
+      waitPort({ port: platformPorts[0] }),
+      waitPort({ port: platformPorts[1] }),
+      waitPort({ port: platformPorts[2] })
+    ])
 
     web3 = testUtil.initWeb3()
     // DollarCoin minter
@@ -90,14 +93,21 @@ describe('Ethereum integration test replicating the K0 demo', () => {
         return contract._address
       })
     )
+    ;[alice, bob, carol] = _.times(3, () => {
+      const mnemonic = bip39.generateMnemonic()
+      const seed = bip39.mnemonicToSeed(mnemonic)
+      const root = hdkey.fromMasterSeed(seed)
+      const path = "m/44'/60'/0'/0/0" // eslint-disable-line
+      const wallet = root.derivePath(path).getWallet()
+      return { mnemonic, wallet }
+    })
 
-    platformState1 = await makePlatformState(platformPorts[0])
-    platformState2 = await makePlatformState(platformPorts[1])
-    platformState3 = await makePlatformState(platformPorts[2])
+    alice.platformState = await makePlatformState(platformPorts[0])
+    bob.platformState = await makePlatformState(platformPorts[1])
+    carol.platformState = await makePlatformState(platformPorts[2])
 
     await u.wait(500)
-
-    const initialRoot = await platformState1.merkleTreeRoot()
+    const initialRoot = await alice.platformState.merkleTreeRoot()
 
     // Deploying coin contract
     const mvppt = await testUtil.deployContract(web3, artefacts.MVPPT, [
@@ -112,15 +122,6 @@ describe('Ethereum integration test replicating the K0 demo', () => {
       web3,
       artefacts.MoneyShower
     )
-
-    ;[alice, bob, carol] = _.times(3, () => {
-      const mnemonic = bip39.generateMnemonic()
-      const seed = bip39.mnemonicToSeed(mnemonic)
-      const root = hdkey.fromMasterSeed(seed)
-      const path = "m/44'/60'/0'/0/0" // eslint-disable-line
-      const wallet = root.derivePath(path).getWallet()
-      return { mnemonic, wallet }
-    })
 
     // Make some money
     await sendTransaction(
@@ -180,16 +181,20 @@ describe('Ethereum integration test replicating the K0 demo', () => {
       carol: carol.wallet.getAddressString()
     }
 
-    k0Eth = await makeEthPlatform(web3, u.hex2buf(addresses.MVPPT))
+    alice.k0Eth = await makeEthPlatform(web3, u.hex2buf(addresses.MVPPT))
+    bob.k0Eth = await makeEthPlatform(web3, u.hex2buf(addresses.MVPPT))
+    carol.k0Eth = await makeEthPlatform(web3, u.hex2buf(addresses.MVPPT))
 
     alice.secretKey = crypto.randomBytes(32)
     bob.secretKey = crypto.randomBytes(32)
     carol.secretKey = crypto.randomBytes(32)
 
-    k0 = await makeK0(4000)
-    alice.publicKey = await k0.prfAddr(alice.secretKey)
-    bob.publicKey = await k0.prfAddr(bob.secretKey)
-    carol.publicKey = await k0.prfAddr(carol.secretKey)
+    alice.k0 = await makeK0(4000)
+    bob.k0 = await makeK0(5000)
+    carol.k0 = await makeK0(6000)
+    alice.publicKey = await alice.k0.prfAddr(alice.secretKey)
+    bob.publicKey = await bob.k0.prfAddr(bob.secretKey)
+    carol.publicKey = await carol.k0.prfAddr(carol.secretKey)
 
     alice.secretStore = makeSecretStore(alice.secretKey, alice.publicKey)
 
@@ -197,18 +202,21 @@ describe('Ethereum integration test replicating the K0 demo', () => {
 
     carol.secretStore = makeSecretStore(carol.secretKey, carol.publicKey)
 
-    initEventHandlers(platformState1, alice.secretStore, k0Eth)
-    initEventHandlers(platformState2, bob.secretStore, k0Eth)
-    initEventHandlers(platformState3, carol.secretStore, k0Eth)
+    initEventHandlers(alice.platformState, alice.secretStore, alice.k0Eth)
+    initEventHandlers(bob.platformState, bob.secretStore, bob.k0Eth)
+    initEventHandlers(carol.platformState, carol.secretStore, carol.k0Eth)
 
     console.log('before: INITIALIZED Secrets, ')
   })
 
   async function checkRootsConsistency() {
-    const ethRoot = await k0Eth.merkleTreeRoot()
-    const root1 = await platformState1.merkleTreeRoot()
-    const root2 = await platformState2.merkleTreeRoot()
-    const root3 = await platformState3.merkleTreeRoot()
+    const ethRoot = await alice.k0Eth.merkleTreeRoot()
+
+    const [root1, root2, root3] = await Promise.all([
+      alice.platformState.merkleTreeRoot(),
+      bob.platformState.merkleTreeRoot(),
+      carol.platformState.merkleTreeRoot()
+    ])
 
     assert(ethRoot.equals(root1))
     assert(ethRoot.equals(root2))
@@ -216,7 +224,7 @@ describe('Ethereum integration test replicating the K0 demo', () => {
   }
 
   // Consume  $coin in exchange for CMs
-  async function approveAndDeposit(wallet, secretStore, platformState, values) {
+  async function approveAndDeposit(wallet, secretStore, k0, platformState, values) {
     // aprove an amounts to mvptt
     const total = values.reduce((acc, el) => acc.add(el), new BN('0'))
 
@@ -236,11 +244,11 @@ describe('Ethereum integration test replicating the K0 demo', () => {
     for (let i = 0; i < values.length; i++) {
       const v = values[i]
 
-      const data = await k0.prepareDeposit(platformState, secretStore, v)
+      const data = await alice.k0.prepareDeposit(platformState, secretStore, v)
 
       await secretStore.addNoteInfo(data.cm, data.a_pk, data.rho, data.r, v)
 
-      const depositTx = await k0Eth.deposit(
+      const depositTx = await alice.k0Eth.deposit(
         wallet.getPrivateKey(),
         v,
         data.k,
@@ -266,15 +274,15 @@ describe('Ethereum integration test replicating the K0 demo', () => {
     await approveAndDeposit(
       alice.wallet,
       alice.secretStore,
-      platformState1,
+      alice.k0,
+      alice.platformState,
       values
     )
-    // values = _.times(3, () => new BN(_.random(50).toString() + '000'))
-    // await approveAndDeposit(bob.wallet, bob.secretStore, platformState2, values)
+
     await checkRootsConsistency()
 
     // check that we have now 6 cm in the merkle tree
-    expect(await platformState1.currentState().cmList.length).to.equal(
+    expect(await alice.platformState.currentState().cmList.length).to.equal(
       numInitialNotes
     )
   })
@@ -307,8 +315,8 @@ describe('Ethereum integration test replicating the K0 demo', () => {
 
   it('allows alice to transfer funds to bob', async () => {
     await checkRootsConsistency()
-    const in0 = await getInputNote(platformState1, alice.secretStore, 0)
-    const in1 = await getInputNote(platformState1, alice.secretStore, 1)
+    const in0 = await getInputNote(alice.platformState, alice.secretStore, 0)
+    const in1 = await getInputNote(alice.platformState, alice.secretStore, 1)
 
     const totalValue = in0.v.add(in1.v)
 
@@ -327,8 +335,8 @@ describe('Ethereum integration test replicating the K0 demo', () => {
 
     const callee = u.hex2buf(u.ZERO_ADDRESS) // zero address since we are not trading
     // does not throw
-    const transferData = await k0.prepareTransfer(
-      platformState1,
+    const transferData = await alice.k0.prepareTransfer(
+      alice.platformState,
       alice.secretStore,
       new BN(0), // cms index
       new BN(1),
@@ -355,19 +363,19 @@ describe('Ethereum integration test replicating the K0 demo', () => {
       out1.v
     )
 
-    const rootBefore = await platformState1.merkleTreeRoot()
-    const labelBefore = platformState1.currentStateLabel()
+    const rootBefore = await alice.platformState.merkleTreeRoot()
+    const labelBefore = bob.platformState.currentStateLabel()
     const tmpLabel =
       'temporary_mt_addition_' + crypto.randomBytes(16).toString('hex')
-    await platformState1.add(
+    await alice.platformState.add(
       tmpLabel,
       [],
       [transferData.output_0_cm, transferData.output_1_cm]
     )
-    const newRoot = await platformState1.merkleTreeRoot()
-    await platformState1.rollbackTo(labelBefore)
+    const newRoot = await alice.platformState.merkleTreeRoot()
+    await alice.platformState.rollbackTo(labelBefore)
 
-    const finalRoot = await platformState1.merkleTreeRoot()
+    const finalRoot = await alice.platformState.merkleTreeRoot()
     assert(finalRoot.equals(rootBefore))
 
     const out_0_data = makeData(out0.a_pk, out0.rho, out0.r, out0.v)
@@ -385,7 +393,7 @@ describe('Ethereum integration test replicating the K0 demo', () => {
       callee,
       transferData.proofAffine
     ]
-    const tx = await k0Eth.transfer(...ethParams)
+    const tx = await alice.k0Eth.transfer(...ethParams)
 
     const receipt = await web3.eth.sendSignedTransaction(u.buf2hex(tx))
     expect(receipt.status).to.equal(true)
