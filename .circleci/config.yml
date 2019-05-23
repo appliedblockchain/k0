@@ -205,8 +205,8 @@ jobs:
             mkdir /tmp/k0keys
             for circuit in commitment transfer addition withdrawal example
             do
-              docker run -v /tmp/k0keys:/tmp/k0keys appliedblockchain/zktrading-setup:$CIRCLE_BRANCH-$CIRCLE_SHA1 $circuit 4 /tmp/k0keys/${circuit}_pk /tmp/k0keys/${circuit}_vk
-              docker run -v /tmp/k0keys:/tmp/k0keys appliedblockchain/zktrading-convert-vk:$CIRCLE_BRANCH-$CIRCLE_SHA1 /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt
+              docker run -v /tmp/k0keys:/tmp/k0keys zktrading-setup $circuit 4 /tmp/k0keys/${circuit}_pk /tmp/k0keys/${circuit}_vk
+              docker run -v /tmp/k0keys:/tmp/k0keys zktrading-convert-vk /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt
             done
       - run:
           name: "Enable NVM"
@@ -225,11 +225,11 @@ jobs:
             chmod +x solc-static-linux && sudo cp solc-static-linux /usr/bin/solc
       - run:
           name: Run the Docker servers
-          command: cd js/test/eth/network && docker-compose up
+          command: cd js/test/eth/network && docker-compose up -d && docker-compose logs -f
           background: true
       - run:
           name: init the demo state
-          command: sleep 20 && cd js && npm run test:integration:eth
+          command: cd js && npm run test:integration:eth
 
 workflows:
   version: 2

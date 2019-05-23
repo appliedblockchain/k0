@@ -29,7 +29,7 @@ const platformPorts = [4100, 5100, 6100]
 let web3
 
 after(() => {
-  if (web3.currentProvider) {
+  if (web3 && web3.currentProvider) {
     web3.currentProvider.connection.close()
   }
 })
@@ -53,21 +53,47 @@ describe('Ethereum integration test replicating the K0 demo', () => {
       process.exit(1)
     })
 
-    await Promise.all([
-      waitPort({ port: 4000 }), // k01
-      // waitPort({ port: 5000 }), // k02
-      // waitPort({ port: 6000 }), // k03
-      waitPort({ port: 8546 }), // parity
-      waitPort({ port: platformPorts[0] }),
-      waitPort({ port: platformPorts[1] }),
-      waitPort({ port: platformPorts[2] })
-    ])
+    let ready = false
+    console.log('TEST: waiting for all the servers to respond')
+    while (!ready) {
+      try {
+        await Promise.all([
+          waitPort({ port: 4000 }), // k01
+          waitPort({ port: 5000 }), // k02
+          waitPort({ port: 6000 }), // k03
+          waitPort({ port: 8546 }), // parity
+          waitPort({ port: platformPorts[0] }),
+          waitPort({ port: platformPorts[1] }),
+          waitPort({ port: platformPorts[2] })
+        ])
 
-    await Promise.all([
-      serverReady(jayson.client.http({ port: 4000 })),
-      // serverReady(jayson.client.http({ port: 5000 })),
-      // serverReady(jayson.client.http({ port: 6000 }))
-    ])
+        await Promise.all([
+          serverReady(jayson.client.http({ port: 4000 })),
+          serverReady(jayson.client.http({ port: 5000 })),
+          serverReady(jayson.client.http({ port: 6000 }))
+        ])
+
+        ready = true
+      } catch (err) {
+        process.stdout.write('.')
+        await u.wait(5000)
+      }
+    }
+
+    while (!ready) {
+      try {
+        await Promise.all([
+          serverReady(jayson.client.http({ port: 4000 })),
+          serverReady(jayson.client.http({ port: 5000 })),
+          serverReady(jayson.client.http({ port: 6000 }))
+        ])
+
+        ready = true
+      } catch (err) {
+        process.stdout.write('.')
+        await u.wait(5000)
+      }
+    }
 
     web3 = testUtil.initWeb3()
     // DollarCoin minter
@@ -230,7 +256,13 @@ describe('Ethereum integration test replicating the K0 demo', () => {
   }
 
   // Consume  $coin in exchange for CMs
-  async function approveAndDeposit(wallet, secretStore, k0, platformState, values) {
+  async function approveAndDeposit(
+    wallet,
+    secretStore,
+    k0,
+    platformState,
+    values
+  ) {
     // aprove an amounts to mvptt
     const total = values.reduce((acc, el) => acc.add(el), new BN('0'))
 
