@@ -19,7 +19,7 @@ const makeSecretStore = require('../../secret-store')
 const sendTransaction = require('../../send-transaction')
 const makePlatformState = require('../../platform-state')
 const compileContracts = require('../helpers/compile-contracts')
-const initEventHandlers = require('../../demo/init-event-handlers')
+const initEventHandlers = require('./helpers/event-handlers')
 const signTransaction = require('../../eth/sign-transaction')
 
 const assert = require('assert')
@@ -140,7 +140,6 @@ describe('Ethereum integration test replicating the K0 demo', () => {
     bob.platformState = await makePlatformState(platformPorts[1])
     carol.platformState = await makePlatformState(platformPorts[2])
 
-    await u.wait(500)
     const initialRoot = await alice.platformState.merkleTreeRoot()
 
     // Deploying coin contract
@@ -217,6 +216,7 @@ describe('Ethereum integration test replicating the K0 demo', () => {
     bob.k0Eth = await makeEthPlatform(web3, u.hex2buf(addresses.MVPPT))
     carol.k0Eth = await makeEthPlatform(web3, u.hex2buf(addresses.MVPPT))
 
+
     alice.secretKey = crypto.randomBytes(32)
     bob.secretKey = crypto.randomBytes(32)
     carol.secretKey = crypto.randomBytes(32)
@@ -286,6 +286,7 @@ describe('Ethereum integration test replicating the K0 demo', () => {
 
       await secretStore.addNoteInfo(data.cm, data.a_pk, data.rho, data.r, v)
 
+      const waitForDeposit = awaitEvent(alice.k0Eth, 'depositProcessed')
       const depositTx = await alice.k0Eth.deposit(
         wallet.getPrivateKey(),
         v,
@@ -297,18 +298,33 @@ describe('Ethereum integration test replicating the K0 demo', () => {
       )
 
       await web3.eth.sendSignedTransaction(u.buf2hex(depositTx))
-      await u.wait(5000)
+
+      await waitForDeposit
     }
+  }
+
+  function awaitEvent(emitter, eventName) {
+    return new Promise((accept, reject) => {
+      const timeout = setTimeout(() => {
+        reject('Event was not emitted within 10 second')
+      }, 10000)
+      emitter.once(eventName, (event) =>{
+        accept(event)
+        clearTimeout(timeout)
+
+      })
+
+    })
   }
 
   let values
   it('Can mint the CMS', async () => {
-    await u.wait(2000)
     // DEPOSIT TEST
     values = _.times(
       numInitialNotes,
       () => new BN(_.random(50).toString() + '000')
     )
+
     await approveAndDeposit(
       alice.wallet,
       alice.secretStore,
@@ -316,7 +332,6 @@ describe('Ethereum integration test replicating the K0 demo', () => {
       alice.platformState,
       values
     )
-
     await checkRootsConsistency()
 
     // check that we have now 6 cm in the merkle tree
@@ -433,11 +448,12 @@ describe('Ethereum integration test replicating the K0 demo', () => {
     ]
     const tx = await alice.k0Eth.transfer(...ethParams)
 
+    const transferForDeposit = awaitEvent(alice.k0Eth, 'transferProcessed')
     const receipt = await web3.eth.sendSignedTransaction(u.buf2hex(tx))
     expect(receipt.status).to.equal(true)
 
     // TODO attach to merkle tree event instead of wait
-    await u.wait(2000)
+    await transferForDeposit
 
     expect(bob.secretStore.getAvailableNotes().length).to.equal(1)
   })
