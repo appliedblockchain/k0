@@ -373,6 +373,19 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::merkleTreeAdditionPro
 
 template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 Json::Value
+zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::pack256Bits(
+    const std::string& input
+)
+{
+    auto packed = pack<FieldT>(hex2bits(input));
+    Json::Value result;
+    result[0] = field_element_to_string(packed[0]);
+    result[1] = field_element_to_string(packed[1]);
+    return result;
+}
+
+template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+Json::Value
 zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepareTransfer(
     const std::string &prev_root_hex,
     const std::string &input_0_address_str,
@@ -638,6 +651,16 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::status()
     Json::Value result;
     result["ready"] = ready;
     return result;
+}
+
+template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+std::string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::unpack256Bits(
+    const std::string& param01,
+    const std::string& param02
+) {
+    vector<FieldT> elements{FieldT(param01.c_str()), FieldT(param02.c_str())};
+    std::cout << bits2hex(unpack(elements)) << endl;
+    return bits2hex(unpack(elements));
 }
 
 template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>

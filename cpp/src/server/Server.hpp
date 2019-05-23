@@ -116,6 +116,8 @@ namespace zktrade {
                            const std::string &v_str,
                            const std::string &recipient_str);
 
+        virtual Json::Value pack256Bits(const std::string& param01);
+
         virtual std::string prf_addr(const std::string &a_sk);
 
         virtual std::string reset();
@@ -123,6 +125,8 @@ namespace zktrade {
         virtual std::string root();
 
         virtual Json::Value status();
+
+        virtual std::string unpack256Bits(const std::string& param01, const std::string& param02);
 
         virtual bool verifyProof(const std::string& proofType,
         const Json::Value& proof,

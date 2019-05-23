@@ -1,4 +1,4 @@
-package main
+package jsonrpc
 
 import (
 	"bytes"
@@ -14,13 +14,7 @@ type jsonRpcRequest struct {
 	Params  []interface{} `json:"params"`
 }
 
-type jsonRpcVerificationResponse struct {
-	Id      string `json:"id"`
-	Jsonrpc string `json:"jsonrpc"`
-	Result  bool   `json:"result"`
-}
-
-func callJsonRpc(endpoint string, method string, params []interface{}) ([]byte, error) {
+func Call(endpoint string, method string, params []interface{}) ([]byte, error) {
 	request := jsonRpcRequest{}
 	request.Jsonrpc = "2.0"
 	request.Method = method
@@ -36,24 +30,6 @@ func callJsonRpc(endpoint string, method string, params []interface{}) ([]byte, 
 	if err != nil {
 		return nil, err
 	}
-
 	defer resp.Body.Close()
 	return ioutil.ReadAll(resp.Body)
-}
-
-func Verify(proofType string, proof proofJacobian, publicInputs []string) (bool, error) {
-	body, err := callJsonRpc("http://localhost:11400/", "verifyProof", []interface{}{
-		proofType,
-		proof,
-		publicInputs,
-	})
-	if err != nil {
-		return false, err
-	}
-	res := jsonRpcVerificationResponse{}
-	json.Unmarshal(body, &res)
-	if err != nil {
-		return false, err
-	}
-	return res.Result, nil
 }

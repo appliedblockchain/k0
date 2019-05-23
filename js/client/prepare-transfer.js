@@ -92,6 +92,8 @@ async function prepareTransfer(
 
   const res = await request(jc, 'prepareTransfer', params)
 
+  console.log(JSON.stringify(res))
+
   return {
     input_0_sn: u.hex2buf(res.input_0_sn),
     input_1_sn: u.hex2buf(res.input_1_sn),

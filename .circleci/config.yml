@@ -91,6 +91,7 @@ jobs:
           paths:
             - js/node_modules
 
+  # This could probably be run more efficiently on the docker executor
   chaincode:
     machine:
       image: circleci/classic:201808-01
