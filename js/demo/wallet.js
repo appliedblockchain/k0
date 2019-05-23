@@ -1,19 +1,17 @@
 'use strict'
+
 const bip39 = require('bip39')
 const hdkey = require('ethereumjs-wallet/hdkey')
 const BN = require('bn.js')
-const crypto = require('crypto')
 const addresses = require('./addresses')
 const testUtil = require('../test/util')
 const makeEthPlatform = require('../eth')
 const makeK0 = require('../k0')
 const mnemonics = require('./mnemonics')
-const signTransaction = require('../eth/sign-transaction')
 const compileContracts = require('../test/helpers/compile-contracts')
 const printState = require('./print-state')
 const makePlatformState = require('../platform-state')
 const makeSecretStore = require('../secret-store')
-const { prompt } = require('./util')
 const u = require('../util')
 const { hex2buf } = require('../util')
 const inquirer = require('inquirer')
@@ -59,23 +57,18 @@ function mvpptAddressBook(a_pk) {
 
 async function run() {
   const who = process.argv[2]
-  if ([ 'alice', 'bob', 'carol' ].indexOf(who) === -1) {
+  if (['alice', 'bob', 'carol'].indexOf(who) === -1) {
     console.log('Need parameter "alice", "bob" or "carol".')
     process.exit(1)
   }
   const platformState = await makePlatformState(mtServerPorts[who])
   const web3 = testUtil.initWeb3()
-  const k0Eth = await makeEthPlatform(
-    web3,
-    u.hex2buf(addresses.MVPPT)
-  )
+  const k0Eth = await makeEthPlatform(web3, u.hex2buf(addresses.MVPPT))
 
   const secretStoreData = require(`./${who}.secrets.json`)
 
   secretStoreData.cms = secretStoreData.cms || {}
   const noteInfos = Object.values(secretStoreData.cms).map((v, k) => {
-    console.log({ k, v })
-
     return {
       cm: hex2buf(Object.keys(secretStoreData.cms)[k]),
       a_pk: hex2buf(v.a_pk),
@@ -84,7 +77,6 @@ async function run() {
       v: new BN(v.v)
     }
   })
-
 
   const secretStore = makeSecretStore(
     u.hex2buf(secretStoreData.privateKey),
@@ -112,9 +104,17 @@ async function run() {
     addresses.CarToken
   )
 
-  const carIds = [ new BN('1') ]
+  const carIds = [new BN('1')]
   function showState() {
-    return printState(secretStore, addressBook, mvpptAddressBook, k0Eth, platformState, carToken, carIds)
+    return printState(
+      secretStore,
+      addressBook,
+      mvpptAddressBook,
+      k0Eth,
+      platformState,
+      carToken,
+      carIds
+    )
   }
 
   async function cycle() {
@@ -138,19 +138,37 @@ async function run() {
         await showState()
       } else if (inquiryResult.command === 'Transfer money') {
         await transferMoney(
-          web3, platformState, secretStore, k0Eth, k0, publicKeys
+          web3,
+          platformState,
+          secretStore,
+          k0Eth,
+          k0,
+          publicKeys
         )
       } else if (inquiryResult.command === 'Smart payment') {
         await transferMoney(
-          web3, platformState, secretStore, k0Eth, k0, publicKeys, true,
+          web3,
+          platformState,
+          secretStore,
+          k0Eth,
+          k0,
+          publicKeys,
+          true,
           ethWallet.getPrivateKey()
         )
       } else if (inquiryResult.command === 'Generate payment data') {
         await generatePaymentData(secretStore, k0)
-      } else if (inquiryResult.command === 'Deploy car trading smart contract') {
+      } else if (
+        inquiryResult.command === 'Deploy car trading smart contract'
+      ) {
         await deployTradingContract(
-          web3, artefacts, secretStore, ethWallet.getPrivateKey(), k0,
-          carToken, u.hex2buf(addresses.MVPPT)
+          web3,
+          artefacts,
+          secretStore,
+          ethWallet.getPrivateKey(),
+          k0,
+          carToken,
+          u.hex2buf(addresses.MVPPT)
         )
       } else {
         throw new Error(`Unknown command: ${inquiryResult.command}`)
@@ -166,21 +184,26 @@ async function run() {
 
   clear()
 
-  console.log(chalk.cyan([
-    '',
-    '██╗  ██╗ ██████╗',
-    '██║ ██╔╝██╔═████╗',
-    '█████╔╝ ██║██╔██║',
-    '██╔═██╗ ████╔╝██║',
-    '██║  ██╗╚██████╔╝',
-    '╚═╝  ╚═╝ ╚═════╝',
-    ''
-  ].join('\n')))
+  console.log(
+    chalk.cyan(
+      [
+        '',
+        '██╗  ██╗ ██████╗',
+        '██║ ██╔╝██╔═████╗',
+        '█████╔╝ ██║██╔██║',
+        '██╔═██╗ ████╔╝██║',
+        '██║  ██╗╚██████╔╝',
+        '╚═╝  ╚═╝ ╚═════╝',
+        ''
+      ].join('\n')
+    )
+  )
 
   while (true) {
     await cycle()
   }
-
 }
 
-run().then(console.log).catch(console.log)
+run()
+  .then(console.log)
+  .catch(console.log)

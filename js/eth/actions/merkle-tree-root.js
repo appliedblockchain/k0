@@ -1,4 +1,4 @@
-const ethUtil = require('../util')
+const u = require('../../util')
 
 async function merkleTreeRoot(web3, mvppt) {
   const root = await Promise.all([
@@ -6,7 +6,7 @@ async function merkleTreeRoot(web3, mvppt) {
     mvppt.methods.root(1).call()
   ])
   console.log(root)
-  return ethUtil.unpack(root)
+  return u.unpack(root)
 }
 
 module.exports = merkleTreeRoot

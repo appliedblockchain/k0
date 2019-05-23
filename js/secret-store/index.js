@@ -15,19 +15,17 @@ function makeSecretStore(privateKey, publicKey, noteInfos) {
   u.checkBuf(privateKey, 32)
   u.checkBuf(publicKey, 32)
 
-  let cms
+  let cms = Immutable.Map() // eslint-disable-line
   if (noteInfos) {
-    cms = Immutable.Map()
     noteInfos.forEach(e => {
       cms = cms.set(
         u.buf2hex(e.cm),
         conv.stringifyNote(e.a_pk, e.rho, e.r, e.v)
       )
     })
-  } else {
-    cms = Immutable.Map()
   }
 
+  // eslint-disable-next-line
   let state = Immutable.Map({
     privateKey: u.buf2hex(privateKey),
     publicKey: u.buf2hex(publicKey),

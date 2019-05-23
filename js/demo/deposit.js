@@ -5,7 +5,6 @@ const bip39 = require('bip39')
 const fs = require('fs')
 const hdkey = require('ethereumjs-wallet/hdkey')
 const BN = require('bn.js')
-// const crypto = require('crypto')
 const assert = require('assert')
 const addresses = require('./addresses')
 const testUtil = require('../test/util')
@@ -14,7 +13,6 @@ const makeK0 = require('../k0')
 const u = require('../util')
 const signTransaction = require('../eth/sign-transaction')
 const compileContracts = require('../test/helpers/compile-contracts')
-// const printState = require('./print-state')
 const makePlatformState = require('../platform-state')
 const makeSecretStore = require('../secret-store')
 const mnemonics = require('./mnemonics')
@@ -33,30 +31,26 @@ process.on('unhandledRejection', error => {
 })
 
 async function run() {
-
   const who = process.argv[2]
-  if ([ 'alice', 'bob', 'carol' ].indexOf(who) === -1) {
+  if (['alice', 'bob', 'carol'].indexOf(who) === -1) {
     console.log('Need parameter "alice", "bob" or "carol".')
     process.exit(1)
   }
 
-  // TODO: put back to initial state
-  // const platformState = await makePlatformState(mtServerPorts[who])
   const platformState = await makePlatformState(mtServerPorts[who])
   const web3 = testUtil.initWeb3()
-  const k0Eth = await makeEthPlatform(
-    web3,
-    u.hex2buf(addresses.MVPPT)
-  )
+  const k0Eth = await makeEthPlatform(web3, u.hex2buf(addresses.MVPPT))
 
   const secretStoreData = require(`./${who}.secrets.json`)
-  const secretStore = makeSecretStore(u.hex2buf(secretStoreData.privateKey), u.hex2buf(secretStoreData.publicKey))
+  const secretStore = makeSecretStore(
+    u.hex2buf(secretStoreData.privateKey),
+    u.hex2buf(secretStoreData.publicKey)
+  )
   console.log('private key', u.buf2hex(secretStore.getPrivateKey()))
   console.log('public key', u.buf2hex(secretStore.getPublicKey()))
   initEventHandlers(platformState, secretStore, k0Eth)
 
-  // const k0 = await makeK0(serverPorts[who])
-  const k0 = await makeK0(serverPorts[4000]) // attempting to use same verification server for all
+  const k0 = await makeK0(serverPorts[who])
 
   const artefacts = await compileContracts()
   const dollarCoin = new web3.eth.Contract(
@@ -86,7 +80,9 @@ async function run() {
   const approveTx = await signTransaction(
     web3,
     u.hex2buf(dollarCoin._address),
-    u.hex2buf(dollarCoin.methods.approve(addresses.MVPPT, total.toString()).encodeABI()),
+    u.hex2buf(
+      dollarCoin.methods.approve(addresses.MVPPT, total.toString()).encodeABI()
+    ),
     5000000,
     wallet.getPrivateKey()
   )
@@ -117,7 +113,7 @@ async function run() {
   fs.writeFileSync(`${who}.secrets.json`, JSON.stringify(secretStore.spit()))
 }
 
-(async () => {
+;(async () => {
   try {
     await run()
     process.exit(0)

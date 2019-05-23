@@ -23,4 +23,13 @@
 /js/test/fabric/network/artefacts
 /js/test/fabric/network/crypto-config
 
+node_modules
+js/alice.secrets.json
+js/bob.secrets.json
+js/carol.secrets.json
+js/public-keys.json
+.DS_Store
+
+
+
 local-notes.txt

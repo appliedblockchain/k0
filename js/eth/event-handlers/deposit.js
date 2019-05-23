@@ -1,11 +1,11 @@
-const ethUtil = require('../util')
+'use strict'
+
 const u = require('../../util')
 
 async function handleDeposit(eventEmitter, event) {
-  const cmStrings = event.returnValues.cm
-  const [ cm, newRoot ] = await Promise.all([
-    ethUtil.unpack(event.returnValues.cm),
-    ethUtil.unpack(event.returnValues.new_root)
+  const [cm, newRoot] = await Promise.all([
+    u.unpack(event.returnValues.cm),
+    u.unpack(event.returnValues.new_root)
   ])
   await eventEmitter.emit(
     'deposit',

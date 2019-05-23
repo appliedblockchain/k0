@@ -1,12 +1,13 @@
+'use strict'
+
 const EventEmitter = require('events')
-const assert = require('assert')
+
 // Move this out of tests
 const compileContracts = require('../test/helpers/compile-contracts')
 const deposit = require('./actions/deposit')
 const merkleTreeRoot = require('./actions/merkle-tree-root')
 const transfer = require('./actions/transfer')
-const ethUtil = require('./util')
-const BN = require('bn.js')
+
 const u = require('../util')
 const initEventHandlers = require('./init-event-handlers')
 
