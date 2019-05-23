@@ -61,6 +61,12 @@ describe('Ethereum integration test replicating the K0 demo', () => {
       waitPort({ port: platformPorts[2] })
     ])
 
+    await Promise.all([
+      serverReady(jayson.client.http({ port: 4000 })),
+      serverReady(jayson.client.http({ port: 5000 })),
+      serverReady(jayson.client.http({ port: 6000 }))
+    ])
+
     web3 = testUtil.initWeb3()
     // DollarCoin minter
     const tokenMaster = web3.eth.accounts.create()
@@ -115,8 +121,6 @@ describe('Ethereum integration test replicating the K0 demo', () => {
       ...verifierAddresses,
       await testUtil.pack256Bits(u.buf2hex(initialRoot))
     ])
-
-    await serverReady(jayson.client.http({ port: 4000 }))
 
     const moneyShower = await testUtil.deployContract(
       web3,

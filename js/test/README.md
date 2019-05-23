@@ -1,4 +1,10 @@
-Faster zk setup for tests:
+
+# Testing readme
+
+## Faster zk setup for tests:
+
+
+Only 5 levels to the merkle tree:
 
 ```
 
@@ -10,7 +16,7 @@ cpp/build/src/convert_vk /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt
 done
 ```
 
-Running the demo(note: you will need 7 terminals, install iterm2 on mac for ease of use):
+Running the nodes(note: you will need 7 terminals, install iterm2 on mac for ease of use):
 
 Run the proving servers(one terminal each):
 
@@ -30,12 +36,7 @@ cpp/build/src/mtserver 5 5100
 cpp/build/src/mtserver 5 6100
 ```
 
-tree height, paths to commitment pk, commitment vk, addition pk, addition vk, transfer pk, transfer vk, withdrawal pk, withdrawal vk, example pk, example vk, port
 
-for circuit in example; do \
-cpp/build/src/setup $circuit 7 /tmp/k0keys/${circuit}\_pk /tmp/k0keys/${circuit}_vk && \
-cpp/build/src/convert_vk /tmp/k0keys/${circuit}\_vk /tmp/k0keys/\${circuit}\_vk_alt; \
-done
 
 # Build docker images locally, create the keys with docker
 
