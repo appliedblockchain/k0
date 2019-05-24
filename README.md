@@ -114,7 +114,6 @@ BASE_DIR=\$(pwd) build/test/letest --gtest_filter=EXPRESSION\*
 ## ZKP setup (needed for all tests and demos)
 
 ```
-
 rm -rf /tmp/k0keys && \
 mkdir /tmp/k0keys && \
 for circuit in commitment transfer addition withdrawal example; do \
@@ -133,7 +132,6 @@ Note: you will need 7 terminals (consider using iTerm2 on Mac for ease of use).
 Run the proving servers(one terminal each):
 
 ```
-
 cpp/build/src/server 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 4000
 
 cpp/build/src/server 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 5000
@@ -145,51 +143,101 @@ cpp/build/src/server 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/
 Run the Merkle tree servers(1 terminal each):
 
 ```
-
 cpp/build/src/mtserver 7 4100
 cpp/build/src/mtserver 7 5100
 cpp/build/src/mtserver 7 6100
-
 ```
 
 Running Parity (in another terminal):
 
 ```
-
 docker run -p 8545:8545 -p 8546:8546 appliedblockchain/parity-solo-instant
-
 ```
 
 Init the js folder
 
 ```
-
 cd js
 node init # create keys and addresses
-
 ```
 
-init the state
+initialize the state
 
 ```
-
 cd demo
 node deposit alice
 node deposit bob
-
 ```
 
 then, in separate terminals:
 
 ```
-
 node wallet alice
 node wallet bob
 node wallet carol
-
 ```
 
 [Video example of how to use the demo](https://www.youtube.com/watch?v=h2KyMOdnbtI)
+
+
+## Ethereum test
+
+### Faster ZK setup for tests:
+
+In order to speed up the proof generation and verification, we can set the merkle tree to have a depth of 4 only. This means that the keys need to be regenerated, and the server started with the proper depth otherwise the proof verification will fail.
+
+### Generating the keys
+
+```
+rm -rf /tmp/k0keys && \
+mkdir /tmp/k0keys && \
+for circuit in commitment transfer addition withdrawal example; do \
+  cpp/build/src/setup $circuit 4 /tmp/k0keys/${circuit}_pk /tmp/k0keys/${circuit}_vk && \
+  cpp/build/src/convert_vk /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt; \
+done
+```
+
+### Running the proving servers with a depth of 4:
+
+```
+cpp/build/src/server 4 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 4000
+
+cpp/build/src/server 4 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 5000
+
+cpp/build/src/server 4 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 6000
+```
+
+### Running the Merkle tree servers(1 terminal each):
+
+```
+cpp/build/src/mtserver 4 4100
+cpp/build/src/mtserver 4 5100
+cpp/build/src/mtserver 4 6100
+```
+
+
+### Building the docker images and running the servers in docker locally(useful to debug CircleCI):
+
+```
+cd cpp
+docker build -f docker/builder.Dockerfile -t zktrading-builder .
+docker build -f docker/zktrading.Dockerfile -t zktrading .
+for IMAGE in setup server mtserver convert-vk pack unpack
+do
+    docker build -f docker/$IMAGE.Dockerfile -t zktrading-$IMAGE .
+done
+
+# Create the keys for the right merkle tree hight, using the docker images
+
+mkdir /tmp/k0keys
+for circuit in commitment transfer addition withdrawal example
+do
+docker run -v /tmp/k0keys:/tmp/k0keys zktrading-setup $circuit 4 /tmp/k0keys/${circuit}\_pk /tmp/k0keys/${circuit}_vk
+    docker run -v /tmp/k0keys:/tmp/k0keys zktrading-convert-vk /tmp/k0keys/${circuit}\_vk /tmp/k0keys/\${circuit}\_vk_alt
+done
+```
+
+
 
 ## Fabric integration tests
 
@@ -202,18 +250,14 @@ ZKP setup as described [above](#zkp-setup-needed-for-all-tests-and-demos)
 In `js/test/fabric/network`:
 
 ```
-
 rm -rf artefacts/\*
 ./start.sh
-
 ```
 
 ### Remove previously created chaincode images
 
 ```
-
 docker rmi \$(docker images --filter=reference="_k0chaincode_" -q) || true
-
 ```
 
 ### Package chaincode
@@ -221,11 +265,9 @@ docker rmi \$(docker images --filter=reference="_k0chaincode_" -q) || true
 In `js/test/fabric/network`:
 
 ```
-
 export CHAINCODE_VERSION=$(($CHAINCODE_VERSION+1)) && echo \$CHAINCODE_VERSION
 
 docker run -v $PWD/artefacts:/artefacts -v $GOPATH/src/github.com/hyperledger/fabric:/opt/gopath/src/github.com/hyperledger/fabric:ro -v $GOPATH/src/github.com/appliedblockchain/zktrading/fabric/chaincode/cash:/opt/gopath/src/github.com/appliedblockchain/fabric/chaincode/cash:ro hyperledger/fabric-tools:1.2.0 peer chaincode package -n k0chaincode -v $CHAINCODE_VERSION -p github.com/appliedblockchain/fabric/chaincode/cash /artefacts/k0chaincode.\${CHAINCODE_VERSION}.out
-
 ```
 
 ### Install chaincode
@@ -233,9 +275,7 @@ docker run -v $PWD/artefacts:/artefacts -v $GOPATH/src/github.com/hyperledger/fa
 In `js/test/fabric/network`:
 
 ```
-
 for org in alpha beta gamma; do docker-compose run ${org}tools peer chaincode install /artefacts/k0chaincode.${CHAINCODE_VERSION}.out; done
-
 ```
 
 ### Instantiate chaincode
@@ -243,9 +283,7 @@ for org in alpha beta gamma; do docker-compose run ${org}tools peer chaincode in
 In `js/test/fabric`:
 
 ```
-
 node instantiate
-
 ```
 
 ### Start proving and Merkle tree servers
@@ -255,49 +293,37 @@ In separate terminal windows, start the following servers:
 Proving server for AlphaCo:
 
 ```
-
 cpp/build/src/server 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 11400
-
 ```
 
 Proving server for BetaCo:
 
 ```
-
 cpp/build/src/server 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 12400
-
 ```
 
 Proving server for GammaCo:
 
 ```
-
 cpp/build/src/server 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 13400
-
 ```
 
 Merkle tree server for AlphaCo:
 
 ```
-
 cpp/build/src/mtserver 7 11410
-
 ```
 
 Merkle tree server for BetaCo:
 
 ```
-
 cpp/build/src/mtserver 7 12410
-
 ```
 
 Merkle tree server for GammaCo:
 
 ```
-
 cpp/build/src/mtserver 7 13410
-
 ```
 
 ### Run tests
@@ -305,7 +331,5 @@ cpp/build/src/mtserver 7 13410
 In `js`:
 
 ```
-
 node_modules/.bin/mocha test/fabric/test.js
-
 ```

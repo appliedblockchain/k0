@@ -13,7 +13,16 @@ function makeData(a_pk, rho, r, v) {
   return Buffer.concat([ a_pk, rho, r, v.toBuffer('le', 64) ])
 }
 
-async function transferMoney(web3, platformState, secretStore, k0Eth, k0, publicKeys, smartPayment = false, ethPrivateKey) {
+async function transferMoney(
+  web3,
+  platformState,
+  secretStore,
+  k0Eth,
+  k0,
+  publicKeys,
+  smartPayment = false,
+  ethPrivateKey
+) {
   if (ethPrivateKey) {
     u.checkBuf(ethPrivateKey, 32)
   }

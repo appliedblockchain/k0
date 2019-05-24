@@ -21,8 +21,7 @@
     "test": "mocha test",
     "test:integration:eth": "mocha --timeout 0 test/eth/all.integration.js",
     "lint": "eslint . --ignore-path .gitignore",
-    "parity": "docker run -p 8545:8545 appliedblockchain/parity-solo-instant",
-    "prettier": "prettier --write"
+    "parity": "docker run -p 8545:8545 appliedblockchain/parity-solo-instant"
   },
   "devDependencies": {
     "@appliedblockchain/eslint-config": "^2.6.0",
@@ -32,19 +31,12 @@
     "code": "^5.2.4",
     "eslint": "^4.19.1",
     "mocha": "^5.2.0",
-    "prettier": "^1.17.1",
     "wait-port": "^0.2.2"
-  },
-  "prettier": {
-    "semi": false,
-    "singleQuote": true
   },
   "eslintConfig": {
     "extends": "@appliedblockchain/eslint-config",
     "rules": {
       "no-param-reassign": 0,
-      "array-bracket-spacing": 0,
-      "no-extra-semi": 0,
       "array-callback-return": 0,
       "max-len": [
         "error",

@@ -6,7 +6,13 @@ const inquirer = require('inquirer')
 const u = require('../util')
 const assert = require('assert')
 
-async function inquireOutputNote(publicKeys, label, maxValue, justUseMaxValue = false, smartPayment = false) {
+async function inquireOutputNote(
+  publicKeys,
+  label,
+  maxValue,
+  justUseMaxValue = false,
+  smartPayment = false
+) {
   u.checkBN(maxValue)
   const data = {}
   const recipientInquiryResult = await inquirer.prompt([ {

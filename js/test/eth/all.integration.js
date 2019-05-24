@@ -1,7 +1,7 @@
 'use strict'
 
-const BN = require('bn.js')
 const _ = require('lodash')
+const BN = require('bn.js')
 const bip39 = require('bip39')
 const crypto = require('crypto')
 const log4js = require('log4js')
@@ -24,7 +24,7 @@ const signTransaction = require('../../eth/sign-transaction')
 
 const assert = require('assert')
 
-const platformPorts = [4100, 5100, 6100]
+const platformPorts = [ 4100, 5100, 6100 ]
 
 let web3
 
@@ -127,7 +127,7 @@ describe('Ethereum integration test replicating the K0 demo', () => {
         return contract._address
       })
     )
-    ;[alice, bob, carol] = _.times(3, () => {
+    ;[ alice, bob, carol ] = _.times(3, () => {
       const mnemonic = bip39.generateMnemonic()
       const seed = bip39.mnemonicToSeed(mnemonic)
       const root = hdkey.fromMasterSeed(seed)
@@ -185,7 +185,7 @@ describe('Ethereum integration test replicating the K0 demo', () => {
       moneyShower.methods
         .transfer(
           dollarCoin._address,
-          _.map([alice, bob], x => x.wallet.getAddressString()),
+          _.map([ alice, bob ], x => x.wallet.getAddressString()),
           _.times(2, () => '1000000000000')
         )
         .encodeABI(),
@@ -234,17 +234,31 @@ describe('Ethereum integration test replicating the K0 demo', () => {
 
     carol.secretStore = makeSecretStore(carol.secretKey, carol.publicKey)
 
-    initEventHandlers(alice.platformState, alice.secretStore, alice.k0Eth)
-    initEventHandlers(bob.platformState, bob.secretStore, bob.k0Eth)
-    initEventHandlers(carol.platformState, carol.secretStore, carol.k0Eth)
+    alice.emitter = initEventHandlers(
+      alice.platformState,
+      alice.secretStore,
+      alice.k0Eth
+    )
 
-    console.log('before: INITIALIZED Secrets, ')
+    bob.emitter = initEventHandlers(
+      bob.platformState,
+      bob.secretStore,
+      bob.k0Eth
+    )
+
+    carol.emitter = initEventHandlers(
+      carol.platformState,
+      carol.secretStore,
+      carol.k0Eth
+    )
+
+    console.log('Test Suite Initialized.')
   })
 
   async function checkRootsConsistency() {
     const ethRoot = await alice.k0Eth.merkleTreeRoot()
 
-    const [root1, root2, root3] = await Promise.all([
+    const [ root1, root2, root3 ] = await Promise.all([
       alice.platformState.merkleTreeRoot(),
       bob.platformState.merkleTreeRoot(),
       carol.platformState.merkleTreeRoot()
@@ -334,7 +348,7 @@ describe('Ethereum integration test replicating the K0 demo', () => {
     )
     await checkRootsConsistency()
 
-    // check that we have now 6 cm in the merkle tree
+    // check that we have now "numInitialNotes" cm in the merkle tree
     expect(await alice.platformState.currentState().cmList.length).to.equal(
       numInitialNotes
     )
@@ -363,7 +377,7 @@ describe('Ethereum integration test replicating the K0 demo', () => {
     u.checkBuf(rho, 32)
     u.checkBuf(r, 48)
     u.checkBN(v)
-    return Buffer.concat([a_pk, rho, r, v.toBuffer('le', 64)])
+    return Buffer.concat([ a_pk, rho, r, v.toBuffer('le', 64) ])
   }
 
   it('allows alice to transfer funds to bob', async () => {
@@ -423,7 +437,7 @@ describe('Ethereum integration test replicating the K0 demo', () => {
     await alice.platformState.add(
       tmpLabel,
       [],
-      [transferData.output_0_cm, transferData.output_1_cm]
+      [ transferData.output_0_cm, transferData.output_1_cm ]
     )
     const newRoot = await alice.platformState.merkleTreeRoot()
     await alice.platformState.rollbackTo(labelBefore)
