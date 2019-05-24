@@ -1,4 +1,7 @@
+'use strict'
+
 function flattenProof(proof) {
+
   return [
     proof.g_A.g.x, // 0 a
     proof.g_A.g.y, // 1
@@ -24,7 +27,7 @@ function flattenProof(proof) {
     proof.g_H.y, // 15
 
     proof.g_K.x, // 16 k
-    proof.g_K.y  // 17
+    proof.g_K.y // 17
   ]
 }
 

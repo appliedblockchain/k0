@@ -71,7 +71,7 @@ jobs:
           command: |
             echo 'export NVM_DIR="/opt/circleci/.nvm"' >> $BASH_ENV
             echo ' [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
-      - run: 
+      - run:
           name: "Update node"
           command: |
             nvm install v8
@@ -104,7 +104,7 @@ jobs:
           command: |
             echo 'export NVM_DIR="/opt/circleci/.nvm"' >> $BASH_ENV
             echo ' [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
-      - run: 
+      - run:
           name: "Update node"
           command: |
             nvm install v8
@@ -179,6 +179,59 @@ jobs:
             cd js
             node_modules/.bin/mocha test/fabric/test.js
 
+  ethereum_integration_tests:
+    machine:
+      image: circleci/classic:201808-01
+      docker_layer_caching: true
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Docker login
+          command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+      - run:
+          name: "Pull and tag the images"
+          command: |
+            cd cpp
+            for IMAGE in setup server mtserver convert-vk pack unpack
+            do
+              docker pull appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
+              docker tag appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1 zktrading-$IMAGE
+            done
+      - run:
+          name: Generate proving and verification keys
+          command: |
+            rm -rf /tmp/k0keys
+            mkdir /tmp/k0keys
+            for circuit in commitment transfer addition withdrawal example
+            do
+              docker run -v /tmp/k0keys:/tmp/k0keys zktrading-setup $circuit 4 /tmp/k0keys/${circuit}_pk /tmp/k0keys/${circuit}_vk
+              docker run -v /tmp/k0keys:/tmp/k0keys zktrading-convert-vk /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt
+            done
+      - run:
+          name: "Enable NVM"
+          command: |
+            echo 'export NVM_DIR="/opt/circleci/.nvm"' >> $BASH_ENV
+            echo ' [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+      - run:
+          name: Setup node 8
+          command: nvm install 8 && nvm alias default 8
+      - run:
+          name: Install Solidity
+          command: |
+            if [ ! -e solc-static-linux ]; then
+              wget https://github.com/ethereum/solidity/releases/download/v0.5.3/solc-static-linux && chmod +x solc-static-linux
+            fi
+            chmod +x solc-static-linux && sudo cp solc-static-linux /usr/bin/solc
+      - run:
+          name: Run the Docker servers
+          command: cd js/test/eth/network && docker-compose up -d && docker-compose logs -f
+          background: true
+      - run:
+          name: init the demo state
+          command: cd js && npm run test:integration:eth
+
 workflows:
   version: 2
   main:
@@ -188,6 +241,11 @@ workflows:
       - prepare_node:
           context: org-global
       - fabric:
+          context: org-global
+          requires:
+            - build_cpp_docker
+            - prepare_node
+      - ethereum_integration_tests:
           context: org-global
           requires:
             - build_cpp_docker

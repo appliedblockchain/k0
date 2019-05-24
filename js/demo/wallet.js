@@ -1,20 +1,19 @@
 'use strict'
+
 const bip39 = require('bip39')
 const hdkey = require('ethereumjs-wallet/hdkey')
 const BN = require('bn.js')
-const crypto = require('crypto')
 const addresses = require('./addresses')
 const testUtil = require('../test/util')
 const makeEthPlatform = require('../eth')
 const makeK0 = require('../k0')
 const mnemonics = require('./mnemonics')
-const signTransaction = require('../eth/sign-transaction')
 const compileContracts = require('../test/helpers/compile-contracts')
 const printState = require('./print-state')
 const makePlatformState = require('../platform-state')
 const makeSecretStore = require('../secret-store')
-const { prompt } = require('./util')
 const u = require('../util')
+const { hex2buf } = require('../util')
 const inquirer = require('inquirer')
 const publicKeysInput = require('./public-keys')
 const transferMoney = require('./transfer-money')
@@ -64,13 +63,26 @@ async function run() {
   }
   const platformState = await makePlatformState(mtServerPorts[who])
   const web3 = testUtil.initWeb3()
-  const k0Eth = await makeEthPlatform(
-    web3,
-    u.hex2buf(addresses.MVPPT)
-  )
+  const k0Eth = await makeEthPlatform(web3, u.hex2buf(addresses.MVPPT))
 
   const secretStoreData = require(`./${who}.secrets.json`)
-  const secretStore = makeSecretStore(secretStoreData)
+
+  secretStoreData.cms = secretStoreData.cms || {}
+  const noteInfos = Object.values(secretStoreData.cms).map((v, k) => {
+    return {
+      cm: hex2buf(Object.keys(secretStoreData.cms)[k]),
+      a_pk: hex2buf(v.a_pk),
+      rho: hex2buf(v.rho),
+      r: hex2buf(v.r),
+      v: new BN(v.v)
+    }
+  })
+
+  const secretStore = makeSecretStore(
+    u.hex2buf(secretStoreData.privateKey),
+    u.hex2buf(secretStoreData.publicKey),
+    noteInfos
+  )
   initEventHandlers(platformState, secretStore, k0Eth)
 
   const k0 = await makeK0(serverPorts[who])
@@ -84,7 +96,7 @@ async function run() {
   const mnemonic = mnemonics[who]
   const seed = bip39.mnemonicToSeed(mnemonic)
   const root = hdkey.fromMasterSeed(seed)
-  const path = "m/44'/60'/0'/0/0"
+  const path = "m/44'/60'/0'/0/0" // eslint-disable-line
   const ethWallet = root.derivePath(path).getWallet()
 
   const carToken = new web3.eth.Contract(
@@ -92,9 +104,17 @@ async function run() {
     addresses.CarToken
   )
 
-  const carIds = [ new BN('1') ]
+  const carIds = [new BN('1')]
   function showState() {
-    return printState(secretStore, addressBook, mvpptAddressBook, k0Eth, platformState, carToken, carIds)
+    return printState(
+      secretStore,
+      addressBook,
+      mvpptAddressBook,
+      k0Eth,
+      platformState,
+      carToken,
+      carIds
+    )
   }
 
   async function cycle() {
@@ -118,24 +138,42 @@ async function run() {
         await showState()
       } else if (inquiryResult.command === 'Transfer money') {
         await transferMoney(
-          web3, platformState, secretStore, k0Eth, k0, publicKeys
+          web3,
+          platformState,
+          secretStore,
+          k0Eth,
+          k0,
+          publicKeys
         )
       } else if (inquiryResult.command === 'Smart payment') {
         await transferMoney(
-          web3, platformState, secretStore, k0Eth, k0, publicKeys, true,
+          web3,
+          platformState,
+          secretStore,
+          k0Eth,
+          k0,
+          publicKeys,
+          true,
           ethWallet.getPrivateKey()
         )
       } else if (inquiryResult.command === 'Generate payment data') {
         await generatePaymentData(secretStore, k0)
-      } else if (inquiryResult.command === 'Deploy car trading smart contract') {
+      } else if (
+        inquiryResult.command === 'Deploy car trading smart contract'
+      ) {
         await deployTradingContract(
-          web3, artefacts, secretStore, ethWallet.getPrivateKey(), k0,
-          carToken, u.hex2buf(addresses.MVPPT)
+          web3,
+          artefacts,
+          secretStore,
+          ethWallet.getPrivateKey(),
+          k0,
+          carToken,
+          u.hex2buf(addresses.MVPPT)
         )
       } else {
         throw new Error(`Unknown command: ${inquiryResult.command}`)
       }
-    } catch(e) {
+    } catch (e) {
       console.log(e.stack)
       console.log('Error!', e.message)
     }
@@ -146,21 +184,24 @@ async function run() {
 
   clear()
 
-  console.log(chalk.cyan([
-    '',
-    '██╗  ██╗ ██████╗',
-    '██║ ██╔╝██╔═████╗',
-    '█████╔╝ ██║██╔██║',
-    '██╔═██╗ ████╔╝██║',
-    '██║  ██╗╚██████╔╝',
-    '╚═╝  ╚═╝ ╚═════╝',
-    ''
-  ].join('\n')))
+  console.log(
+    chalk.cyan([
+      '',
+      '██╗  ██╗ ██████╗',
+      '██║ ██╔╝██╔═████╗',
+      '█████╔╝ ██║██╔██║',
+      '██╔═██╗ ████╔╝██║',
+      '██║  ██╗╚██████╔╝',
+      '╚═╝  ╚═╝ ╚═════╝',
+      ''
+    ].join('\n'))
+  )
 
   while (true) {
     await cycle()
   }
-
 }
 
-run().then(console.log).catch(console.log)
+run()
+  .then(console.log)
+  .catch(console.log)

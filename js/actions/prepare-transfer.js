@@ -1,5 +1,5 @@
-const BN = require('bn.js')
-const crypto = require('crypto')
+'use strict'
+
 const u = require('../util')
 
 async function prepareTransfer(server, platformState, secretStore, in0idx, in1idx, out0data, out1data, calleeAddress) {
@@ -8,24 +8,34 @@ async function prepareTransfer(server, platformState, secretStore, in0idx, in1id
 
   const mtRoot = await platformState.merkleTreeRoot()
   const privateKey = secretStore.getPrivateKey()
-  const inputs = [in0idx, in1idx].map(idx => {
+
+  const inputs = [ in0idx, in1idx ].map(idx => {
     u.checkBN(idx)
     const cm = platformState.cmAtIndex(idx)
     const info = secretStore.getNoteInfo(cm)
+
     return {
       address: idx,
       a_sk: privateKey,
       ...info
     }
   })
-  const outputs = [out0data, out1data].map(data => {
+
+
+
+
+  const outputs = [ out0data, out1data ].map(data => {
     u.checkBuf(data.a_pk, 32)
     u.checkBuf(data.rho, 32)
     u.checkBuf(data.r, 48)
     u.checkBN(data.v)
     return data
   })
-  if (calleeAddress) u.checkBuf(calleeAddress, 20)
+
+  if (calleeAddress) {
+    u.checkBuf(calleeAddress, 20)
+  }
+
   const params = [
     mtRoot,
     inputs[0].address,

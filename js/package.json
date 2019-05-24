@@ -4,6 +4,7 @@
   "dependencies": {
     "@appliedblockchain/not-a-logger": "^1.0.1",
     "bip39": "^2.5.0",
+    "chai": "^4.2.0",
     "csv-load-sync": "^1.0.0",
     "ethereumjs-wallet": "^0.6.3",
     "fabric-client": "^1.2.1",
@@ -18,22 +19,31 @@
   },
   "scripts": {
     "test": "mocha test",
+    "test:integration:eth": "mocha --timeout 0 test/eth/all.integration.js",
     "lint": "eslint . --ignore-path .gitignore",
     "parity": "docker run -p 8545:8545 appliedblockchain/parity-solo-instant"
   },
   "devDependencies": {
+    "@appliedblockchain/eslint-config": "^2.6.0",
     "chalk": "^2.4.2",
     "clear": "^0.1.0",
     "cli-table": "^0.3.1",
     "code": "^5.2.4",
+    "eslint": "^4.19.1",
     "mocha": "^5.2.0",
-    "@appliedblockchain/eslint-config": "^2.2.0",
-    "eslint": "^4.19.1"
+    "wait-port": "^0.2.2"
   },
   "eslintConfig": {
     "extends": "@appliedblockchain/eslint-config",
     "rules": {
-      "no-param-reassign": 0
+      "no-param-reassign": 0,
+      "array-callback-return": 0,
+      "max-len": [
+        "error",
+        {
+          "code": 80
+        }
+      ]
     },
     "env": {
       "mocha": true

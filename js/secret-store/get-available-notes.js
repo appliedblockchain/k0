@@ -1,3 +1,5 @@
+'use strict'
+
 const BN = require('bn.js')
 const u = require('../util')
 
@@ -6,7 +8,7 @@ function getAvailableNotes(state) {
     .get('cms')
     .entrySeq()
     .filter(entry => {
-      const [key, val] = entry
+      const [val] = entry
       return val.sn === undefined
     })
     .toArray()

@@ -3,35 +3,49 @@ const inquireInputNote = require('./inquire-input-note')
 const inquireOutputNote = require('./inquire-output-note')
 const inquirer = require('inquirer')
 const u = require('../util')
+const assert = require('assert')
 
 function makeData(a_pk, rho, r, v) {
   u.checkBuf(a_pk, 32)
   u.checkBuf(rho, 32)
   u.checkBuf(r, 48)
   u.checkBN(v)
-  return Buffer.concat([ a_pk, rho, r, v.toBuffer('le', 64)])
+  return Buffer.concat([ a_pk, rho, r, v.toBuffer('le', 64) ])
 }
 
-async function transferMoney(web3, platformState, secretStore, k0Eth, k0,
-                             publicKeys, smartPayment = false, ethPrivateKey) {
-  if (ethPrivateKey) u.checkBuf(ethPrivateKey, 32)
+async function transferMoney(
+  web3,
+  platformState,
+  secretStore,
+  k0Eth,
+  k0,
+  publicKeys,
+  smartPayment = false,
+  ethPrivateKey
+) {
+  if (ethPrivateKey) {
+    u.checkBuf(ethPrivateKey, 32)
+  }
+
   const inquireInput = inquireInputNote.bind(null, platformState, secretStore)
   const in0 = await inquireInput('First input note')
   const in1 = await inquireInput('Second input note')
+
   const totalValue = in0.v.add(in1.v)
   const out0 = await inquireOutputNote(publicKeys, 'First output note', totalValue, false, smartPayment)
   let callee
   if (smartPayment) {
-    const calleeInquiryResult = await inquirer.prompt([{
+    const calleeInquiryResult = await inquirer.prompt([ {
       type: 'input',
       name: 'callee',
-      message: `Smart contract address`
-    }])
+      message: 'Smart contract address'
+    } ])
     callee = u.hex2buf(calleeInquiryResult.callee)
     u.checkBuf(callee, 20)
   } else {
     callee = u.hex2buf('0x0000000000000000000000000000000000000000')
   }
+
   const out1 = await inquireOutputNote(publicKeys, 'Second output note (change)', totalValue.sub(out0.v), true, false)
   const transferData = await k0.prepareTransfer(platformState, secretStore, in0.address, in1.address, out0, out1, callee)
   secretStore.addSNToNote(in0.cm, transferData.input_0_sn)
@@ -62,7 +76,7 @@ async function transferMoney(web3, platformState, secretStore, k0Eth, k0,
     out_1_data,
     newRoot,
     callee,
-    transferData.proof
+    transferData.proofAffine
   ]
   const tx = await k0Eth.transfer(...ethParams)
 

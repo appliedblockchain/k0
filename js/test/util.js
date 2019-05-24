@@ -10,7 +10,9 @@ const Web3 = require('web3')
 const inquirer = require('inquirer')
 const clear = require('clear')
 const globalUtil = require('../util')
+const BN = require('bn.js')
 
+const { env } = process
 const baseDir = path.join(__dirname, '..', '..')
 const cppDir = process.env.CPP_DIR || path.join(baseDir, 'cpp')
 const cppUtilDir = process.env.CPP_UTIL_DIR || path.join(cppDir, 'build', 'src')
@@ -29,7 +31,7 @@ async function convertProof(proofPath, proofAltPath) {
 
 function paths(label) {
   const tmpDir = process.env.TMP_DIR || path.join('/', 'tmp', 'k0keys')
-  const baseDir = path.join(__dirname, '..', '..')
+  const baseDir = path.join(__dirname, '..', '..') // eslint-disable-line
   return {
     tmpDir,
     baseDir,
@@ -45,7 +47,14 @@ function paths(label) {
 
 async function pack256Bits(hex) {
   globalUtil.checkString(hex)
-  const executablePath = path.join(cppUtilDir, 'pack_256_bits')
+  let executablePath
+
+  if (env.CIRCLECI) {
+    executablePath = `docker run appliedblockchain/zktrading-pack:${env.CIRCLE_BRANCH}-${env.CIRCLE_SHA1}`
+  } else {
+    executablePath = path.join(cppUtilDir, 'pack_256_bits')
+  }
+
   const command = `${executablePath} ${hex}`
   const result = await execAsync(command)
   return result.stdout.trim().split(',')
@@ -146,7 +155,19 @@ async function prompt() {
   }
 }
 
+async function sleep(seconds = 0, message = '') {
+  if (message) {
+    console.log('Sleeping for ${sec} seconds')
+  }
+  return new Promise(a => {
+    setTimeout(sec * 1000, a)
+  })
+}
+
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+
 module.exports = {
+  sleep,
   clear,
   convertVk,
   convertProof,
@@ -161,5 +182,8 @@ module.exports = {
   randomBytesHex,
   sha256Instance,
   verifyOnChain,
-  verifyOnChainWithProof
+  verifyOnChainWithProof,
+  toUnits,
+  fromUnits,
+  ZERO_ADDRESS
 }

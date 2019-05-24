@@ -60,37 +60,38 @@ async function prepareTransfer(
   if (calleeAddress !== undefined) {
     u.checkBuf(calleeAddress, 20)
   }
-   const params = [
-      u.buf2hex(prev_root),
+  const params = [
+    u.buf2hex(prev_root),
 
-      in_0_address,
-      u.buf2hex(in_0_a_sk),
-      u.buf2hex(in_0_rho),
-      u.buf2hex(in_0_r),
-      in_0_v.toString(),
-      in_0_path.map(x => u.buf2hex(x)),
+    in_0_address,
+    u.buf2hex(in_0_a_sk),
+    u.buf2hex(in_0_rho),
+    u.buf2hex(in_0_r),
+    in_0_v.toString(),
+    in_0_path.map(x => u.buf2hex(x)),
 
-      in_1_address,
-      u.buf2hex(in_1_a_sk),
-      u.buf2hex(in_1_rho),
-      u.buf2hex(in_1_r),
-      in_1_v.toString(),
-      in_1_path.map(x => u.buf2hex(x)),
+    in_1_address,
+    u.buf2hex(in_1_a_sk),
+    u.buf2hex(in_1_rho),
+    u.buf2hex(in_1_r),
+    in_1_v.toString(),
+    in_1_path.map(x => u.buf2hex(x)),
 
-      u.buf2hex(out_0_a_pk),
-      u.buf2hex(out_0_rho),
-      u.buf2hex(out_0_r),
-      out_0_v.toString(),
+    u.buf2hex(out_0_a_pk),
+    u.buf2hex(out_0_rho),
+    u.buf2hex(out_0_r),
+    out_0_v.toString(),
 
-      u.buf2hex(out_1_a_pk),
-      u.buf2hex(out_1_rho),
-      u.buf2hex(out_1_r),
-      out_1_v.toString(),
+    u.buf2hex(out_1_a_pk),
+    u.buf2hex(out_1_rho),
+    u.buf2hex(out_1_r),
+    out_1_v.toString(),
 
-      calleeAddress !== undefined ? u.buf2hex(calleeAddress) : ZERO_ADDRESS
-   ]
+    calleeAddress !== undefined ? u.buf2hex(calleeAddress) : ZERO_ADDRESS
+  ]
 
   const res = await request(jc, 'prepareTransfer', params)
+
 
   return {
     input_0_sn: u.hex2buf(res.input_0_sn),

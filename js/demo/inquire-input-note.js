@@ -8,6 +8,7 @@ async function inquireInputNote(platformState, secretStore, message) {
   const address = new BN(inquiryResult.noteId)
   const cm = platformState.cmAtIndex(address)
   const info = secretStore.getNoteInfo(cm)
+
   return {
     address,
     cm,

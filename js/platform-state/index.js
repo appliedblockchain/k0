@@ -1,3 +1,5 @@
+'use strict'
+
 const cmAtIndex = require('./cm-at-index')
 const currentState = require('./current-state')
 const immutable = require('immutable')
@@ -5,11 +7,12 @@ const indexOfCM = require('./index-of-cm')
 const makeMT = require('./mt')
 const makeStateList = require('./state-list')
 const u = require('../util')
+const assert = require('assert')
 
 async function makePlatformState(serverPort = 4100) {
   const mt = await makeMT(serverPort)
   let stateList
-  reset()
+  await reset()
 
   async function add(snapshotLabel, newSNList, newCMList, expectedNextRoot) {
     u.checkString(snapshotLabel)

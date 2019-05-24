@@ -5,7 +5,6 @@ const bip39 = require('bip39')
 const fs = require('fs')
 const hdkey = require('ethereumjs-wallet/hdkey')
 const BN = require('bn.js')
-// const crypto = require('crypto')
 const assert = require('assert')
 const addresses = require('./addresses')
 const testUtil = require('../test/util')
@@ -14,7 +13,6 @@ const makeK0 = require('../k0')
 const u = require('../util')
 const signTransaction = require('../eth/sign-transaction')
 const compileContracts = require('../test/helpers/compile-contracts')
-// const printState = require('./print-state')
 const makePlatformState = require('../platform-state')
 const makeSecretStore = require('../secret-store')
 const mnemonics = require('./mnemonics')
@@ -33,23 +31,23 @@ process.on('unhandledRejection', error => {
 })
 
 async function run() {
-
   const who = process.argv[2]
   if ([ 'alice', 'bob', 'carol' ].indexOf(who) === -1) {
     console.log('Need parameter "alice", "bob" or "carol".')
     process.exit(1)
   }
+
   const platformState = await makePlatformState(mtServerPorts[who])
   const web3 = testUtil.initWeb3()
-  const k0Eth = await makeEthPlatform(
-    web3,
-    u.hex2buf(addresses.MVPPT)
-  )
+  const k0Eth = await makeEthPlatform(web3, u.hex2buf(addresses.MVPPT))
 
   const secretStoreData = require(`./${who}.secrets.json`)
-  const secretStore = makeSecretStore(secretStoreData)
-  console.log('private key', secretStore.getPrivateKey())
-  console.log('public key', secretStore.getPublicKey())
+  const secretStore = makeSecretStore(
+    u.hex2buf(secretStoreData.privateKey),
+    u.hex2buf(secretStoreData.publicKey)
+  )
+  console.log('private key', u.buf2hex(secretStore.getPrivateKey()))
+  console.log('public key', u.buf2hex(secretStore.getPublicKey()))
   initEventHandlers(platformState, secretStore, k0Eth)
 
   const k0 = await makeK0(serverPorts[who])
@@ -71,6 +69,7 @@ async function run() {
   const total = values.reduce((acc, el) => acc.add(el), new BN('0'))
 
   await demoUtil.prompt()
+
   const platformRoot = await k0Eth.merkleTreeRoot()
   console.log(`Platform Merkle tree root: ${u.buf2hex(platformRoot)}`)
   const localRoot = await platformState.merkleTreeRoot()
@@ -81,7 +80,9 @@ async function run() {
   const approveTx = await signTransaction(
     web3,
     u.hex2buf(dollarCoin._address),
-    u.hex2buf(dollarCoin.methods.approve(addresses.MVPPT, total.toString()).encodeABI()),
+    u.hex2buf(
+      dollarCoin.methods.approve(addresses.MVPPT, total.toString()).encodeABI()
+    ),
     5000000,
     wallet.getPrivateKey()
   )
@@ -91,6 +92,7 @@ async function run() {
     const v = values[i]
 
     const data = await k0.prepareDeposit(platformState, secretStore, v)
+
     await secretStore.addNoteInfo(data.cm, data.a_pk, data.rho, data.r, v)
 
     const depositTx = await k0Eth.deposit(
@@ -102,12 +104,22 @@ async function run() {
       data.commitmentProofAffine,
       data.additionProofAffine
     )
-    const receipt = await web3.eth.sendSignedTransaction(u.buf2hex(depositTx))
 
-    await u.wait(200)
+    await web3.eth.sendSignedTransaction(u.buf2hex(depositTx))
+
+    await u.wait(2000)
   }
 
   fs.writeFileSync(`${who}.secrets.json`, JSON.stringify(secretStore.spit()))
 }
 
-run().then(console.log).catch(console.log)
+(async () => {
+  try {
+    await run()
+    process.exit(0)
+  } catch (err) {
+    console.log(err)
+    console.log('Deposit failed...')
+    process.exit(1)
+  }
+})()

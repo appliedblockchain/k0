@@ -4,6 +4,7 @@ const u = require('../util')
 function getNoteInfo(state, cm) {
   u.checkBuf(cm, 32)
   const noteInfo = state.get('cms').get(u.buf2hex(cm))
+
   if (noteInfo !== undefined) {
     const data = {
       a_pk: u.hex2buf(noteInfo.get('a_pk')),
