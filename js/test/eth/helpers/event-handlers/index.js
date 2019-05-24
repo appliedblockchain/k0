@@ -1,12 +1,16 @@
 const handleDeposit = require('./deposit')
 const handleTransfer = require('./transfer')
+const EventEmitter = require('events')
 
 function initEventHandlers(platformState, secretStore, platform) {
-  platform.on('deposit', handleDeposit.bind(platform, platformState))
+  const emitter = new EventEmitter()
+  platform.on('deposit', handleDeposit.bind(null, platformState, emitter))
   platform.on(
     'transfer',
-    handleTransfer.bind(platform, platformState, secretStore)
+    handleTransfer.bind(null, platformState, secretStore, emitter)
   )
+
+  return emitter
 }
 
 module.exports = initEventHandlers

@@ -17,6 +17,7 @@ function decodeData(data) {
 async function handleTransfer(
   platformState,
   secretStore,
+  emitter,
   txHash,
   in0sn,
   in1sn,
@@ -26,7 +27,7 @@ async function handleTransfer(
   out1data,
   nextRoot
 ) {
-  const outputs = [[out0cm, out0data], [out1cm, out1data]]
+  const outputs = [ [ out0cm, out0data ], [ out1cm, out1data ] ]
   for (let i = 0; i < 2; i = i + 1) {
     const info = decodeData(outputs[i][1])
     if (info.a_pk.equals(secretStore.getPublicKey())) {
@@ -42,8 +43,8 @@ async function handleTransfer(
 
   await platformState.add(
     u.buf2hex(txHash),
-    [in0sn, in1sn],
-    [out0cm, out1cm],
+    [ in0sn, in1sn ],
+    [ out0cm, out1cm ],
     nextRoot
   )
   console.log(
@@ -58,7 +59,8 @@ async function handleTransfer(
       ].join('\n')
     )
   )
-  this.emit('transferProcessed', txHash)
+
+  emitter.emit('transferProcessed', txHash)
 }
 
 module.exports = handleTransfer

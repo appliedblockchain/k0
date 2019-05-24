@@ -300,7 +300,7 @@ describe('Ethereum integration test replicating the K0 demo', () => {
 
       await secretStore.addNoteInfo(data.cm, data.a_pk, data.rho, data.r, v)
 
-      const waitForDeposit = awaitEvent(alice.k0Eth, 'depositProcessed')
+      const waitForDeposit = awaitEvent(alice.emitter, 'depositProcessed')
       const depositTx = await alice.k0Eth.deposit(
         wallet.getPrivateKey(),
         v,
@@ -462,11 +462,10 @@ describe('Ethereum integration test replicating the K0 demo', () => {
     ]
     const tx = await alice.k0Eth.transfer(...ethParams)
 
-    const transferForDeposit = awaitEvent(alice.k0Eth, 'transferProcessed')
+    const transferForDeposit = awaitEvent(bob.emitter, 'transferProcessed')
     const receipt = await web3.eth.sendSignedTransaction(u.buf2hex(tx))
     expect(receipt.status).to.equal(true)
 
-    // TODO attach to merkle tree event instead of wait
     await transferForDeposit
 
     expect(bob.secretStore.getAvailableNotes().length).to.equal(1)
