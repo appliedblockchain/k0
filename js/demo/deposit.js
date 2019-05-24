@@ -32,7 +32,7 @@ process.on('unhandledRejection', error => {
 
 async function run() {
   const who = process.argv[2]
-  if (['alice', 'bob', 'carol'].indexOf(who) === -1) {
+  if ([ 'alice', 'bob', 'carol' ].indexOf(who) === -1) {
     console.log('Need parameter "alice", "bob" or "carol".')
     process.exit(1)
   }
@@ -113,7 +113,7 @@ async function run() {
   fs.writeFileSync(`${who}.secrets.json`, JSON.stringify(secretStore.spit()))
 }
 
-;(async () => {
+(async () => {
   try {
     await run()
     process.exit(0)

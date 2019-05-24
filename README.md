@@ -182,37 +182,13 @@ node wallet carol
 
 ## Ethereum test
 
-### Faster ZK setup for tests:
+### Running the Ethereum integration tests
 
-In order to speed up the proof generation and verification, we can set the merkle tree to have a depth of 4 only. This means that the keys need to be regenerated, and the server started with the proper depth otherwise the proof verification will fail.
-
-### Generating the keys
+ZKP setup as described [above](#zkp-setup-needed-for-all-tests-and-demos)
 
 ```
-rm -rf /tmp/k0keys && \
-mkdir /tmp/k0keys && \
-for circuit in commitment transfer addition withdrawal example; do \
-  cpp/build/src/setup $circuit 4 /tmp/k0keys/${circuit}_pk /tmp/k0keys/${circuit}_vk && \
-  cpp/build/src/convert_vk /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt; \
-done
-```
-
-### Running the proving servers with a depth of 4:
-
-```
-cpp/build/src/server 4 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 4000
-
-cpp/build/src/server 4 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 5000
-
-cpp/build/src/server 4 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 6000
-```
-
-### Running the Merkle tree servers(1 terminal each):
-
-```
-cpp/build/src/mtserver 4 4100
-cpp/build/src/mtserver 4 5100
-cpp/build/src/mtserver 4 6100
+cd js
+npm run test:integration:eth
 ```
 
 
@@ -227,7 +203,7 @@ do
     docker build -f docker/$IMAGE.Dockerfile -t zktrading-$IMAGE .
 done
 
-# Create the keys for the right merkle tree hight, using the docker images
+# !IMPORTANT! Create the keys for the right merkle tree hight, which is 4(unlike the setup where it's 7):
 
 mkdir /tmp/k0keys
 for circuit in commitment transfer addition withdrawal example
@@ -236,7 +212,6 @@ docker run -v /tmp/k0keys:/tmp/k0keys zktrading-setup $circuit 4 /tmp/k0keys/${c
     docker run -v /tmp/k0keys:/tmp/k0keys zktrading-convert-vk /tmp/k0keys/${circuit}\_vk /tmp/k0keys/\${circuit}\_vk_alt
 done
 ```
-
 
 
 ## Fabric integration tests
@@ -250,14 +225,14 @@ ZKP setup as described [above](#zkp-setup-needed-for-all-tests-and-demos)
 In `js/test/fabric/network`:
 
 ```
-rm -rf artefacts/\*
+rm -rf artefacts/*
 ./start.sh
 ```
 
 ### Remove previously created chaincode images
 
 ```
-docker rmi \$(docker images --filter=reference="_k0chaincode_" -q) || true
+docker rmi $(docker images --filter=reference="*k0chaincode*" -q) || true
 ```
 
 ### Package chaincode
@@ -265,9 +240,10 @@ docker rmi \$(docker images --filter=reference="_k0chaincode_" -q) || true
 In `js/test/fabric/network`:
 
 ```
-export CHAINCODE_VERSION=$(($CHAINCODE_VERSION+1)) && echo \$CHAINCODE_VERSION
+export CHAINCODE_VERSION=$(($CHAINCODE_VERSION+1)) && echo $CHAINCODE_VERSION
 
-docker run -v $PWD/artefacts:/artefacts -v $GOPATH/src/github.com/hyperledger/fabric:/opt/gopath/src/github.com/hyperledger/fabric:ro -v $GOPATH/src/github.com/appliedblockchain/zktrading/fabric/chaincode/cash:/opt/gopath/src/github.com/appliedblockchain/fabric/chaincode/cash:ro hyperledger/fabric-tools:1.2.0 peer chaincode package -n k0chaincode -v $CHAINCODE_VERSION -p github.com/appliedblockchain/fabric/chaincode/cash /artefacts/k0chaincode.\${CHAINCODE_VERSION}.out
+```
+ docker run -v $PWD/artefacts:/artefacts -v $GOPATH/src/github.com/hyperledger/fabric:/opt/gopath/src/github.com/hyperledger/fabric:ro -v $GOPATH/src/github.com/appliedblockchain/zktrading/fabric/chaincode/cash:/opt/gopath/src/github.com/appliedblockchain/fabric/chaincode/cash:ro hyperledger/fabric-tools:1.2.0 peer chaincode package -n k0chaincode -v $CHAINCODE_VERSION -p github.com/appliedblockchain/fabric/chaincode/cash /artefacts/k0chaincode.${CHAINCODE_VERSION}.out
 ```
 
 ### Install chaincode
