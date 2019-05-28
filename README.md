@@ -117,8 +117,8 @@ BASE_DIR=\$(pwd) build/test/letest --gtest_filter=EXPRESSION\*
 rm -rf /tmp/k0keys && \
 mkdir /tmp/k0keys && \
 for circuit in commitment transfer addition withdrawal example; do \
-cpp/build/src/setup $circuit 7 /tmp/k0keys/${circuit}\_pk /tmp/k0keys/${circuit}_vk && \
-cpp/build/src/convert_vk /tmp/k0keys/${circuit}\_vk /tmp/k0keys/\${circuit}\_vk_alt; \
+  cpp/build/src/setup $circuit 7 /tmp/k0keys/${circuit}\_pk /tmp/k0keys/${circuit}_vk && \
+  cpp/build/src/convert_vk /tmp/k0keys/${circuit}\_vk /tmp/k0keys/${circuit}\_vk_alt; \
 done
 
 ```
@@ -220,6 +220,8 @@ The project needs to be checked out in the GOPATH (`$GOPATH/src/github.com/appli
 
 ZKP setup as described [above](#zkp-setup-needed-for-all-tests-and-demos)
 
+Use node version 8, otherwise it will not work.
+
 ### Spin up a Fabric network
 
 In `js/test/fabric/network`:
@@ -242,7 +244,6 @@ In `js/test/fabric/network`:
 ```
 export CHAINCODE_VERSION=$(($CHAINCODE_VERSION+1)) && echo $CHAINCODE_VERSION
 
-```
  docker run -v $PWD/artefacts:/artefacts -v $GOPATH/src/github.com/hyperledger/fabric:/opt/gopath/src/github.com/hyperledger/fabric:ro -v $GOPATH/src/github.com/appliedblockchain/zktrading/fabric/chaincode/cash:/opt/gopath/src/github.com/appliedblockchain/fabric/chaincode/cash:ro hyperledger/fabric-tools:1.2.0 peer chaincode package -n k0chaincode -v $CHAINCODE_VERSION -p github.com/appliedblockchain/fabric/chaincode/cash /artefacts/k0chaincode.${CHAINCODE_VERSION}.out
 ```
 

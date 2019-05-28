@@ -28,13 +28,9 @@ const platformPorts = [ 4100, 5100, 6100 ]
 
 let web3
 
-after(() => {
-  if (web3 && web3.currentProvider) {
-    web3.currentProvider.connection.close()
-  }
-})
+describe('Ethereum integration test replicating the K0 demo', function () {
+  this.timeout(3600 * 1000)
 
-describe('Ethereum integration test replicating the K0 demo', () => {
   let alice, bob, carol // web3 accounts, and secretKeys
   let artefacts
   let addresses // contract and user addresses, indexed by name
@@ -42,6 +38,13 @@ describe('Ethereum integration test replicating the K0 demo', () => {
   let dollarCoin // , carToken
 
   const numInitialNotes = 2
+
+  // close web3 websocket so the test can exit
+  after(() => {
+    if (web3 && web3.currentProvider) {
+      web3.currentProvider.connection.close()
+    }
+  })
 
   // Make the accounts, deploy the contracts
   before(async () => {
