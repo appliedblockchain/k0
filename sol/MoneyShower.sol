@@ -9,7 +9,7 @@ contract MoneyShower {
     function transfer(
             address tokenContractAddress,
             address[] memory addresses,
-            uint256[] memory amounts) payable public {
+            uint256[] memory amounts) public payable {
         require(addresses.length == amounts.length,
                 "Number of addresses differs from number of amounts");
         IERC20 tokenContract = IERC20(tokenContractAddress);

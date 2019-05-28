@@ -57,7 +57,7 @@ function mvpptAddressBook(a_pk) {
 
 async function run() {
   const who = process.argv[2]
-  if (['alice', 'bob', 'carol'].indexOf(who) === -1) {
+  if ([ 'alice', 'bob', 'carol' ].indexOf(who) === -1) {
     console.log('Need parameter "alice", "bob" or "carol".')
     process.exit(1)
   }
@@ -104,7 +104,7 @@ async function run() {
     addresses.CarToken
   )
 
-  const carIds = [new BN('1')]
+  const carIds = [ new BN('1') ]
   function showState() {
     return printState(
       secretStore,

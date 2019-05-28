@@ -1,9 +1,11 @@
+'use strict'
+
 async function sendTransaction(web3, to, data, gas = 50000000, account = null) {
   const txParams = {
     to,
     data,
     gas,
-    gasPrice: "0"
+    gasPrice: '0'
   }
   if (account === null) {
     account = web3.eth.accounts.create()
