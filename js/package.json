@@ -20,6 +20,7 @@
   "scripts": {
     "test": "mocha test",
     "test:integration:eth": "mocha --timeout 0 test/eth/all.integration.js",
+    "test:integration:fabric": "mocha --timeout 0 test/fabric/test.js",
     "lint": "eslint . --ignore-path .gitignore",
     "parity": "docker run -p 8545:8545 appliedblockchain/parity-solo-instant"
   },
