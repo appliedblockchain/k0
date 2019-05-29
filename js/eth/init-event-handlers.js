@@ -3,7 +3,7 @@ const handleTransfer = require('./event-handlers/transfer')
 const u = require('../util')
 
 function initEventHandlers(mvppt, eventEmitter) {
-  let queue = []
+  const queue = []
 
   let processing = false
   let lastBlockNumber = 0
@@ -31,7 +31,7 @@ function initEventHandlers(mvppt, eventEmitter) {
     } else if (item.event === 'Transfer') {
       await handleTransfer(eventEmitter, item)
     } else if (item.event === 'Log') {
-      // ignore
+      // console.log('LOG', require('util').inspect(item, { depth: null, colors: true }))
     } else if (item.event === 'SNRegistration') {
       // ignore
     } else if (item.event === 'SNReuseAttemptError') {
@@ -46,6 +46,8 @@ function initEventHandlers(mvppt, eventEmitter) {
     } else if (item.event === 'TransferFromFailure') {
       console.log('TransferFromFailure')
       process.exit(1)
+    } else if (item.event === 'Debug') {
+      // console.log('ETH DEBUG', require('util').inspect(item, { depth: null, colors: true }))
     } else {
       throw new Error(`Don't know what to do with event of type ${item.event}`)
     }

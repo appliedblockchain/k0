@@ -96,7 +96,6 @@ function initWeb3() {
 }
 
 async function deployContract(web3, artefacts, params = [], account) {
-  console.log({ account })
   const contractAddress = await deploy(
     web3,
     artefacts.abi,

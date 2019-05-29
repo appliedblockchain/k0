@@ -16,9 +16,10 @@ async function transfer(
   calleeAddress,
   proof
 ) {
-  ;[privateKey, in_0_sn, in_1_sn, out_0_cm, out_1_cm, nextRoot].map(buf => {
+  [ privateKey, in_0_sn, in_1_sn, out_0_cm, out_1_cm, nextRoot ].map(buf => {
     u.checkBuf(buf, 32)
   })
+
   u.checkBuf(out_0_data)
   u.checkBuf(out_1_data)
   u.checkBuf(calleeAddress, 20)
