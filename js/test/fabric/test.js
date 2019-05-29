@@ -82,14 +82,17 @@ describe('Fabric workflow', function() {
         const data = await k0s[who].prepareDeposit(
           platformStates[who], secretStores[who], v
         )
-        console.log({ data })
+        console.log(data.commitmentProofJacobian)
         await secretStores[who].addNoteInfo(
           data.cm, data.a_pk, data.rho, data.r, v
         )
         const depositTx = await k0Fabrics[who].mint(
-          u.buf2hex(data.cm),
-          u.buf2hex(data.nextRoot),
-          ''
+          data.k,
+          v,
+          data.cm,
+          data.nextRoot,
+          data.commitmentProofJacobian,
+          data.additionProofJacobian
         )
         await u.wait(2000)
       }
@@ -117,6 +120,7 @@ describe('Fabric workflow', function() {
     const in0addr = platformStates.alpha.indexOfCM(inputs[0].cm)
     const in1addr = platformStates.alpha.indexOfCM(inputs[1].cm)
 
+    console.log('indexOfCM', in0addr, in1addr)
     const out0 = {
       a_pk: publicKeys.gamma,
       rho: crypto.randomBytes(32),

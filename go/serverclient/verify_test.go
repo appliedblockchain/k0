@@ -1,22 +1,27 @@
-package k0chaincode_test
+package serverclient
 
 import (
 	"encoding/json"
-	"github.com/appliedblockchain/zktrading/fabric/chaincode/cash/verification"
 	"github.com/appliedblockchain/zktrading/go/data"
+	"github.com/appliedblockchain/zktrading/go/util"
 	"io/ioutil"
+	"os"
 	"testing"
 )
 
 func TestVerify(t *testing.T) {
+	endpoint, is_set := os.LookupEnv("VERIFIER_ENDPOINT")
+	if !is_set {
+		endpoint = "http://localhost:11400"
+	}
 	proofData, _ := ioutil.ReadFile("testdata/jacobian_proof.json")
 	proof := data.ProofJacobian{}
 	json.Unmarshal(proofData, &proof)
 	inputsData, _ := ioutil.ReadFile("testdata/public_inputs.json")
-	publicInputs := []string{}
-	json.Unmarshal(inputsData, &publicInputs)
-
-	result, err := verification.Verify("transfer", proof, publicInputs)
+	publicInputStrings := []string{}
+	json.Unmarshal(inputsData, &publicInputStrings)
+	publicInputs := util.StringsToBigInts(publicInputStrings)
+	result, err := Verify(endpoint, "transfer", proof, publicInputs)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}

@@ -1,8 +1,9 @@
-package k0chaincode
+package main
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/appliedblockchain/zktrading/go/data"
 	"github.com/appliedblockchain/zktrading/go/serverclient"
 	"github.com/appliedblockchain/zktrading/go/util"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -19,7 +20,6 @@ func setup(t *testing.T) *shim.MockStub {
 	if response.Status != shim.OK {
 		t.Fatalf(response.Message)
 	}
-	println("Hello world")
 	return stub
 }
 
@@ -41,6 +41,10 @@ func TestMint(t *testing.T) {
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
+	fmt.Printf("%+v", stub)
+	fmt.Printf("%+v", a_pk)
+	fmt.Printf("%+v", rho)
+	fmt.Printf("%+v", r)
 	v := uint64(4000)
 	res, err := serverclient.DepositCommitmentProof(
 		"http://localhost:11400", a_pk, rho, r, v)
@@ -48,13 +52,37 @@ func TestMint(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 
-	proofJson, err := json.Marshal(res.ProofJacobian)
+	commitmentProofJson, err := json.Marshal(res.ProofJacobian)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	v_bytes, err := util.UintToBytes8(v)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	// TODO Test with MT server
+	newRoot, err := util.RandomBytes32()
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	// TODO Test with actual proof
+	var additionProof data.ProofJacobian
+	additionProofJson, err := json.Marshal(additionProof)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
 
 	response := stub.MockInvoke("200", [][]byte{
 		[]byte("mint"),
-		res.CM[:],
 		res.K[:],
-		proofJson,
+		v_bytes[:],
+		res.CM[:],
+		newRoot[:],
+		commitmentProofJson,
+		additionProofJson,
 	})
 	if response.Status == shim.ERROR {
 		fmt.Printf("%+v", response)

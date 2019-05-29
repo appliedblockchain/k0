@@ -1,6 +1,7 @@
 package util
 
 import (
+	"encoding/binary"
 	"fmt"
 )
 
@@ -22,4 +23,24 @@ func VariableToFixed48(input []byte) ([48]byte, error) {
 	var result [48]byte
 	copy(result[:], input[:48])
 	return result, nil
+}
+
+func VariableToFixed8(input []byte) ([8]byte, error) {
+	if len(input) != 8 {
+		msg := "Byte array is of length %d, expected 8"
+		return [8]byte{}, fmt.Errorf(msg, len(input))
+	}
+	var result [8]byte
+	copy(result[:], input[:8])
+	return result, nil
+}
+
+func UintToBytes8(input uint64) ([8]byte, error) {
+	b := make([]byte, 8)
+	binary.BigEndian.PutUint64(b, input)
+	return VariableToFixed8(b)
+}
+
+func BytesToUint8(input [8]byte) uint64 {
+	return uint64(binary.BigEndian.Uint64(input[:]))
 }

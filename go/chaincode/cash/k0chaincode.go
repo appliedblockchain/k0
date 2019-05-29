@@ -1,4 +1,4 @@
-package k0chaincode
+package main
 
 import (
 	"encoding/json"
@@ -53,19 +53,37 @@ func (t *K0Chaincode) mint(
 ) pb.Response {
 	endpoint, is_set := os.LookupEnv("VERIFIER_ENDPOINT")
 	if !is_set {
-		endpoint = "http://localhost:11400"
+		endpoint = "http://verifier/"
 	}
-
-	cm, err := util.VariableToFixed32(args[0])
+	k, err := util.VariableToFixed32(args[0])
+	if err != nil {
+		msg := "While trying to convert variable length byte array " +
+			"for k into fixed-length byte array: %s"
+		return shim.Error(fmt.Sprintf(msg, err.Error()))
+	}
+	v, err := util.VariableToFixed8(args[1])
+	if err != nil {
+		msg := "While trying to convert variable length byte array " +
+			"for v into fixed-length byte array: %s"
+		return shim.Error(fmt.Sprintf(msg, err.Error()))
+	}
+	cm, err := util.VariableToFixed32(args[2])
 	if err != nil {
 		msg := "While trying to convert variable length byte array " +
 			"for cm into fixed-length byte array: %s"
 		return shim.Error(fmt.Sprintf(msg, err.Error()))
 	}
-	k, err := util.VariableToFixed32(args[1])
+
+	newRoot, err := util.VariableToFixed32(args[3])
 	if err != nil {
 		msg := "While trying to convert variable length byte array " +
-			"for k into fixed-length byte array: %s"
+			"for new root into fixed-length byte array: %s"
+		return shim.Error(fmt.Sprintf(msg, err.Error()))
+	}
+
+	k_elems, err := serverclient.Pack256Bits(endpoint, k)
+	if err != nil {
+		msg := "While trying to pack k value: %s"
 		return shim.Error(fmt.Sprintf(msg, err.Error()))
 	}
 	cm_elems, err := serverclient.Pack256Bits(endpoint, cm)
@@ -73,21 +91,21 @@ func (t *K0Chaincode) mint(
 		msg := "While trying to pack cm value: %s"
 		return shim.Error(fmt.Sprintf(msg, err.Error()))
 	}
-	k_elems, err := serverclient.Pack256Bits(endpoint, k)
-	if err != nil {
-		msg := "While trying to pack k value: %s"
-		return shim.Error(fmt.Sprintf(msg, err.Error()))
-	}
-	var proof data.ProofJacobian
-	err = json.Unmarshal(args[2], &proof)
-	logger.Infof("proof %+v", proof)
+	var commitmentProof data.ProofJacobian
+	err = json.Unmarshal(args[4], &commitmentProof)
+
+	var additionProof data.ProofJacobian
+	err = json.Unmarshal(args[5], &additionProof)
+
 	publicInputs := []*big.Int{
-		cm_elems[0],
-		cm_elems[1],
 		k_elems[0],
 		k_elems[1],
+		new(big.Int).SetUint64(util.BytesToUint8(v)),
+		cm_elems[0],
+		cm_elems[1],
 	}
-	verified, err := serverclient.Verify(endpoint, "commitment", proof, publicInputs)
+	verified, err := serverclient.Verify(
+		endpoint, "commitment", commitmentProof, publicInputs)
 	if err != nil {
 		msg := "While trying to verify commitment proof: %s"
 		return shim.Error(fmt.Sprintf(msg, err.Error()))
@@ -96,27 +114,18 @@ func (t *K0Chaincode) mint(
 		return shim.Error("Commitment proof not verified")
 	}
 
-	// 	//newroot, commitmentProof, additionproof
-	// 	logger.Infof("MINT %s", string(args[0]))
-	// var err error
-	// cm := args[0]
-	// newRoot := args[1]
-	// err = stub.PutState("root", []byte(newRoot))
-	// if err != nil {
-	// 	return shim.Error(err.Error())
-	// }
-	// logger.Infof("Set root to %s.", string(newRoot))
+	// TODO verify addition proof
 
-	// eventVals := []string{cm, newRoot}
-	// eventValsJson, err := json.Marshal(eventVals)
-	// if err != nil {
-	// 	return shim.Error(err.Error())
-	// }
+	err = stub.PutState("root", newRoot[:])
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	logger.Infof("Set root to %s.", util.BytesToHex32(newRoot))
 
-	// err = stub.SetEvent("Mint", []byte(eventValsJson))
-	// if err != nil {
-	// 	return shim.Error(err.Error())
-	// }
+	err = stub.SetEvent("Mint", append(cm[:], newRoot[:]...))
+	if err != nil {
+		return shim.Error(err.Error())
+	}
 
 	return shim.Success(nil)
 }
@@ -131,7 +140,10 @@ type transferInput struct {
 	newRoot    string `json:"newRoot"`
 }
 
-func (t *K0Chaincode) transfer(stub shim.ChaincodeStubInterface, args [][]byte) pb.Response {
+func (t *K0Chaincode) transfer(
+	stub shim.ChaincodeStubInterface, args [][]byte,
+) pb.Response {
+	logger.Info("TRANSFER!")
 	var err error
 	params := transferInput{}
 	err = json.Unmarshal(args[0], &params)
@@ -145,24 +157,21 @@ func (t *K0Chaincode) transfer(stub shim.ChaincodeStubInterface, args [][]byte) 
 	}
 	logger.Infof("Set root to %s.", string(params.newRoot))
 
-	eventVals := []string{params.sn_in_0, params.sn_in_1, params.cm_out_0, params.cm_out_1, params.data_out_0, params.data_out_1, params.newRoot}
+	eventVals := []string{
+		params.sn_in_0, params.sn_in_1, params.cm_out_0,
+		params.cm_out_1, params.data_out_0, params.data_out_1,
+		params.newRoot}
+	logger.Infof("eventVals %+v", eventVals)
 	eventValsJson, err := json.Marshal(eventVals)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 
+	logger.Infof("eventvalsjson %+v", eventValsJson)
 	err = stub.SetEvent("Transfer", []byte(eventValsJson))
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 
 	return shim.Success(nil)
-}
-
-func main() {
-	err := shim.Start(new(K0Chaincode))
-	if err != nil {
-		fmt.Printf("Error starting K0 chaincode: %s", err)
-	}
-
 }

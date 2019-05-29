@@ -6,6 +6,7 @@ import (
 	"github.com/appliedblockchain/zktrading/go/data"
 	"github.com/appliedblockchain/zktrading/go/jsonrpc"
 	"github.com/appliedblockchain/zktrading/go/util"
+	"strconv"
 )
 
 type depositCommitmentProofJsonRpcResult struct {
@@ -42,7 +43,7 @@ func DepositCommitmentProof(
 		a_pk_hex,
 		rho_hex,
 		r_hex,
-		string(v),
+		strconv.FormatUint(v, 10),
 	}
 	body, err := jsonrpc.Call(endpoint, "depositCommitmentProof", params)
 	if err != nil {

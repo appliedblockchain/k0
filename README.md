@@ -191,7 +191,7 @@ In `js/test/fabric/network`:
 ```
 export CHAINCODE_VERSION=$(($CHAINCODE_VERSION+1)) && echo $CHAINCODE_VERSION
 
-docker run -v $PWD/artefacts:/artefacts -v $GOPATH/src/github.com/hyperledger/fabric:/opt/gopath/src/github.com/hyperledger/fabric:ro -v $GOPATH/src/github.com/appliedblockchain/zktrading/fabric/chaincode/cash:/opt/gopath/src/github.com/appliedblockchain/fabric/chaincode/cash:ro hyperledger/fabric-tools:1.2.0 peer chaincode package -n k0chaincode -v $CHAINCODE_VERSION -p github.com/appliedblockchain/fabric/chaincode/cash /artefacts/k0chaincode.${CHAINCODE_VERSION}.out
+docker run -v $PWD/artefacts:/artefacts -v $GOPATH/src/github.com/hyperledger/fabric:/opt/gopath/src/github.com/hyperledger/fabric:ro -v $GOPATH/src/github.com/appliedblockchain/zktrading/go/:/opt/gopath/src/github.com/appliedblockchain/zktrading/go/:ro hyperledger/fabric-tools:1.2.0 peer chaincode package -n k0chaincode -v $CHAINCODE_VERSION -p github.com/appliedblockchain/zktrading/go/chaincode/cash /artefacts/k0chaincode.${CHAINCODE_VERSION}.out
 ```
 
 ### Install chaincode

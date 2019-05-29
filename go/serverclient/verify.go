@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/appliedblockchain/zktrading/go/data"
 	"github.com/appliedblockchain/zktrading/go/jsonrpc"
+	"github.com/appliedblockchain/zktrading/go/util"
 	"math/big"
 )
 
@@ -25,7 +26,7 @@ func Verify(
 		[]interface{}{
 			proofType,
 			proof,
-			publicInputs,
+			util.BigIntsToStrings(publicInputs),
 		},
 	)
 	if err != nil {

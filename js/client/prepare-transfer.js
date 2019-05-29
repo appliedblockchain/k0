@@ -1,7 +1,7 @@
 const BN = require('bn.js')
 const request = require('./request')
 const u = require('../util')
-const conv = require('./proof-conversion')
+const conv = require('../proof-conversion')
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
