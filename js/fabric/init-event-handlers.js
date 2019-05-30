@@ -1,3 +1,5 @@
+'use strict'
+
 const u = require('../util')
 
 function initEventHandlers(channelEventHub, chaincodeId, eventEmitter) {
@@ -14,10 +16,26 @@ function initEventHandlers(channelEventHub, chaincodeId, eventEmitter) {
     processing = true
     var item = queue.shift()
 
-    if (item.type === 'Mint'){
-      eventEmitter.emit('mint', item.txnid, ...item.payload)
+    if (item.type === 'Mint') {
+      u.checkBuf(item.payload, 64)
+      eventEmitter.emit(
+        'mint',
+        item.txnid,
+        item.payload.slice(0,32),
+        item.payload.slice(32)
+      )
     } else if (item.type === 'Transfer') {
-      eventEmitter.emit('transfer', item.txnid, ...item.payload)
+      u.checkBuf(item.payload, 480)
+      eventEmitter.emit(
+        'transfer',
+        item.txnid,
+        item.payload.slice(0,32),
+        item.payload.slice(32,64),
+        item.payload.slice(64,96),
+        item.payload.slice(96,128),
+        item.payload.slice(128,304),
+        item.payload.slice(304)
+      )
     } else {
       throw new Error(`Don't know what to do with event of type ${item.type}`)
     }
@@ -33,8 +51,7 @@ function initEventHandlers(channelEventHub, chaincodeId, eventEmitter) {
     chaincodeId,
     '^.*',
     (event, block_num, txnid, status) => {
-      const event_payload = JSON.parse(event.payload)
-      queue.push({ type: event.event_name, txnid, payload: event_payload})
+      queue.push({ type: event.event_name, txnid, payload: event.payload})
       processQueue()
     },
     error => console.log(error),

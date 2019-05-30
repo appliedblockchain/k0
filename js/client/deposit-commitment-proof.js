@@ -1,6 +1,7 @@
 const request = require('./request')
 const u = require('../util')
-const conv = require('./proof-conversion')
+const BN = require('bn.js')
+const conv = require('../proof-conversion')
 
 async function depositCommitmentProof(jc, a_pk, rho, r, v) {
   u.checkBuf(a_pk, 32)

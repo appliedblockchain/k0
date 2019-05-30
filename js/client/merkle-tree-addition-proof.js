@@ -1,7 +1,7 @@
 const request = require('./request')
 const u = require('../util')
 const BN = require('bn.js')
-const conv = require('./proof-conversion')
+const conv = require('../proof-conversion')
 
 async function merkleTreeAdditionProof(
   jc, prevRoot, address, leaf, path, nextRoot) {

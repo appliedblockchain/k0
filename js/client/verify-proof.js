@@ -1,5 +1,5 @@
 'use strict'
-const conv = require('./proof-conversion')
+const conv = require('../proof-conversion')
 const request = require('./request')
 const u = require('../util')
 

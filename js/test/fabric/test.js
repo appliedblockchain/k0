@@ -52,7 +52,11 @@ describe('Fabric workflow', function() {
       k0s[who] = await makeK0(config.proverPort)
       secretStores[who] = await generateSecretStore(k0s[who])
       publicKeys[who] = secretStores[who].getPublicKey()
-      k0Fabrics[who] = await makeFabricPlatform(logger, config, process.env.CHAINCODE_ID || 'k0chaincode')
+      k0Fabrics[who] = await makeFabricPlatform(
+        logger,
+        config,
+        process.env.CHAINCODE_ID || 'k0chaincode'
+      )
       initEventHandlers(platformStates[who], secretStores[who], k0Fabrics[who])
       k0Fabrics[who].startEventMonitoring()
     }
@@ -65,20 +69,30 @@ describe('Fabric workflow', function() {
     for (let i = 0; i < orgs.length; i = i + 1) {
       expect(secretStores[orgs[i]].getAvailableNotes().length).to.equal(0)
     }
-    const numInitialHodlers = 2
-    const numInitialNotesPerHodler = 3
+    const numInitialHodlers = 1
+    const numInitialNotesPerHodler = 2
     for (let i = 0; i < numInitialHodlers; i = i + 1) {
       const who = orgs[i]
-      const values = _.times(numInitialNotesPerHodler, () => new BN(_.random(50).toString() + '000'))
+      const values = _.times(numInitialNotesPerHodler, () => {
+        return new BN(_.random(50).toString() + '000')
+      })
       const total = values.reduce((acc, el) => acc.add(el), new BN('0'))
       for (let i = 0; i < values.length; i++) {
         const v = values[i]
-        const data = await k0s[who].prepareDeposit(platformStates[who], secretStores[who], v)
-        await secretStores[who].addNoteInfo(data.cm, data.a_pk, data.rho, data.r, v)
+        const data = await k0s[who].prepareDeposit(
+          platformStates[who], secretStores[who], v
+        )
+        console.log(data.commitmentProofJacobian)
+        await secretStores[who].addNoteInfo(
+          data.cm, data.a_pk, data.rho, data.r, v
+        )
         const depositTx = await k0Fabrics[who].mint(
-          u.buf2hex(data.cm),
-          u.buf2hex(data.nextRoot),
-          ''
+          data.k,
+          v,
+          data.cm,
+          data.nextRoot,
+          data.commitmentProofJacobian,
+          data.additionProofJacobian
         )
         await u.wait(2000)
       }
@@ -86,7 +100,8 @@ describe('Fabric workflow', function() {
 
     // Hodlers should now have numInitialNotesPerHodler notes each
     for (let i = 0; i < numInitialHodlers; i = i + 1) {
-      expect(secretStores[orgs[i]].getAvailableNotes().length).to.equal(numInitialNotesPerHodler)
+      const numAvailableNotes = secretStores[orgs[i]].getAvailableNotes().length
+      expect(numAvailableNotes).to.equal(numInitialNotesPerHodler)
     }
     // GammaCo should still have 0
     expect(secretStores[orgs[2]].getAvailableNotes().length).to.equal(0)
@@ -105,6 +120,7 @@ describe('Fabric workflow', function() {
     const in0addr = platformStates.alpha.indexOfCM(inputs[0].cm)
     const in1addr = platformStates.alpha.indexOfCM(inputs[1].cm)
 
+    console.log('indexOfCM', in0addr, in1addr)
     const out0 = {
       a_pk: publicKeys.gamma,
       rho: crypto.randomBytes(32),
@@ -119,7 +135,6 @@ describe('Fabric workflow', function() {
       v: sum.sub(out0.v)
     }
 
-
     const transferData = await k0s.alpha.prepareTransfer(
       platformStates.alpha,
       secretStores.alpha,
@@ -128,17 +143,24 @@ describe('Fabric workflow', function() {
       out0,
       out1
     )
+
     secretStores.alpha.addSNToNote(inputs[0].cm, transferData.input_0_sn)
     secretStores.alpha.addSNToNote(inputs[1].cm, transferData.input_1_sn)
-    secretStores.alpha.addNoteInfo(transferData.output_0_cm, out0.a_pk, out0.rho, out0.r, out0.v)
-    secretStores.alpha.addNoteInfo(transferData.output_1_cm, out1.a_pk, out1.rho, out1.r, out1.v)
+    secretStores.alpha.addNoteInfo(
+      transferData.output_0_cm, out0.a_pk, out0.rho, out0.r, out0.v
+    )
+    secretStores.alpha.addNoteInfo(
+      transferData.output_1_cm, out1.a_pk, out1.rho, out1.r, out1.v
+    )
 
     // This is hacky :/
     // We need a "simulate two additions" function on the MT server
     const rootBefore = await platformStates.alpha.merkleTreeRoot()
     const labelBefore = platformStates.alpha.currentStateLabel()
-    const tmpLabel = ('temporary_mt_addition_' + crypto.randomBytes(16).toString('hex'))
-    await platformStates.alpha.add(tmpLabel, [], [ transferData.output_0_cm, transferData.output_1_cm ])
+    const tmpLabel = 'temporary_mt_addition_' + crypto.randomBytes(16).toString('hex')
+    await platformStates.alpha.add(
+      tmpLabel, [], [ transferData.output_0_cm, transferData.output_1_cm ]
+    )
     const newRoot = await platformStates.alpha.merkleTreeRoot()
     await platformStates.alpha.rollbackTo(labelBefore)
 
@@ -149,15 +171,14 @@ describe('Fabric workflow', function() {
     const out_1_data = makeData(out1.a_pk, out1.rho, out1.r, out1.v)
 
     await k0Fabrics.alpha.transfer(
-      u.buf2hex(transferData.input_0_sn),
-      u.buf2hex(transferData.input_1_sn),
-      u.buf2hex(transferData.output_0_cm),
-      u.buf2hex(transferData.output_1_cm),
-      u.buf2hex(out_0_data),
-      u.buf2hex(out_1_data),
-      u.buf2hex(newRoot)
+      transferData.input_0_sn,
+      transferData.input_1_sn,
+      transferData.output_0_cm,
+      transferData.output_1_cm,
+      out_0_data,
+      out_1_data,
+      newRoot
     )
-
   })
 
   after(async function() {
