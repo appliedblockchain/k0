@@ -12,18 +12,7 @@ type K0Chaincode struct {
 }
 
 func (t *K0Chaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
-	var err error
-	_, args := stub.GetFunctionAndParameters()
-	if len(args) != 1 {
-		return shim.Error("Error in Init: Incorrect number of " +
-			"arguments. Expecting 1, got: " + string(len(args)))
-	}
-	logger.Infof("Setting value to: %s", args[0])
-	err = stub.PutState("value", []byte(args[0]))
-	if err != nil {
-		return shim.Error(err.Error())
-	}
-
+	// TODO set initial Merkle tree root
 	return shim.Success(nil)
 }
 
