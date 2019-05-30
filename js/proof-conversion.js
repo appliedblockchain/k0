@@ -1,6 +1,6 @@
 'use strict'
 
-const u = require('../util')
+const u = require('./util')
 
 function convertG1Affine(convert, point) {
   return {

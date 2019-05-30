@@ -253,19 +253,16 @@
     }
   },
 
+
   {
-    "name": "verifyProof",
+    "name": "pack256Bits",
     "params": [
-      "what",
-      {
-        "label": "val"
-      },
-      [
-        "public_input_value",
-        "public_input_value"
-      ]
+      "0x1111111111111111111111111111111111111111111111111111111111111111"
     ],
-    "returns": true
+    "returns": [
+      "1234",
+      "5678"
+    ]
   },
 
   {
@@ -294,5 +291,29 @@
     "returns": {
       "ready": true
     }
+  },
+
+  {
+    "name": "unpack256Bits",
+    "params": [
+      "1234",
+      "5678"
+    ],
+    "returns": "0x1111111111111111111111111111111111111111111111111111111111111111"
+  },
+
+  {
+    "name": "verifyProof",
+    "params": [
+      "what",
+      {
+        "label": "val"
+      },
+      [
+        "public_input_value",
+        "public_input_value"
+      ]
+    ],
+    "returns": true
   }
 ]

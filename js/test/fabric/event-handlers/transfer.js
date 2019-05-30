@@ -17,8 +17,8 @@ async function handleTransfer(platformState, secretStore, txnid, in0sn, in1sn,
                               out0cm, out1cm, out0data, out1data, nextRoot) {
 
   const outputs = [
-    [ u.hex2buf(out0cm), u.hex2buf(out0data) ],
-    [ u.hex2buf(out1cm), u.hex2buf(out1data) ]
+    [ out0cm, out0data ],
+    [ out1cm, out1data ]
   ]
 
   for (let i = 0; i < 2; i = i + 1) {
@@ -36,9 +36,9 @@ async function handleTransfer(platformState, secretStore, txnid, in0sn, in1sn,
 
   await platformState.add(
     txnid,
-    [ u.hex2buf(in0sn), u.hex2buf(in1sn) ],
-    [ u.hex2buf(out0cm), u.hex2buf(out1cm) ],
-    u.hex2buf(nextRoot)
+    [ in0sn, in1sn ],
+    [ out0cm, out1cm ],
+    nextRoot
   )
 }
 

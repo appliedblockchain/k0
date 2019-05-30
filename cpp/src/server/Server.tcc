@@ -282,6 +282,7 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::depositCommitmentProo
         r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
             commitment_vk, circuit.pb->primary_input(),
             proof);
+
     if (verified)
     {
         cout << "Commitment proof successfully verified." << endl;
@@ -291,9 +292,6 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::depositCommitmentProo
         cerr << "Commitment proof verification failed." << endl;
         throw JsonRpcException(-32010, "Commitment proof verification failed.");
     }
-
-    r1cs_ppzksnark_proof<alt_bn128_pp> prooof;
-    G2<alt_bn128_pp> g2{};
 
     Json::Value result;
     result["k"] = bits_to_hex(k_bits);
@@ -314,7 +312,7 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::merkleTreeAdditionPro
 {
 
     vector<bit_vector> path_vec(path.size());
-    for (int i = 0; i < path.size(); i++)
+    for (uint i = 0; i < path.size(); i++)
     {
         path_vec[i] = hex2bits(path[i].asString());
     }
@@ -373,6 +371,19 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::merkleTreeAdditionPro
 
 template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 Json::Value
+zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::pack256Bits(
+    const std::string& input
+)
+{
+    auto packed = pack<FieldT>(hex2bits(input));
+    Json::Value result;
+    result[0] = field_element_to_string(packed[0]);
+    result[1] = field_element_to_string(packed[1]);
+    return result;
+}
+
+template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+Json::Value
 zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepareTransfer(
     const std::string &prev_root_hex,
     const std::string &input_0_address_str,
@@ -406,12 +417,12 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepareTransfer(
     auto in_1_address = strtoul(input_1_address_str.c_str(), NULL, 10);
 
     vector<bit_vector> in_0_path_vec(input_0_path.size());
-    for (int i = 0; i < input_0_path.size(); i++)
+    for (uint i = 0; i < input_0_path.size(); i++)
     {
         in_0_path_vec[i] = hex2bits(input_0_path[i].asString());
     }
     vector<bit_vector> in_1_path_vec(input_1_path.size());
-    for (int i = 0; i < input_1_path.size(); i++)
+    for (uint i = 0; i < input_1_path.size(); i++)
     {
         in_1_path_vec[i] = hex2bits(input_1_path[i].asString());
     }
@@ -641,21 +652,26 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::status()
 }
 
 template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+std::string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::unpack256Bits(
+    const std::string& param01,
+    const std::string& param02
+) {
+    vector<FieldT> elements{FieldT(param01.c_str()), FieldT(param02.c_str())};
+    return bits2hex(unpack(elements));
+}
+
+template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 bool zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::verifyProof(
     const std::string &proof_type,
     const Json::Value &proof_json,
     const Json::Value &public_inputs_json)
 {
     vector<FieldT> public_inputs(public_inputs_json.size());
-    for (int i = 0; i < public_inputs_json.size(); i++)
+    for (uint i = 0; i < public_inputs_json.size(); i++)
     {
         public_inputs[i] = FieldT(public_inputs_json[i].asString().c_str());
     }
-    cout << "PROOF JSON" << endl;
-    cout << proof_json << endl;
     auto proof = json_conversion::json_to_proof_jacobian(proof_json);
-    cout << "PROOF RAW" << endl;
-    cout << proof << endl;
 
     r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp> vk;
     if (!strcmp(proof_type.c_str(), "commitment"))
@@ -682,6 +698,9 @@ bool zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::verifyProof(
     {
         throw JsonRpcException(-32602, "Invalid proof type");
     }
+
+
+    cout << "PRIMARY INPUT" << endl << public_inputs << endl;
     bool verified = r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
         vk,
         public_inputs,
