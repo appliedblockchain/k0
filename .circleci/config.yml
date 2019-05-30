@@ -128,8 +128,8 @@ jobs:
       - run:
           name: "Run Go tests"
           command: |
-            cd go/chaincode/cash
-            go test
+            cd go
+            VERIFIER_ENDPOINT=http://localhost:11400/ go test ./...
 
   fabric:
     machine:
