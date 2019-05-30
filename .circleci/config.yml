@@ -107,7 +107,7 @@ jobs:
           command: |
             docker run -d \
             -p 11400:11400 \
-            -v $PWD/go/chaincode/cash/testdata/:/tmp/k0keys/:ro \
+            -v $PWD/go/serverclient/testdata/:/tmp/k0keys/:ro \
             appliedblockchain/zktrading-server:$CIRCLE_BRANCH-$CIRCLE_SHA1 \
             6 \
             /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk \
