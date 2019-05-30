@@ -82,7 +82,6 @@ describe('Fabric workflow', function() {
         const data = await k0s[who].prepareDeposit(
           platformStates[who], secretStores[who], v
         )
-        console.log(data.commitmentProofJacobian)
         await secretStores[who].addNoteInfo(
           data.cm, data.a_pk, data.rho, data.r, v
         )
@@ -120,7 +119,6 @@ describe('Fabric workflow', function() {
     const in0addr = platformStates.alpha.indexOfCM(inputs[0].cm)
     const in1addr = platformStates.alpha.indexOfCM(inputs[1].cm)
 
-    console.log('indexOfCM', in0addr, in1addr)
     const out0 = {
       a_pk: publicKeys.gamma,
       rho: crypto.randomBytes(32),
@@ -182,7 +180,6 @@ describe('Fabric workflow', function() {
   })
 
   after(async function() {
-    console.log('shutting down')
     for (let i = 0; i < orgs.length; i = i + 1) {
       k0Fabrics[orgs[i]].off()
     }

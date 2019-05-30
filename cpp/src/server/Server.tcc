@@ -238,7 +238,6 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::depositCommitmentProo
     const std::string &r_str,
     const std::string &v_str)
 {
-    cout << "DEPOSITCOMMITMENTPROOF GOT V" << v_str << endl;
     bit_vector a_pk_bits = hex2bits(a_pk_str);
     bit_vector rho_bits = hex2bits(rho_str);
     bit_vector r_bits = hex2bits(r_str);
@@ -279,17 +278,12 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::depositCommitmentProo
             commitment_pk, circuit.pb->primary_input(),
             circuit.pb->auxiliary_input());
 
-    cout << "PROOF" << endl << proof << endl;
-
-    cout << "PRIMARY INPUT" << endl << circuit.pb->primary_input() << endl;
-
     bool verified =
         r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
             commitment_vk, circuit.pb->primary_input(),
             proof);
-    if (verified)
 
-        if (verified)
+    if (verified)
     {
         cout << "Commitment proof successfully verified." << endl;
     }
@@ -678,13 +672,7 @@ bool zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::verifyProof(
     {
         public_inputs[i] = FieldT(public_inputs_json[i].asString().c_str());
     }
-    cout << "PROOF JSON" << endl;
-    cout << proof_json << endl;
     auto proof = json_conversion::json_to_proof_jacobian(proof_json);
-    cout << "PROOF RAW" << endl;
-    cout << proof << endl;
-    cout << "PUBLIC INPUTS" << endl;
-    cout << public_inputs << endl;
 
     r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp> vk;
     if (!strcmp(proof_type.c_str(), "commitment"))

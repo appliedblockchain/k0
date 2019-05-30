@@ -74,10 +74,4 @@ func DepositCommitmentProof(
 	return DepositCommitmentProofResponse{
 		cm, k, res.Result.ProofAffine, res.Result.ProofJacobian,
 	}, nil
-	// result, err := util.HexToBytes32(res.Result)
-	// if err != nil {
-	// 	msg := "When trying to convert prf_addr hex to bytes: %s"
-	// 	return [32]byte{}, fmt.Errorf(msg, err.Error())
-	// }
-	// return result, nil
 }

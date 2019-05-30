@@ -24,7 +24,6 @@ async function sendTransaction(logger, client, channel, chaincodeId, peers,
         && proposalResponses[0].response.status === 200
         && proposalResponses[1].response
         && proposalResponses[1].response.status === 200)) {
-    console.dir(endorsementResults)
     console.error(JSON.stringify(endorsementResults))
     throw new Error('At least one endorsement failed')
   }
