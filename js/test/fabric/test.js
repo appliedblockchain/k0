@@ -15,7 +15,7 @@ const makeSecretStore = require('../../secret-store')
 const testUtil = require('../../test/util')
 const u = require('../../util')
 const expect = require('code').expect
-const initEventHandlers = require('./init-event-handlers')
+const initEventHandling = require('./init-event-handling')
 
 async function generateSecretStore(k0) {
   const privateKey = crypto.randomBytes(32)
@@ -57,7 +57,7 @@ describe('Fabric workflow', function() {
         config,
         process.env.CHAINCODE_ID || 'k0chaincode'
       )
-      initEventHandlers(platformStates[who], secretStores[who], k0Fabrics[who])
+      initEventHandling(platformStates[who], secretStores[who], k0Fabrics[who])
       k0Fabrics[who].startEventMonitoring()
     }
     await u.wait(5000)
