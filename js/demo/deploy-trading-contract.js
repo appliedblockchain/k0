@@ -1,12 +1,20 @@
+'use strict'
+
 const BN = require('bn.js')
+const assert = require('assert')
 const inquirer = require('inquirer')
 const u = require('../util')
-const ethUtil = require('../eth/util')
 const deployContract = require('./deploy-contract')
 
-async function deployTradingContract(web3, artefacts, secretStore,
-                                     ethPrivateKey, k0, carToken,
-                                     mvpptAddress) {
+async function deployTradingContract(
+  web3,
+  artefacts,
+  secretStore,
+  ethPrivateKey,
+  k0,
+  carToken,
+  mvpptAddress
+) {
   u.checkBuf(ethPrivateKey, 32)
   u.checkBuf(mvpptAddress, 20)
   const carIdInquiryResult = await inquirer.prompt([
@@ -23,7 +31,7 @@ async function deployTradingContract(web3, artefacts, secretStore,
   console.log(`  v:   ${v.toString()}`)
   console.log(`  cm:  ${u.buf2hex(cm)}`)
 
-  const cmPacked = await ethUtil.pack256Bits(cm)
+  const cmPacked = await u.pack256Bits(cm)
 
   const tradeContractAddress = await deployContract(
     web3,
@@ -48,7 +56,10 @@ async function deployTradingContract(web3, artefacts, secretStore,
     data: approvalTxData,
     gas: 1000000
   }
-  const tx = await web3.eth.accounts.signTransaction(txParams, u.buf2hex(ethPrivateKey))
+  const tx = await web3.eth.accounts.signTransaction(
+    txParams,
+    u.buf2hex(ethPrivateKey)
+  )
   const receipt = await web3.eth.sendSignedTransaction(tx.rawTransaction)
   assert(receipt.status === true)
 }

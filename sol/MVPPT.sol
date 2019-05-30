@@ -111,10 +111,11 @@ contract MVPPT {
             num_leaves++;
             emit Deposit(comm_cm, new_root);
         } else {
-            emit DepositFailure();
-            // revert();
+            revert("Deposit Failure, proof failed to verify");
         }
     }
+
+    event Debug(uint[2] snin0, uint[2]snin1,uint[2] cmout0, uint[2] cmout1, bytes dataout0, bytes dataout1, uint[2] newRoot, address callee_addre, uint[18] proof);
 
     function transfer(
         uint[2] memory sn_in_0,
@@ -175,8 +176,7 @@ contract MVPPT {
             emit Transfer(sn_in_0, sn_in_1, cm_out_0, cm_out_1, data_out_0, data_out_1, new_root,
                           callee_address);
         } else {
-            emit TransferFailure();
-            // revert();
+            revert("TransferFailure");
         }
     }
 

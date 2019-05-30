@@ -2,13 +2,11 @@
 
 const _ = require('lodash')
 const BN = require('bn.js')
-const bip39 = require('bip39')
 const crypto = require('crypto')
 const log4js = require('log4js')
 const { expect } = require('chai')
 const waitPort = require('wait-port')
 const jayson = require('jayson/promise')
-const hdkey = require('ethereumjs-wallet/hdkey')
 
 const u = require('../../util')
 const makeK0 = require('../../k0')
@@ -24,6 +22,7 @@ const signTransaction = require('../../eth/sign-transaction')
 
 const assert = require('assert')
 
+const k0Ports = [ 4000, 5000, 6000 ]
 const platformPorts = [ 4100, 5100, 6100 ]
 
 let web3
@@ -35,8 +34,10 @@ describe('Ethereum integration test replicating the K0 demo', function () {
   let artefacts
   let addresses // contract and user addresses, indexed by name
   let verifierAddresses
-  let dollarCoin // , carToken
+  let dollarCoin, carToken, mvppt
+  let tokenMaster, carManufacturer
 
+  const carId = 1
   const numInitialNotes = 2
 
   // close web3 websocket so the test can exit
@@ -61,9 +62,9 @@ describe('Ethereum integration test replicating the K0 demo', function () {
     while (!ready) {
       try {
         await Promise.all([
-          waitPort({ port: 4000 }), // k01
-          waitPort({ port: 5000 }), // k02
-          waitPort({ port: 6000 }), // k03
+          waitPort({ port: k0Ports[0] }),
+          waitPort({ port: k0Ports[1] }),
+          waitPort({ port: k0Ports[2] }),
           waitPort({ port: 8546 }), // parity
           waitPort({ port: platformPorts[0] }),
           waitPort({ port: platformPorts[1] }),
@@ -71,24 +72,9 @@ describe('Ethereum integration test replicating the K0 demo', function () {
         ])
 
         await Promise.all([
-          serverReady(jayson.client.http({ port: 4000 })),
-          serverReady(jayson.client.http({ port: 5000 })),
-          serverReady(jayson.client.http({ port: 6000 }))
-        ])
-
-        ready = true
-      } catch (err) {
-        process.stdout.write('.')
-        await u.wait(10000)
-      }
-    }
-
-    while (!ready) {
-      try {
-        await Promise.all([
-          serverReady(jayson.client.http({ port: 4000 })),
-          serverReady(jayson.client.http({ port: 5000 })),
-          serverReady(jayson.client.http({ port: 6000 }))
+          serverReady(jayson.client.http({ port: k0Ports[0] })),
+          serverReady(jayson.client.http({ port: k0Ports[1] })),
+          serverReady(jayson.client.http({ port: k0Ports[2] }))
         ])
 
         ready = true
@@ -100,10 +86,10 @@ describe('Ethereum integration test replicating the K0 demo', function () {
 
     web3 = testUtil.initWeb3()
     // DollarCoin minter
-    const tokenMaster = web3.eth.accounts.create()
+    tokenMaster = web3.eth.accounts.create()
 
     // CarToken minter
-    // const carManufacturer = web3.eth.accounts.create()
+    carManufacturer = web3.eth.accounts.create()
 
     // contract artefacts
     artefacts = await compileContracts()
@@ -116,8 +102,14 @@ describe('Ethereum integration test replicating the K0 demo', function () {
       tokenMaster
     )
 
+
     // ERC-721 token representing cars
-    // carToken = await testUtil.deployContract(web3, artefacts.CarToken, [], carManufacturer)
+    carToken = await testUtil.deployContract(
+      web3,
+      artefacts.CarToken,
+      [],
+      carManufacturer
+    )
 
     verifierAddresses = await Promise.all(
       [
@@ -131,12 +123,8 @@ describe('Ethereum integration test replicating the K0 demo', function () {
       })
     )
     ;[ alice, bob, carol ] = _.times(3, () => {
-      const mnemonic = bip39.generateMnemonic()
-      const seed = bip39.mnemonicToSeed(mnemonic)
-      const root = hdkey.fromMasterSeed(seed)
-      const path = "m/44'/60'/0'/0/0" // eslint-disable-line
-      const wallet = root.derivePath(path).getWallet()
-      return { mnemonic, wallet }
+      const account = web3.eth.accounts.create()
+      return { account }
     })
 
     alice.platformState = await makePlatformState(platformPorts[0])
@@ -146,7 +134,7 @@ describe('Ethereum integration test replicating the K0 demo', function () {
     const initialRoot = await alice.platformState.merkleTreeRoot()
 
     // Deploying coin contract
-    const mvppt = await testUtil.deployContract(web3, artefacts.MVPPT, [
+    mvppt = await testUtil.deployContract(web3, artefacts.MVPPT, [
       dollarCoin._address,
       ...verifierAddresses,
       await testUtil.pack256Bits(u.buf2hex(initialRoot))
@@ -162,57 +150,57 @@ describe('Ethereum integration test replicating the K0 demo', function () {
       web3,
       dollarCoin._address,
       dollarCoin.methods
-        .mint(tokenMaster.address, '1000000000000000')
+        .mint(
+          tokenMaster.address,
+          '1000000000000000000000000000000000000000'
+        )
         .encodeABI(),
-      5000000,
+      50000000,
       tokenMaster
     )
 
-    // Money to the people
     await sendTransaction(
       web3,
       dollarCoin._address,
       dollarCoin.methods
         .approve(
           moneyShower._address,
-          web3.utils.toWei(numInitialNotes.toString())
+          web3.utils.toWei((numInitialNotes * 3000000).toString())
         )
         .encodeABI(),
-      5000000,
+      50000000,
       tokenMaster
     )
+
 
     await sendTransaction(
       web3,
       moneyShower._address,
-      moneyShower.methods
-        .transfer(
-          dollarCoin._address,
-          _.map([ alice, bob ], x => x.wallet.getAddressString()),
-          _.times(2, () => '1000000000000')
-        )
-        .encodeABI(),
+      moneyShower.methods.transfer(
+        dollarCoin._address,
+        _.map([ alice, bob ], x => x.account.address),
+        _.times(2, () => '1000000000000')
+      ).encodeABI(),
       5000000,
       tokenMaster
     )
 
-    // Make a car for Alice
-    // const carId = 1
-    // await sendTransaction(
-    //   web3,
-    //   carToken._address,
-    //   carToken.methods.mint(alice.wallet.getAddressString(), carId).encodeABI(),
-    //   5000000,
-    //   carManufacturer
-    // )
+    // Make a car for carol
+    await sendTransaction(
+      web3,
+      carToken._address,
+      carToken.methods.mint(carol.account.address, carId).encodeABI(),
+      5000000,
+      carManufacturer
+    )
 
     addresses = {
       DollarCoin: dollarCoin._address,
-      // CarToken: carToken._address,
+      CarToken: carToken._address,
       MVPPT: mvppt._address,
-      alice: alice.wallet.getAddressString(),
-      bob: bob.wallet.getAddressString(),
-      carol: carol.wallet.getAddressString()
+      alice: alice.account.address,
+      bob: alice.account.address,
+      carol: alice.account.address
     }
 
     alice.k0Eth = await makeEthPlatform(web3, u.hex2buf(addresses.MVPPT))
@@ -224,17 +212,16 @@ describe('Ethereum integration test replicating the K0 demo', function () {
     bob.secretKey = crypto.randomBytes(32)
     carol.secretKey = crypto.randomBytes(32)
 
-    alice.k0 = await makeK0(4000)
-    bob.k0 = await makeK0(4000)
-    carol.k0 = await makeK0(4000)
+    alice.k0 = await makeK0(k0Ports[0])
+    bob.k0 = await makeK0(k0Ports[1])
+    carol.k0 = await makeK0(k0Ports[2])
+
     alice.publicKey = await alice.k0.prfAddr(alice.secretKey)
     bob.publicKey = await bob.k0.prfAddr(bob.secretKey)
     carol.publicKey = await carol.k0.prfAddr(carol.secretKey)
 
     alice.secretStore = makeSecretStore(alice.secretKey, alice.publicKey)
-
     bob.secretStore = makeSecretStore(bob.secretKey, bob.publicKey)
-
     carol.secretStore = makeSecretStore(carol.secretKey, carol.publicKey)
 
     alice.emitter = initEventHandlers(
@@ -274,10 +261,7 @@ describe('Ethereum integration test replicating the K0 demo', function () {
 
   // Consume  $coin in exchange for CMs
   async function approveAndDeposit(
-    wallet,
-    secretStore,
-    k0,
-    platformState,
+    user,
     values
   ) {
     // aprove an amounts to mvptt
@@ -292,20 +276,29 @@ describe('Ethereum integration test replicating the K0 demo', function () {
           .encodeABI()
       ),
       5000000,
-      wallet.getPrivateKey()
+      u.hex2buf(user.account.privateKey)
     )
     await web3.eth.sendSignedTransaction(u.buf2hex(approveTx))
 
     for (let i = 0; i < values.length; i++) {
       const v = values[i]
 
-      const data = await alice.k0.prepareDeposit(platformState, secretStore, v)
+      const data = await alice.k0.prepareDeposit(
+        user.platformState,
+        user.secretStore,
+        v
+      )
 
-      await secretStore.addNoteInfo(data.cm, data.a_pk, data.rho, data.r, v)
+      await user.secretStore.addNoteInfo(
+        data.cm,
+        data.a_pk,
+        data.rho,
+        data.r,
+        v)
 
-      const waitForDeposit = awaitEvent(alice.emitter, 'depositProcessed')
-      const depositTx = await alice.k0Eth.deposit(
-        wallet.getPrivateKey(),
+      const waitForDeposit = awaitEvent(user.emitter, 'depositProcessed')
+      const depositTx = await user.k0Eth.deposit(
+        u.hex2buf(user.account.privateKey),
         v,
         data.k,
         data.cm,
@@ -343,10 +336,7 @@ describe('Ethereum integration test replicating the K0 demo', function () {
     )
 
     await approveAndDeposit(
-      alice.wallet,
-      alice.secretStore,
-      alice.k0,
-      alice.platformState,
+      alice,
       values
     )
     await checkRootsConsistency()
@@ -355,6 +345,14 @@ describe('Ethereum integration test replicating the K0 demo', function () {
     expect(await alice.platformState.currentState().cmList.length).to.equal(
       numInitialNotes
     )
+
+    await u.wait(1000)
+
+    await approveAndDeposit(
+      bob,
+      values
+    )
+    await checkRootsConsistency()
   })
 
   async function getInputNote(platformState, secretStore, index) {
@@ -403,8 +401,9 @@ describe('Ethereum integration test replicating the K0 demo', function () {
       r: crypto.randomBytes(48)
     }
 
-    const callee = u.hex2buf(u.ZERO_ADDRESS) // zero address since we are not trading
-    // does not throw
+    // zero address since we are not trading
+    const callee = u.hex2buf(u.ZERO_ADDRESS)
+
     const transferData = await alice.k0.prepareTransfer(
       alice.platformState,
       alice.secretStore,
@@ -425,6 +424,7 @@ describe('Ethereum integration test replicating the K0 demo', function () {
       out0.r,
       out0.v
     )
+
     alice.secretStore.addNoteInfo(
       transferData.output_1_cm,
       out1.a_pk,
@@ -471,6 +471,150 @@ describe('Ethereum integration test replicating the K0 demo', function () {
 
     await transferForDeposit
 
-    expect(bob.secretStore.getAvailableNotes().length).to.equal(1)
+    expect(
+      bob.secretStore.getAvailableNotes().length
+    ).to.equal(numInitialNotes + 1)
+  })
+
+  it('allows carol to sell her car to bob', async () => {
+    // Deploying The trading contract
+    const bobNotes = bob.secretStore.getAvailableNotes()
+    const [ in0, in1 ] = bobNotes
+    const in0V = bobNotes[0].v
+    const in1V = bobNotes[1].v
+
+    // average between the bigest one and the sum
+    const carPrice = in0V.gt(in1V) ?
+      in0V.add(in0V.add(in1V)).div(new BN(2)) :
+      in1V.add(in1V.add(in0V)).div(new BN(2))
+
+    const change = in0V.add(in1V).sub(carPrice)
+
+    const { rho, r, cm } = await carol.k0.generatePaymentData(
+      carol.secretStore,
+      carPrice
+    )
+
+    const cmPacked = await u.pack256Bits(cm)
+
+    const tradeContract = await testUtil.deployContract(
+      web3,
+      artefacts.HiddenPriceCarTrade,
+      [
+        carToken._address,
+        mvppt._address,
+        (new BN(carId)).toString(),
+        u.buf2hex(cmPacked[0]),
+        u.buf2hex(cmPacked[1])
+      ],
+      carol.account
+    )
+
+    // Aprove the car to the trading contract
+    const approvalTxData = carToken.methods.approve(
+      tradeContract._address, carId.toString()
+    ).encodeABI()
+
+    const txData = await carol.account.signTransaction({
+      to: carToken._address,
+      data: approvalTxData,
+      gas: 1000000
+    })
+
+    await web3.eth.sendSignedTransaction(txData.rawTransaction)
+
+    const out0 = {
+      a_pk: carol.secretStore.getPublicKey(),
+      v: carPrice,
+      rho, // Generated payment data in step1
+      r // Generated payment data in step1
+    }
+    const out1 = { // Change back to bob
+      a_pk: bob.secretStore.getPublicKey(),
+      v: change,
+      rho: crypto.randomBytes(32),
+      r: crypto.randomBytes(48)
+    }
+
+    const in0Id = bob.platformState.indexOfCM(in0.cm)
+    const in1Id = bob.platformState.indexOfCM(in1.cm)
+
+    // Prepare the transfer
+    const transferData = await bob.k0.prepareTransfer(
+      bob.platformState,
+      bob.secretStore,
+      in0Id, // cms index in the Merkle Tree
+      in1Id,
+      out0,
+      out1,
+      u.hex2buf(tradeContract._address)
+    )
+
+    // execute the transfer
+    bob.secretStore.addSNToNote(in0.cm, transferData.input_0_sn)
+    bob.secretStore.addSNToNote(in1.cm, transferData.input_1_sn)
+    bob.secretStore.addNoteInfo(
+      transferData.output_0_cm,
+      out0.a_pk,
+      out0.rho,
+      out0.r,
+      out0.v
+    )
+
+    bob.secretStore.addNoteInfo(
+      transferData.output_1_cm,
+      out1.a_pk,
+      out1.rho,
+      out1.r,
+      out1.v
+    )
+
+    const rootBefore = await bob.platformState.merkleTreeRoot()
+    const labelBefore = await bob.platformState.currentStateLabel()
+    const tmpLabel =
+      'temporary_mt_addition_' + crypto.randomBytes(16).toString('hex')
+    await bob.platformState.add(
+      tmpLabel,
+      [],
+      [ transferData.output_0_cm, transferData.output_1_cm ]
+    )
+    const newRoot = await bob.platformState.merkleTreeRoot()
+    await bob.platformState.rollbackTo(labelBefore)
+
+    const finalRoot = await bob.platformState.merkleTreeRoot()
+    assert(finalRoot.equals(rootBefore))
+
+    const out_0_data = makeData(out0.a_pk, out0.rho, out0.r, out0.v)
+    const out_1_data = makeData(out1.a_pk, out1.rho, out1.r, out1.v)
+
+    const ethParams = [
+      u.hex2buf(bob.account.privateKey),
+      transferData.input_0_sn,
+      transferData.input_1_sn,
+      transferData.output_0_cm,
+      transferData.output_1_cm,
+      out_0_data,
+      out_1_data,
+      newRoot,
+      u.hex2buf(tradeContract._address),
+      transferData.proofAffine
+    ]
+
+    let carOwnwer = await carToken.methods.ownerOf(carId).call()
+
+    const tx = await bob.k0Eth.transfer(...ethParams)
+
+    const transferForDeposit = awaitEvent(bob.emitter, 'transferProcessed')
+    const receipt = await web3.eth.sendSignedTransaction(u.buf2hex(tx))
+
+    expect(receipt.status).to.equal(true)
+
+    await transferForDeposit
+    await u.wait(1000)
+
+    // Test that the ownership got transfered
+    carOwnwer = await carToken.methods.ownerOf(carId).call()
+
+    expect(carOwnwer).to.equal(bob.account.address)
   })
 })

@@ -107,7 +107,11 @@ async function deployContract(web3, artefacts, params = [], account) {
   return new web3.eth.Contract(artefacts.abi, contractAddress)
 }
 
-async function deployStandardContract(web3, contractName, account = null, params = []) {
+async function deployStandardContract(web3,
+  contractName,
+  account = null,
+  params = []
+) {
   const artefacts = await compileContract(contractName)
   const contractAddress = await deploy(
     web3,
