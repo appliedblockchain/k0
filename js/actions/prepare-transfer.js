@@ -12,8 +12,6 @@ async function prepareTransfer(
   out1data,
   calleeAddress
 ) {
-
-  console.log({ in0idx, in1idx, out0data, out1data, calleeAddress })
   u.checkBN(in0idx)
   u.checkBN(in1idx)
 

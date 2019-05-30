@@ -2,13 +2,11 @@
 
 const _ = require('lodash')
 const BN = require('bn.js')
-const bip39 = require('bip39')
 const crypto = require('crypto')
 const log4js = require('log4js')
 const { expect } = require('chai')
 const waitPort = require('wait-port')
 const jayson = require('jayson/promise')
-const hdkey = require('ethereumjs-wallet/hdkey')
 
 const u = require('../../util')
 const makeK0 = require('../../k0')
@@ -125,16 +123,8 @@ describe('Ethereum integration test replicating the K0 demo', function () {
       })
     )
     ;[ alice, bob, carol ] = _.times(3, () => {
-      const mnemonic = bip39.generateMnemonic()
-      const seed = bip39.mnemonicToSeed(mnemonic)
-      const root = hdkey.fromMasterSeed(seed)
-      const path = "m/44'/60'/0'/0/0" // eslint-disable-line
-      const wallet = root.derivePath(path).getWallet()
       const account = web3.eth.accounts.create()
-
-
-
-      return { mnemonic, wallet, account }
+      return { account }
     })
 
     alice.platformState = await makePlatformState(platformPorts[0])
@@ -188,7 +178,7 @@ describe('Ethereum integration test replicating the K0 demo', function () {
       moneyShower._address,
       moneyShower.methods.transfer(
         dollarCoin._address,
-        _.map([ alice, bob ], x => x.wallet.getAddressString()),
+        _.map([ alice, bob ], x => x.account.address),
         _.times(2, () => '1000000000000')
       ).encodeABI(),
       5000000,
@@ -208,9 +198,9 @@ describe('Ethereum integration test replicating the K0 demo', function () {
       DollarCoin: dollarCoin._address,
       CarToken: carToken._address,
       MVPPT: mvppt._address,
-      alice: alice.wallet.getAddressString(),
-      bob: bob.wallet.getAddressString(),
-      carol: carol.wallet.getAddressString()
+      alice: alice.account.address,
+      bob: alice.account.address,
+      carol: alice.account.address
     }
 
     alice.k0Eth = await makeEthPlatform(web3, u.hex2buf(addresses.MVPPT))
@@ -286,7 +276,7 @@ describe('Ethereum integration test replicating the K0 demo', function () {
           .encodeABI()
       ),
       5000000,
-      user.wallet.getPrivateKey()
+      u.hex2buf(user.account.privateKey)
     )
     await web3.eth.sendSignedTransaction(u.buf2hex(approveTx))
 
@@ -308,7 +298,7 @@ describe('Ethereum integration test replicating the K0 demo', function () {
 
       const waitForDeposit = awaitEvent(user.emitter, 'depositProcessed')
       const depositTx = await user.k0Eth.deposit(
-        user.wallet.getPrivateKey(),
+        u.hex2buf(user.account.privateKey),
         v,
         data.k,
         data.cm,

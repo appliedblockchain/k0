@@ -176,8 +176,7 @@ contract MVPPT {
             emit Transfer(sn_in_0, sn_in_1, cm_out_0, cm_out_1, data_out_0, data_out_1, new_root,
                           callee_address);
         } else {
-            // emit TransferFailure();
-            // revert("TransferFailure");
+            revert("TransferFailure");
         }
     }
 
