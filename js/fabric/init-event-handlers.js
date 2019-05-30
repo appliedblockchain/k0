@@ -25,7 +25,7 @@ function initEventHandlers(channelEventHub, chaincodeId, eventEmitter) {
         item.payload.slice(32)
       )
     } else if (item.type === 'Transfer') {
-      u.checkBuf(item.payload, 480)
+      u.checkBuf(item.payload, 512)
       eventEmitter.emit(
         'transfer',
         item.txnid,
@@ -34,7 +34,8 @@ function initEventHandlers(channelEventHub, chaincodeId, eventEmitter) {
         item.payload.slice(64,96),
         item.payload.slice(96,128),
         item.payload.slice(128,304),
-        item.payload.slice(304)
+        item.payload.slice(304,480),
+        item.payload.slice(480)
       )
     } else {
       throw new Error(`Don't know what to do with event of type ${item.type}`)
