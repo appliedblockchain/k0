@@ -25,6 +25,16 @@ func VariableToFixed48(input []byte) ([48]byte, error) {
 	return result, nil
 }
 
+func VariableToFixed176(input []byte) ([176]byte, error) {
+	if len(input) != 176 {
+		msg := "Byte array is of length %d, expected 176"
+		return [176]byte{}, fmt.Errorf(msg, len(input))
+	}
+	var result [176]byte
+	copy(result[:], input[:176])
+	return result, nil
+}
+
 func VariableToFixed8(input []byte) ([8]byte, error) {
 	if len(input) != 8 {
 		msg := "Byte array is of length %d, expected 8"
@@ -43,4 +53,13 @@ func UintToBytes8(input uint64) ([8]byte, error) {
 
 func BytesToUint8(input [8]byte) uint64 {
 	return uint64(binary.BigEndian.Uint64(input[:]))
+}
+
+// Copied from https://stackoverflow.com/a/40678026
+func ConcatByteSlices(slices [][]byte) []byte {
+	var tmp []byte
+	for _, s := range slices {
+		tmp = append(tmp, s[:]...)
+	}
+	return tmp
 }

@@ -16,13 +16,11 @@ function initEventHandlers(mvppt, eventEmitter) {
     processing = true
     var item = queue.shift()
     if (item.blockNumber < lastBlockNumber) {
-      console.log(item)
       throw new Error(`Received event out of order (blockNumber: ${item.blockNumber}, last: ${lastBlockNumber})`)
     } else if (item.blockNumber > lastBlockNumber) {
       lastTransactionIndex = 0
     }
     if (item.transactionIndex < lastTransactionIndex) {
-      console.log(item)
       throw new Error(`Received event out of order (transactionIndex: ${item.transactionIndex}, last: ${lastTransactionIndex})`)
     }
     if (item.event === 'Deposit') {
