@@ -36,7 +36,6 @@ func (t *K0Chaincode) transfer(
 		data_out_1[:],
 	})
 	err = stub.SetEvent("Transfer", eventVals)
-	logger.Infof("slice length %d", len(eventVals))
 	if err != nil {
 		return shim.Error(err.Error())
 	}

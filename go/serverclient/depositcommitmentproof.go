@@ -50,7 +50,6 @@ func DepositCommitmentProof(
 		msg := "Error in depositCommitmentProof JSNORPC call: %s"
 		return DepositCommitmentProofResponse{}, fmt.Errorf(msg, err.Error())
 	}
-	println(string(body))
 	res := depositCommitmentProofJsonRpcResponse{}
 	json.Unmarshal(body, &res)
 	if err != nil {
@@ -58,7 +57,6 @@ func DepositCommitmentProof(
 		return DepositCommitmentProofResponse{},
 			fmt.Errorf(msg, err.Error())
 	}
-	fmt.Printf("%+v", res)
 	cm, err := util.HexToBytes32(res.Result.CM)
 	if err != nil {
 		msg := "When trying to convert cm hex to bytes: %s"

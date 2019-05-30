@@ -657,7 +657,6 @@ std::string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::unpack256
     const std::string& param02
 ) {
     vector<FieldT> elements{FieldT(param01.c_str()), FieldT(param02.c_str())};
-    std::cout << bits2hex(unpack(elements)) << endl;
     return bits2hex(unpack(elements));
 }
 
