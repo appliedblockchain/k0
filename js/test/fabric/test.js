@@ -69,8 +69,8 @@ describe('Fabric workflow', function() {
     for (let i = 0; i < orgs.length; i = i + 1) {
       expect(secretStores[orgs[i]].getAvailableNotes().length).to.equal(0)
     }
-    const numInitialHodlers = 1
-    const numInitialNotesPerHodler = 2
+    const numInitialHodlers = 2
+    const numInitialNotesPerHodler = 3
     for (let i = 0; i < numInitialHodlers; i = i + 1) {
       const who = orgs[i]
       const values = _.times(numInitialNotesPerHodler, () => {
