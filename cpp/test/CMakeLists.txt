@@ -3,6 +3,7 @@ add_executable(
 
         bits_and_numbers.cpp
         comms.cpp
+        encryption.cpp
         hashes.cpp
         json.cpp
         lifecycle.cpp
@@ -21,6 +22,7 @@ target_link_libraries(
         snark
         zktrade
         jsoncpp
+        sodium
         ${GTEST_LDFLAGS}
 )
 
