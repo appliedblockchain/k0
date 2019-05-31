@@ -34,7 +34,6 @@ function makeEventHub(platformState, secretStore, platform) {
       throw new Error(`Don't know what to do with event of type ${item.type}`)
     }
 
-    // await u.wait(100)
     processing = false
     if (queue.length === 0) {
       eh.emit('queueEmpty')
