@@ -67,9 +67,14 @@ describe('Fabric workflow', function() {
       k0Fabrics[who].startEventMonitoring()
     }
 
+    // Wait for the event queue to initialise
     await u.wait(2000)
 
-    // if not all event queues are empty
+    // TODO The following is still a bit fragile. A better way would be to wait
+    // until the platform state Merkle tree root matches that of the actual
+    // platform (once the chaincode provides functionality to query the root).
+
+    // If not all event queues are empty
     if (!orgs.map(who => events[who].queueEmpty()).reduce((a,b) => a && b)) {
       // wait for all event queues to become empty
       await Promise.all(orgs.map(who => {
