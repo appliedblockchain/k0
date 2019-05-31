@@ -296,7 +296,7 @@ describe('Ethereum integration test replicating the K0 demo', function () {
         data.r,
         v)
 
-      const waitForDeposit = awaitEvent(user.emitter, 'depositProcessed')
+      const waitForDeposit = testUtil.awaitEvent(user.emitter, 'depositProcessed')
       const depositTx = await user.k0Eth.deposit(
         u.hex2buf(user.account.privateKey),
         v,
@@ -311,20 +311,6 @@ describe('Ethereum integration test replicating the K0 demo', function () {
 
       await waitForDeposit
     }
-  }
-
-  function awaitEvent(emitter, eventName) {
-    return new Promise((accept, reject) => {
-      const timeout = setTimeout(() => {
-        reject('Event was not emitted within 10 second')
-      }, 10000)
-      emitter.once(eventName, (event) =>{
-        accept(event)
-        clearTimeout(timeout)
-
-      })
-
-    })
   }
 
   let values
@@ -465,7 +451,7 @@ describe('Ethereum integration test replicating the K0 demo', function () {
     ]
     const tx = await alice.k0Eth.transfer(...ethParams)
 
-    const transferForDeposit = awaitEvent(bob.emitter, 'transferProcessed')
+    const transferForDeposit = testUtil.awaitEvent(bob.emitter, 'transferProcessed')
     const receipt = await web3.eth.sendSignedTransaction(u.buf2hex(tx))
     expect(receipt.status).to.equal(true)
 
@@ -604,7 +590,7 @@ describe('Ethereum integration test replicating the K0 demo', function () {
 
     const tx = await bob.k0Eth.transfer(...ethParams)
 
-    const transferForDeposit = awaitEvent(bob.emitter, 'transferProcessed')
+    const transferForDeposit = testUtil.awaitEvent(bob.emitter, 'transferProcessed')
     const receipt = await web3.eth.sendSignedTransaction(u.buf2hex(tx))
 
     expect(receipt.status).to.equal(true)
