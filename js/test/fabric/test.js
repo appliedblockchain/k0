@@ -12,10 +12,10 @@ const makeFabricPlatform = require('../../fabric')
 const makeK0 = require('../../k0')
 const makePlatformState = require('../../platform-state')
 const makeSecretStore = require('../../secret-store')
-const testUtil = require('../../test/util')
+const testUtil = require('../util')
 const u = require('../../util')
 const expect = require('code').expect
-const initEventHandlers = require('./init-event-handlers')
+const makeEventHub = require('./event-hub')
 
 async function generateSecretStore(k0) {
   const privateKey = crypto.randomBytes(32)
@@ -37,6 +37,8 @@ describe('Fabric workflow', function() {
   const platformStates = {}
   const secretStores = {}
   const k0Fabrics = {}
+  // event handling
+  const events = {}
   const publicKeys = {}
   const orgs = [ 'alpha', 'beta', 'gamma' ]
   let logger
@@ -57,11 +59,28 @@ describe('Fabric workflow', function() {
         config,
         process.env.CHAINCODE_ID || 'k0chaincode'
       )
-      initEventHandlers(platformStates[who], secretStores[who], k0Fabrics[who])
+      events[who] = makeEventHub(
+        platformStates[who],
+        secretStores[who],
+        k0Fabrics[who]
+      )
       k0Fabrics[who].startEventMonitoring()
     }
-    await u.wait(5000)
-    // TODO instead: wait until Fabric Merkle tree root equals platform state Merkle root
+
+    // Wait for the event queue to initialise
+    await u.wait(2000)
+
+    // TODO The following is still a bit fragile. A better way would be to wait
+    // until the platform state Merkle tree root matches that of the actual
+    // platform (once the chaincode provides functionality to query the root).
+
+    // If not all event queues are empty
+    if (!orgs.map(who => events[who].queueEmpty()).reduce((a,b) => a && b)) {
+      // wait for all event queues to become empty
+      await Promise.all(orgs.map(who => {
+        return testUtil.awaitEvent(events[who], 'queueEmpty', 100)
+      }))
+    }
   })
 
   it('Mint', async function() {
@@ -85,6 +104,11 @@ describe('Fabric workflow', function() {
         await secretStores[who].addNoteInfo(
           data.cm, data.a_pk, data.rho, data.r, v
         )
+        const mintProcessedPromise = testUtil.awaitEvent(
+          events[who],
+          'mintProcessed',
+          100
+        )
         const depositTx = await k0Fabrics[who].mint(
           data.k,
           v,
@@ -93,7 +117,7 @@ describe('Fabric workflow', function() {
           data.commitmentProofJacobian,
           data.additionProofJacobian
         )
-        await u.wait(2000)
+        await mintProcessedPromise
       }
     }
 

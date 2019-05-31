@@ -34,6 +34,7 @@ func (t *K0Chaincode) transfer(
 		cm_out_1[:],
 		data_out_0[:],
 		data_out_1[:],
+		newRoot[:],
 	})
 	err = stub.SetEvent("Transfer", eventVals)
 	if err != nil {
