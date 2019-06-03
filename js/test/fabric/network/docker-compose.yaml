@@ -201,3 +201,55 @@ services:
       - ./artefacts:/artefacts
       - ./crypto-config/peerOrganizations/gamma.com/peers/peer0.gamma.com/tls/ca.crt:/tls/ca.crt:ro
       - ./crypto-config/peerOrganizations/gamma.com/users/Admin@gamma.com/msp:/msp:ro
+
+  peer0.bank.com:
+    << : *peer
+    container_name: peer0.bank.com
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_PEER=debug
+      - CORE_CHAINCODE_LOGGING_LEVEL=debug
+      - CORE_PEER_MSPCONFIGPATH=/msp
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_VM_DOCKER_ATTACHSTDOUT=true
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=network_default
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=user
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=foo
+
+      - CORE_PEER_ID=peer0.bank.com
+      - CORE_PEER_LOCALMSPID=BankCoMSP
+      - CORE_PEER_ADDRESS=peer0.bank.com:7051
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=bankcouch:5984
+    ports:
+      - 14751:7051
+      - 14753:7053
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./crypto-config/peerOrganizations/bank.com/peers/peer0.bank.com/msp:/msp:ro
+        - ./crypto-config/peerOrganizations/bank.com/peers/peer0.bank.com/tls:/etc/hyperledger/fabric/tls:ro
+        - ./crypto-config/peerOrganizations/bank.com/users:/etc/hyperledger/msp/users:ro
+    depends_on:
+      - orderer.orderer.org
+      - bankcouch
+
+  bankcouch:
+    << : *couch
+    container_name: bankcouch
+    ports:
+      - 14584:5984
+
+  banktools:
+    container_name: banktools
+    image: hyperledger/fabric-tools:1.2.0
+    environment:
+      - CORE_PEER_MSPCONFIGPATH=/msp
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_ROOTCERT_FILE=/tls/ca.crt
+      - CORE_PEER_ADDRESS=peer0.bank.com:7051
+      - CORE_PEER_LOCALMSPID=BankCoMSP
+    volumes:
+      - ./crypto-config/ordererOrganizations/orderer.org/orderers/orderer.orderer.org/tls/ca.crt:/orderer/ca.crt:ro
+      - ./artefacts:/artefacts
+      - ./crypto-config/peerOrganizations/bank.com/peers/peer0.bank.com/tls/ca.crt:/tls/ca.crt:ro
+      - ./crypto-config/peerOrganizations/bank.com/users/Admin@bank.com/msp:/msp:ro
