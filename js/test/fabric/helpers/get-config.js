@@ -12,7 +12,6 @@ const orgs = [ 'alpha', 'beta', 'gamma' ]
 const usernames = [ 'Admin', 'User1' ]
 
 function getConfig(org, username, devMode = false) {
-  console.log('dev mode', devMode)
   const orgIndex = orgs.indexOf(org)
   if (orgIndex === -1) {
     throw new Error(`Invalid org: ${org}`)
