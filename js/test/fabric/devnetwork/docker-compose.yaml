@@ -1,0 +1,22 @@
+version: '3.7'
+
+services:
+
+  orderer.orderer.org:
+    container_name: orderer.orderer.org
+    image: hyperledger/fabric-orderer:1.2.0
+    environment:
+      - ORDERER_GENERAL_LOGLEVEL=debug
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/orderer_genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererOrgMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/msp
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
+    command: orderer
+    ports:
+      - 7050:7050
+    volumes:
+      - ./artefacts/orderer_genesis.block:/orderer_genesis.block:ro
+      - ./crypto-config/ordererOrganizations/orderer.org/orderers/orderer.orderer.org/msp:/msp:ro
+      - ./crypto-config/ordererOrganizations/orderer.org/orderers/orderer.orderer.org/tls:/etc/hyperledger/fabric/tls:ro

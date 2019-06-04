@@ -46,7 +46,7 @@ describe('Fabric workflow', function () {
     logger.level = process.env.LOG_LEVEL || 'info'
     for (let i = 0; i < orgs.length; i = i + 1) {
       const who = orgs[i]
-      const config = getConfig(who, 'User1')
+      const config = getConfig(who, 'User1', process.env.DEV_MODE === 'true')
       platformStates[who] = await makePlatformState(config.mtServerPort)
       await platformStates[who].reset()
       k0s[who] = await makeK0(config.proverPort)

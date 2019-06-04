@@ -13,14 +13,15 @@ process.on('unhandledRejection', error => {
 })
 
 async function run() {
-  const config = getConfig('bank', 'Admin')
-  const alphaAdmin = await makeClient(config)
+  const config = getConfig('bank', 'Admin', process.env.DEV_MODE === 'true')
+
+  const bankAdmin = await makeClient(config)
   const bankPlatformState = await makePlatformState(config.mtServerPort)
 
   const initialRoot = await bankPlatformState.merkleTreeRoot()
 
   await instantiateOrUpgrade(
-    alphaAdmin,
+    bankAdmin,
     endorsementPolicy,
     process.env.CHAINCODE_ID || 'k0chaincode',
     process.env.CHAINCODE_VERSION || '1',

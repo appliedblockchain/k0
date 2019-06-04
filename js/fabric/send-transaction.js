@@ -6,7 +6,8 @@ const waitForTx = require('./wait-for-tx')
 async function sendTransaction(logger, client, channel, chaincodeId, peers,
   queryPeer, fcn, params) {
   const txId = client.newTransactionID()
-  const targets = _.sampleSize(peers, 2)
+  const numTargets = 2
+  const targets = _.sampleSize(peers, numTargets)
   logger.debug([
     'Sending proposal to ',
     targets.map(t => t._options['grpc.default_authority']).join(', '),
@@ -22,12 +23,25 @@ async function sendTransaction(logger, client, channel, chaincodeId, peers,
   })
 
   const [ proposalResponses, proposal, header ] = endorsementResults
+<<<<<<< HEAD
   if (!(proposalResponses[0].response
         && proposalResponses[0].response.status === 200
         && proposalResponses[1].response
         && proposalResponses[1].response.status === 200)) {
     console.error(JSON.stringify(endorsementResults))
     console.inspect(proposalResponses[0])
+=======
+  let allEndorsed = true
+  for (let i = 0; i < proposalResponses.length; i = i + 1) {
+    const r = proposalResponses[i]
+    if (!(r.response && r.response.status === 200)) {
+      allEndorsed = false
+      break
+    }
+  }
+  if (!allEndorsed) {
+    proposalResponses.forEach((r, i) => console.log(i, r))
+>>>>>>> 3d9eecec85fcc38828f2e76bae58f39d66bba710
     throw new Error('At least one endorsement failed')
   }
 
