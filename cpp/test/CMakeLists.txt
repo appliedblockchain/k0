@@ -6,6 +6,7 @@ add_executable(
         encryption.cpp
         hashes.cpp
         json.cpp
+        ka.cpp
         lifecycle.cpp
         main.cpp
         merkle_tree.cpp

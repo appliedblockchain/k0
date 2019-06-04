@@ -8,12 +8,12 @@ using namespace std;
 using namespace libff;
 using namespace zktrade;
 
+
 TEST(Encryption, Encryption) {
 
     ASSERT_FALSE(sodium_init());
 
     auto input = random_bits(256);
-
     vector<unsigned char> message = bits_to_bytes(input);
     unsigned char* message_ptr = &message[0];
     auto message_len = 32;

@@ -632,7 +632,7 @@ string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prf_addr(
     const string &a_sk_hex)
 {
     bit_vector a_sk = hex2bits(a_sk_hex);
-    bit_vector a_pk = zktrade::prf_addr<CommitmentHashT>(a_sk);
+    bit_vector a_pk = zktrade::prf_addr_a_pk<CommitmentHashT>(a_sk);
     string a_pk_hex = bits2hex(a_pk);
     return a_pk_hex;
 }
