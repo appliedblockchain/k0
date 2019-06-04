@@ -27,7 +27,7 @@ process.on('unhandledRejection', error => {
 async function run() {
 
   const who = process.argv[2]
-  if (['alice', 'bob', 'carol'].indexOf(who) === -1) {
+  if ([ 'alice', 'bob', 'carol' ].indexOf(who) === -1) {
     console.log('Need parameter "alice", "bob" or "carol".')
     process.exit(1)
   }
@@ -51,7 +51,7 @@ async function run() {
   for (let i = 0; i < values.length; i++) {
     const v = values[i]
 
-    const data = await k0.prepareDeposit(platformState, secretStore, v)
+    const data = await k0.prepareDeposit(platformState, secretStore.getPublicKey(), v)
     await secretStore.addNoteInfo(data.cm, data.a_pk, data.rho, data.r, v)
 
     const depositTx = await k0Fabric.mint(

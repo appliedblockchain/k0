@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/appliedblockchain/zktrading/go/util"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"

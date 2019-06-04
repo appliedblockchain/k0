@@ -252,7 +252,7 @@ docker run -v $PWD/artefacts:/artefacts -v $GOPATH/src/github.com/hyperledger/fa
 In `js/test/fabric/network`:
 
 ```
-for org in alpha beta gamma; do docker-compose run ${org}tools peer chaincode install /artefacts/k0chaincode.${CHAINCODE_VERSION}.out; done
+for org in alpha beta gamma bank; do docker-compose run ${org}tools peer chaincode install /artefacts/k0chaincode.${CHAINCODE_VERSION}.out; done
 ```
 
 ### Instantiate chaincode
@@ -285,6 +285,12 @@ Proving server for GammaCo:
 cpp/build/src/server 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 13400
 ```
 
+Proving server for BankCo:
+
+```
+cpp/build/src/server 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 14400
+```
+
 Merkle tree server for AlphaCo:
 
 ```
@@ -301,6 +307,12 @@ Merkle tree server for GammaCo:
 
 ```
 cpp/build/src/mtserver 7 13410
+```
+
+Merkle tree server for BankCo:
+
+```
+cpp/build/src/mtserver 7 14410
 ```
 
 ### Run tests

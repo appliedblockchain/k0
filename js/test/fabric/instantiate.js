@@ -4,6 +4,7 @@ const getConfig = require('./helpers/get-config')
 const makeClient = require('./helpers/client')
 const instantiateOrUpgrade = require('./helpers/instantiate-or-upgrade')
 const endorsementPolicy = require('./endorsement-policy')
+const makePlatformState = require('../../platform-state')
 
 process.on('unhandledRejection', error => {
   console.log(error.message)
@@ -12,16 +13,22 @@ process.on('unhandledRejection', error => {
 })
 
 async function run() {
-  const config = getConfig('alpha', 'Admin')
+  const config = getConfig('bank', 'Admin')
   const alphaAdmin = await makeClient(config)
+  const bankPlatformState = await makePlatformState(config.mtServerPort)
+
+  const initialRoot = await bankPlatformState.merkleTreeRoot()
+
   await instantiateOrUpgrade(
     alphaAdmin,
     endorsementPolicy,
     process.env.CHAINCODE_ID || 'k0chaincode',
     process.env.CHAINCODE_VERSION || '1',
-    [ 'foo' ],
+    [ initialRoot ],
     false
   )
 }
 
-run()
+run().then(() => {
+  console.log('Chaincode successfuly instantiated.')
+})

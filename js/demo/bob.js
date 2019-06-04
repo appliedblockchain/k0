@@ -37,16 +37,16 @@ async function run() {
     u.checkBuf(txHash, 32)
     u.checkBuf(cm, 32)
     u.checkBuf(nextRoot, 32)
-    await platformState.add(u.buf2hex(txHash), [cm], [], nextRoot)
+    await platformState.add(u.buf2hex(txHash), [ cm ], [], nextRoot)
   })
 
   const proverPort = parseInt(process.env.SERVER_PORT || '5000', 10)
   const k0 = await makeK0(proverPort)
-  //web3.eth.accounts.signTransaction(tx, privateKey [, callback]);
+  // web3.eth.accounts.signTransaction(tx, privateKey [, callback]);
   const mnemonic = mnemonics.bob
   const seed = bip39.mnemonicToSeed(mnemonic)
   const root = hdkey.fromMasterSeed(seed)
-  const path = "m/44'/60'/0'/0/0"
+  const path = 'm/44\'/60\'/0\'/0/0'
   const wallet = root.derivePath(path).getWallet()
 
   const v1 = new BN('50000')
@@ -62,12 +62,12 @@ async function run() {
   await web3.eth.sendSignedTransaction(u.buf2hex(approveTx))
 
 
-  const values = [v1, v2]
+  const values = [ v1, v2 ]
 
   for (let i = 0; i < 1; i++) {
     const v = values[i]
 
-    const data = await k0.prepareDeposit(platformState, secretStore, v)
+    const data = await k0.prepareDeposit(platformState, secretStore.getPublicKey(), v)
     await secretStore.addNoteInfo(data.cm, data.rho, data.r, v)
 
     const depositTx = await k0Eth.deposit(

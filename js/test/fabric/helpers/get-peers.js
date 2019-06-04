@@ -1,6 +1,5 @@
 'use strict'
-const _ = require('lodash')
-const fs = require('fs')
+
 const log4js = require('log4js')
 const logger = log4js.getLogger()
 const path = require('path')
@@ -36,6 +35,12 @@ function getPeers() {
       eventUrl: 'grpcs://localhost:13753',
       tlsHostnameOverride: 'peer0.gamma.com',
       tlsCaCertPEM: readFile(tlsCACertPath('gamma.com'))
+    },
+    {
+      url: 'grpcs://localhost:14751',
+      eventUrl: 'grpcs://localhost:14753',
+      tlsHostnameOverride: 'peer0.bank.com',
+      tlsCaCertPEM: readFile(tlsCACertPath('bank.com'))
     }
   ]
 }

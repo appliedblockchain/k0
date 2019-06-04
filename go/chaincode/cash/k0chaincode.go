@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+
+	"github.com/appliedblockchain/zktrading/go/util"
+	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
@@ -12,7 +15,31 @@ type K0Chaincode struct {
 }
 
 func (t *K0Chaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
-	// TODO set initial Merkle tree root
+	fncName, args := stub.GetFunctionAndParameters()
+
+	if fncName != "init" {
+		str := "Expected function name \"init\", got \"%s\""
+		return shim.Error(fmt.Sprintf(str, fncName))
+	}
+
+	if len(args) != 1 {
+		str := "Incorrect number of arguments. Expecting 1, got: %d"
+		return shim.Error(fmt.Sprintf(str, len(args)))
+	}
+
+	// Setting initial Root
+	initialRoot, err := util.VariableToFixed32([]byte(args[0]))
+
+	err = stub.PutState("root", initialRoot[:])
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	mspid, err := cid.GetMSPID(stub)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	err = stub.PutState("minterID", []byte(mspid))
 	return shim.Success(nil)
 }
 

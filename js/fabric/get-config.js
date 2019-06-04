@@ -9,11 +9,11 @@ logger.level = process.env['LOG_LEVEL'] || 'info'
 
 const firstFileInDir = dir => path.join(dir, fs.readdirSync(dir)[0])
 
-const read = filePath =>  Buffer.from(fs.readFileSync(filePath)).toString()
+const read = filePath => Buffer.from(fs.readFileSync(filePath)).toString()
 
 function generateConfig(config) {
   const peers = csvLoader(config.peersConfigFilePath).map(p => _.extend(
-    _.pick(p, ['url', 'eventUrl', 'tlsHostnameOverride']),
+    _.pick(p, [ 'url', 'eventUrl', 'tlsHostnameOverride' ]),
     { tlsCaCertPEM: read(p.tlsCaCertPath) }
   ))
   const fieldsToBeCopied = [
