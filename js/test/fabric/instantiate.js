@@ -32,4 +32,5 @@ async function run() {
 
 run().then(() => {
   console.log('Chaincode successfuly instantiated.')
+  process.exit(0)
 })

@@ -95,7 +95,7 @@ describe('Fabric workflow', function () {
         return new BN(_.random(50).toString() + '000')
       })
       const total = values.reduce((acc, el) => acc.add(el), new BN('0'))
-      for (let j = 0; i < values.length; i++) {
+      for (let j = 0; j < values.length; j++) {
         console.inspect(`Minting note ${j}`)
         const v = values[j]
 

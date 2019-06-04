@@ -8,6 +8,7 @@ If you want to run the Fabric tests/demo, the project should be checked out in y
 [ZKP setup](#zkp-setup-needed-for-all-tests-and-demos)  
 [Ethereum demo](#ethereum-demo)  
 [Fabric integration tests](#fabric-integration-tests)
+[Fabric dev mode](#fabric-dev-mode)
 
 ## Set up the project dependencies
 
@@ -322,3 +323,110 @@ In `js`:
 ```
 node_modules/.bin/mocha test/fabric/test.js
 ```
+
+## Fabric Dev mode
+For a faster way to itterate on the chaincode developement, use this setup, that will allow you to restart and redeploy the chaincode more rapidly
+### Pre Setup
+
+First, start a ZKP setup as described [above](#zkp-setup-needed-for-all-tests-and-demos)
+
+Then, add the following line to your `/etc/hosts` file:
+
+```
+127.0.0.1        orderer.orderer.org
+```
+
+Then, in your home directory, create a software folder and download the fabric tools inside that directory:
+```
+curl -sSL http://bit.ly/2ysbOFE | bash -s 1.2.0 1.2.0 1.2.0
+```
+
+### Starting the network
+
+__In this section, the command needs to be run from the `js/test/fabric/devnetwork`.__  
+
+Use this command to clean previous artefacts, if any:  
+
+```
+docker-compose down && rm -rf crypto-config/* artefacts/* *peer/data && docker rm $(docker ps -qa)
+```
+
+Generate the crypto-config:
+```
+~/software/fabric-samples/bin/cryptogen generate --config=crypto-config.yaml
+```
+
+Generate the genesis block for fabric:
+```
+~/software/fabric-samples/bin/configtxgen -profile TheGenesis -channelID orderer-system-channel -outputBlock artefacts/orderer_genesis.block
+```
+
+Generate the channel config:
+
+```
+~/software/fabric-samples/bin/configtxgen -profile TheChannel -channelID the-channel -outputCreateChannelTx artefacts/channel_creation.tx
+```
+
+Start the orderer:
+```
+docker-compose up
+```
+
+Then open 12 terminals(iterm2 or similar recommended), respectively in:
+* `js/test/fabric/devnetwork/alphapeer`
+* `js/test/fabric/devnetwork/betapeer`
+* `js/test/fabric/devnetwork/gammaapeer`
+* `js/test/fabric/devnetwork/bankpeer`
+* `js/test/fabric/devnetwork/alphaadmin`
+* `js/test/fabric/devnetwork/betaadmin`
+* `js/test/fabric/devnetwork/gammaadmin`
+* `js/test/fabric/devnetwork/bankadmin`
+* __3__ in `go/chaincode/cash`
+
+
+in alphaadmin, run:
+```
+~/software/fabric-samples/bin/peer channel create -o localhost:7050 -c the-channel -f ../artefacts/channel_creation.tx  --outputBlock ../artefacts/the-channel.block
+```
+
+in alphapeer, betapeer, gammapeer and bankpeer, run:
+```
+~/software/fabric-samples/bin/peer node start --peer-chaincodedev=true
+```
+
+in alphaadmin, betaadmin, gammaadmin and bankadmin, run:
+```
+~/software/fabric-samples/bin/peer channel join -b ../artefacts/the-channel.block
+```
+
+### Compiling, starting
+Step to reproduce after a Chaincode code change:
+
+maybe `go build` then,
+
+Start the chaincodes program by running each of those command in a separate free terminal:
+
+```
+VERIFIER_ENDPOINT=http://localhost:11400/ CORE_CHAINCODE_LOGLEVEL=debug CORE_PEER_ADDRESS=localhost:11752 CORE_CHAINCODE_ID_NAME=k0chaincode:1 ./cash
+VERIFIER_ENDPOINT=http://localhost:12400/ CORE_CHAINCODE_LOGLEVEL=debug CORE_PEER_ADDRESS=localhost:12752 CORE_CHAINCODE_ID_NAME=k0chaincode:1 ./cash
+VERIFIER_ENDPOINT=http://localhost:13400/ CORE_CHAINCODE_LOGLEVEL=debug CORE_PEER_ADDRESS=localhost:13752 CORE_CHAINCODE_ID_NAME=k0chaincode:1 ./cash
+VERIFIER_ENDPOINT=http://localhost:14400/ CORE_CHAINCODE_LOGLEVEL=debug CORE_PEER_ADDRESS=localhost:14752 CORE_CHAINCODE_ID_NAME=k0chaincode:1 ./cash
+```
+
+Finally, in alphaadmin, betaadmin, gammaadmin and bankadmin, run:
+```
+CORE_CHAINCODE_MODE=net ~/software/fabric-samples/bin/peer chaincode install -p github.com/appliedblockchain/zktrading/go/chaincode/cash -n k0chaincode -v 1
+```
+
+### Instanciating and running the chaincode
+
+To instanciate, from the the `js/test/fabric` folder, run:
+```
+DEV_MODE=true mocha test.js
+```
+
+To Run the test, from the the `js/test/fabric` folder, run:
+```
+DEV_MODE=true mocha test.js
+```
+

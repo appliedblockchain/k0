@@ -34,7 +34,7 @@ logging:
     # Default for all modules running within the scope of a peer.
     # Note: this value is only used when --logging-level or CORE_LOGGING_LEVEL
     #       are not set
-    level:       debug
+    level:       info
 
     # The overall default values mentioned above can be overridden for the
     # specific components listed in the override section below.
@@ -45,14 +45,14 @@ logging:
     # logging package.
     # Note: the modules listed below are the only acceptable modules at this
     #       time.
-    cauthdsl:   debug
-    gossip:     debug
-    grpc:       debug
-    ledger:     debug
-    msp:        debug
-    policies:   debug
+    cauthdsl:   info
+    gossip:     info
+    grpc:       info
+    ledger:     info
+    msp:        info
+    policies:   info
     peer:
-        gossip: debug
+        gossip: info
 
     # Message format for the peer logs
     format: '%{color}%{time:2006-01-02 15:04:05.000 MST} [%{module}] %{shortfunc} -> %{level:.4s} %{id:03x}%{color:reset} %{message}'
