@@ -48,7 +48,8 @@ async function makeClient(config) {
   const ordererOptions = {
     'pem': config.ordererTlsCaCertPEM
   }
-  if (config.ordererTlsHostnameOverride && config.ordererTlsHostnameOverride.length > 0) {
+  if (config.ordererTlsHostnameOverride !== undefined
+      && config.ordererTlsHostnameOverride.length > 0) {
     ordererOptions['ssl-target-name-override'] = config.ordererTlsHostnameOverride
   }
   const orderer = client.newOrderer(config.ordererUrl, ordererOptions)
@@ -58,10 +59,13 @@ async function makeClient(config) {
 
   const peers = config.peers.map(p => {
     const peerOptions = {
-      'pem': p.tlsCaCertPEM,
       'request-timeout': 3000000
     }
-    if (p.tlsHostnameOverride.length > 0) {
+    if (p.tlsCaCertPEM !== undefined) {
+      peerOptions['pem'] = p.tlsCaCertPEM
+    }
+    if (p.tlsHostnameOverride !== undefined
+        && p.tlsHostnameOverride.length > 0) {
 		  peerOptions['ssl-target-name-override'] = p.tlsHostnameOverride
     }
     return client.newPeer(p.url, peerOptions)

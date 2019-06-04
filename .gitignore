@@ -25,6 +25,9 @@
 /js/node_modules
 /js/package-lock.json
 /js/public-keys.json
+/js/test/fabric/devnetwork/*peer/data
+/js/test/fabric/devnetwork/artefacts
+/js/test/fabric/devnetwork/crypto-config
 /js/test/fabric/network/artefacts
 /js/test/fabric/network/crypto-config
 local-notes.txt
