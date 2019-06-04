@@ -8,6 +8,7 @@
 /cpp/cmake-build-debug-remote-host
 /cpp/depends
 /data
+/go/chaincode/cash/cash
 /js/alice.secrets.json
 /js/bob.secrets.json
 /js/carol.secrets.json
