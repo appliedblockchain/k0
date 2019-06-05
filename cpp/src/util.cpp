@@ -94,6 +94,27 @@ libff::bit_vector zktrade::random_bits(size_t len = 256) {
     return v;
 }
 
+void zktrade::fill_with_random_bytes(unsigned char *bytes, size_t len)
+{
+    for (size_t i = 0; i < len; i++) {
+        bytes[i] = rand() % 255;
+    }
+}
+
+void zktrade::fill_with_bits(unsigned char *bytes, bit_vector &bits)
+{
+    if (bits.size() % 8 != 0) {
+        throw std::invalid_argument(
+                "size of bit vector is not a multiple of 8");
+    }
+    std::vector<unsigned char> result;
+    for (size_t i = 0; i < bits.size() / 8; i++) {
+        libff::bit_vector byte_bv = libff::bit_vector(
+                bits.begin() + i * 8, bits.begin() + i * 8 + 8);
+        bytes[i] = zktrade::bits_to_byte(byte_bv);
+    }
+}
+
 uint64_t zktrade::random_uint64() {
     // https://stackoverflow.com/a/7920941
     return (((uint64_t) rand() << 0) & 0x000000000000FFFFull) |

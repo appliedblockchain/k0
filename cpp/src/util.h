@@ -25,6 +25,10 @@ namespace zktrade {
 
     bit_vector random_bits(size_t len);
 
+    void fill_with_random_bytes(unsigned char *bytes, size_t len);
+
+    void fill_with_bits(unsigned char *bytes, bit_vector &bits);
+
     uint64_t random_uint64();
 
     bit_vector truncate(bit_vector input, size_t len);
