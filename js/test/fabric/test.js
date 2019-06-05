@@ -2,6 +2,7 @@
 
 const BN = require('bn.js')
 const _ = require('lodash')
+const assert = require('assert')
 const crypto = require('crypto')
 const getConfig = require('./helpers/get-config')
 const log4js = require('log4js')
@@ -89,12 +90,13 @@ describe('Fabric workflow', function () {
     const numInitialHodlers = 2
     const numInitialNotesPerHodler = 3
     for (let i = 0; i < numInitialHodlers; i = i + 1) {
-      console.inspect(`Minting Note for org ${i}`)
+      console.inspect(`Minting Notes for Org ${i}`)
       const who = orgs[i]
       const values = _.times(numInitialNotesPerHodler, () => {
         return new BN(_.random(50).toString() + '000')
       })
-      const total = values.reduce((acc, el) => acc.add(el), new BN('0'))
+      values.reduce((acc, el) => acc.add(el), new BN('0'))
+
       for (let j = 0; j < values.length; j++) {
         console.inspect(`Minting note ${j}`)
         const v = values[j]
@@ -107,11 +109,11 @@ describe('Fabric workflow', function () {
           data.cm, data.a_pk, data.rho, data.r, v
         )
         const mintProcessedPromise = testUtil.awaitEvent(
-          events[who],
+          events[BANK],
           'mintProcessed',
           100
         )
-        const depositTx = await k0Fabrics[BANK].mint(
+        const depositTx = await k0Fabrics[BANK].mint( // eslint-disable-line
           data.k,
           v,
           data.cm,
@@ -184,7 +186,8 @@ describe('Fabric workflow', function () {
     // We need a "simulate two additions" function on the MT server
     const rootBefore = await platformStates.alpha.merkleTreeRoot()
     const labelBefore = platformStates.alpha.currentStateLabel()
-    const tmpLabel = 'temporary_mt_addition_' + crypto.randomBytes(16).toString('hex')
+    const tmpLabel =
+      `temporary_mt_addition_${crypto.randomBytes(16).toString('hex')}`
     await platformStates.alpha.add(
       tmpLabel, [], [ transferData.output_0_cm, transferData.output_1_cm ]
     )
