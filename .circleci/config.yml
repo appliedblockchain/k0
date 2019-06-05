@@ -206,7 +206,7 @@ jobs:
           name: "Install K0 chaincode"
           command: |
             cd js/test/fabric/network
-            for org in alpha beta gamma; do docker-compose run ${org}tools peer chaincode install /artefacts/k0chaincode.1.out; done
+            for org in alpha beta gamma bank; do docker-compose run ${org}tools peer chaincode install /artefacts/k0chaincode.1.out; done
       - run:
           name: "Instantiate K0 chaincode"
           command: |
