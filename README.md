@@ -337,11 +337,14 @@ Then, add the following line to your `/etc/hosts` file:
 ```
 127.0.0.1        orderer.orderer.org
 ```
+follow [those instruction](https://hyperledger-fabric.readthedocs.io/en/release-1.2/install.html) to install the fabric binaries
 
-Then, in your home directory, create a software folder and download the fabric tools inside that directory:
+For our version, on mac, downloading the binary would look like this:
 ```
 curl -sSL http://bit.ly/2ysbOFE | bash -s 1.2.0 1.2.0 1.2.0
 ```
+
+Then, add the `fabric-samples/bin` directory to you `$PATH`
 
 ### Starting the network
 
@@ -355,18 +358,18 @@ docker-compose down && rm -rf crypto-config/* artefacts/* *peer/data && docker r
 
 Generate the crypto-config:
 ```
-~/software/fabric-samples/bin/cryptogen generate --config=crypto-config.yaml
+cryptogen generate --config=crypto-config.yaml
 ```
 
 Generate the genesis block for fabric:
 ```
-~/software/fabric-samples/bin/configtxgen -profile TheGenesis -channelID orderer-system-channel -outputBlock artefacts/orderer_genesis.block
+configtxgen -profile TheGenesis -channelID orderer-system-channel -outputBlock artefacts/orderer_genesis.block
 ```
 
 Generate the channel config:
 
 ```
-~/software/fabric-samples/bin/configtxgen -profile TheChannel -channelID the-channel -outputCreateChannelTx artefacts/channel_creation.tx
+configtxgen -profile TheChannel -channelID the-channel -outputCreateChannelTx artefacts/channel_creation.tx
 ```
 
 Start the orderer:
@@ -388,17 +391,17 @@ Then open 12 terminals(iterm2 or similar recommended), respectively in:
 
 in alphaadmin, run:
 ```
-~/software/fabric-samples/bin/peer channel create -o localhost:7050 -c the-channel -f ../artefacts/channel_creation.tx  --outputBlock ../artefacts/the-channel.block
+peer channel create -o localhost:7050 -c the-channel -f ../artefacts/channel_creation.tx  --outputBlock ../artefacts/the-channel.block
 ```
 
 in alphapeer, betapeer, gammapeer and bankpeer, run:
 ```
-~/software/fabric-samples/bin/peer node start --peer-chaincodedev=true
+peer node start --peer-chaincodedev=true
 ```
 
 in alphaadmin, betaadmin, gammaadmin and bankadmin, run:
 ```
-~/software/fabric-samples/bin/peer channel join -b ../artefacts/the-channel.block
+bin/peer channel join -b ../artefacts/the-channel.block
 ```
 
 ### Compiling the chaincode
@@ -406,7 +409,7 @@ Step to reproduce after a Chaincode code change:
 
 maybe `go build` then,
 
-Start the chaincodes program by running each of those command in a separate free terminal:
+Start the chaincodes program by running each of those command in a separate terminal:
 
 ```
 VERIFIER_ENDPOINT=http://localhost:11400/ CORE_CHAINCODE_LOGLEVEL=debug CORE_PEER_ADDRESS=localhost:11752 CORE_CHAINCODE_ID_NAME=k0chaincode:1 ./cash
@@ -417,7 +420,7 @@ VERIFIER_ENDPOINT=http://localhost:14400/ CORE_CHAINCODE_LOGLEVEL=debug CORE_PEE
 
 Finally, in alphaadmin, betaadmin, gammaadmin and bankadmin, run:
 ```
-CORE_CHAINCODE_MODE=net ~/software/fabric-samples/bin/peer chaincode install -p github.com/appliedblockchain/zktrading/go/chaincode/cash -n k0chaincode -v 1
+CORE_CHAINCODE_MODE=net peer chaincode install -p github.com/appliedblockchain/zktrading/go/chaincode/cash -n k0chaincode -v 1
 ```
 
 ### Instanciating and running the chaincode
