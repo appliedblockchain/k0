@@ -83,7 +83,7 @@ peer:
     # If this is not specified, the chaincodeListenAddress address is selected.
     # And if chaincodeListenAddress is not specified, address is selected from
     # peer listenAddress.
-    # chaincodeAddress: 0.0.0.0:14752
+    # chaincodeAddress: 0.0.0.0:13752
 
     # When used as peer config, this represents the endpoint to other peers
     # in the same organization. For peers in other organization, see

@@ -46,7 +46,7 @@ async function run() {
   const mnemonic = mnemonics.bob
   const seed = bip39.mnemonicToSeed(mnemonic)
   const root = hdkey.fromMasterSeed(seed)
-  const path = 'm/44\'/60\'/0\'/0/0'
+  const path = "m/44'/60'/0'/0/0" // eslint-disable-line
   const wallet = root.derivePath(path).getWallet()
 
   const v1 = new BN('50000')

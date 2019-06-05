@@ -325,7 +325,9 @@ node_modules/.bin/mocha test/fabric/test.js
 ```
 
 ## Fabric Dev mode
-For a faster way to itterate on the chaincode developement, use this setup, that will allow you to restart and redeploy the chaincode more rapidly
+
+For a faster way to itterate on chaincode developement, use this setup, that will allow you to build and restart the chaincode without having to redeploy
+
 ### Pre Setup
 
 First, start a ZKP setup as described [above](#zkp-setup-needed-for-all-tests-and-demos)
@@ -399,7 +401,7 @@ in alphaadmin, betaadmin, gammaadmin and bankadmin, run:
 ~/software/fabric-samples/bin/peer channel join -b ../artefacts/the-channel.block
 ```
 
-### Compiling, starting
+### Compiling the chaincode
 Step to reproduce after a Chaincode code change:
 
 maybe `go build` then,
@@ -429,4 +431,10 @@ To Run the test, from the the `js/test/fabric` folder, run:
 ```
 DEV_MODE=true mocha test.js
 ```
+
+### Changing the chaincode
+
+* Stop the chaincode programs
+* run 'go compile' to compile the modified chaincode
+* restart the chaincode programs
 
