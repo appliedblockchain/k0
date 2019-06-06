@@ -45,6 +45,7 @@ target_sources(
         scheme/comms.tcc
         scheme/ka.cpp
         scheme/kdf.cpp
+        scheme/note_encryption.cpp
         scheme/prfs.tcc
         util.cpp
         serialization.cpp
