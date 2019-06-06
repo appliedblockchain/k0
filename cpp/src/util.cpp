@@ -86,6 +86,15 @@ std::string zktrade::bytes_to_hex(std::vector<unsigned char> bytes) {
         stream << std::hex << std::setfill('0') << std::setw(2) << (int) b;
     }
     return stream.str();
+
+}
+std::string zktrade::bytes_to_hex(unsigned char *bytes, size_t len) {
+    std::stringstream s;
+    s << "0x";
+    for (size_t i = 0; i < len; i++) {
+        s << std::hex << std::setfill('0') << std::setw(2) << (int) bytes[i];
+    }
+    return s.str();
 }
 
 libff::bit_vector zktrade::random_bits(size_t len = 256) {

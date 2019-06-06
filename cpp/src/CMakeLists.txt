@@ -44,6 +44,7 @@ target_sources(
         hash/sha256_compression.cpp
         scheme/comms.tcc
         scheme/ka.cpp
+        scheme/kdf.cpp
         scheme/prfs.tcc
         util.cpp
         serialization.cpp
@@ -55,6 +56,7 @@ target_sources(
         hash/sha256_compression.hpp
         scheme/comms.hpp
         scheme/ka.hpp
+        scheme/kdf.hpp
         scheme/prfs.h
         server/Server.hpp
         server/Server.tcc

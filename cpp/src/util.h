@@ -23,6 +23,8 @@ namespace zktrade {
 
     string bytes_to_hex(vector<unsigned char> bytes);
 
+    string bytes_to_hex(unsigned char *bytes, size_t len);
+
     bit_vector random_bits(size_t len);
 
     void fill_with_random_bytes(unsigned char *bytes, size_t len);
@@ -137,6 +139,7 @@ namespace zktrade {
     string hex_to_dec_string(string hex);
 
     void printnode(vector<bool> bv);
+
 }
 
 #endif //ZKTRADE_UTIL_H
