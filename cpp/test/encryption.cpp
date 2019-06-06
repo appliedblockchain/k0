@@ -47,16 +47,15 @@ TEST(Encryption, Functions) {
     unsigned char message[32];
     fill_with_random_bytes(message, 32);
 
-    unsigned char epk[32];
-    unsigned char ciphertext[48];
+    unsigned char ciphertext[80];
 
-    EXPECT_EQ(encrypt_note(ciphertext, epk, message, bob_pk_enc), 0);
+    EXPECT_EQ(encrypt_note(ciphertext, message, bob_pk_enc), 0);
 
     unsigned char decrypted_text[32];
-    EXPECT_EQ(decrypt_note(decrypted_text, ciphertext, epk, carol_sk_enc,
+    EXPECT_EQ(decrypt_note(decrypted_text, ciphertext, carol_sk_enc,
                            carol_pk_enc),
               -1);
-    EXPECT_EQ(decrypt_note(decrypted_text, ciphertext, epk, bob_sk_enc,
+    EXPECT_EQ(decrypt_note(decrypted_text, ciphertext, bob_sk_enc,
                            bob_pk_enc),
               0);
 
@@ -106,7 +105,8 @@ TEST(Encryption, Steps) {
     kdf(encryption_key, alice_dhsecret, epk, bob_pk_enc);
 
     // The nonce is zero because we never reuse keys
-    auto enc_cipher_length = crypto_aead_chacha20poly1305_IETF_NPUBBYTES;
+    constexpr auto enc_cipher_length =
+        crypto_aead_chacha20poly1305_IETF_NPUBBYTES;
     unsigned char encryption_cipher_nonce[enc_cipher_length] {};
 
     unsigned long long message_length = 32;
@@ -153,7 +153,7 @@ TEST(Encryption, Steps) {
     unsigned long long decrypted_text_length;
 
     // The nonce is zero because we never reuse keys
-    auto nonce_length = crypto_aead_chacha20poly1305_IETF_NPUBBYTES;
+    constexpr auto nonce_length = crypto_aead_chacha20poly1305_IETF_NPUBBYTES;
     unsigned char decryption_cipher_nonce[nonce_length] = {};
 
     EXPECT_EQ(crypto_aead_chacha20poly1305_ietf_decrypt(
