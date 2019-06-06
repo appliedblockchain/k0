@@ -170,7 +170,7 @@ async function sleep(seconds = 0, message = '') {
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
-function awaitEvent(emitter, eventName, timeoutSecs = 10) {
+function awaitEvent(emitter, eventName, timeoutSecs = 20) {
   return new Promise((accept, reject) => {
     const timeout = setTimeout(() => {
       // TODO unregister the event listener?

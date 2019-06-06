@@ -8,7 +8,7 @@ const readFile = require('./read-file')
 
 const firstFileInDir = dir => path.join(dir, fs.readdirSync(dir)[0])
 
-const orgs = [ 'alpha', 'beta', 'gamma' ]
+const orgs = [ 'alpha', 'beta', 'gamma', 'bank' ]
 const usernames = [ 'Admin', 'User1' ]
 
 function getConfig(org, username, devMode = false) {

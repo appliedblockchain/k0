@@ -1,11 +1,9 @@
 'use strict'
 
 const BN = require('bn.js')
-const Immutable = require('immutable')
 const _ = require('lodash')
-const bip39 = require('bip39')
+const assert = require('assert')
 const crypto = require('crypto')
-const fs = require('fs')
 const getConfig = require('./helpers/get-config')
 const log4js = require('log4js')
 const makeFabricPlatform = require('../../fabric')
@@ -28,10 +26,10 @@ function makeData(a_pk, rho, r, v) {
   u.checkBuf(rho, 32)
   u.checkBuf(r, 48)
   u.checkBN(v)
-  return Buffer.concat([ a_pk, rho, r, v.toBuffer('le', 64)])
+  return Buffer.concat([ a_pk, rho, r, v.toBuffer('le', 64) ])
 }
 
-describe('Fabric workflow', function() {
+describe('Fabric workflow', function () {
   this.timeout(3600 * 1000)
   const k0s = {}
   const platformStates = {}
@@ -40,10 +38,11 @@ describe('Fabric workflow', function() {
   // event handling
   const events = {}
   const publicKeys = {}
-  const orgs = [ 'alpha', 'beta', 'gamma' ]
+  const orgs = [ 'alpha', 'beta', 'gamma', 'bank' ]
+  const BANK = 'bank'
   let logger
 
-  it('Init', async function() {
+  it('Init', async function () {
     logger = log4js.getLogger()
     logger.level = process.env.LOG_LEVEL || 'info'
     for (let i = 0; i < orgs.length; i = i + 1) {
@@ -75,7 +74,7 @@ describe('Fabric workflow', function() {
     // platform (once the chaincode provides functionality to query the root).
 
     // If not all event queues are empty
-    if (!orgs.map(who => events[who].queueEmpty()).reduce((a,b) => a && b)) {
+    if (!orgs.map(who => events[who].queueEmpty()).reduce((a, b) => a && b)) {
       // wait for all event queues to become empty
       await Promise.all(orgs.map(who => {
         return testUtil.awaitEvent(events[who], 'queueEmpty', 100)
@@ -83,7 +82,7 @@ describe('Fabric workflow', function() {
     }
   })
 
-  it('Mint', async function() {
+  it('Mint', async function () {
     // Nobody should have any money
     for (let i = 0; i < orgs.length; i = i + 1) {
       expect(secretStores[orgs[i]].getAvailableNotes().length).to.equal(0)
@@ -91,25 +90,30 @@ describe('Fabric workflow', function() {
     const numInitialHodlers = 2
     const numInitialNotesPerHodler = 3
     for (let i = 0; i < numInitialHodlers; i = i + 1) {
+      console.inspect(`Minting Notes for Org ${i}`)
       const who = orgs[i]
       const values = _.times(numInitialNotesPerHodler, () => {
         return new BN(_.random(50).toString() + '000')
       })
-      const total = values.reduce((acc, el) => acc.add(el), new BN('0'))
-      for (let i = 0; i < values.length; i++) {
-        const v = values[i]
-        const data = await k0s[who].prepareDeposit(
-          platformStates[who], secretStores[who], v
+      values.reduce((acc, el) => acc.add(el), new BN('0'))
+
+      for (let j = 0; j < values.length; j++) {
+        console.inspect(`Minting note ${j}`)
+        const v = values[j]
+
+        // In fabric, a single bank authority issues secret notes
+        const data = await k0s[BANK].prepareDeposit(
+          platformStates[BANK], secretStores[who].getPublicKey(), v
         )
         await secretStores[who].addNoteInfo(
           data.cm, data.a_pk, data.rho, data.r, v
         )
         const mintProcessedPromise = testUtil.awaitEvent(
-          events[who],
+          events[BANK],
           'mintProcessed',
           100
         )
-        const depositTx = await k0Fabrics[who].mint(
+        const depositTx = await k0Fabrics[BANK].mint( // eslint-disable-line
           data.k,
           v,
           data.cm,
@@ -118,7 +122,10 @@ describe('Fabric workflow', function() {
           data.additionProofJacobian
         )
         await mintProcessedPromise
+
+
       }
+      console.inspect(`Note for org ${i} MINTED`)
     }
 
     // Hodlers should now have numInitialNotesPerHodler notes each
@@ -131,7 +138,7 @@ describe('Fabric workflow', function() {
 
   })
 
-  it('Transfer', async function() {
+  it('Transfer', async function () {
 
     const labelBeforeBefore = platformStates.alpha.currentStateLabel()
 
@@ -179,7 +186,8 @@ describe('Fabric workflow', function() {
     // We need a "simulate two additions" function on the MT server
     const rootBefore = await platformStates.alpha.merkleTreeRoot()
     const labelBefore = platformStates.alpha.currentStateLabel()
-    const tmpLabel = 'temporary_mt_addition_' + crypto.randomBytes(16).toString('hex')
+    const tmpLabel =
+      `temporary_mt_addition_${crypto.randomBytes(16).toString('hex')}`
     await platformStates.alpha.add(
       tmpLabel, [], [ transferData.output_0_cm, transferData.output_1_cm ]
     )
@@ -203,7 +211,7 @@ describe('Fabric workflow', function() {
     )
   })
 
-  after(async function() {
+  after(async function () {
     for (let i = 0; i < orgs.length; i = i + 1) {
       k0Fabrics[orgs[i]].off()
     }

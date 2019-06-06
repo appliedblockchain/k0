@@ -8,6 +8,7 @@ If you want to run the Fabric tests/demo, the project should be checked out in y
 [ZKP setup](#zkp-setup-needed-for-all-tests-and-demos)  
 [Ethereum demo](#ethereum-demo)  
 [Fabric integration tests](#fabric-integration-tests)
+[Fabric dev mode](#fabric-dev-mode)
 
 ## Set up the project dependencies
 
@@ -252,7 +253,7 @@ docker run -v $PWD/artefacts:/artefacts -v $GOPATH/src/github.com/hyperledger/fa
 In `js/test/fabric/network`:
 
 ```
-for org in alpha beta gamma; do docker-compose run ${org}tools peer chaincode install /artefacts/k0chaincode.${CHAINCODE_VERSION}.out; done
+for org in alpha beta gamma bank; do docker-compose run ${org}tools peer chaincode install /artefacts/k0chaincode.${CHAINCODE_VERSION}.out; done
 ```
 
 ### Instantiate chaincode
@@ -285,6 +286,12 @@ Proving server for GammaCo:
 cpp/build/src/server 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 13400
 ```
 
+Proving server for BankCo:
+
+```
+cpp/build/src/server 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 14400
+```
+
 Merkle tree server for AlphaCo:
 
 ```
@@ -303,6 +310,12 @@ Merkle tree server for GammaCo:
 cpp/build/src/mtserver 7 13410
 ```
 
+Merkle tree server for BankCo:
+
+```
+cpp/build/src/mtserver 7 14410
+```
+
 ### Run tests
 
 In `js`:
@@ -310,3 +323,121 @@ In `js`:
 ```
 node_modules/.bin/mocha test/fabric/test.js
 ```
+
+## Fabric Dev mode
+
+For a faster way to itterate on chaincode developement, use this setup, that will allow you to build and restart the chaincode without having to redeploy
+
+### Pre Setup
+
+First, start a ZKP setup as described [above](#zkp-setup-needed-for-all-tests-and-demos)
+
+Then, add the following line to your `/etc/hosts` file:
+
+```
+127.0.0.1        orderer.orderer.org
+```
+follow [those instruction](https://hyperledger-fabric.readthedocs.io/en/release-1.2/install.html) to install the fabric binaries
+
+For our version, on mac, downloading the binary would look like this:
+```
+curl -sSL http://bit.ly/2ysbOFE | bash -s 1.2.0 1.2.0 1.2.0
+```
+
+Then, add the `fabric-samples/bin` directory to you `$PATH`
+
+### Starting the network
+
+__In this section, the command needs to be run from the `js/test/fabric/devnetwork`.__  
+
+Use this command to clean previous artefacts, if any:  
+
+```
+docker-compose down && rm -rf crypto-config/* artefacts/* *peer/data && docker rm $(docker ps -qa)
+```
+
+Generate the crypto-config:
+```
+cryptogen generate --config=crypto-config.yaml
+```
+
+Generate the genesis block for fabric:
+```
+configtxgen -profile TheGenesis -channelID orderer-system-channel -outputBlock artefacts/orderer_genesis.block
+```
+
+Generate the channel config:
+
+```
+configtxgen -profile TheChannel -channelID the-channel -outputCreateChannelTx artefacts/channel_creation.tx
+```
+
+Start the orderer:
+```
+docker-compose up
+```
+
+Then open 12 terminals(iterm2 or similar recommended), respectively in:
+* `js/test/fabric/devnetwork/alphapeer`
+* `js/test/fabric/devnetwork/betapeer`
+* `js/test/fabric/devnetwork/gammaapeer`
+* `js/test/fabric/devnetwork/bankpeer`
+* `js/test/fabric/devnetwork/alphaadmin`
+* `js/test/fabric/devnetwork/betaadmin`
+* `js/test/fabric/devnetwork/gammaadmin`
+* `js/test/fabric/devnetwork/bankadmin`
+* __3__ in `go/chaincode/cash`
+
+
+in alphaadmin, run:
+```
+peer channel create -o localhost:7050 -c the-channel -f ../artefacts/channel_creation.tx  --outputBlock ../artefacts/the-channel.block
+```
+
+in alphapeer, betapeer, gammapeer and bankpeer, run:
+```
+peer node start --peer-chaincodedev=true
+```
+
+in alphaadmin, betaadmin, gammaadmin and bankadmin, run:
+```
+bin/peer channel join -b ../artefacts/the-channel.block
+```
+
+### Compiling the chaincode
+Step to reproduce after a Chaincode code change:
+
+maybe `go build` then,
+
+Start the chaincodes program by running each of those command in a separate terminal:
+
+```
+VERIFIER_ENDPOINT=http://localhost:11400/ CORE_CHAINCODE_LOGLEVEL=debug CORE_PEER_ADDRESS=localhost:11752 CORE_CHAINCODE_ID_NAME=k0chaincode:1 ./cash
+VERIFIER_ENDPOINT=http://localhost:12400/ CORE_CHAINCODE_LOGLEVEL=debug CORE_PEER_ADDRESS=localhost:12752 CORE_CHAINCODE_ID_NAME=k0chaincode:1 ./cash
+VERIFIER_ENDPOINT=http://localhost:13400/ CORE_CHAINCODE_LOGLEVEL=debug CORE_PEER_ADDRESS=localhost:13752 CORE_CHAINCODE_ID_NAME=k0chaincode:1 ./cash
+VERIFIER_ENDPOINT=http://localhost:14400/ CORE_CHAINCODE_LOGLEVEL=debug CORE_PEER_ADDRESS=localhost:14752 CORE_CHAINCODE_ID_NAME=k0chaincode:1 ./cash
+```
+
+Finally, in alphaadmin, betaadmin, gammaadmin and bankadmin, run:
+```
+CORE_CHAINCODE_MODE=net peer chaincode install -p github.com/appliedblockchain/zktrading/go/chaincode/cash -n k0chaincode -v 1
+```
+
+### Instanciating and running the chaincode
+
+To instanciate, from the the `js/test/fabric` folder, run:
+```
+DEV_MODE=true mocha test.js
+```
+
+To Run the test, from the the `js/test/fabric` folder, run:
+```
+DEV_MODE=true mocha test.js
+```
+
+### Changing the chaincode
+
+* Stop the chaincode programs
+* run 'go compile' to compile the modified chaincode
+* restart the chaincode programs
+

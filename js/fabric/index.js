@@ -31,9 +31,9 @@ async function makeFabric(logger, config, chaincodeId) {
 
 
   fabric.mint = mint.bind(null, logger, client, channel, chaincodeId, peers,
-                          queryPeer)
+    queryPeer)
   fabric.transfer = transfer.bind(null, logger, client, channel, chaincodeId,
-                                  peers, queryPeer)
+    peers, queryPeer)
   fabric.startEventMonitoring = startEventMonitoring
   fabric.off = off
   return fabric

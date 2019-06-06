@@ -4,7 +4,7 @@ const assert = require('assert')
 const waitForTx = require('./wait-for-tx')
 
 async function sendTransaction(logger, client, channel, chaincodeId, peers,
-                               queryPeer, fcn, params) {
+  queryPeer, fcn, params) {
   const txId = client.newTransactionID()
   const numTargets = 2
   const targets = _.sampleSize(peers, numTargets)
@@ -13,13 +13,15 @@ async function sendTransaction(logger, client, channel, chaincodeId, peers,
     targets.map(t => t._options['grpc.default_authority']).join(', '),
     '...'
   ].join(''))
+
   const endorsementResults = await channel.sendTransactionProposal({
     txId: txId,
     chaincodeId,
     fcn,
     args: params,
     targets
-	})
+  })
+
   const [ proposalResponses, proposal, header ] = endorsementResults
   let allEndorsed = true
   for (let i = 0; i < proposalResponses.length; i = i + 1) {
@@ -34,7 +36,7 @@ async function sendTransaction(logger, client, channel, chaincodeId, peers,
     throw new Error('At least one endorsement failed')
   }
 
-  logger.debug(`Sending transaction to orderer...`)
+  logger.debug('Sending transaction to orderer...')
   const result = await waitForTx(
     channel,
     queryPeer,

@@ -3,19 +3,59 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"math/big"
+	"os"
+
 	"github.com/appliedblockchain/zktrading/go/data"
 	"github.com/appliedblockchain/zktrading/go/serverclient"
 	"github.com/appliedblockchain/zktrading/go/util"
+	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
-	"math/big"
-	"os"
 )
+
+func (t *K0Chaincode) checkIdentity(
+	stub shim.ChaincodeStubInterface,
+	expectedOrg []byte) (error, cid.ClientIdentity) {
+
+	id, err := cid.New(stub)
+	if err != nil {
+		return err, nil
+	}
+
+	mspid, err := id.GetMSPID()
+	if err != nil {
+		return err, nil
+	}
+
+	if mspid != string(expectedOrg) {
+		err := fmt.Errorf("Expected identity to be %s, was %s", string(expectedOrg), mspid)
+		return err, id
+	}
+
+	return nil, id
+}
 
 func (t *K0Chaincode) mint(
 	stub shim.ChaincodeStubInterface,
 	args [][]byte,
 ) pb.Response {
+	minterID, err := stub.GetState("minterID")
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	if len(minterID) == 0 {
+		return shim.Error("minterID is not properly set, minting operation not permitted.")
+	}
+
+	err, _ = t.checkIdentity(stub, minterID)
+
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
 	endpoint, is_set := os.LookupEnv("VERIFIER_ENDPOINT")
 	if !is_set {
 		endpoint = "http://verifier/"

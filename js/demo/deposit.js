@@ -91,7 +91,7 @@ async function run() {
   for (let i = 0; i < values.length; i++) {
     const v = values[i]
 
-    const data = await k0.prepareDeposit(platformState, secretStore, v)
+    const data = await k0.prepareDeposit(platformState, secretStore.getPublicKey(), v)
 
     await secretStore.addNoteInfo(data.cm, data.a_pk, data.rho, data.r, v)
 

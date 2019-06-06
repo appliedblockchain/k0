@@ -2,9 +2,10 @@
 const crypto = require('crypto')
 const u = require('../util')
 
-async function prepareDeposit(server, platformState, secretStore, v) {
+async function prepareDeposit(server, platformState, a_pk, v) {
   u.checkBN(v)
-  const a_pk = secretStore.getPublicKey()
+  u.checkBuf(a_pk, 32)
+
   const rho = crypto.randomBytes(32)
   const r = crypto.randomBytes(48)
 

@@ -25,6 +25,13 @@ Organizations:
     AnchorPeers:
       - Host: peer0.gamma.com
         Port: 7051
+  - &BankCo
+    Name: BankCo
+    ID: BankCoMSP
+    MSPDir: crypto-config/peerOrganizations/bank.com/msp
+    AnchorPeers:
+      - Host: peer0.bank.com
+        Port: 7051
 
 Profiles:
   TheGenesis:
@@ -45,6 +52,7 @@ Profiles:
           - *AlphaCo
           - *BetaCo
           - *GammaCo
+          - *BankCo
   TheChannel:
     Consortium: TheConsortium
     Application:
@@ -52,3 +60,4 @@ Profiles:
         - *AlphaCo
         - *BetaCo
         - *GammaCo
+        - *BankCo
