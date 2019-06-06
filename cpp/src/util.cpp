@@ -88,7 +88,23 @@ std::string zktrade::bytes_to_hex(std::vector<unsigned char> bytes) {
     return stream.str();
 
 }
-std::string zktrade::bytes_to_hex(unsigned char *bytes, size_t len) {
+
+void zktrade::fill_with_bytes_of_hex_string(unsigned char *bytes,
+                                              const std::string& hex)
+{
+    if (strcmp(hex.substr(0,2).c_str(), "0x") != 0) {
+        throw std::invalid_argument("hex string does not start with 0x");
+    }
+    if (hex.length() % 2 != 0) {
+        throw std::invalid_argument("hex string is not of even length");
+    }
+    for (auto i = 0; i < (hex.length() - 2) / 2; i++) {
+        auto byte_string = hex.substr(2 + i * 2, 2);
+        bytes[i] = strtol(byte_string.c_str(), NULL, 16);
+    }
+}
+
+std::string zktrade::bytes_to_hex(const unsigned char *bytes, const size_t len) {
     std::stringstream s;
     s << "0x";
     for (size_t i = 0; i < len; i++) {

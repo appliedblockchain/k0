@@ -102,3 +102,12 @@ TEST(Util, IntBitsConversion) {
         ASSERT_EQ(bits_to_uint64(bv), val);
     }
 }
+
+TEST(Util, HexBytesConversion) {
+    unsigned char bytes[32];
+    fill_with_random_bytes(bytes, 32);
+    auto hex = bytes_to_hex(bytes, 32);
+    unsigned char newbytes[32];
+    fill_with_bytes_of_hex_string(newbytes, hex);
+    EXPECT_EQ(std::memcmp(newbytes, bytes, 32), 0);
+}
