@@ -4,8 +4,8 @@
 #include "scheme/kdf.hpp"
 #include "util.h"
 
-int zktrade::encrypt_note(unsigned char ciphertext[80],
-                          const unsigned char plaintext[32],
+int zktrade::encrypt_note(unsigned char ciphertext[104],
+                          const unsigned char plaintext[88],
                           const unsigned char pk_enc[32])
 {
     if (sodium_init() == -1) {
@@ -29,11 +29,11 @@ int zktrade::encrypt_note(unsigned char ciphertext[80],
 
     // actual ciphertext: ciphertext from 33rd byte (first 32 are epk)
     return crypto_aead_chacha20poly1305_ietf_encrypt(
-        ciphertext+32, NULL, plaintext, 32, NULL, 0, NULL, cipher_nonce, key);
+        ciphertext+32, NULL, plaintext, 88, NULL, 0, NULL, cipher_nonce, key);
 }
 
-int zktrade::decrypt_note(unsigned char plaintext[32],
-                          const unsigned char ciphertext[80],
+int zktrade::decrypt_note(unsigned char plaintext[88],
+                          const unsigned char ciphertext[104],
                           const unsigned char sk_enc[32],
                           const unsigned char pk_enc[32])
 {
@@ -55,5 +55,5 @@ int zktrade::decrypt_note(unsigned char plaintext[32],
 
     // actual ciphertext: ciphertext from 33rd byte (first 32 are epk)
     return crypto_aead_chacha20poly1305_ietf_decrypt(
-        plaintext, NULL, NULL, ciphertext+32, 48, NULL, 0, cipher_nonce, key);
+        plaintext, NULL, NULL, ciphertext+32, 104, NULL, 0, cipher_nonce, key);
 }
