@@ -21,8 +21,8 @@
 template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::Server(
     size_t height,
-                                                                  AbstractServerConnector &connector,
-                                                                  serverVersion_t type)
+    AbstractServerConnector &connector,
+    serverVersion_t type)
     : ZKTradeStubServer(connector, type),
       tree_height{height},
       mt{height} {}
@@ -160,6 +160,17 @@ std::string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::cm(
     bit_vector k = comm_r<CommitmentHashT>(a_pk, rho, r);
     bit_vector commitment = comm_s<CommitmentHashT>(k, v_bits);
     return bits2hex(commitment);
+}
+
+template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+Json::Value zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::decrypt_note(
+    const std::string& ciphertext_hex_str,
+    const std::string& sk_enc_hex_str,
+    const std::string& pk_enc_hex_str)
+{
+    unsigned char ciphertext[104];
+    unsigned char sk_enc[32];
+    unsigned char pk_enc[32];
 }
 
 template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
@@ -373,7 +384,7 @@ template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 Json::Value
 zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::pack256Bits(
     const std::string& input
-)
+    )
 {
     auto packed = pack<FieldT>(hex2bits(input));
     Json::Value result;
@@ -429,31 +440,31 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepareTransfer(
 
     input_note in[]{
         {in_0_address,
-         hex2bits(input_0_a_sk_str),
-         hex2bits(input_0_rho_str),
-         hex2bits(input_0_r_str),
-         strtoul(input_0_v_str.c_str(), NULL, 10),
-         in_0_path_vec},
+                hex2bits(input_0_a_sk_str),
+                hex2bits(input_0_rho_str),
+                hex2bits(input_0_r_str),
+                strtoul(input_0_v_str.c_str(), NULL, 10),
+                in_0_path_vec},
         {in_1_address,
-         hex2bits(input_1_a_sk_str),
-         hex2bits(input_1_rho_str),
-         hex2bits(input_1_r_str),
-         strtoul(input_1_v_str.c_str(), NULL, 10),
-         in_1_path_vec}};
+                hex2bits(input_1_a_sk_str),
+                hex2bits(input_1_rho_str),
+                hex2bits(input_1_r_str),
+                strtoul(input_1_v_str.c_str(), NULL, 10),
+                in_1_path_vec}};
 
     output_note out[]{
         {
             hex2bits(output_0_a_pk_str),
-            hex2bits(output_0_rho_str),
-            hex2bits(output_0_r_str),
-            strtoul(output_0_v_str.c_str(), NULL, 10),
-        },
+                hex2bits(output_0_rho_str),
+                hex2bits(output_0_r_str),
+                strtoul(output_0_v_str.c_str(), NULL, 10),
+                },
         {
             hex2bits(output_1_a_pk_str),
-            hex2bits(output_1_rho_str),
-            hex2bits(output_1_r_str),
-            strtoul(output_1_v_str.c_str(), NULL, 10),
-        }};
+                hex2bits(output_1_rho_str),
+                hex2bits(output_1_r_str),
+                strtoul(output_1_v_str.c_str(), NULL, 10),
+                }};
 
     auto callee_dec_str = hex_to_dec_string(callee_hex_str);
     auto callee = FieldT(callee_dec_str.c_str());
@@ -655,7 +666,7 @@ template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 std::string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::unpack256Bits(
     const std::string& param01,
     const std::string& param02
-) {
+    ) {
     vector<FieldT> elements{FieldT(param01.c_str()), FieldT(param02.c_str())};
     return bits2hex(unpack(elements));
 }
