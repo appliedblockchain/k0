@@ -192,15 +192,9 @@ Json::Value zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::decrypt_n
     fill_with_bytes_of_hex_string(pk_enc, pk_enc_hex_str);
 
     unsigned char decrypted_text[88];
-    cout << endl << "DECRYPTION" << endl;
-    cout << "epk " << bytes_to_hex(epk, 32) << endl;
-    cout << "ciphertext " << bytes_to_hex(ciphertext, 104) << endl;
-    cout << "sk_enc " << bytes_to_hex(sk_enc, 32) << endl;
-    cout << "pk_enc " << bytes_to_hex(pk_enc, 32) << endl;
     Json::Value res;
     if (zktrade::decrypt_note(decrypted_text, epk, ciphertext, sk_enc, pk_enc) == 0) {
         res["success"] = true;
-        cout << "value " << bytes_to_hex(decrypted_text, 88) << endl;
         res["value"] = bytes_to_hex(decrypted_text, 88);
     } else {
         res["success"] = false;
@@ -222,10 +216,6 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::deriveKeys(
     ka_format_private(sk_enc);
     unsigned char pk_enc[32];
     ka_derive_public(pk_enc, sk_enc);
-
-    cout << endl << "KEY DERIVATION" << endl;
-    cout << "sk_enc " << bytes_to_hex(sk_enc, 32) << endl;
-    cout << "pk_enc " << bytes_to_hex(pk_enc, 32) << endl;
 
     Json::Value res;
     res["a_pk"] = bits2hex(a_pk);
@@ -258,24 +248,16 @@ string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::encrypt_note(
 
     unsigned char plaintext[88];
     fill_with_bytes_of_hex_string(plaintext, plaintext_hex_str);
-    cout << endl << "ENCRYPTION" << endl;
-    cout << "pk_enc input            " << pk_enc_hex_str << endl;
     unsigned char pk_enc[32];
     fill_with_bytes_of_hex_string(pk_enc, pk_enc_hex_str);
-    cout << "pk_enc after conversion " << bytes_to_hex(pk_enc, 32) << endl;
 
     unsigned char epk[32];
     unsigned char ciphertext[104];
 
     if (zktrade::encrypt_note(epk, ciphertext, plaintext, pk_enc) == 0) {
-        cout << "plaintext " << bytes_to_hex(plaintext, 88) << endl;
-        cout << "pk_enc " << bytes_to_hex(pk_enc, 32) << endl;
-        cout << "epk " << bytes_to_hex(epk, 32) << endl;
-        cout << "ciphertext " << bytes_to_hex(ciphertext, 104) << endl;
         unsigned char combined_ciphertext[136];
         memcpy(combined_ciphertext, epk, 32);
         memcpy(combined_ciphertext+32, ciphertext, 104);
-        cout << "combined ciphertext " << bytes_to_hex(combined_ciphertext, 136) << endl;
         return bytes_to_hex(combined_ciphertext, 136);
     } else {
         throw JsonRpcException(-32010, "Encryption failed.");
