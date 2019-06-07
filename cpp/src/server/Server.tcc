@@ -12,6 +12,7 @@
 #include "pkutil.cpp"
 #include "printbits.hpp"
 #include "scheme/comms.hpp"
+#include "scheme/ka.hpp"
 #include "scheme/prfs.h"
 #include "serialization.hpp"
 #include "Server.hpp"
@@ -171,6 +172,28 @@ Json::Value zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::decrypt_n
     unsigned char ciphertext[104];
     unsigned char sk_enc[32];
     unsigned char pk_enc[32];
+}
+
+template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+Json::Value
+zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::deriveKeys(
+    const std::string& a_sk_hex)
+{
+    bit_vector a_sk = hex2bits(a_sk_hex);
+    bit_vector a_pk = zktrade::prf_addr_a_pk<CommitmentHashT>(a_sk);
+
+    unsigned char sk_enc[32];
+    auto prfed = prf_addr_sk_enc<CommitmentHashT>(a_sk);
+    fill_with_bits(sk_enc, prfed);
+    ka_format_private(sk_enc);
+    unsigned char pk_enc[32];
+    ka_derive_public(pk_enc, sk_enc);
+
+    Json::Value res;
+    res["a_pk"] = bits2hex(a_pk);
+    res["sk_enc"] = bytes_to_hex(sk_enc, 32);
+    res["pk_enc"] = bytes_to_hex(pk_enc, 32);
+    return res;
 }
 
 template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
@@ -638,6 +661,7 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_withdrawal(
     return result;
 }
 
+// TODO remove (a_pk is also generated in deriveKeys)
 template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prf_addr(
     const string &a_sk_hex)

@@ -15,6 +15,7 @@ class ZKTradeStubServer : public jsonrpc::AbstractServer<ZKTradeStubServer>
             this->bindAndAddMethod(jsonrpc::Procedure("add", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::addI);
             this->bindAndAddMethod(jsonrpc::Procedure("cm", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_STRING,"param03",jsonrpc::JSON_STRING,"param04",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::cmI);
             this->bindAndAddMethod(jsonrpc::Procedure("decrypt_note", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_STRING,"param03",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::decrypt_noteI);
+            this->bindAndAddMethod(jsonrpc::Procedure("deriveKeys", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::deriveKeysI);
             this->bindAndAddMethod(jsonrpc::Procedure("element", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING, "param01",jsonrpc::JSON_INTEGER, NULL), &ZKTradeStubServer::elementI);
             this->bindAndAddMethod(jsonrpc::Procedure("encrypt_note", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_STRING, "param01",jsonrpc::JSON_STRING,"param02",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::encrypt_noteI);
             this->bindAndAddMethod(jsonrpc::Procedure("exampleWitnessAndProof", jsonrpc::PARAMS_BY_POSITION, jsonrpc::JSON_OBJECT, "param01",jsonrpc::JSON_STRING, NULL), &ZKTradeStubServer::exampleWitnessAndProofI);
@@ -43,6 +44,10 @@ class ZKTradeStubServer : public jsonrpc::AbstractServer<ZKTradeStubServer>
         inline virtual void decrypt_noteI(const Json::Value &request, Json::Value &response)
         {
             response = this->decrypt_note(request[0u].asString(), request[1u].asString(), request[2u].asString());
+        }
+        inline virtual void deriveKeysI(const Json::Value &request, Json::Value &response)
+        {
+            response = this->deriveKeys(request[0u].asString());
         }
         inline virtual void elementI(const Json::Value &request, Json::Value &response)
         {
@@ -107,6 +112,7 @@ class ZKTradeStubServer : public jsonrpc::AbstractServer<ZKTradeStubServer>
         virtual Json::Value add(const std::string& param01) = 0;
         virtual std::string cm(const std::string& param01, const std::string& param02, const std::string& param03, const std::string& param04) = 0;
         virtual Json::Value decrypt_note(const std::string& param01, const std::string& param02, const std::string& param03) = 0;
+        virtual Json::Value deriveKeys(const std::string& param01) = 0;
         virtual std::string element(int param01) = 0;
         virtual std::string encrypt_note(const std::string& param01, const std::string& param02) = 0;
         virtual Json::Value exampleWitnessAndProof(const std::string& param01) = 0;

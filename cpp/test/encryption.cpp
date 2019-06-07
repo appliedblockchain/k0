@@ -21,10 +21,8 @@ TEST(Encryption, Functions) {
 
     EXPECT_NE(sodium_init(), -1);
 
-
     unsigned char message[88];
     fill_with_random_bytes(message, 88);
-
 
     auto alice_a_sk = random_bits(256);
     unsigned char alice_sk_enc[32];

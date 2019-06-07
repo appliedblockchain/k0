@@ -68,6 +68,12 @@ target_sources(
         json_conversion.hpp
 )
 
+target_link_libraries(
+        zktrade
+
+        sodium
+)
+
 target_include_directories(
         zktrade
 
