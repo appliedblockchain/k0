@@ -4,7 +4,8 @@
 #include "scheme/kdf.hpp"
 #include "util.h"
 
-int zktrade::encrypt_note(unsigned char ciphertext[104],
+int zktrade::encrypt_note(unsigned char epk[32],
+                          unsigned char ciphertext[104],
                           const unsigned char plaintext[88],
                           const unsigned char pk_enc[32])
 {
@@ -14,25 +15,23 @@ int zktrade::encrypt_note(unsigned char ciphertext[104],
     unsigned char esk[32];
     fill_with_random_bytes(esk, 32);
 
-    // Derive DH secret from epk and esk. epk is first 32 bits of ciphertext
-    ka_derive_public(ciphertext, esk);
+    ka_derive_public(epk, esk);
 
     unsigned char dhsecret[32];
     ka_agree(dhsecret, esk, pk_enc);
 
     unsigned char key[32];
-    // epk: first 32 bits of ciphertext
-    kdf(key, dhsecret, ciphertext, pk_enc);
+    kdf(key, dhsecret, epk, pk_enc);
 
     const auto nonce_len = crypto_aead_chacha20poly1305_IETF_NPUBBYTES;
     unsigned char cipher_nonce[nonce_len] = {};
 
-    // actual ciphertext: ciphertext from 33rd byte (first 32 are epk)
     return crypto_aead_chacha20poly1305_ietf_encrypt(
-        ciphertext+32, NULL, plaintext, 88, NULL, 0, NULL, cipher_nonce, key);
+        ciphertext, NULL, plaintext, 88, NULL, 0, NULL, cipher_nonce, key);
 }
 
 int zktrade::decrypt_note(unsigned char plaintext[88],
+                          const unsigned char epk[32],
                           const unsigned char ciphertext[104],
                           const unsigned char sk_enc[32],
                           const unsigned char pk_enc[32])
@@ -43,17 +42,14 @@ int zktrade::decrypt_note(unsigned char plaintext[88],
 
     unsigned char dhsecret[32];
 
-    // Derive DH secret from sk_enc and epk. epk is first 32 bits of ciphertext
-    ka_agree(dhsecret, sk_enc, ciphertext);
+    ka_agree(dhsecret, sk_enc, epk);
 
     unsigned char key[32];
-    // epk: first 32 bits of ciphertext
-    kdf(key, dhsecret, ciphertext, pk_enc);
+    kdf(key, dhsecret, epk, pk_enc);
 
     const auto nonce_len = crypto_aead_chacha20poly1305_IETF_NPUBBYTES;
     unsigned char cipher_nonce[nonce_len] = {};
 
-    // actual ciphertext: ciphertext from 33rd byte (first 32 are epk)
     return crypto_aead_chacha20poly1305_ietf_decrypt(
-        plaintext, NULL, NULL, ciphertext+32, 104, NULL, 0, cipher_nonce, key);
+        plaintext, NULL, NULL, ciphertext, 104, NULL, 0, cipher_nonce, key);
 }

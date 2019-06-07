@@ -48,14 +48,15 @@ TEST(Encryption, Functions) {
     unsigned char carol_pk_enc[32];
     ka_derive_public(carol_pk_enc, carol_sk_enc);
 
+    unsigned char epk[32];
     unsigned char ciphertext[104];
-    EXPECT_EQ(encrypt_note(ciphertext, message, bob_pk_enc), 0);
+    EXPECT_EQ(encrypt_note(epk, ciphertext, message, bob_pk_enc), 0);
 
     unsigned char decrypted_text[88];
-    EXPECT_EQ(decrypt_note(decrypted_text, ciphertext, carol_sk_enc,
+    EXPECT_EQ(decrypt_note(decrypted_text, epk, ciphertext, carol_sk_enc,
                            carol_pk_enc),
               -1);
-    EXPECT_EQ(decrypt_note(decrypted_text, ciphertext, bob_sk_enc,
+    EXPECT_EQ(decrypt_note(decrypted_text, epk, ciphertext, bob_sk_enc,
                            bob_pk_enc),
               0);
 

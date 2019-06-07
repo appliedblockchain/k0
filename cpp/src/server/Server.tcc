@@ -12,6 +12,7 @@
 #include "pkutil.cpp"
 #include "printbits.hpp"
 #include "scheme/comms.hpp"
+#include "scheme/note_encryption.hpp"
 #include "scheme/ka.hpp"
 #include "scheme/prfs.h"
 #include "serialization.hpp"
@@ -165,13 +166,46 @@ std::string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::cm(
 
 template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 Json::Value zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::decrypt_note(
-    const std::string& ciphertext_hex_str,
+    const std::string& combined_ciphertext_hex_str,
     const std::string& sk_enc_hex_str,
     const std::string& pk_enc_hex_str)
 {
+    if (combined_ciphertext_hex_str.length() != 2 + (32 + 104) * 2) {
+        throw JsonRpcException(-32602, "Invalid ciphertext length");
+    }
+    if (sk_enc_hex_str.length() != 2 + 32 * 2) {
+        throw JsonRpcException(-32602, "Invalid sk_enc length");
+    }
+    if (pk_enc_hex_str.length() != 2 + 32 * 2) {
+        throw JsonRpcException(-32602, "Invalid pk_enc length");
+    }
+
+    unsigned char combined_ciphertext[136];
+    fill_with_bytes_of_hex_string(combined_ciphertext, combined_ciphertext_hex_str);
+    unsigned char epk[32];
+    memcpy(epk, combined_ciphertext, 32);
     unsigned char ciphertext[104];
+    memcpy(ciphertext, combined_ciphertext + 32, 104);
     unsigned char sk_enc[32];
+    fill_with_bytes_of_hex_string(sk_enc, sk_enc_hex_str);
     unsigned char pk_enc[32];
+    fill_with_bytes_of_hex_string(pk_enc, pk_enc_hex_str);
+
+    unsigned char decrypted_text[88];
+    cout << endl << "DECRYPTION" << endl;
+    cout << "epk " << bytes_to_hex(epk, 32) << endl;
+    cout << "ciphertext " << bytes_to_hex(ciphertext, 104) << endl;
+    cout << "sk_enc " << bytes_to_hex(sk_enc, 32) << endl;
+    cout << "pk_enc " << bytes_to_hex(pk_enc, 32) << endl;
+    Json::Value res;
+    if (zktrade::decrypt_note(decrypted_text, epk, ciphertext, sk_enc, pk_enc) == 0) {
+        res["success"] = true;
+        cout << "value " << bytes_to_hex(decrypted_text, 88) << endl;
+        res["value"] = bytes_to_hex(decrypted_text, 88);
+    } else {
+        res["success"] = false;
+    }
+    return res;
 }
 
 template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
@@ -189,6 +223,10 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::deriveKeys(
     unsigned char pk_enc[32];
     ka_derive_public(pk_enc, sk_enc);
 
+    cout << endl << "KEY DERIVATION" << endl;
+    cout << "sk_enc " << bytes_to_hex(sk_enc, 32) << endl;
+    cout << "pk_enc " << bytes_to_hex(pk_enc, 32) << endl;
+
     Json::Value res;
     res["a_pk"] = bits2hex(a_pk);
     res["sk_enc"] = bytes_to_hex(sk_enc, 32);
@@ -205,6 +243,43 @@ string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::element(
         throw JsonRpcException(-32602, "Address too big");
     }
     return bits2hex(mt[address]);
+}
+
+template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::encrypt_note(
+    const string& plaintext_hex_str, const string& pk_enc_hex_str)
+{
+    if (plaintext_hex_str.length() != 2 + 88 * 2) {
+        throw JsonRpcException(-32602, "Invalid plaintext length");
+    }
+    if (pk_enc_hex_str.length() != 2 + 32 * 2) {
+        throw JsonRpcException(-32602, "Invalid pk_enc length");
+    }
+
+    unsigned char plaintext[88];
+    fill_with_bytes_of_hex_string(plaintext, plaintext_hex_str);
+    cout << endl << "ENCRYPTION" << endl;
+    cout << "pk_enc input            " << pk_enc_hex_str << endl;
+    unsigned char pk_enc[32];
+    fill_with_bytes_of_hex_string(pk_enc, pk_enc_hex_str);
+    cout << "pk_enc after conversion " << bytes_to_hex(pk_enc, 32) << endl;
+
+    unsigned char epk[32];
+    unsigned char ciphertext[104];
+
+    if (zktrade::encrypt_note(epk, ciphertext, plaintext, pk_enc) == 0) {
+        cout << "plaintext " << bytes_to_hex(plaintext, 88) << endl;
+        cout << "pk_enc " << bytes_to_hex(pk_enc, 32) << endl;
+        cout << "epk " << bytes_to_hex(epk, 32) << endl;
+        cout << "ciphertext " << bytes_to_hex(ciphertext, 104) << endl;
+        unsigned char combined_ciphertext[136];
+        memcpy(combined_ciphertext, epk, 32);
+        memcpy(combined_ciphertext+32, ciphertext, 104);
+        cout << "combined ciphertext " << bytes_to_hex(combined_ciphertext, 136) << endl;
+        return bytes_to_hex(combined_ciphertext, 136);
+    } else {
+        throw JsonRpcException(-32010, "Encryption failed.");
+    }
 }
 
 template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>

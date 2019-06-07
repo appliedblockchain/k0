@@ -145,4 +145,3 @@ namespace zktrade {
 }
 
 #include "Server.tcc"
-#include "encrypt_note.tcc"

@@ -6,12 +6,14 @@ using namespace libff;
 
 namespace zktrade {
 
-int encrypt_note(unsigned char ciphertext[80],
-                 const unsigned char plaintext[32],
+int encrypt_note(unsigned char epk[32],
+                 unsigned char ciphertext[104],
+                 const unsigned char plaintext[88],
                  const unsigned char pk_enc[32]);
 
-int decrypt_note(unsigned char plaintext[32],
-                 const unsigned char ciphertext[80],
+int decrypt_note(unsigned char plaintext[88],
+                 const unsigned char epk[32],
+                 const unsigned char ciphertext[104],
                  const unsigned char sk_enc[32],
                  const unsigned char pk_enc[32]);
 
