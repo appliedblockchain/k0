@@ -283,7 +283,7 @@ describe('Ethereum integration test replicating the K0 demo', function () {
     for (let i = 0; i < values.length; i++) {
       const v = values[i]
 
-      const data = await alice.k0.prepareDeposit(
+      const data = await user.k0.prepareDeposit(
         user.platformState,
         user.secretStore.getPublicKey(),
         v
