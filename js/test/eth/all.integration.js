@@ -4,7 +4,7 @@ const _ = require('lodash')
 const BN = require('bn.js')
 const crypto = require('crypto')
 const log4js = require('log4js')
-const { expect } = require('chai')
+const { expect } = require('code')
 const waitPort = require('wait-port')
 const jayson = require('jayson/promise')
 

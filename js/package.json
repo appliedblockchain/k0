@@ -4,7 +4,6 @@
   "dependencies": {
     "@appliedblockchain/not-a-logger": "^1.0.1",
     "bip39": "^2.5.0",
-    "chai": "^4.2.0",
     "csv-load-sync": "^1.0.0",
     "ethereumjs-wallet": "^0.6.3",
     "fabric-client": "^1.2.1",
