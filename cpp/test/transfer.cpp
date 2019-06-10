@@ -28,7 +28,7 @@ TEST(TransferCircuit, CannotCreateMoney) {
         in[i].a_sk = random_bits(256);
         in[i].rho = random_bits(256);
         in[i].r = random_bits(384);
-        auto a_pk = prf_addr<CommitmentHashT>(in[i].a_sk);
+        auto a_pk = prf_addr_a_pk<CommitmentHashT>(in[i].a_sk);
         auto k = comm_r<CommitmentHashT>(a_pk, in[i].rho, in[i].r);
         auto cm = comm_s<CommitmentHashT>(k, uint64_to_bits(in[i].v));
         mt.add(cm);
