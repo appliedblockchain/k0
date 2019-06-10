@@ -289,21 +289,14 @@ describe('Ethereum integration test replicating the K0 demo', function () {
         v
       )
 
-      await user.secretStore.addNoteInfo(
-        data.cm,
-        data.a_pk,
-        data.rho,
-        data.r,
-        v)
-
-      const dataData = crypto.randomBytes(88)
+      const noteData = makeData(data.a_pk, data.rho, data.r, v)
       const waitForDeposit = testUtil.awaitEvent(user.emitter, 'depositProcessed')
       const depositTx = await user.k0Eth.deposit(
         u.hex2buf(user.account.privateKey),
         v,
         data.k,
         data.cm,
-        dataData,
+        noteData,
         data.nextRoot,
         data.commitmentProofAffine,
         data.additionProofAffine
