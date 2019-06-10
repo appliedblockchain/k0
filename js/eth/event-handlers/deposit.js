@@ -11,6 +11,7 @@ async function handleDeposit(eventEmitter, event) {
     'deposit',
     u.hex2buf(event.transactionHash),
     cm,
+    u.hex2buf(event.returnValues.data),
     newRoot
   )
 }

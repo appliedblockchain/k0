@@ -296,12 +296,15 @@ describe('Ethereum integration test replicating the K0 demo', function () {
         data.r,
         v)
 
+      const dataData = crypto.randomBytes(88)
+      console.log('sending data', dataData)
       const waitForDeposit = testUtil.awaitEvent(user.emitter, 'depositProcessed')
       const depositTx = await user.k0Eth.deposit(
         u.hex2buf(user.account.privateKey),
         v,
         data.k,
         data.cm,
+        dataData,
         data.nextRoot,
         data.commitmentProofAffine,
         data.additionProofAffine
