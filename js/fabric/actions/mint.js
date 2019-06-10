@@ -6,7 +6,8 @@ const u = require('../../util')
 
 async function mint(logger, client, channel, chaincodeId, peers, queryPeer, k,
                     v, cm, data, newRoot, commitmentProof, additionProof) {
-  [k,cm,newRoot].forEach(buf => u.checkBuf(k, 32))
+  [ k, cm, newRoot ].forEach(buf => u.checkBuf(buf, 32))
+  u.checkBuf(data)
   u.checkBN(v)
 	const params = [
     k,

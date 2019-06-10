@@ -15,7 +15,6 @@ function decodeData(data) {
 
 async function handleTransfer(platformState, secretStore, txnid, in0sn, in1sn,
                               out0cm, out1cm, out0data, out1data, nextRoot) {
-
   const outputs = [
     [ out0cm, out0data ],
     [ out1cm, out1data ]

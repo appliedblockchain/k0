@@ -113,10 +113,12 @@ describe('Fabric workflow', function () {
           'mintProcessed',
           100
         )
+        const noteData = crypto.randomBytes(176)
         const depositTx = await k0Fabrics[BANK].mint( // eslint-disable-line
           data.k,
           v,
           data.cm,
+          noteData,
           data.nextRoot,
           data.commitmentProofJacobian,
           data.additionProofJacobian
@@ -148,7 +150,9 @@ describe('Fabric workflow', function () {
     const sum = _.map(inputs, 'v').reduce((acc, el) => acc.add(el), new BN(0))
     const thousand = new BN(1000)
     const in0addr = platformStates.alpha.indexOfCM(inputs[0].cm)
+    expect(in0addr).to.not.be.null()
     const in1addr = platformStates.alpha.indexOfCM(inputs[1].cm)
+    expect(in1addr).to.not.be.null()
 
     const out0 = {
       a_pk: publicKeys.gamma,

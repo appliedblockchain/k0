@@ -17,12 +17,13 @@ function initEventHandlers(channelEventHub, chaincodeId, eventEmitter) {
     var item = queue.shift()
 
     if (item.type === 'Mint') {
-      u.checkBuf(item.payload, 64)
+      u.checkBuf(item.payload, 240)
       eventEmitter.emit(
         'mint',
         item.txnid,
-        item.payload.slice(0,32),
-        item.payload.slice(32)
+        item.payload.slice(0, 32),
+        item.payload.slice(32, 208),
+        item.payload.slice(208)
       )
     } else if (item.type === 'Transfer') {
       u.checkBuf(item.payload, 512)
