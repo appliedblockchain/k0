@@ -34,7 +34,6 @@ async function instantiateOrUpgrade(clientBundle, endorsementPolicy, chaincodeId
       && proposalResponses[0].response
       && proposalResponses[0].response.status === 200) {
     // everything ok
-    console.log('ALL OK', proposalResponses[0])
   } else {
     console.log(proposalResponses[0])
     eh.close()

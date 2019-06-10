@@ -40,6 +40,12 @@ func (t *K0Chaincode) mint(
 	stub shim.ChaincodeStubInterface,
 	args [][]byte,
 ) pb.Response {
+	expectedArgCount := 7
+	if len(args) != expectedArgCount {
+		str := "Incorrect number of arguments. Expecting %d, got: %d"
+		return shim.Error(fmt.Sprintf(str, expectedArgCount, len(args)))
+	}
+
 	minterID, err := stub.GetState("minterID")
 
 	if err != nil {
@@ -63,7 +69,8 @@ func (t *K0Chaincode) mint(
 	k, err := util.VariableToFixed32(args[0])
 	v, err := util.VariableToFixed8(args[1])
 	cm, err := util.VariableToFixed32(args[2])
-	newRoot, err := util.VariableToFixed32(args[3])
+	noteData, err := util.VariableToFixed176(args[3])
+	newRoot, err := util.VariableToFixed32(args[4])
 	k_elems, err := serverclient.Pack256Bits(endpoint, k)
 	cm_elems, err := serverclient.Pack256Bits(endpoint, cm)
 	if err != nil {
@@ -71,10 +78,10 @@ func (t *K0Chaincode) mint(
 		return shim.Error(fmt.Sprintf(msg, err.Error()))
 	}
 	var commitmentProof data.ProofJacobian
-	err = json.Unmarshal(args[4], &commitmentProof)
+	err = json.Unmarshal(args[5], &commitmentProof)
 
 	var additionProof data.ProofJacobian
-	err = json.Unmarshal(args[5], &additionProof)
+	err = json.Unmarshal(args[6], &additionProof)
 
 	publicInputs := []*big.Int{
 		k_elems[0],
@@ -100,8 +107,12 @@ func (t *K0Chaincode) mint(
 		return shim.Error(err.Error())
 	}
 	logger.Infof("Set root to %s.", util.BytesToHex32(newRoot))
-
-	err = stub.SetEvent("Mint", append(cm[:], newRoot[:]...))
+	eventVals := util.ConcatByteSlices([][]byte{
+		cm[:],
+		noteData[:],
+		newRoot[:],
+	})
+	err = stub.SetEvent("Mint", eventVals)
 	if err != nil {
 		return shim.Error(err.Error())
 	}

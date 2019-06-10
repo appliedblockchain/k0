@@ -13,15 +13,17 @@ async function deposit(
   v,
   k,
   cm,
+  data,
   nextRoot,
   commitmentProof,
   additionProof
 ) {
-  assert(Buffer.isBuffer(privateKey) && privateKey.length === 32)
-  assert(BN.isBN(v))
-  assert(Buffer.isBuffer(k) && k.length === 32)
-  assert(Buffer.isBuffer(cm) && k.length === 32)
-  assert(Buffer.isBuffer(nextRoot))
+  u.checkBuf(privateKey, 32)
+  u.checkBN(v)
+  u.checkBuf(k, 32)
+  u.checkBuf(cm, 32)
+  u.checkBuf(data)
+  u.checkBuf(nextRoot, 32)
 
   const commitmentProofCompact = flattenProof(commitmentProof)
   const additionProofCompact = flattenProof(additionProof)
@@ -30,6 +32,7 @@ async function deposit(
     v.toString(),
     (await u.pack256Bits(k)).map(u.bn2string),
     (await u.pack256Bits(cm)).map(u.bn2string),
+    u.buf2hex(data),
     (await u.pack256Bits(nextRoot)).map(u.bn2string),
     commitmentProofCompact.map(u.bn2string),
     additionProofCompact.map(u.bn2string)

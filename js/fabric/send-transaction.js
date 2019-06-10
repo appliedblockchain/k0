@@ -10,7 +10,13 @@ async function sendTransaction(logger, client, channel, chaincodeId, peers,
   const targets = _.sampleSize(peers, numTargets)
   logger.debug([
     'Sending proposal to ',
-    targets.map(t => t._options['grpc.default_authority']).join(', '),
+    targets.map(t => {
+      let text = t._url
+      if (t._options['grpc.default_authority'] !== undefined) {
+        text += " " + t._options['grpc.default_authority']
+      }
+      return text
+    }).join(', '),
     '...'
   ].join(''))
 

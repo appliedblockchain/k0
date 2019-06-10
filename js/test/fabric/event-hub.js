@@ -20,7 +20,7 @@ function makeEventHub(platformState, secretStore, platform) {
     var item = queue.shift()
 
     if (item.type === 'mint'){
-      await handleMint(platformState, item.txnid, ...item.params)
+      await handleMint(platformState, secretStore, item.txnid, ...item.params)
       eh.emit('mintProcessed', item.txnid)
     } else if (item.type === 'transfer') {
       await handleTransfer(

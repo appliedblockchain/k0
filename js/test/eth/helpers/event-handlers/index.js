@@ -4,7 +4,10 @@ const EventEmitter = require('events')
 
 function initEventHandlers(platformState, secretStore, platform) {
   const emitter = new EventEmitter()
-  platform.on('deposit', handleDeposit.bind(null, platformState, emitter))
+  platform.on(
+    'deposit',
+    handleDeposit.bind(null, platformState, secretStore, emitter)
+  )
   platform.on(
     'transfer',
     handleTransfer.bind(null, platformState, secretStore, emitter)

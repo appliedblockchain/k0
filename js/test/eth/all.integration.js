@@ -4,7 +4,7 @@ const _ = require('lodash')
 const BN = require('bn.js')
 const crypto = require('crypto')
 const log4js = require('log4js')
-const { expect } = require('chai')
+const { expect } = require('code')
 const waitPort = require('wait-port')
 const jayson = require('jayson/promise')
 
@@ -283,25 +283,20 @@ describe('Ethereum integration test replicating the K0 demo', function () {
     for (let i = 0; i < values.length; i++) {
       const v = values[i]
 
-      const data = await alice.k0.prepareDeposit(
+      const data = await user.k0.prepareDeposit(
         user.platformState,
         user.secretStore.getPublicKey(),
         v
       )
 
-      await user.secretStore.addNoteInfo(
-        data.cm,
-        data.a_pk,
-        data.rho,
-        data.r,
-        v)
-
+      const noteData = makeData(data.a_pk, data.rho, data.r, v)
       const waitForDeposit = testUtil.awaitEvent(user.emitter, 'depositProcessed')
       const depositTx = await user.k0Eth.deposit(
         u.hex2buf(user.account.privateKey),
         v,
         data.k,
         data.cm,
+        noteData,
         data.nextRoot,
         data.commitmentProofAffine,
         data.additionProofAffine

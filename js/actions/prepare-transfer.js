@@ -30,9 +30,6 @@ async function prepareTransfer(
     }
   })
 
-
-
-
   const outputs = [ out0data, out1data ].map(data => {
     u.checkBuf(data.a_pk, 32)
     u.checkBuf(data.rho, 32)
