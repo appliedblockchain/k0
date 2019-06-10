@@ -7,7 +7,8 @@ If you want to run the Fabric tests/demo, the project should be checked out in y
 [C++ tests](#c-tests)  
 [ZKP setup](#zkp-setup-needed-for-all-tests-and-demos)  
 [Ethereum demo](#ethereum-demo)  
-[Fabric integration tests](#fabric-integration-tests)
+[Ethereum integration tests](#ethereum-integration-tests)
+[Fabric integration tests](#fabric-integration-tests)  
 [Fabric dev mode](#fabric-dev-mode)
 
 ## Set up the project dependencies
@@ -181,9 +182,7 @@ node wallet carol
 [Video example of how to use the demo](https://www.youtube.com/watch?v=h2KyMOdnbtI)
 
 
-## Ethereum test
-
-### Running the Ethereum integration tests
+## Ethereum integration tests
 
 ZKP setup as described [above](#zkp-setup-needed-for-all-tests-and-demos)
 
