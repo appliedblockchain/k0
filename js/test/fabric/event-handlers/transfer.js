@@ -1,17 +1,8 @@
 'use strict'
 
 const BN = require('bn.js')
+const decodeData = require('./decode-data')
 const u = require('../../../util')
-
-function decodeData(data) {
-  u.checkBuf(data, 176)
-  return {
-    a_pk: data.slice(0, 32),
-    rho: data.slice(32, 64),
-    r: data.slice(64, 112),
-    v: new BN(data.slice(112, 176).toString('hex'), 'hex', 'le')
-  }
-}
 
 async function handleTransfer(platformState, secretStore, txnid, in0sn, in1sn,
                               out0cm, out1cm, out0data, out1data, nextRoot) {

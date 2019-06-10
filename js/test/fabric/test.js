@@ -105,15 +105,12 @@ describe('Fabric workflow', function () {
         const data = await k0s[BANK].prepareDeposit(
           platformStates[BANK], secretStores[who].getPublicKey(), v
         )
-        await secretStores[who].addNoteInfo(
-          data.cm, data.a_pk, data.rho, data.r, v
-        )
         const mintProcessedPromise = testUtil.awaitEvent(
           events[BANK],
           'mintProcessed',
           100
         )
-        const noteData = crypto.randomBytes(176)
+        const noteData = makeData(data.a_pk, data.rho, data.r, v)
         const depositTx = await k0Fabrics[BANK].mint( // eslint-disable-line
           data.k,
           v,
@@ -124,8 +121,6 @@ describe('Fabric workflow', function () {
           data.additionProofJacobian
         )
         await mintProcessedPromise
-
-
       }
       console.inspect(`Note for org ${i} MINTED`)
     }
