@@ -7,13 +7,20 @@ const getAvailableNotes = require('./get-available-notes')
 const getNoteInfo = require('./get-note-info')
 const getPrivateKey = require('./get-private-key')
 const getPublicKey = require('./get-public-key')
+const makeClient = require('../client')
 const spit = require('./spit')
 const u = require('../util')
 const conv = require('./conversion')
 
-function makeSecretStore(privateKey, publicKey, noteInfos) {
+async function makeSecretStore(serverPort, privateKey, noteInfos) {
+  console.log({ serverPort })
+  assert(!isNaN(serverPort), `server port ${serverPort} is not a number`)
   u.checkBuf(privateKey, 32)
-  u.checkBuf(publicKey, 32)
+  const server = makeClient(serverPort)
+  const derivedKeys = await server.deriveKeys(privateKey)
+  console.log(derivedKeys)
+
+  const publicKey = derivedKeys.a_pk
 
   let cms = Immutable.Map() // eslint-disable-line
   if (noteInfos) {

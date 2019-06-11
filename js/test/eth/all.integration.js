@@ -102,7 +102,6 @@ describe('Ethereum integration test replicating the K0 demo', function () {
       tokenMaster
     )
 
-
     // ERC-721 token representing cars
     carToken = await testUtil.deployContract(
       web3,
@@ -216,13 +215,9 @@ describe('Ethereum integration test replicating the K0 demo', function () {
     bob.k0 = await makeK0(k0Ports[1])
     carol.k0 = await makeK0(k0Ports[2])
 
-    alice.publicKey = await alice.k0.prfAddr(alice.secretKey)
-    bob.publicKey = await bob.k0.prfAddr(bob.secretKey)
-    carol.publicKey = await carol.k0.prfAddr(carol.secretKey)
-
-    alice.secretStore = makeSecretStore(alice.secretKey, alice.publicKey)
-    bob.secretStore = makeSecretStore(bob.secretKey, bob.publicKey)
-    carol.secretStore = makeSecretStore(carol.secretKey, carol.publicKey)
+    alice.secretStore = await makeSecretStore(k0Ports[0], alice.secretKey)
+    bob.secretStore = await makeSecretStore(k0Ports[1], bob.secretKey)
+    carol.secretStore = await makeSecretStore(k0Ports[2], carol.secretKey)
 
     alice.emitter = initEventHandlers(
       alice.platformState,
