@@ -6,7 +6,7 @@ const u = require('../../../util')
 async function handleMint(platformState, secretStore, txnid, cm, data,
                           nextRoot) {
   const info = decodeData(data)
-  if (info.a_pk.equals(secretStore.getPublicKey())) {
+  if (info.a_pk.equals(secretStore.getAPk())) {
     secretStore.addNoteInfo(
       cm,
       info.a_pk,

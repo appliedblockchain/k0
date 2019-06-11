@@ -57,7 +57,7 @@ async function run() {
     u.hex2buf(dollarCoin._address),
     u.hex2buf(dollarCoin.methods.approve(addresses.MVPPT, v1.add(v2).toString()).encodeABI()),
     5000000,
-    wallet.getPrivateKey()
+    wallet.getASk()
   )
   await web3.eth.sendSignedTransaction(u.buf2hex(approveTx))
 
@@ -67,11 +67,11 @@ async function run() {
   for (let i = 0; i < 1; i++) {
     const v = values[i]
 
-    const data = await k0.prepareDeposit(platformState, secretStore.getPublicKey(), v)
+    const data = await k0.prepareDeposit(platformState, secretStore.getAPk(), v)
     await secretStore.addNoteInfo(data.cm, data.rho, data.r, v)
 
     const depositTx = await k0Eth.deposit(
-      wallet.getPrivateKey(),
+      wallet.getASk(),
       v,
       data.k,
       data.cm,

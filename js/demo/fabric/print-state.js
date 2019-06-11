@@ -11,7 +11,7 @@ async function printState(secretStore, addressBook, platform, platformState) {
     colAligns: ['right', 'left', 'left', 'right', 'left']
   });
   const state = platformState.currentState()
-  const ourPublicKey = secretStore.getPublicKey()
+  const ourPublicKey = secretStore.getAPk()
   for (let i = 0; i < state.cmList.length; i++) {
     const cm = state.cmList[i]
     const info = secretStore.getNoteInfo(cm)

@@ -46,8 +46,8 @@ async function run() {
     u.hex2buf(secretStoreData.privateKey),
     u.hex2buf(secretStoreData.publicKey)
   )
-  console.log('private key', u.buf2hex(secretStore.getPrivateKey()))
-  console.log('public key', u.buf2hex(secretStore.getPublicKey()))
+  console.log('private key', u.buf2hex(secretStore.getASk()))
+  console.log('public key', u.buf2hex(secretStore.getAPk()))
   initEventHandlers(platformState, secretStore, k0Eth)
 
   const k0 = await makeK0(serverPorts[who])
@@ -84,19 +84,19 @@ async function run() {
       dollarCoin.methods.approve(addresses.MVPPT, total.toString()).encodeABI()
     ),
     5000000,
-    wallet.getPrivateKey()
+    wallet.getASk()
   )
   await web3.eth.sendSignedTransaction(u.buf2hex(approveTx))
 
   for (let i = 0; i < values.length; i++) {
     const v = values[i]
 
-    const data = await k0.prepareDeposit(platformState, secretStore.getPublicKey(), v)
+    const data = await k0.prepareDeposit(platformState, secretStore.getAPk(), v)
 
     await secretStore.addNoteInfo(data.cm, data.a_pk, data.rho, data.r, v)
 
     const depositTx = await k0Eth.deposit(
-      wallet.getPrivateKey(),
+      wallet.getASk(),
       v,
       data.k,
       data.cm,

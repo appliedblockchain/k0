@@ -1,4 +1,5 @@
 const EventEmitter = require('events')
+const decryptNote = require('./actions/decrypt-note')
 const initEventHandlers = require('./init-event-handlers')
 const makeClient = require('./client')
 const mint = require('./actions/mint')

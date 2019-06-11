@@ -52,7 +52,7 @@ describe('Fabric workflow', function () {
       await platformStates[who].reset()
       k0s[who] = await makeK0(config.proverPort)
       secretStores[who] = await generateSecretStore(k0s[who])
-      publicKeys[who] = secretStores[who].getPublicKey()
+      publicKeys[who] = secretStores[who].getAPk()
       k0Fabrics[who] = await makeFabricPlatform(
         logger,
         config,
@@ -103,7 +103,7 @@ describe('Fabric workflow', function () {
 
         // In fabric, a single bank authority issues secret notes
         const data = await k0s[BANK].prepareDeposit(
-          platformStates[BANK], secretStores[who].getPublicKey(), v
+          platformStates[BANK], secretStores[who].getAPk(), v
         )
         const mintProcessedPromise = testUtil.awaitEvent(
           events[BANK],
