@@ -69,7 +69,7 @@ func (t *K0Chaincode) mint(
 	k, err := util.VariableToFixed32(args[0])
 	v, err := util.VariableToFixed8(args[1])
 	cm, err := util.VariableToFixed32(args[2])
-	noteData, err := util.VariableToFixed176(args[3])
+	noteData, err := util.VariableToFixed136(args[3])
 	newRoot, err := util.VariableToFixed32(args[4])
 	k_elems, err := serverclient.Pack256Bits(endpoint, k)
 	cm_elems, err := serverclient.Pack256Bits(endpoint, cm)
