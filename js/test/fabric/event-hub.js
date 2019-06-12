@@ -5,7 +5,7 @@ const u = require('../../util')
 
 class EventHub extends EventEmitter {}
 
-function makeEventHub(platformState, secretStore, platform) {
+function makeEventHub(platformState, secretStore, k0, platform) {
   let queue = []
 
   let processing = false
@@ -20,12 +20,19 @@ function makeEventHub(platformState, secretStore, platform) {
     var item = queue.shift()
 
     if (item.type === 'mint'){
-      await handleMint(platformState, secretStore, item.txnid, ...item.params)
+      await handleMint(
+        platformState,
+        secretStore,
+        k0,
+        item.txnid,
+        ...item.params
+      )
       eh.emit('mintProcessed', item.txnid)
     } else if (item.type === 'transfer') {
       await handleTransfer(
         platformState,
         secretStore,
+        k0,
         item.txnid,
         ...item.params
       )

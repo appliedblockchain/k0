@@ -22,7 +22,7 @@ async function deposit(
   u.checkBN(v)
   u.checkBuf(k, 32)
   u.checkBuf(cm, 32)
-  u.checkBuf(data)
+  u.checkBuf(data, 136)
   u.checkBuf(nextRoot, 32)
 
   const commitmentProofCompact = flattenProof(commitmentProof)

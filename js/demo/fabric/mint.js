@@ -36,8 +36,8 @@ async function run() {
 
   const secretStoreData = require(`./${who}.secrets.json`)
   const secretStore = makeSecretStore(secretStoreData)
-  console.log('private key', secretStore.getPrivateKey())
-  console.log('public key', secretStore.getPublicKey())
+  console.log('private key', secretStore.getASk())
+  console.log('public key', secretStore.getAPk())
   initEventHandlers(platformState, secretStore, k0Fabric)
 
   const k0 = await makeK0(serverPorts[who])
@@ -51,7 +51,7 @@ async function run() {
   for (let i = 0; i < values.length; i++) {
     const v = values[i]
 
-    const data = await k0.prepareDeposit(platformState, secretStore.getPublicKey(), v)
+    const data = await k0.prepareDeposit(platformState, secretStore.getAPk(), v)
     await secretStore.addNoteInfo(data.cm, data.a_pk, data.rho, data.r, v)
 
     const depositTx = await k0Fabric.mint(

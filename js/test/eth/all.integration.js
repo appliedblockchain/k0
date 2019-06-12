@@ -102,7 +102,6 @@ describe('Ethereum integration test replicating the K0 demo', function () {
       tokenMaster
     )
 
-
     // ERC-721 token representing cars
     carToken = await testUtil.deployContract(
       web3,
@@ -216,30 +215,29 @@ describe('Ethereum integration test replicating the K0 demo', function () {
     bob.k0 = await makeK0(k0Ports[1])
     carol.k0 = await makeK0(k0Ports[2])
 
-    alice.publicKey = await alice.k0.prfAddr(alice.secretKey)
-    bob.publicKey = await bob.k0.prfAddr(bob.secretKey)
-    carol.publicKey = await carol.k0.prfAddr(carol.secretKey)
-
-    alice.secretStore = makeSecretStore(alice.secretKey, alice.publicKey)
-    bob.secretStore = makeSecretStore(bob.secretKey, bob.publicKey)
-    carol.secretStore = makeSecretStore(carol.secretKey, carol.publicKey)
+    alice.secretStore = await makeSecretStore(k0Ports[0], alice.secretKey)
+    bob.secretStore = await makeSecretStore(k0Ports[1], bob.secretKey)
+    carol.secretStore = await makeSecretStore(k0Ports[2], carol.secretKey)
 
     alice.emitter = initEventHandlers(
       alice.platformState,
       alice.secretStore,
-      alice.k0Eth
+      alice.k0Eth,
+      alice.k0
     )
 
     bob.emitter = initEventHandlers(
       bob.platformState,
       bob.secretStore,
-      bob.k0Eth
+      bob.k0Eth,
+      bob.k0
     )
 
     carol.emitter = initEventHandlers(
       carol.platformState,
       carol.secretStore,
-      carol.k0Eth
+      carol.k0Eth,
+      carol.k0
     )
 
     console.log('Test Suite Initialized.')
@@ -285,18 +283,17 @@ describe('Ethereum integration test replicating the K0 demo', function () {
 
       const data = await user.k0.prepareDeposit(
         user.platformState,
-        user.secretStore.getPublicKey(),
+        user.secretStore.getAddress(),
         v
       )
 
-      const noteData = makeData(data.a_pk, data.rho, data.r, v)
       const waitForDeposit = testUtil.awaitEvent(user.emitter, 'depositProcessed')
       const depositTx = await user.k0Eth.deposit(
         u.hex2buf(user.account.privateKey),
         v,
         data.k,
         data.cm,
-        noteData,
+        data.ciphertext,
         data.nextRoot,
         data.commitmentProofAffine,
         data.additionProofAffine
@@ -347,21 +344,6 @@ describe('Ethereum integration test replicating the K0 demo', function () {
     }
   }
 
-  /**
-   * convert data to eth compatible format
-   * @param {} a_pk
-   * @param {*} rho
-   * @param {*} r
-   * @param {*} v
-   */
-  function makeData(a_pk, rho, r, v) {
-    u.checkBuf(a_pk, 32)
-    u.checkBuf(rho, 32)
-    u.checkBuf(r, 48)
-    u.checkBN(v)
-    return Buffer.concat([ a_pk, rho, r, v.toBuffer('le', 64) ])
-  }
-
   it('allows alice to transfer funds to bob', async () => {
     await checkRootsConsistency()
     const in0 = await getInputNote(alice.platformState, alice.secretStore, 0)
@@ -370,13 +352,14 @@ describe('Ethereum integration test replicating the K0 demo', function () {
     const totalValue = in0.v.add(in1.v)
 
     const out0 = {
-      a_pk: bob.secretStore.getPublicKey(),
+      address: bob.secretStore.getAddress(),
       v: totalValue,
       rho: crypto.randomBytes(32),
       r: crypto.randomBytes(48)
     }
+
     const out1 = {
-      a_pk: alice.secretStore.getPublicKey(),
+      address: alice.secretStore.getAddress(),
       v: new BN('0'),
       rho: crypto.randomBytes(32),
       r: crypto.randomBytes(48)
@@ -398,21 +381,6 @@ describe('Ethereum integration test replicating the K0 demo', function () {
 
     alice.secretStore.addSNToNote(in0.cm, transferData.input_0_sn)
     alice.secretStore.addSNToNote(in1.cm, transferData.input_1_sn)
-    alice.secretStore.addNoteInfo(
-      transferData.output_0_cm,
-      out0.a_pk,
-      out0.rho,
-      out0.r,
-      out0.v
-    )
-
-    alice.secretStore.addNoteInfo(
-      transferData.output_1_cm,
-      out1.a_pk,
-      out1.rho,
-      out1.r,
-      out1.v
-    )
 
     const rootBefore = await alice.platformState.merkleTreeRoot()
     const labelBefore = bob.platformState.currentStateLabel()
@@ -429,29 +397,42 @@ describe('Ethereum integration test replicating the K0 demo', function () {
     const finalRoot = await alice.platformState.merkleTreeRoot()
     assert(finalRoot.equals(rootBefore))
 
-    const out_0_data = makeData(out0.a_pk, out0.rho, out0.r, out0.v)
-    const out_1_data = makeData(out1.a_pk, out1.rho, out1.r, out1.v)
-
     const ethParams = [
       crypto.randomBytes(32),
       transferData.input_0_sn,
       transferData.input_1_sn,
       transferData.output_0_cm,
       transferData.output_1_cm,
-      out_0_data,
-      out_1_data,
+      transferData.output_0_ciphertext,
+      transferData.output_1_ciphertext,
       newRoot,
       callee,
       transferData.proofAffine
     ]
+
     const tx = await alice.k0Eth.transfer(...ethParams)
 
-    const transferForDeposit = testUtil.awaitEvent(bob.emitter, 'transferProcessed')
+    const avNotesBefore = [alice, bob, carol].map(who => {
+      return [
+        who.secretStore.getAPk(),
+        who.secretStore.getAvailableNotes().length
+      ]
+    })
+
+    await u.wait(5000)
+    const transferProcessed = testUtil.awaitEvent(bob.emitter, 'transferProcessed')
     const receipt = await web3.eth.sendSignedTransaction(u.buf2hex(tx))
     expect(receipt.status).to.equal(true)
 
-    await transferForDeposit
+    await transferProcessed
+    await u.wait(5000)
 
+    const avNotesAfter = [alice, bob, carol].map(who => {
+      return [
+        who.secretStore.getAPk(),
+        who.secretStore.getAvailableNotes().length
+      ]
+    })
     expect(
       bob.secretStore.getAvailableNotes().length
     ).to.equal(numInitialNotes + 1)
@@ -505,13 +486,14 @@ describe('Ethereum integration test replicating the K0 demo', function () {
     await web3.eth.sendSignedTransaction(txData.rawTransaction)
 
     const out0 = {
-      a_pk: carol.secretStore.getPublicKey(),
+      address: carol.secretStore.getAddress(),
       v: carPrice,
       rho, // Generated payment data in step1
       r // Generated payment data in step1
     }
+
     const out1 = { // Change back to bob
-      a_pk: bob.secretStore.getPublicKey(),
+      address: bob.secretStore.getAddress(),
       v: change,
       rho: crypto.randomBytes(32),
       r: crypto.randomBytes(48)
@@ -534,21 +516,6 @@ describe('Ethereum integration test replicating the K0 demo', function () {
     // execute the transfer
     bob.secretStore.addSNToNote(in0.cm, transferData.input_0_sn)
     bob.secretStore.addSNToNote(in1.cm, transferData.input_1_sn)
-    bob.secretStore.addNoteInfo(
-      transferData.output_0_cm,
-      out0.a_pk,
-      out0.rho,
-      out0.r,
-      out0.v
-    )
-
-    bob.secretStore.addNoteInfo(
-      transferData.output_1_cm,
-      out1.a_pk,
-      out1.rho,
-      out1.r,
-      out1.v
-    )
 
     const rootBefore = await bob.platformState.merkleTreeRoot()
     const labelBefore = await bob.platformState.currentStateLabel()
@@ -565,17 +532,14 @@ describe('Ethereum integration test replicating the K0 demo', function () {
     const finalRoot = await bob.platformState.merkleTreeRoot()
     assert(finalRoot.equals(rootBefore))
 
-    const out_0_data = makeData(out0.a_pk, out0.rho, out0.r, out0.v)
-    const out_1_data = makeData(out1.a_pk, out1.rho, out1.r, out1.v)
-
     const ethParams = [
       u.hex2buf(bob.account.privateKey),
       transferData.input_0_sn,
       transferData.input_1_sn,
       transferData.output_0_cm,
       transferData.output_1_cm,
-      out_0_data,
-      out_1_data,
+      transferData.output_0_ciphertext,
+      transferData.output_1_ciphertext,
       newRoot,
       u.hex2buf(tradeContract._address),
       transferData.proofAffine
