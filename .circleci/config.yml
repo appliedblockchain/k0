@@ -164,6 +164,11 @@ jobs:
       - attach_workspace:
           at: .
       - run:
+          name: "Lerna bootstrap"
+          command: |
+            cd js
+            node_modules/.bin/lerna bootstrap
+      - run:
           name: "Generate proving and verification keys"
           command: |
             mkdir /tmp/k0keys
@@ -189,7 +194,7 @@ jobs:
       - run:
           name: "Package K0 chaincode"
           command: |
-            cd js/test/fabric/network
+            cd js/packages/k0-integration-tests-fabric/network
             docker run \
             -v $PWD/artefacts:/artefacts \
             -v ~/.go_workspace/src/github.com/hyperledger/fabric:/opt/gopath/src/github.com/hyperledger/fabric:ro \
@@ -200,23 +205,23 @@ jobs:
       - run:
           name: "Spin up Fabric network"
           command: |
-            cd js/test/fabric/network
+            cd js/packages/k0-integration-tests-fabric/network
             CI=true ./start.sh
       - run:
           name: "Install K0 chaincode"
           command: |
-            cd js/test/fabric/network
+            cd js/packages/k0-integration-tests-fabric/network
             for org in alpha beta gamma bank; do docker-compose run ${org}tools peer chaincode install /artefacts/k0chaincode.1.out; done
       - run:
           name: "Instantiate K0 chaincode"
           command: |
-            cd js/test/fabric
+            cd js/packages/k0-integration-tests-fabric
             node instantiate
       - run:
           name: "Run integration tests"
           command: |
-            cd js
-            node_modules/.bin/mocha test/fabric/test.js
+            cd js/packages/k0-integration-tests-fabric
+            node_modules/.bin/mocha test
 
   ethereum_integration_tests:
     machine:
@@ -265,11 +270,11 @@ jobs:
             chmod +x solc-static-linux && sudo cp solc-static-linux /usr/bin/solc
       - run:
           name: Run the Docker servers
-          command: cd js/test/eth/network && docker-compose up -d && docker-compose logs -f
+          command: cd js/packages/k0-integration-tests-eth/network && docker-compose up -d && docker-compose logs -f
           background: true
       - run:
-          name: init the demo state
-          command: cd js && npm run test:integration:eth
+          name: Run tests
+          command: cd js && npm test
 
 workflows:
   version: 2
