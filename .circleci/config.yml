@@ -161,13 +161,12 @@ jobs:
               docker pull appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
               docker tag appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1 zktrading-$IMAGE
             done
-      - attach_workspace:
-          at: .
       - run:
-          name: "Lerna bootstrap"
-          command: |
-            cd js
-            node_modules/.bin/lerna bootstrap
+          name: Install lerna
+          command: cd js && npm i lerna
+      - run:
+          name: Lerna bootstrap
+          command: cd js && node_modules/.bin/lerna bootstrap --no-ci
       - run:
           name: "Generate proving and verification keys"
           command: |
