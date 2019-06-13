@@ -279,13 +279,26 @@ jobs:
       image: circleci/classic:201808-01
     steps:
       - checkout
-
+      - run:
+          name: "Enable NVM"
+          command: |
+            echo 'export NVM_DIR="/opt/circleci/.nvm"' >> $BASH_ENV
+            echo ' [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+      - run:
+          name: Setup node 8
+          command: nvm install 8 && nvm alias default 8
+      - run:
+          name: Lerna bootstrap
+          command: cd js && lerna bootstrap --no-ci --force-local
+ 
   pure2:
     docker:
       - image: circleci/node:8
     steps:
       - checkout
-
+      - run:
+          name: Lerna bootstrap
+          command: cd js && lerna bootstrap --no-ci --force-local
 
 workflows:
   version: 2
