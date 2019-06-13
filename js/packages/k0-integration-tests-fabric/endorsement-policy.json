@@ -2,13 +2,15 @@
   "identities": [
     { "role": { "name": "member", "mspId": "AlphaCoMSP" }},
     { "role": { "name": "member", "mspId": "BetaCoMSP" }},
-    { "role": { "name": "member", "mspId": "GammaCoMSP" }}
+    { "role": { "name": "member", "mspId": "GammaCoMSP" }},
+    { "role": { "name": "member", "mspId": "BankCoMSP" }}
   ],
   "policy": {
     "2-of": [
       { "signed-by": 0 },
       { "signed-by": 1 },
-      { "signed-by": 2 }
+      { "signed-by": 2 },
+      { "signed-by": 3 }
     ]
   }
 }

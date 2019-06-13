@@ -1,7 +1,9 @@
+'use strict'
+
 const BN = require('bn.js')
+const conv = require('@appliedblockchain/k0-util/proof-conversion')
 const request = require('./request')
 const u = require('@appliedblockchain/k0-util')
-const conv = require('../proof-conversion')
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 

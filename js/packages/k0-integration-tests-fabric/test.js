@@ -3,17 +3,23 @@
 const BN = require('bn.js')
 const _ = require('lodash')
 const assert = require('assert')
+const awaitEvent = require('./helpers/await-event')
 const crypto = require('crypto')
 const getConfig = require('./helpers/get-config')
 const log4js = require('log4js')
-const makeFabricPlatform = require('../../fabric')
-const makeK0 = require('../../k0')
-const makePlatformState = require('../../platform-state')
-const makeSecretStore = require('../../secret-store')
-const testUtil = require('@appliedblockchain/k0-util')
+const makeFabricPlatform = require('@appliedblockchain/k0-fabric')
+const makeK0 = require('@appliedblockchain/k0')
+const makePlatformState = require('@appliedblockchain/k0-in-memory-platform-state')
+const makeSecretStore = require('@appliedblockchain/k0-in-memory-secret-store')
 const u = require('@appliedblockchain/k0-util')
 const expect = require('code').expect
 const makeEventHub = require('./event-hub')
+
+async function initSecretStore(port, k0, secretKey) {
+  const { a_pk, sk_enc, pk_enc } =
+        await k0.deriveKeys(secretKey)
+  return makeSecretStore(secretKey, a_pk, sk_enc, pk_enc)
+}
 
 describe('Fabric workflow', function fabricTest() {
   this.timeout(3600 * 1000)
@@ -38,7 +44,7 @@ describe('Fabric workflow', function fabricTest() {
       await platformStates[who].reset()
       k0s[who] = await makeK0(config.proverPort)
       const privateKey = crypto.randomBytes(32)
-      secretStores[who] = await makeSecretStore(config.proverPort, privateKey)
+      secretStores[who] = await initSecretStore(config.proverPort, k0s[who], privateKey)
       addresses[who] = secretStores[who].getAddress()
       k0Fabrics[who] = await makeFabricPlatform(
         logger,
@@ -65,7 +71,7 @@ describe('Fabric workflow', function fabricTest() {
     if (!orgs.map(who => events[who].queueEmpty()).reduce((a, b) => a && b)) {
       // wait for all event queues to become empty
       await Promise.all(orgs.map(who => {
-        return testUtil.awaitEvent(events[who], 'queueEmpty', 100)
+        return awaitEvent(events[who], 'queueEmpty', 100)
       }))
     }
   })
@@ -93,7 +99,7 @@ describe('Fabric workflow', function fabricTest() {
         const data = await k0s[BANK].prepareDeposit(
           platformStates[BANK], secretStores[who].getAddress(), v
         )
-        const mintProcessedPromise = testUtil.awaitEvent(
+        const mintProcessedPromise = awaitEvent(
           events[BANK],
           'mintProcessed',
           100

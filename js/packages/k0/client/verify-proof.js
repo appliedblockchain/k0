@@ -1,5 +1,6 @@
 'use strict'
-const conv = require('../proof-conversion')
+
+const conv = require('@appliedblockchain/k0-util/proof-conversion')
 const request = require('./request')
 const u = require('@appliedblockchain/k0-util')
 
@@ -17,7 +18,7 @@ async function verifyProof(jc, what, proof, publicInputs) {
   return request(
     jc,
     'verifyProof',
-    [ 
+    [
       what,
       conv.stringifyJacobian(proof),
       publicInputs.map(u.bn2string)

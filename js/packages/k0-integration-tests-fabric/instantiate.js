@@ -4,7 +4,7 @@ const getConfig = require('./helpers/get-config')
 const makeClient = require('./helpers/client')
 const instantiateOrUpgrade = require('./helpers/instantiate-or-upgrade')
 const endorsementPolicy = require('./endorsement-policy')
-const makePlatformState = require('../../platform-state')
+const makePlatformState = require('@appliedblockchain/k0-in-memory-platform-state')
 
 process.on('unhandledRejection', error => {
   console.log(error.message)

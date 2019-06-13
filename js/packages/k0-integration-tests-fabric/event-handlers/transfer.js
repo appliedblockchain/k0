@@ -1,7 +1,7 @@
 'use strict'
 
 const BN = require('bn.js')
-const u = require('../../../util')
+const u = require('@appliedblockchain/k0-util')
 
 async function handleTransfer(platformState, secretStore, k0, txnid, in0sn,
                               in1sn, out0cm, out1cm, out0data, out1data,

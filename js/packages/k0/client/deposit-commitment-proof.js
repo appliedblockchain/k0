@@ -1,7 +1,9 @@
+'use strict'
+
+const BN = require('bn.js')
+const conv = require('@appliedblockchain/k0-util/proof-conversion')
 const request = require('./request')
 const u = require('@appliedblockchain/k0-util')
-const BN = require('bn.js')
-const conv = require('../proof-conversion')
 
 async function depositCommitmentProof(jc, a_pk, rho, r, v) {
   u.checkBuf(a_pk, 32)

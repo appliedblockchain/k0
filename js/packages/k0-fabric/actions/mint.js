@@ -1,6 +1,6 @@
 'use strict'
 const _ = require('lodash')
-const conv = require('../../proof-conversion')
+const conv = require('@appliedblockchain/k0-util/proof-conversion')
 const sendTransaction = require('../send-transaction')
 const u = require('@appliedblockchain/k0-util')
 

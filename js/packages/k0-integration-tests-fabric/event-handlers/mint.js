@@ -1,6 +1,6 @@
 'use strict'
 
-const u = require('../../../util')
+const u = require('@appliedblockchain/k0-util')
 
 async function handleMint(platformState, secretStore, k0, txnid, cm, data,
                           nextRoot) {

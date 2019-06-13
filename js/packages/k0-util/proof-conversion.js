@@ -1,6 +1,6 @@
 'use strict'
 
-const u = require('@appliedblockchain/k0-util')
+const u = require('.')
 
 function convertG1Affine(convert, point) {
   return {

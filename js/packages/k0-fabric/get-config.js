@@ -2,10 +2,7 @@
 const _ = require('lodash')
 const csvLoader = require('csv-load-sync')
 const fs = require('fs')
-const log4js = require('log4js')
-const logger = log4js.getLogger()
 const path = require('path')
-logger.level = process.env['LOG_LEVEL'] || 'info'
 
 const firstFileInDir = dir => path.join(dir, fs.readdirSync(dir)[0])
 
@@ -61,7 +58,7 @@ function getConfig() {
     console.log(envVar, process.env[envVar])
   })
 
-  return Object.assign(generateConfig({
+  return generateConfig({
     username: process.env['USERNAME'] || 'User1',
     mspid: process.env['MSPID'],
     userCertDir: process.env['USER_CERT_DIR'],
@@ -73,8 +70,7 @@ function getConfig() {
     queryPeerIndex: parseInt(process.env['QUERY_PEER_INDEX'] || '0', 10),
     channelName: process.env['CHANNEL_NAME'],
     chaincodeId: process.env['CHAINCODE_ID']
-  }), { logger })
-
+  })
 }
 
 module.exports = getConfig
