@@ -271,8 +271,11 @@ jobs:
           command: cd js/packages/k0-integration-tests-eth/network && docker-compose up -d && docker-compose logs -f
           background: true
       - run:
+          name: Install lerna
+          command: cd js && npm i lerna
+      - run:
           name: Lerna bootstrap
-          command: cd js && lerna bootstrap --no-ci
+          command: cd js && node_modules/.bin/lerna bootstrap --no-ci
       - run:
           name: Run tests
           command: cd js/packages/k0-integration-tests-eth && npm test
