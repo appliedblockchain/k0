@@ -78,18 +78,43 @@ jobs:
             nvm alias default v8
       - restore_cache:
           keys:
-            - zktrading-js-deps-$CIRCLE_BRANCH-{{ checksum "js/package.json" }}
+            - zktrading-js-root-deps-$CIRCLE_BRANCH-{{ checksum "js/package.json" }}
+            - zktrading-js-core-deps-$CIRCLE_BRANCH-{{ checksum "js/package.json" }}
+            - zktrading-js-eth-deps-$CIRCLE_BRANCH-{{ checksum "js/package.json" }}
+            - zktrading-js-fabric-deps-$CIRCLE_BRANCH-{{ checksum "js/package.json" }}
+            - zktrading-js-platform-state-deps-$CIRCLE_BRANCH-{{ checksum "js/package.json" }}
+            - zktrading-js-secret-store-deps-$CIRCLE_BRANCH-{{ checksum "js/package.json" }}
+            - zktrading-js-integration-tests-eth-deps-$CIRCLE_BRANCH-{{ checksum "js/package.json" }}
+            - zktrading-js-integration-tests-fabric-deps-$CIRCLE_BRANCH-{{ checksum "js/package.json" }}
       - run:
-          name: Install npm modules
-          command: cd js && npm i
+          name: Install lerna
+          command: cd js && npm i lerna
+      - run:
+          name: Lerna bootstrap
+          command: cd js && node_modules/.bin/lerna bootstrap --no-ci
       - save_cache:
-         key: zktrading-js-deps-$CIRCLE_BRANCH-{{ checksum "js/package.json" }}
+         key: zktrading-js-root-deps-$CIRCLE_BRANCH
          paths:
            - js/node_modules
+      - save_cache:
+         key: zktrading-js-core-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0/package.json" }}
+         paths:
+           - js/packages/k0/node_modules
+      - save_cache:
+         key: zktrading-js-eth-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-eth/package.json" }}
+         paths:
+           - js/packages/k0-eth/node_modules
       - persist_to_workspace:
           root: .
           paths:
             - js/node_modules
+            - js/packages/k0/node_modules
+            - js/packages/k0-eth/node_modules
+            - js/packages/k0-fabric/node_modules
+            - js/packages/k0-in-memory-platform-state/node_modules
+            - js/packages/k0-in-memory-secret-store/node_modules
+            - js/packages/k0-integration-tests-eth/node_modules
+            - js/packages/k0-integration-tests-fabric/node_modules
 
   # This could probably be run more efficiently on the docker executor
   chaincode:
@@ -161,6 +186,8 @@ jobs:
               docker pull appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
               docker tag appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1 zktrading-$IMAGE
             done
+      - attach_workspace:
+          at: .
       - run:
           name: Install lerna
           command: cd js && npm i lerna
@@ -269,6 +296,8 @@ jobs:
           name: Run the Docker servers
           command: cd js/packages/k0-integration-tests-eth/network && docker-compose up -d && docker-compose logs -f
           background: true
+      - attach_workspace:
+          at: .
       - run:
           name: Install lerna
           command: cd js && npm i lerna
