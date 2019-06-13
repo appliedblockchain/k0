@@ -1,6 +1,6 @@
 const BN = require('bn.js')
 const inquirer = require('inquirer')
-const u = require('../util')
+const u = require('@appliedblockchain/k0-util')
 
 async function generatePaymentData(secretStore, k0) {
   const inquiryResult = await inquirer.prompt([

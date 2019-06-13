@@ -16,7 +16,7 @@ const jayson = require('jayson/promise')
 const makeClient = require('../client')
 const flattenProof = require('../eth/flatten-proof')
 const ethUtil = require('../eth/util')
-const globalUtil = require('../util')
+const globalUtil = require('@appliedblockchain/k0-util')
 
 describe('Private trade', async function () {
 

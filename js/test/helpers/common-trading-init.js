@@ -1,4 +1,4 @@
-const util = require('../util')
+const util = require('@appliedblockchain/k0-util')
 const compileContracts = require('./compile-contracts')
 const log = console.log
 const write = x => process.stdout.write(x)

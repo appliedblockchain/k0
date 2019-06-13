@@ -2,7 +2,7 @@ const crypto = require('crypto')
 const inquireInputNote = require('./inquire-input-note')
 const inquireOutputNote = require('./inquire-output-note')
 const inquirer = require('inquirer')
-const u = require('../util')
+const u = require('@appliedblockchain/k0-util')
 const assert = require('assert')
 
 function makeData(a_pk, rho, r, v) {

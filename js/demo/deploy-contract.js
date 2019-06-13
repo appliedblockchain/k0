@@ -1,5 +1,5 @@
 const signTransaction = require('../eth/sign-transaction')
-const u = require('../util')
+const u = require('@appliedblockchain/k0-util')
 
 async function deployContract(web3, artefacts, params, privateKey, gas = 1000000) {
   u.checkBuf(privateKey, 32)

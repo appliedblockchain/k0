@@ -24,10 +24,12 @@
 /js/demo/public-keys.json
 /js/node_modules
 /js/package-lock.json
+/js/packages/*/node_modules
+/js/packages/*/package-lock.json
 /js/public-keys.json
-/js/test/fabric/devnetwork/*peer/data
-/js/test/fabric/devnetwork/artefacts
-/js/test/fabric/devnetwork/crypto-config
-/js/test/fabric/network/artefacts
-/js/test/fabric/network/crypto-config
+/js/packages/k0-integration-tests-fabric/devnetwork/*peer/data
+/js/packages/k0-integration-tests-fabric/devnetwork/artefacts
+/js/packages/k0-integration-tests-fabric/devnetwork/crypto-config
+/js/packages/k0-integration-tests-fabric/network/artefacts
+/js/packages/k0-integration-tests-fabricnetwork/crypto-config
 local-notes.txt

@@ -1,37 +1,15 @@
 {
-  "name": "libsnark-examples",
-  "version": "0.0.1",
-  "dependencies": {
-    "@appliedblockchain/not-a-logger": "^1.0.1",
-    "bip39": "^2.5.0",
-    "csv-load-sync": "^1.0.0",
-    "ethereumjs-wallet": "^0.6.3",
-    "fabric-client": "^1.2.1",
-    "immutable": "^4.0.0-rc.12",
-    "inquirer": "^6.2.2",
-    "jayson": "^2.1.1",
-    "linked-list": "^2.0.0",
-    "lodash": "^4.17.11",
-    "log4js": "^4.1.0",
-    "openzeppelin-solidity": "^2.1.2",
-    "web3": "1.0.0-beta.37"
-  },
+  "name": "@appliedblockchain/k0-js",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "test": "mocha test",
-    "test:integration:eth": "mocha --timeout 0 test/eth/all.integration.js",
-    "test:integration:fabric": "mocha --timeout 0 test/fabric/test.js",
     "lint": "eslint . --ignore-path .gitignore",
     "parity": "docker run -p 8545:8545 appliedblockchain/parity-solo-instant"
   },
-  "devDependencies": {
+  "dependencies": {
     "@appliedblockchain/eslint-config": "^2.6.0",
-    "chalk": "^2.4.2",
-    "clear": "^0.1.0",
-    "cli-table": "^0.3.1",
-    "code": "^5.2.4",
     "eslint": "^4.19.1",
-    "mocha": "^5.2.0",
-    "wait-port": "^0.2.2"
+    "lerna": "^3.15.0"
   },
   "eslintConfig": {
     "extends": "@appliedblockchain/eslint-config",
@@ -44,9 +22,6 @@
           "code": 80
         }
       ]
-    },
-    "env": {
-      "mocha": true
     },
     "globals": {
       "def": true,

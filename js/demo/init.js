@@ -9,7 +9,7 @@ const _ = require('lodash')
 const hdkey = require('ethereumjs-wallet/hdkey')
 const sendTransaction = require('../send-transaction')
 const makePlatformState = require('../platform-state')
-const u = require('../util')
+const u = require('@appliedblockchain/k0-util')
 const makeK0 = require('../k0')
 const log4js = require('log4js')
 

@@ -1,5 +1,5 @@
 const chalk = require('chalk')
-const u = require('../../util')
+const u = require('@appliedblockchain/k0-util')
 
 async function handleDeposit(platformState, txHash, cm, nextRoot) {
   await platformState.add(u.buf2hex(txHash), [], [ cm ], nextRoot)
