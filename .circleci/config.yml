@@ -104,27 +104,26 @@ jobs:
          key: zktrading-js-eth-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-eth/package.json" }}
          paths:
            - js/packages/k0-eth/node_modules
-    - save_cache:
+      - save_cache:
          key: zktrading-js-eth-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-fabric/package.json" }}
          paths:
            - js/packages/k0-fabric/node_modules
-    - save_cache:
+      - save_cache:
          key: zktrading-js-platform-state-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-in-memory-platform-state/package.json" }}
          paths:
            - js/packages/k0-in-memory-platform-state/node_modules
-    - save_cache:
+      - save_cache:
          key: zktrading-js-secret-store-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-eth/in-memory-secret-store.json" }}
          paths:
            - js/packages/k0-in-memory-secret-store/node_modules
-    - save_cache:
+      - save_cache:
          key: zktrading-js-integration-tests-eth-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-integration-tests-eth/package.json" }}
          paths:
            - js/packages/k0-integration-tests-eth/node_modules
-    - save_cache:
+      - save_cache:
          key: zktrading-js-integration-tests-fabric-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-integration-tests-fabric/package.json" }}
          paths:
            - js/packages/k0-integration-tests-fabric/node_modules
-
       - persist_to_workspace:
           root: .
           paths:
