@@ -143,9 +143,6 @@ function unpack(bns) {
 }
 
 async function unpack256Bits(val1, val2) {
-  // checkBN(val1)
-  // checkBN(val2)
-
   let executablePath
   if (process.env.CIRCLECI) {
     executablePath = `docker run appliedblockchain/zktrading-unpack:${env.CIRCLE_BRANCH}-${env.CIRCLE_SHA1}`

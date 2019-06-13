@@ -20,7 +20,6 @@ async function compileContract(contractName) {
     `solc --combined-json abi,bin openzeppelin-solidity=${ozDir} `,
     `${contractPath}`
   ].join('')
-  console.log("running this ", command)
   const { stdout, stderr } = await execAsync(command, { cwd: contractsDir })
   if (stderr) {
     console.log(stderr)
