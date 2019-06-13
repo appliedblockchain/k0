@@ -31,5 +31,5 @@
 /js/packages/k0-integration-tests-fabric/devnetwork/artefacts
 /js/packages/k0-integration-tests-fabric/devnetwork/crypto-config
 /js/packages/k0-integration-tests-fabric/network/artefacts
-/js/packages/k0-integration-tests-fabricnetwork/crypto-config
+/js/packages/k0-integration-tests-fabric/network/crypto-config
 local-notes.txt
