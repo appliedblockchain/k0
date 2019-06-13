@@ -4,7 +4,6 @@ const assert = require('assert')
 const BN = require('bn.js')
 const execAsync = require('./exec-async')
 const path = require('path')
-const { inspect } = require('util')
 const chalk = require('chalk')
 
 const baseDir = path.join(__dirname, '..', '..', '..')
@@ -156,15 +155,6 @@ async function unpack256Bits(val1, val2) {
 }
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
-
-console.inspect = function (...argv) {
-  console.log(chalk.red('>>> Inspecting'))
-  argv.forEach((arg, i) => {
-    process.stdout.write(`${i}: `)
-    console.log(inspect(arg, { colors: true, depth: null }))
-  })
-  console.log(chalk.red('<<< end'))
-}
 
 module.exports = {
   bn2string,

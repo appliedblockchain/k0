@@ -84,7 +84,7 @@ describe('Fabric workflow', function fabricTest() {
     const numInitialHodlers = 2
     const numInitialNotesPerHodler = 2
     for (let i = 0; i < numInitialHodlers; i = i + 1) {
-      console.inspect(`Minting Notes for Org ${i}`)
+      logger.info(`Minting Notes for Org ${i}`)
       const who = orgs[i]
       const values = _.times(numInitialNotesPerHodler, () => {
         return new BN(_.random(50).toString() + '000')
@@ -92,7 +92,7 @@ describe('Fabric workflow', function fabricTest() {
       values.reduce((acc, el) => acc.add(el), new BN('0'))
 
       for (let j = 0; j < values.length; j++) {
-        console.inspect(`Minting note ${j}`)
+        logger.info(`Minting note ${j}`)
         const v = values[j]
 
         // In fabric, a single bank authority issues secret notes
@@ -115,7 +115,7 @@ describe('Fabric workflow', function fabricTest() {
         )
         await mintProcessedPromise
       }
-      console.inspect(`Note for org ${i} MINTED`)
+      logger.info(`Note for org ${i} MINTED`)
     }
 
     // Hodlers should now have numInitialNotesPerHodler notes each
