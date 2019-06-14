@@ -4,6 +4,8 @@ const makeClient = require('./client')
 const mint = require('./actions/mint')
 const notalogger = require('@appliedblockchain/not-a-logger')
 const transfer = require('./actions/transfer')
+const waitForTx = require('./wait-for-tx')
+const getState = require('./actions/get-state')
 const u = require('../util')
 
 class K0Fabric extends EventEmitter {}
@@ -29,12 +31,16 @@ async function makeFabric(logger, config, chaincodeId) {
     eh.disconnect()
   }
 
+  fabric.getState = getState.bind(null, logger, channel, queryPeer)
 
   fabric.mint = mint.bind(null, logger, client, channel, chaincodeId, peers,
     queryPeer)
   fabric.transfer = transfer.bind(null, logger, client, channel, chaincodeId,
     peers, queryPeer)
   fabric.startEventMonitoring = startEventMonitoring
+
+  fabric.waitForTx = waitForTx.bind(null, channel, queryPeer)
+
   fabric.off = off
   return fabric
 }

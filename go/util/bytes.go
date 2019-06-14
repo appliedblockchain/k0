@@ -25,13 +25,13 @@ func VariableToFixed48(input []byte) ([48]byte, error) {
 	return result, nil
 }
 
-func VariableToFixed176(input []byte) ([176]byte, error) {
-	if len(input) != 176 {
-		msg := "Byte array is of length %d, expected 176"
-		return [176]byte{}, fmt.Errorf(msg, len(input))
+func VariableToFixed136(input []byte) ([136]byte, error) {
+	if len(input) != 136 {
+		msg := "Byte array is of length %d, expected 136"
+		return [136]byte{}, fmt.Errorf(msg, len(input))
 	}
-	var result [176]byte
-	copy(result[:], input[:176])
+	var result [136]byte
+	copy(result[:], input[:136])
 	return result, nil
 }
 

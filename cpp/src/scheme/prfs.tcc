@@ -22,10 +22,17 @@ bit_vector prf(bit_vector x, bit_vector y, bit_vector z) {
 }
 
 template<typename HashT>
-bit_vector zktrade::prf_addr(bit_vector a_sk) {
+bit_vector zktrade::prf_addr_a_pk(bit_vector a_sk) {
     bit_vector zeros(254);
     std::fill(zeros.begin(), zeros.end(), 0);
     return prf<HashT>(a_sk, {0,0}, zeros);
+}
+
+template<typename HashT>
+bit_vector zktrade::prf_addr_sk_enc(bit_vector a_sk) {
+    bit_vector zeros(254);
+    std::fill(zeros.begin(), zeros.end(), 0);
+    return prf<HashT>(a_sk, {1,0}, zeros);
 }
 
 template<typename HashT>

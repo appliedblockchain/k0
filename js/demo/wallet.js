@@ -154,7 +154,7 @@ async function run() {
           k0,
           publicKeys,
           true,
-          ethWallet.getPrivateKey()
+          ethWallet.getASk()
         )
       } else if (inquiryResult.command === 'Generate payment data') {
         await generatePaymentData(secretStore, k0)
@@ -165,7 +165,7 @@ async function run() {
           web3,
           artefacts,
           secretStore,
-          ethWallet.getPrivateKey(),
+          ethWallet.getASk(),
           k0,
           carToken,
           u.hex2buf(addresses.MVPPT)

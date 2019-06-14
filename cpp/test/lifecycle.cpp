@@ -89,7 +89,7 @@ TEST(Lifecycle, Full) {
 //        auto a_sk = random_bits(256);
         auto a_sk = coins[address].a_sk;
         // Derive public key/address
-        auto a_pk = prf_addr<CommitmentHashT>(a_sk);
+        auto a_pk = prf_addr_a_pk<CommitmentHashT>(a_sk);
 
         // DEPOSIT/"SHIELDING"
         // Sample rho
@@ -195,7 +195,7 @@ TEST(Lifecycle, Full) {
         output_note out[2];
         for (size_t i = 0; i < 2; i++) {
             auto idx = input_0_address + 2 + i;
-            out[i].a_pk = prf_addr<CommitmentHashT>(coins[idx].a_sk);
+            out[i].a_pk = prf_addr_a_pk<CommitmentHashT>(coins[idx].a_sk);
             out[i].rho = coins[idx].rho;
             out[i].r = coins[idx].r;
             out[i].v = coins[idx].v;
@@ -214,7 +214,7 @@ TEST(Lifecycle, Full) {
 
         for (size_t i = 0; i < 2; i++) {
             auto idx = input_0_address + 2 + i;
-            auto a_pk = prf_addr<CommitmentHashT>(coins[idx].a_sk);
+            auto a_pk = prf_addr_a_pk<CommitmentHashT>(coins[idx].a_sk);
             auto k = comm_r<CommitmentHashT>(a_pk, coins[idx].rho,
                                              coins[idx].r);
             auto cm = comm_s<CommitmentHashT>(k, uint64_to_bits(coins[idx].v));
@@ -231,7 +231,7 @@ TEST(Lifecycle, Full) {
         cout << "Withdrawal address " << address << endl;
 
         coin c = coins[address];
-        auto a_pk = prf_addr<CommitmentHashT>(c.a_sk);
+        auto a_pk = prf_addr_a_pk<CommitmentHashT>(c.a_sk);
         cout << "a_pk  " << bits2hex(a_pk) << endl;
         auto k = comm_r<CommitmentHashT>(a_pk, c.rho, c.r);
         cout << "k  " << bits2hex(k) << endl;

@@ -86,12 +86,58 @@ std::string zktrade::bytes_to_hex(std::vector<unsigned char> bytes) {
         stream << std::hex << std::setfill('0') << std::setw(2) << (int) b;
     }
     return stream.str();
+
+}
+
+void zktrade::fill_with_bytes_of_hex_string(unsigned char *bytes,
+                                              const std::string& hex)
+{
+    if (strcmp(hex.substr(0,2).c_str(), "0x") != 0) {
+        throw std::invalid_argument("hex string does not start with 0x");
+    }
+    if (hex.length() % 2 != 0) {
+        throw std::invalid_argument("hex string is not of even length");
+    }
+    for (auto i = 0; i < (hex.length() - 2) / 2; i++) {
+        auto byte_string = hex.substr(2 + i * 2, 2);
+        bytes[i] = strtol(byte_string.c_str(), NULL, 16);
+    }
+}
+
+std::string zktrade::bytes_to_hex(const unsigned char *bytes, const size_t len) {
+    std::stringstream s;
+    s << "0x";
+    for (size_t i = 0; i < len; i++) {
+        s << std::hex << std::setfill('0') << std::setw(2) << (int) bytes[i];
+    }
+    return s.str();
 }
 
 libff::bit_vector zktrade::random_bits(size_t len = 256) {
     libff::bit_vector v(len);
     generate(v.begin(), v.end(), [&]() { return rand() % 2; });
     return v;
+}
+
+void zktrade::fill_with_random_bytes(unsigned char *bytes, size_t len)
+{
+    for (size_t i = 0; i < len; i++) {
+        bytes[i] = rand() % 255;
+    }
+}
+
+void zktrade::fill_with_bits(unsigned char *bytes, bit_vector &bits)
+{
+    if (bits.size() % 8 != 0) {
+        throw std::invalid_argument(
+                "size of bit vector is not a multiple of 8");
+    }
+    std::vector<unsigned char> result;
+    for (size_t i = 0; i < bits.size() / 8; i++) {
+        libff::bit_vector byte_bv = libff::bit_vector(
+                bits.begin() + i * 8, bits.begin() + i * 8 + 8);
+        bytes[i] = zktrade::bits_to_byte(byte_bv);
+    }
 }
 
 uint64_t zktrade::random_uint64() {

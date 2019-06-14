@@ -7,7 +7,8 @@ If you want to run the Fabric tests/demo, the project should be checked out in y
 [C++ tests](#c-tests)  
 [ZKP setup](#zkp-setup-needed-for-all-tests-and-demos)  
 [Ethereum demo](#ethereum-demo)  
-[Fabric integration tests](#fabric-integration-tests)
+[Ethereum integration tests](#ethereum-integration-tests)
+[Fabric integration tests](#fabric-integration-tests)  
 [Fabric dev mode](#fabric-dev-mode)
 
 ## Set up the project dependencies
@@ -31,8 +32,7 @@ brew install https://raw.githubusercontent.com/ethereum/homebrew-ethereum/e05aa3
 brew install libjson-rpc-cpp
 brew install jsoncpp
 brew install openssl
-
-# probably some other to figure out, can all be installed by brew
+brew install sodium
 ```
 
 ### Install Google Test
@@ -181,9 +181,7 @@ node wallet carol
 [Video example of how to use the demo](https://www.youtube.com/watch?v=h2KyMOdnbtI)
 
 
-## Ethereum test
-
-### Running the Ethereum integration tests
+## Ethereum integration tests
 
 ZKP setup as described [above](#zkp-setup-needed-for-all-tests-and-demos)
 
@@ -401,13 +399,14 @@ peer node start --peer-chaincodedev=true
 
 in alphaadmin, betaadmin, gammaadmin and bankadmin, run:
 ```
-bin/peer channel join -b ../artefacts/the-channel.block
+peer channel join -b ../artefacts/the-channel.block
 ```
 
 ### Compiling the chaincode
-Step to reproduce after a Chaincode code change:
 
-maybe `go build` then,
+in `go/chaincode/cash`
+
+ `go build` then,
 
 Start the chaincodes program by running each of those command in a separate terminal:
 
@@ -419,6 +418,7 @@ VERIFIER_ENDPOINT=http://localhost:14400/ CORE_CHAINCODE_LOGLEVEL=debug CORE_PEE
 ```
 
 Finally, in alphaadmin, betaadmin, gammaadmin and bankadmin, run:
+
 ```
 CORE_CHAINCODE_MODE=net peer chaincode install -p github.com/appliedblockchain/zktrading/go/chaincode/cash -n k0chaincode -v 1
 ```
@@ -427,7 +427,7 @@ CORE_CHAINCODE_MODE=net peer chaincode install -p github.com/appliedblockchain/z
 
 To instanciate, from the the `js/test/fabric` folder, run:
 ```
-DEV_MODE=true mocha test.js
+DEV_MODE=true node instantiate
 ```
 
 To Run the test, from the the `js/test/fabric` folder, run:
@@ -437,7 +437,5 @@ DEV_MODE=true mocha test.js
 
 ### Changing the chaincode
 
-* Stop the chaincode programs
-* run 'go compile' to compile the modified chaincode
-* restart the chaincode programs
+* Rerun the procedure :/, at least the terminal windows are already there
 

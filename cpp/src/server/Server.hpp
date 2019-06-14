@@ -63,7 +63,16 @@ namespace zktrade {
         cm(const std::string &param01, const std::string &param02,
            const std::string &param03, const std::string &param04);
 
+        virtual Json::Value decrypt_note(const std::string& ciphertext,
+                                         const std::string& sk_enc,
+                                         const std::string& pk_enc);
+
+        virtual Json::Value deriveKeys(const std::string& a_sk);
+
         virtual std::string element(int param01);
+
+        virtual std::string encrypt_note(const std::string& plaintext,
+                                         const std::string& pk_enc);
 
         virtual Json::Value
         exampleWitnessAndProof(const std::string &x);

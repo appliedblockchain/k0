@@ -12,7 +12,7 @@ process.on('unhandledRejection', error => {
 })
 
 async function run() {
-  const config = getConfig('alpha', 'Admin', process.env.DEV_MODE === 'true')
+  const config = getConfig('alpha', 'Admin', !!process.env.DEV_MODE)
   const alphaAdmin = await makeClient(config)
   await instantiateOrUpgrade(
     alphaAdmin,

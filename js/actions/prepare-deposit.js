@@ -1,10 +1,14 @@
+'use strict'
 
 const crypto = require('crypto')
+const encryptNote = require('./helpers/encrypt-note')
 const u = require('../util')
 
-async function prepareDeposit(server, platformState, a_pk, v) {
+async function prepareDeposit(server, platformState, address, v) {
+  u.checkBuf(address, 64)
   u.checkBN(v)
-  u.checkBuf(a_pk, 32)
+
+  const a_pk = address.slice(0, 32)
 
   const rho = crypto.randomBytes(32)
   const r = crypto.randomBytes(48)
@@ -20,11 +24,15 @@ async function prepareDeposit(server, platformState, a_pk, v) {
     mtAddSim.path,
     mtAddSim.nextRoot
   )
+
+  const ciphertext = await encryptNote(server, address, v, rho, r)
+
   return {
     a_pk,
     rho,
     r,
     cm,
+    ciphertext,
     k: commProofData.k,
     nextRoot: mtAddSim.nextRoot,
     additionProofAffine: additionProof.proof_affine,

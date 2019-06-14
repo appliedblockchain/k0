@@ -23,7 +23,16 @@ namespace zktrade {
 
     string bytes_to_hex(vector<unsigned char> bytes);
 
+    string bytes_to_hex(const unsigned char *bytes, const size_t len);
+
+    void fill_with_bytes_of_hex_string(unsigned char *bytes,
+                                       const std::string& hex);
+
     bit_vector random_bits(size_t len);
+
+    void fill_with_random_bytes(unsigned char *bytes, size_t len);
+
+    void fill_with_bits(unsigned char *bytes, bit_vector &bits);
 
     uint64_t random_uint64();
 
@@ -49,7 +58,7 @@ namespace zktrade {
         pb.set_input_sizes(2);
         bits.fill_with_bits(pb, bitv);
         packer.generate_r1cs_witness_from_bits();
-        return pb.primary_input();
+        return pb.primary_input;
     }
 
     template<typename FieldT>
@@ -133,6 +142,7 @@ namespace zktrade {
     string hex_to_dec_string(string hex);
 
     void printnode(vector<bool> bv);
+
 }
 
 #endif //ZKTRADE_UTIL_H

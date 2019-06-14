@@ -20,7 +20,7 @@ contract MVPPT {
 
     mapping(bytes32 => bool) snUsed;
 
-    event Deposit(uint[2] cm, uint[2] new_root);
+    event Deposit(uint[2] cm, bytes data, uint[2] new_root);
 
     event Transfer(uint[2] sn_in_0, uint[2] sn_in_1, uint[2] cm_out_0,
                    uint[2] cm_out_1, bytes data_out_0, bytes data_out_1,
@@ -56,6 +56,7 @@ contract MVPPT {
         uint v,
         uint[2] memory comm_k,
         uint[2] memory comm_cm,
+        bytes memory data,
         uint[2] memory new_root,
         uint[18] memory commitmentProof,
         uint[18] memory additionProof
@@ -109,7 +110,7 @@ contract MVPPT {
         ) {
             root = new_root;
             num_leaves++;
-            emit Deposit(comm_cm, new_root);
+            emit Deposit(comm_cm, data, new_root);
         } else {
             revert("Deposit Failure, proof failed to verify");
         }

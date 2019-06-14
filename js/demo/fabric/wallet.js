@@ -58,8 +58,8 @@ async function run() {
 
   const secretStoreData = require(`./${who}.secrets.json`)
   const secretStore = makeSecretStore(secretStoreData)
-  console.log('private key', secretStore.getPrivateKey())
-  console.log('public key', secretStore.getPublicKey())
+  console.log('private key', secretStore.getASk())
+  console.log('public key', secretStore.getAPk())
   initEventHandlers(platformState, secretStore, k0Fabric)
 
   const k0 = await makeK0(serverPorts[who])

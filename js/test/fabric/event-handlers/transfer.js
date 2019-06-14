@@ -3,33 +3,23 @@
 const BN = require('bn.js')
 const u = require('../../../util')
 
-function decodeData(data) {
-  u.checkBuf(data, 176)
-  return {
-    a_pk: data.slice(0, 32),
-    rho: data.slice(32, 64),
-    r: data.slice(64, 112),
-    v: new BN(data.slice(112, 176).toString('hex'), 'hex', 'le')
-  }
-}
-
-async function handleTransfer(platformState, secretStore, txnid, in0sn, in1sn,
-                              out0cm, out1cm, out0data, out1data, nextRoot) {
-
+async function handleTransfer(platformState, secretStore, k0, txnid, in0sn,
+                              in1sn, out0cm, out1cm, out0data, out1data,
+                              nextRoot) {
   const outputs = [
     [ out0cm, out0data ],
     [ out1cm, out1data ]
   ]
 
   for (let i = 0; i < 2; i = i + 1) {
-    const info = decodeData(outputs[i][1])
-    if (info.a_pk.equals(secretStore.getPublicKey())) {
+    const decryptionResult = await k0.decryptNote(secretStore, outputs[i][1])
+    if (decryptionResult.success) {
       secretStore.addNoteInfo(
         outputs[i][0],
-        info.a_pk,
-        info.rho,
-        info.r,
-        info.v
+        secretStore.getAPk(),
+        decryptionResult.rho,
+        decryptionResult.r,
+        decryptionResult.v
       )
     }
   }

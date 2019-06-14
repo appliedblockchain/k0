@@ -5,7 +5,7 @@ async function generatePaymentData(server, secretStore, v) {
   u.checkBN(v)
   const rho = crypto.randomBytes(32)
   const r = crypto.randomBytes(48)
-  const cm = await server.cm(secretStore.getPublicKey(), rho, r, v)
+  const cm = await server.cm(secretStore.getAPk(), rho, r, v)
   return { rho, r, cm }
 }
 

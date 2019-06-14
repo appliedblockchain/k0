@@ -22,7 +22,7 @@ TEST(prfs, prf_addr) {
     bit_vector zeros(256);
     std::fill(zeros.begin(), zeros.end(), 0);
     bit_vector expected_result = sha256_compress(concat(a_sk, zeros));
-    ASSERT_EQ(prf_addr<HashT>(a_sk), expected_result);
+    ASSERT_EQ(prf_addr_a_pk<HashT>(a_sk), expected_result);
 }
 
 TEST(prfs, prf_sn) {

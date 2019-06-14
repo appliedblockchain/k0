@@ -40,6 +40,13 @@ func (t *K0Chaincode) mint(
 	stub shim.ChaincodeStubInterface,
 	args [][]byte,
 ) pb.Response {
+	fmt.Println("BEGIN MINT ENDORSMENT")
+	expectedArgCount := 7
+	if len(args) != expectedArgCount {
+		str := "Incorrect number of arguments. Expecting %d, got: %d"
+		return shim.Error(fmt.Sprintf(str, expectedArgCount, len(args)))
+	}
+
 	minterID, err := stub.GetState("minterID")
 
 	if err != nil {
@@ -63,7 +70,8 @@ func (t *K0Chaincode) mint(
 	k, err := util.VariableToFixed32(args[0])
 	v, err := util.VariableToFixed8(args[1])
 	cm, err := util.VariableToFixed32(args[2])
-	newRoot, err := util.VariableToFixed32(args[3])
+	noteData, err := util.VariableToFixed136(args[3])
+	newRoot, err := util.VariableToFixed32(args[4])
 	k_elems, err := serverclient.Pack256Bits(endpoint, k)
 	cm_elems, err := serverclient.Pack256Bits(endpoint, cm)
 	if err != nil {
@@ -71,12 +79,12 @@ func (t *K0Chaincode) mint(
 		return shim.Error(fmt.Sprintf(msg, err.Error()))
 	}
 	var commitmentProof data.ProofJacobian
-	err = json.Unmarshal(args[4], &commitmentProof)
+	err = json.Unmarshal(args[5], &commitmentProof)
 
 	var additionProof data.ProofJacobian
-	err = json.Unmarshal(args[5], &additionProof)
+	err = json.Unmarshal(args[6], &additionProof)
 
-	publicInputs := []*big.Int{
+	publicInputsCommitment := []*big.Int{
 		k_elems[0],
 		k_elems[1],
 		new(big.Int).SetUint64(util.BytesToUint8(v)),
@@ -84,7 +92,7 @@ func (t *K0Chaincode) mint(
 		cm_elems[1],
 	}
 	verified, err := serverclient.Verify(
-		endpoint, "commitment", commitmentProof, publicInputs)
+		endpoint, "commitment", commitmentProof, publicInputsCommitment)
 	if err != nil {
 		msg := "While trying to verify commitment proof: %s"
 		return shim.Error(fmt.Sprintf(msg, err.Error()))
@@ -93,18 +101,70 @@ func (t *K0Chaincode) mint(
 		return shim.Error("Commitment proof not verified")
 	}
 
-	// TODO verify addition proof
+	currentRoot, err := stub.GetState("root")
+
+	currentRootFixed, err := util.VariableToFixed32(currentRoot)
+
+	logger.Infof("Root After Mint to %s.", util.BytesToHex32(currentRootFixed))
+
+	numLeaves, err := stub.GetState("numLeaves")
+	prev_root_elems, err := serverclient.Pack256Bits(endpoint, currentRootFixed)
+	new_root_elems, err := serverclient.Pack256Bits(endpoint, newRoot)
+	numLeavesFixed8, err := util.VariableToFixed8(numLeaves)
+	numLeavesUint := util.BytesToUint8(numLeavesFixed8)
+
+	fmt.Printf("Leaves count before mint: %+v \n", numLeavesUint)
+
+	publicInputsAddition := []*big.Int{
+		prev_root_elems[0],
+		prev_root_elems[1],
+		new(big.Int).SetUint64(numLeavesUint),
+		cm_elems[0],
+		cm_elems[1],
+		new_root_elems[0],
+		new_root_elems[1],
+	}
+
+	fmt.Printf("%+v \n", publicInputsAddition)
+
+	verified, err = serverclient.Verify(
+		endpoint, "addition", additionProof, publicInputsAddition)
+	if err != nil {
+		msg := "While trying to verify addition proof: %s"
+		return shim.Error(fmt.Sprintf(msg, err.Error()))
+	}
+	if !verified {
+		return shim.Error("Addition proof not verified")
+	}
 
 	err = stub.PutState("root", newRoot[:])
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	logger.Infof("Set root to %s.", util.BytesToHex32(newRoot))
-
-	err = stub.SetEvent("Mint", append(cm[:], newRoot[:]...))
+	logger.Infof("Settin root to %s.", util.BytesToHex32(newRoot))
+	eventVals := util.ConcatByteSlices([][]byte{
+		cm[:],
+		noteData[:],
+		newRoot[:],
+	})
+	err = stub.SetEvent("Mint", eventVals)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
+
+	numLeavesUint = numLeavesUint + 1
+	newNumLeaves, err := util.UintToBytes8(numLeavesUint)
+
+	if err != nil {
+		msg := "Conversion for uint to bytes failed for newNumLeaves"
+		return shim.Error(fmt.Sprintf(msg, err.Error()))
+	}
+
+	fmt.Printf("Leaves count after mint:\n uint: %+v\nbytes: %+v \n", numLeavesUint, newNumLeaves)
+
+	stub.PutState("numLeaves", newNumLeaves[:])
+
+	fmt.Println("MINT ENDORSMENT SUCCESS")
 
 	return shim.Success(nil)
 }

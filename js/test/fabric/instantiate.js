@@ -13,10 +13,12 @@ process.on('unhandledRejection', error => {
 })
 
 async function run() {
-  const config = getConfig('bank', 'Admin', process.env.DEV_MODE === 'true')
+  const config = getConfig('bank', 'Admin', !!process.env.DEV_MODE)
 
   const bankAdmin = await makeClient(config)
   const bankPlatformState = await makePlatformState(config.mtServerPort)
+
+  await bankPlatformState.reset()
 
   const initialRoot = await bankPlatformState.merkleTreeRoot()
 

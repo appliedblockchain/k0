@@ -12,20 +12,30 @@
 #include "pkutil.cpp"
 #include "printbits.hpp"
 #include "scheme/comms.hpp"
+#include "scheme/note_encryption.hpp"
+#include "scheme/ka.hpp"
 #include "scheme/prfs.h"
 #include "serialization.hpp"
 #include "Server.hpp"
 #include "util.h"
 #include "proof_serialization.hpp"
 
+#include <iostream>
+#include <chrono>
+#include <ctime>
+
+
 template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::Server(
     size_t height,
-                                                                  AbstractServerConnector &connector,
-                                                                  serverVersion_t type)
+    AbstractServerConnector &connector,
+    serverVersion_t type)
+
     : ZKTradeStubServer(connector, type),
       tree_height{height},
-      mt{height} {}
+      mt{height}
+{
+}
 
 template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::reset()
@@ -163,6 +173,66 @@ std::string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::cm(
 }
 
 template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+Json::Value zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::decrypt_note(
+    const std::string& combined_ciphertext_hex_str,
+    const std::string& sk_enc_hex_str,
+    const std::string& pk_enc_hex_str)
+{
+    if (combined_ciphertext_hex_str.length() != 2 + (32 + 104) * 2) {
+        throw JsonRpcException(-32602, "Invalid ciphertext length");
+    }
+    if (sk_enc_hex_str.length() != 2 + 32 * 2) {
+        throw JsonRpcException(-32602, "Invalid sk_enc length");
+    }
+    if (pk_enc_hex_str.length() != 2 + 32 * 2) {
+        throw JsonRpcException(-32602, "Invalid pk_enc length");
+    }
+
+    unsigned char combined_ciphertext[136];
+    fill_with_bytes_of_hex_string(combined_ciphertext, combined_ciphertext_hex_str);
+    unsigned char epk[32];
+    memcpy(epk, combined_ciphertext, 32);
+    unsigned char ciphertext[104];
+    memcpy(ciphertext, combined_ciphertext + 32, 104);
+    unsigned char sk_enc[32];
+    fill_with_bytes_of_hex_string(sk_enc, sk_enc_hex_str);
+    unsigned char pk_enc[32];
+    fill_with_bytes_of_hex_string(pk_enc, pk_enc_hex_str);
+
+    unsigned char decrypted_text[88];
+    Json::Value res;
+    if (zktrade::decrypt_note(decrypted_text, epk, ciphertext, sk_enc, pk_enc) == 0) {
+        res["success"] = true;
+        res["value"] = bytes_to_hex(decrypted_text, 88);
+    } else {
+        res["success"] = false;
+    }
+    return res;
+}
+
+template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+Json::Value
+zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::deriveKeys(
+    const std::string& a_sk_hex)
+{
+    bit_vector a_sk = hex2bits(a_sk_hex);
+    bit_vector a_pk = zktrade::prf_addr_a_pk<CommitmentHashT>(a_sk);
+
+    unsigned char sk_enc[32];
+    auto prfed = prf_addr_sk_enc<CommitmentHashT>(a_sk);
+    fill_with_bits(sk_enc, prfed);
+    ka_format_private(sk_enc);
+    unsigned char pk_enc[32];
+    ka_derive_public(pk_enc, sk_enc);
+
+    Json::Value res;
+    res["a_pk"] = bits2hex(a_pk);
+    res["sk_enc"] = bytes_to_hex(sk_enc, 32);
+    res["pk_enc"] = bytes_to_hex(pk_enc, 32);
+    return res;
+}
+
+template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::element(
     int address)
 {
@@ -171,6 +241,35 @@ string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::element(
         throw JsonRpcException(-32602, "Address too big");
     }
     return bits2hex(mt[address]);
+}
+
+template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
+string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::encrypt_note(
+    const string& plaintext_hex_str, const string& pk_enc_hex_str)
+{
+    if (plaintext_hex_str.length() != 2 + 88 * 2) {
+        throw JsonRpcException(-32602, "Invalid plaintext length");
+    }
+    if (pk_enc_hex_str.length() != 2 + 32 * 2) {
+        throw JsonRpcException(-32602, "Invalid pk_enc length");
+    }
+
+    unsigned char plaintext[88];
+    fill_with_bytes_of_hex_string(plaintext, plaintext_hex_str);
+    unsigned char pk_enc[32];
+    fill_with_bytes_of_hex_string(pk_enc, pk_enc_hex_str);
+
+    unsigned char epk[32];
+    unsigned char ciphertext[104];
+
+    if (zktrade::encrypt_note(epk, ciphertext, plaintext, pk_enc) == 0) {
+        unsigned char combined_ciphertext[136];
+        memcpy(combined_ciphertext, epk, 32);
+        memcpy(combined_ciphertext+32, ciphertext, 104);
+        return bytes_to_hex(combined_ciphertext, 136);
+    } else {
+        throw JsonRpcException(-32010, "Encryption failed.");
+    }
 }
 
 template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
@@ -343,12 +442,18 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::merkleTreeAdditionPro
         throw JsonRpcException(-32010, "Addition circuit not satisfied");
     }
 
+
+    //TODO rename vars
+    auto start = std::chrono::system_clock::now();
+    std::time_t readableStart = std::chrono::system_clock::to_time_t(start);
+    cout << "Called at: " << std::ctime(&readableStart) << endl;
+
     const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> proof =
         r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
             addition_pk, circuit.pb->primary_input(),
             circuit.pb->auxiliary_input());
     cout << "ADDITION params" << endl
-         << hex << circuit.pb->primary_input()
+         << dec << circuit.pb->primary_input()
          << endl;
     bool verified =
         r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
@@ -373,7 +478,7 @@ template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 Json::Value
 zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::pack256Bits(
     const std::string& input
-)
+    )
 {
     auto packed = pack<FieldT>(hex2bits(input));
     Json::Value result;
@@ -429,31 +534,31 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepareTransfer(
 
     input_note in[]{
         {in_0_address,
-         hex2bits(input_0_a_sk_str),
-         hex2bits(input_0_rho_str),
-         hex2bits(input_0_r_str),
-         strtoul(input_0_v_str.c_str(), NULL, 10),
-         in_0_path_vec},
+                hex2bits(input_0_a_sk_str),
+                hex2bits(input_0_rho_str),
+                hex2bits(input_0_r_str),
+                strtoul(input_0_v_str.c_str(), NULL, 10),
+                in_0_path_vec},
         {in_1_address,
-         hex2bits(input_1_a_sk_str),
-         hex2bits(input_1_rho_str),
-         hex2bits(input_1_r_str),
-         strtoul(input_1_v_str.c_str(), NULL, 10),
-         in_1_path_vec}};
+                hex2bits(input_1_a_sk_str),
+                hex2bits(input_1_rho_str),
+                hex2bits(input_1_r_str),
+                strtoul(input_1_v_str.c_str(), NULL, 10),
+                in_1_path_vec}};
 
     output_note out[]{
         {
             hex2bits(output_0_a_pk_str),
-            hex2bits(output_0_rho_str),
-            hex2bits(output_0_r_str),
-            strtoul(output_0_v_str.c_str(), NULL, 10),
-        },
+                hex2bits(output_0_rho_str),
+                hex2bits(output_0_r_str),
+                strtoul(output_0_v_str.c_str(), NULL, 10),
+                },
         {
             hex2bits(output_1_a_pk_str),
-            hex2bits(output_1_rho_str),
-            hex2bits(output_1_r_str),
-            strtoul(output_1_v_str.c_str(), NULL, 10),
-        }};
+                hex2bits(output_1_rho_str),
+                hex2bits(output_1_r_str),
+                strtoul(output_1_v_str.c_str(), NULL, 10),
+                }};
 
     auto callee_dec_str = hex_to_dec_string(callee_hex_str);
     auto callee = FieldT(callee_dec_str.c_str());
@@ -627,12 +732,13 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_withdrawal(
     return result;
 }
 
+// TODO remove (a_pk is also generated in deriveKeys)
 template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prf_addr(
     const string &a_sk_hex)
 {
     bit_vector a_sk = hex2bits(a_sk_hex);
-    bit_vector a_pk = zktrade::prf_addr<CommitmentHashT>(a_sk);
+    bit_vector a_pk = zktrade::prf_addr_a_pk<CommitmentHashT>(a_sk);
     string a_pk_hex = bits2hex(a_pk);
     return a_pk_hex;
 }
@@ -655,7 +761,7 @@ template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 std::string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::unpack256Bits(
     const std::string& param01,
     const std::string& param02
-) {
+    ) {
     vector<FieldT> elements{FieldT(param01.c_str()), FieldT(param02.c_str())};
     return bits2hex(unpack(elements));
 }
@@ -699,8 +805,11 @@ bool zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::verifyProof(
         throw JsonRpcException(-32602, "Invalid proof type");
     }
 
-
-    cout << "PRIMARY INPUT" << endl << public_inputs << endl;
+    //TODO: rename vars or extract func
+    auto start = std::chrono::system_clock::now();
+    std::time_t readableStart = std::chrono::system_clock::to_time_t(start);
+    cout << "Called at: " << std::ctime(&readableStart) << endl;
+    cout << "PRIMARY INPUT" << endl << dec << public_inputs << endl;
     bool verified = r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
         vk,
         public_inputs,

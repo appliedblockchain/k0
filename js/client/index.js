@@ -1,6 +1,9 @@
 const jayson = require('jayson/promise')
 const cm = require('./cm')
+const decryptNote = require('./decrypt-note')
+const deriveKeys = require('./derive-keys')
 const depositCommitmentProof = require('./deposit-commitment-proof')
+const encryptNote = require('./encrypt-note')
 const merkleTreeAdditionProof = require('./merkle-tree-addition-proof')
 const prepareTransfer = require('./prepare-transfer')
 const prepare_withdrawal = require('./prepare_withdrawal')
@@ -12,7 +15,10 @@ function client(serverPort = 4000) {
   const jc = jayson.client.http({ port: serverPort })
   return {
     cm: cm.bind(null, jc),
+    decryptNote: decryptNote.bind(null, jc),
     depositCommitmentProof: depositCommitmentProof.bind(null, jc),
+    deriveKeys: deriveKeys.bind(null, jc),
+    encryptNote: encryptNote.bind(null, jc),
     merkleTreeAdditionProof: merkleTreeAdditionProof.bind(null, jc),
     prepareTransfer: prepareTransfer.bind(null, jc),
     prepare_withdrawal: prepare_withdrawal.bind(null, jc),

@@ -21,7 +21,7 @@ async function handleTransfer(platformState, secretStore, txnid, in0sn, in1sn, o
 
   for (let i = 0; i < 2; i = i + 1) {
     const info = decodeData(outputs[i][1])
-    if (info.a_pk.equals(secretStore.getPublicKey())) {
+    if (info.a_pk.equals(secretStore.getAPk())) {
       secretStore.addNoteInfo(
         outputs[i][0],
         info.a_pk,
