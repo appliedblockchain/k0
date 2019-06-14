@@ -1,6 +1,9 @@
 const request = require('./request')
 const u = require('../util')
 
+// sc address
+// recipient: msg.sender
+// recipient must go into the proof otherwise it could go into another tx, must be msg.sender
 async function prepare_withdrawal(jc, address, a_sk, rho, r, v, recipient) {
   u.checkBN(address)
   u.checkBuf(a_sk, 32)

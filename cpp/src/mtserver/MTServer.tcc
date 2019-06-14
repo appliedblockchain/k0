@@ -50,6 +50,9 @@ Json::Value zktrade::MTServer<FieldT, MerkleTreeHashT>::add(
   Json::Value result;
   result["address"] = address;
   result["nextRoot"] = bits2hex(mt.root());
+
+  mt.print();
+
   return result;
 }
 

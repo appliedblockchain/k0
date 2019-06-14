@@ -344,7 +344,7 @@ describe('Ethereum integration test replicating the K0 demo', function () {
     }
   }
 
-  it('allows alice to transfer funds to bob', async () => {
+  xit('allows alice to transfer funds to bob', async () => {
     await checkRootsConsistency()
     const in0 = await getInputNote(alice.platformState, alice.secretStore, 0)
     const in1 = await getInputNote(alice.platformState, alice.secretStore, 1)
@@ -412,7 +412,7 @@ describe('Ethereum integration test replicating the K0 demo', function () {
 
     const tx = await alice.k0Eth.transfer(...ethParams)
 
-    const avNotesBefore = [alice, bob, carol].map(who => {
+    const avNotesBefore = [ alice, bob, carol ].map(who => {
       return [
         who.secretStore.getAPk(),
         who.secretStore.getAvailableNotes().length
@@ -427,7 +427,7 @@ describe('Ethereum integration test replicating the K0 demo', function () {
     await transferProcessed
     await u.wait(5000)
 
-    const avNotesAfter = [alice, bob, carol].map(who => {
+    const avNotesAfter = [ alice, bob, carol ].map(who => {
       return [
         who.secretStore.getAPk(),
         who.secretStore.getAvailableNotes().length
@@ -438,7 +438,7 @@ describe('Ethereum integration test replicating the K0 demo', function () {
     ).to.equal(numInitialNotes + 1)
   })
 
-  it('allows carol to sell her car to bob', async () => {
+  xit('allows carol to sell her car to bob', async () => {
     // Deploying The trading contract
     const bobNotes = bob.secretStore.getAvailableNotes()
     const [ in0, in1 ] = bobNotes
@@ -561,5 +561,23 @@ describe('Ethereum integration test replicating the K0 demo', function () {
     carOwnwer = await carToken.methods.ownerOf(carId).call()
 
     expect(carOwnwer).to.equal(bob.account.address)
+  })
+
+  it('allows alice to withdraw a note', async function () {
+    // dollar coin before
+
+    const noteToWithdraw = alice.secretStore.getAvailableNotes()[1]
+
+    // console.log({ noteInfos, index, as_k })
+    const res = await alice.k0.prepareWithdrawal(
+      alice.platformState,
+      alice.secretStore,
+      noteToWithdraw.cm,
+      u.hex2buf(alice.account.address)
+    )
+
+    console.log({ res })
+
+    // dollar coin after
   })
 })
