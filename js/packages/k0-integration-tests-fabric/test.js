@@ -114,6 +114,9 @@ describe('Fabric workflow', function fabricTest() {
           data.additionProofJacobian
         )
         await mintProcessedPromise
+        if (process.env.CIRCLECI) {
+          await u.wait(1000)
+        }
       }
       logger.info(`Note for org ${i} MINTED`)
     }
