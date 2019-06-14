@@ -9,6 +9,7 @@ async function prepareDeposit(server, platformState, address, v) {
   u.checkBN(v)
 
   const a_pk = address.slice(0, 32)
+  const pk_enc = address.slice(32, 64)
 
   const rho = crypto.randomBytes(32)
   const r = crypto.randomBytes(48)

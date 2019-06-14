@@ -42,7 +42,7 @@ async function instantiateOrUpgrade(
       && proposalResponses[0].response
       && proposalResponses[0].response.status === 200) {
     // everything ok
-    console.inspect('ALL OK', proposalResponses[0])
+    console.inspect('INSTANTIATE OK', proposalResponses[0])
   } else {
     console.log(proposalResponses[0])
     eh.close()

@@ -30,7 +30,6 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::Server(
     size_t height,
     AbstractServerConnector &connector,
     serverVersion_t type)
-
     : ZKTradeStubServer(connector, type),
       tree_height{height},
       mt{height}
