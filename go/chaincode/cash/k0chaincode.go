@@ -35,6 +35,16 @@ func (t *K0Chaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 		return shim.Error(err.Error())
 	}
 
+	numLeaves, err := util.UintToBytes8(0)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	err = stub.PutState("numLeaves", numLeaves[:])
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
 	mspid, err := cid.GetMSPID(stub)
 	if err != nil {
 		return shim.Error(err.Error())
@@ -51,6 +61,8 @@ func (t *K0Chaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return t.mint(stub, args[1:])
 	case "transfer":
 		return t.transfer(stub, args[1:])
+	case "getState":
+		return t.getState(stub, args[1:])
 	default:
 		msg := "Function \"%s\" not (yet) implemented"
 		return shim.Error(fmt.Sprintf(msg, function))

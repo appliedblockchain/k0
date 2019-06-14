@@ -28,12 +28,15 @@ describe('Fabric workflow', function fabricTest() {
   const BANK = 'bank'
   let logger
 
-  it('Init', async function () {
+  before(async function () {
     logger = log4js.getLogger()
     logger.level = process.env.LOG_LEVEL || 'info'
+
+    const devMode = u.readBooleanFromENV('DEV_MODE')
+
     for (let i = 0; i < orgs.length; i = i + 1) {
       const who = orgs[i]
-      const config = getConfig(who, 'User1', process.env.DEV_MODE === 'true')
+      const config = getConfig(who, 'User1', devMode)
       platformStates[who] = await makePlatformState(config.mtServerPort)
       await platformStates[who].reset()
       k0s[who] = await makeK0(config.proverPort)
@@ -70,15 +73,67 @@ describe('Fabric workflow', function fabricTest() {
     }
   })
 
+  function awaitMinting() {
+    const prs = orgs.map(orgName => {
+      return testUtil.awaitEvent(
+        events[orgName],
+        'mintProcessed',
+        100
+      )
+    })
+
+    return Promise.all(prs)
+  }
+
+  function txMinedOnNetwork(txId) {
+    return Promise.all(orgs.map(orgName => {
+      return k0Fabrics[orgName].waitForTx(txId).then(res =>{
+        console.inspect({ label: 'MinedOnNetwork-SUCCESS', orgName, res })
+      }).catch(err => {
+        console.inspect({ label: 'MinedOnNetwork-ERROR', orgName, err })
+        throw err
+      })
+    }))
+  }
+
+  async function printStates(message) {
+    console.log(message)
+    for (let i = 0; i < orgs.length; i++) {
+      const orgName = orgs[i]
+      const state = await k0Fabrics[orgName].getState()
+      const platformStateRoot = await platformStates[orgName].merkleTreeRoot()
+      console.inspect({
+        label: `STATE for ${orgName}`,
+        state: {
+          root: state.root.toString('hex'),
+          numLeaves: state.numLeaves.toString(),
+          platformStateRoot: platformStateRoot.toString('hex')
+        }
+      })
+    }
+  }
+
+
+  it('Can get the peers state, and they are all at root "0" and 0 leaves', async function () {
+    for (let i = 0; i < orgs.length; i++) {
+      const orgName = orgs[i]
+      const state = await k0Fabrics[orgName].getState()
+      expect(state.root.toString('hex'))
+        .to.equal('0000000000000000000000000000000000000000000000000000000000000000')
+      expect(state.numLeaves.eq(new BN(0))).to.equal(true)
+    }
+  })
+
   it('Mint', async function () {
+    let mintedNotes = 0
     // Nobody should have any money
     for (let i = 0; i < orgs.length; i = i + 1) {
       expect(secretStores[orgs[i]].getAvailableNotes().length).to.equal(0)
     }
+
     const numInitialHodlers = 2
     const numInitialNotesPerHodler = 2
     for (let i = 0; i < numInitialHodlers; i = i + 1) {
-      console.inspect(`Minting Notes for Org ${i}`)
       const who = orgs[i]
       const values = _.times(numInitialNotesPerHodler, () => {
         return new BN(_.random(50).toString() + '000')
@@ -86,30 +141,51 @@ describe('Fabric workflow', function fabricTest() {
       values.reduce((acc, el) => acc.add(el), new BN('0'))
 
       for (let j = 0; j < values.length; j++) {
-        console.inspect(`Minting note ${j}`)
+
+
+        // await u.wait(5000)
+        await printStates('STATE BEFORE MINT')
+        console.inspect(`Minting note ${j} for Org ${i}`)
         const v = values[j]
 
         // In fabric, a single bank authority issues secret notes
         const data = await k0s[BANK].prepareDeposit(
           platformStates[BANK], secretStores[who].getAddress(), v
         )
-        const mintProcessedPromise = testUtil.awaitEvent(
-          events[BANK],
-          'mintProcessed',
-          100
-        )
-        const depositTx = await k0Fabrics[BANK].mint( // eslint-disable-line
-          data.k,
-          v,
-          data.cm,
-          data.ciphertext,
-          data.nextRoot,
-          data.commitmentProofJacobian,
-          data.additionProofJacobian
-        )
-        await mintProcessedPromise
+
+        try {
+          const mintProcessedPromises = awaitMinting()
+        const { transactionId } = await k0Fabrics[BANK].mint( // eslint-disable-line
+            data.k,
+            v,
+            data.cm,
+            data.ciphertext,
+            data.nextRoot,
+            data.commitmentProofJacobian,
+            data.additionProofJacobian
+          )
+
+          await Promise.all([
+            awaitMinting,
+            mintProcessedPromises,
+            txMinedOnNetwork(transactionId)
+          ])
+          await u.wait(2000)
+          await printStates('STATE AFTER MINT')
+
+        } catch (err) {
+          console.inspect('MINTING ERROR', err)
+          await printStates('STATE ON THROW ERR')
+
+          console.inspect({ LABEL: 'MINTEDNOTES Before fail', mintedNotes })
+
+          throw err
+        }
+
+        mintedNotes++
+        console.inspect({ LABEL: 'MINTEDNOTES', mintedNotes })
+
       }
-      console.inspect(`Note for org ${i} MINTED`)
     }
 
     // Hodlers should now have numInitialNotesPerHodler notes each
@@ -123,10 +199,8 @@ describe('Fabric workflow', function fabricTest() {
   })
 
   it('Transfer', async function transferTest() {
-
-    const labelBeforeBefore = platformStates.alpha.currentStateLabel()
-
     const availableNotes = secretStores.alpha.getAvailableNotes()
+
     // select 2 notes randomly
     const inputs = _.sampleSize(availableNotes, 2)
     const sum = _.map(inputs, 'v').reduce((acc, el) => acc.add(el), new BN(0))

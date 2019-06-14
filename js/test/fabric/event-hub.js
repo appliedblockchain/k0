@@ -1,12 +1,13 @@
+'use strict'
+
 const EventEmitter = require('events')
 const handleMint = require('./event-handlers/mint')
 const handleTransfer = require('./event-handlers/transfer')
-const u = require('../../util')
 
 class EventHub extends EventEmitter {}
 
 function makeEventHub(platformState, secretStore, k0, platform) {
-  let queue = []
+  const queue = []
 
   let processing = false
 
@@ -19,7 +20,7 @@ function makeEventHub(platformState, secretStore, k0, platform) {
     processing = true
     var item = queue.shift()
 
-    if (item.type === 'mint'){
+    if (item.type === 'mint') {
       await handleMint(
         platformState,
         secretStore,
@@ -55,7 +56,7 @@ function makeEventHub(platformState, secretStore, k0, platform) {
   }
 
   platform.on('mint', (txnid, cm, nextRoot) => {
-    addToQueue('mint', txnid, [cm, nextRoot])
+    addToQueue('mint', txnid, [ cm, nextRoot ])
   })
 
   platform.on(

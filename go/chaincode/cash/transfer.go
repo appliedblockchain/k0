@@ -11,6 +11,8 @@ import (
 func (t *K0Chaincode) transfer(
 	stub shim.ChaincodeStubInterface, args [][]byte,
 ) pb.Response {
+	fmt.Println("BEGIN TRANSFER ENDORSMENT")
+
 	sn_in_0, err := util.VariableToFixed32(args[0])
 	sn_in_1, err := util.VariableToFixed32(args[1])
 	cm_out_0, err := util.VariableToFixed32(args[2])
@@ -41,6 +43,8 @@ func (t *K0Chaincode) transfer(
 	if err != nil {
 		return shim.Error(err.Error())
 	}
+
+	fmt.Println("TRANSFER ENDORSMENT SUCCESS")
 
 	return shim.Success(nil)
 }

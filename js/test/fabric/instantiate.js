@@ -1,5 +1,6 @@
 'use strict'
 
+const u = require('../../util')
 const getConfig = require('./helpers/get-config')
 const makeClient = require('./helpers/client')
 const instantiateOrUpgrade = require('./helpers/instantiate-or-upgrade')
@@ -13,10 +14,17 @@ process.on('unhandledRejection', error => {
 })
 
 async function run() {
-  const config = getConfig('bank', 'Admin', process.env.DEV_MODE === 'true')
+
+  const devMode = u.readBooleanFromENV('DEV_MODE')
+
+  console.inspect({ devMode })
+
+  const config = getConfig('bank', 'Admin', devMode)
 
   const bankAdmin = await makeClient(config)
   const bankPlatformState = await makePlatformState(config.mtServerPort)
+
+  await bankPlatformState.reset()
 
   const initialRoot = await bankPlatformState.merkleTreeRoot()
 

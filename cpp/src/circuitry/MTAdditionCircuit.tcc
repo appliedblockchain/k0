@@ -15,7 +15,7 @@ zktrade::make_mt_addition_circuit(size_t tree_height) {
     prev_root_packed->allocate(*pb, 2, "prev_root_packed");
 
     auto address_packed = new pb_variable<FieldT>();
-    address_packed->allocate(*pb, "address_packed");
+    address_packed->allocate(*pb, "address_packed"); // id of the leaf
 
     auto next_leaf_packed = new pb_variable_array<FieldT>();
     next_leaf_packed->allocate(*pb, 2, "next_leaf_packed");

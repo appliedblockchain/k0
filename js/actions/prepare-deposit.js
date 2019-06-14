@@ -27,6 +27,7 @@ async function prepareDeposit(server, platformState, address, v) {
   )
 
   const ciphertext = await encryptNote(server, address, v, rho, r)
+
   return {
     a_pk,
     rho,

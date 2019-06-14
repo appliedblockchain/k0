@@ -3,7 +3,7 @@
 async function waitForTx(channel, queryPeer, transactionId, promise) {
   const eh = channel.newChannelEventHub(queryPeer)
   eh.connect()
-  const [ result, _ ] = await Promise.all([
+  const [ result ] = await Promise.all([
     promise,
     new Promise((resolve, reject) => {
       eh.registerTxEvent(
@@ -11,7 +11,7 @@ async function waitForTx(channel, queryPeer, transactionId, promise) {
         (tx, code) => {
           eh.unregisterTxEvent(transactionId)
           eh.close()
-          resolve()
+          resolve(code)
         },
         (err) => {
           eh.unregisterTxEvent(transactionId)
@@ -21,6 +21,7 @@ async function waitForTx(channel, queryPeer, transactionId, promise) {
       )
     })
   ])
+
   return result
 }
 

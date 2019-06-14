@@ -1,8 +1,15 @@
 'use strict'
-const fs = require('fs')
+
 const waitForTx = require('./wait-for-tx')
 
-async function instantiateOrUpgrade(clientBundle, endorsementPolicy, chaincodeId, version, args, upgrade = false) {
+async function instantiateOrUpgrade(
+  clientBundle,
+  endorsementPolicy,
+  chaincodeId,
+  version,
+  args,
+  upgrade = false
+) {
   const { client, channel, queryPeer } = clientBundle
 
 
@@ -19,6 +26,7 @@ async function instantiateOrUpgrade(clientBundle, endorsementPolicy, chaincodeId
     'endorsement-policy': endorsementPolicy,
     targets: [ queryPeer ]
   }
+
   let endorsementResults
   if (upgrade) {
     endorsementResults = await channel.sendUpgradeProposal(request)
@@ -34,10 +42,11 @@ async function instantiateOrUpgrade(clientBundle, endorsementPolicy, chaincodeId
       && proposalResponses[0].response
       && proposalResponses[0].response.status === 200) {
     // everything ok
+    console.inspect('INSTANTIATED CHAINCODE SUCCESSFULY', proposalResponses[0])
   } else {
     console.log(proposalResponses[0])
     eh.close()
-    throw new Error('Proposal was bad')
+    throw new Error('FAIL TO INSTANTIATE CHAINCODE: Proposal was bad')
   }
   const tx = {
     proposalResponses: proposalResponses,

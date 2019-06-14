@@ -211,12 +211,12 @@ jobs:
           name: "Instantiate K0 chaincode"
           command: |
             cd js/test/fabric
-            node instantiate
+            CHAINCODE_ID=k0chaincode node instantiate
       - run:
           name: "Run integration tests"
           command: |
             cd js
-            node_modules/.bin/mocha test/fabric/test.js
+            CHAINCODE_ID=k0chaincode node_modules/.bin/mocha test/fabric/test.js
 
   ethereum_integration_tests:
     machine:

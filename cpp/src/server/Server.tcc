@@ -20,6 +20,11 @@
 #include "util.h"
 #include "proof_serialization.hpp"
 
+#include <iostream>
+#include <chrono>
+#include <ctime>
+
+
 template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::Server(
     size_t height,
@@ -27,7 +32,9 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::Server(
     serverVersion_t type)
     : ZKTradeStubServer(connector, type),
       tree_height{height},
-      mt{height} {}
+      mt{height}
+{
+}
 
 template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 string zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::reset()
@@ -434,12 +441,18 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::merkleTreeAdditionPro
         throw JsonRpcException(-32010, "Addition circuit not satisfied");
     }
 
+
+    //TODO rename vars
+    auto start = std::chrono::system_clock::now();
+    std::time_t readableStart = std::chrono::system_clock::to_time_t(start);
+    cout << "Called at: " << std::ctime(&readableStart) << endl;
+
     const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> proof =
         r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
             addition_pk, circuit.pb->primary_input(),
             circuit.pb->auxiliary_input());
     cout << "ADDITION params" << endl
-         << hex << circuit.pb->primary_input()
+         << dec << circuit.pb->primary_input()
          << endl;
     bool verified =
         r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
@@ -791,8 +804,11 @@ bool zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::verifyProof(
         throw JsonRpcException(-32602, "Invalid proof type");
     }
 
-
-    cout << "PRIMARY INPUT" << endl << public_inputs << endl;
+    //TODO: rename vars or extract func
+    auto start = std::chrono::system_clock::now();
+    std::time_t readableStart = std::chrono::system_clock::to_time_t(start);
+    cout << "Called at: " << std::ctime(&readableStart) << endl;
+    cout << "PRIMARY INPUT" << endl << dec << public_inputs << endl;
     bool verified = r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
         vk,
         public_inputs,
