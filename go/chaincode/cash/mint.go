@@ -141,7 +141,7 @@ func (t *K0Chaincode) mint(
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	logger.Infof("Settin root to %s.", util.BytesToHex32(newRoot))
+	logger.Infof("Setting root to %s.", util.BytesToHex32(newRoot))
 	eventVals := util.ConcatByteSlices([][]byte{
 		cm[:],
 		noteData[:],

@@ -172,6 +172,25 @@ console.inspect = function (...argv) {
   console.log(chalk.red('<<< end'))
 }
 
+function readBooleanFromENV(name) {
+  const envValue = process.env[name]
+
+  console.inspect({ envValue })
+  let result
+  if (isNaN(envValue) || envValue === '' || envValue === 'false') {
+    result = false
+  } else if (envValue === 'true') {
+    result = true
+  } else {
+    throw new Error(
+      `The environment variable ${name} must be set to ` +
+      `either "true" or "false", got: ${envValue}`
+    )
+  }
+
+  return result
+}
+
 module.exports = {
   bn2string,
   buf2hex,
@@ -189,5 +208,6 @@ module.exports = {
   parseG2Point,
   unpack,
   unpack256Bits,
-  ZERO_ADDRESS
+  ZERO_ADDRESS,
+  readBooleanFromENV
 }

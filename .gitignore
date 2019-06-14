@@ -9,6 +9,7 @@
 /cpp/depends
 /data
 /go/chaincode/cash/cash
+/go/chaincode/cash/bin/cash
 /js/alice.secrets.json
 /js/bob.secrets.json
 /js/carol.secrets.json

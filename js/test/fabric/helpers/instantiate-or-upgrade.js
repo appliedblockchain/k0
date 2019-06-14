@@ -42,11 +42,11 @@ async function instantiateOrUpgrade(
       && proposalResponses[0].response
       && proposalResponses[0].response.status === 200) {
     // everything ok
-    console.inspect('INSTANTIATE OK', proposalResponses[0])
+    console.inspect('INSTANTIATED CHAINCODE SUCCESSFULY', proposalResponses[0])
   } else {
     console.log(proposalResponses[0])
     eh.close()
-    throw new Error('Proposal was bad')
+    throw new Error('FAIL TO INSTANTIATE CHAINCODE: Proposal was bad')
   }
   const tx = {
     proposalResponses: proposalResponses,

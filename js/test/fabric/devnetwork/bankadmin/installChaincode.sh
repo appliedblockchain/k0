@@ -1,1 +1,0 @@
-../alphaadmin/installChaincode.sh

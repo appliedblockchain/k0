@@ -31,9 +31,12 @@ describe('Fabric workflow', function fabricTest() {
   before(async function () {
     logger = log4js.getLogger()
     logger.level = process.env.LOG_LEVEL || 'info'
+
+    const devMode = u.readBooleanFromENV('DEV_MODE')
+
     for (let i = 0; i < orgs.length; i = i + 1) {
       const who = orgs[i]
-      const config = getConfig(who, 'User1', !!process.env.DEV_MODE)
+      const config = getConfig(who, 'User1', devMode)
       platformStates[who] = await makePlatformState(config.mtServerPort)
       await platformStates[who].reset()
       k0s[who] = await makeK0(config.proverPort)
@@ -111,8 +114,7 @@ describe('Fabric workflow', function fabricTest() {
   }
 
 
-  // TODO check its 0 root 0 leaves
-  it('Can get the peer state', async function () {
+  it('Can get the peers state, and they are all at root "0" and 0 leaves', async function () {
     for (let i = 0; i < orgs.length; i++) {
       const orgName = orgs[i]
       const state = await k0Fabrics[orgName].getState()
