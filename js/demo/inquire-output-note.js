@@ -3,7 +3,7 @@
 const BN = require('bn.js')
 const crypto = require('crypto')
 const inquirer = require('inquirer')
-const u = require('../util')
+const u = require('@appliedblockchain/k0-util')
 const assert = require('assert')
 
 async function inquireOutputNote(

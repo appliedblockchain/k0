@@ -2,7 +2,7 @@
 
 const BN = require('bn.js')
 const chalk = require('chalk')
-const u = require('../../util')
+const u = require('@appliedblockchain/k0-util')
 
 function decodeData(data) {
   u.checkBuf(data, 176)

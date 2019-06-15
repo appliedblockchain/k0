@@ -1,0 +1,24 @@
+{
+  "name": "@appliedblockchain/k0-integration-tests-eth",
+  "version": "0.0.0",
+  "scripts": {
+    "test": "mocha all.integration.js"
+  },
+  "dependencies": {
+    "@appliedblockchain/k0": "0.0.0",
+    "@appliedblockchain/k0-in-memory-platform-state": "0.0.0",
+    "@appliedblockchain/k0-in-memory-secret-store": "0.0.0",
+    "@appliedblockchain/k0-eth": "0.0.0",
+    "@appliedblockchain/k0-util": "0.0.0",
+    "bn.js": "^4.11.8",
+    "chalk": "^2.4.2",
+    "clear": "^0.1.0",
+    "code": "^5.2.4",
+    "jayson": "^3.0.2",
+    "log4js": "^4.3.1",
+    "mocha": "^6.1.4",
+    "openzeppelin-solidity": "^2.3.0",
+    "wait-port": "^0.2.2",
+    "web3": "^1.0.0-beta.46"
+  }
+}

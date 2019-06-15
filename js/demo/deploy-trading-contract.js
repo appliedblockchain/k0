@@ -3,7 +3,7 @@
 const BN = require('bn.js')
 const assert = require('assert')
 const inquirer = require('inquirer')
-const u = require('../util')
+const u = require('@appliedblockchain/k0-util')
 const deployContract = require('./deploy-contract')
 
 async function deployTradingContract(

@@ -1,7 +1,7 @@
 const chalk = require('chalk')
 const log = console.log
 const Table = require('cli-table')
-const u = require('../../util')
+const u = require('@appliedblockchain/k0-util')
 const inquirer = require('inquirer')
 
 async function printState(secretStore, addressBook, platform, platformState) {

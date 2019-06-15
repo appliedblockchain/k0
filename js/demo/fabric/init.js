@@ -6,7 +6,7 @@ const fs = require('fs')
 const testUtil = require('../../test/util')
 const _ = require('lodash')
 const makePlatformState = require('../../platform-state')
-const u = require('../../util')
+const u = require('@appliedblockchain/k0-util')
 const makeK0 = require('../../k0')
 const log4js = require('log4js')
 

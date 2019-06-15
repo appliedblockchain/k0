@@ -40,7 +40,7 @@ func (t *K0Chaincode) mint(
 	stub shim.ChaincodeStubInterface,
 	args [][]byte,
 ) pb.Response {
-	fmt.Println("BEGIN MINT ENDORSMENT")
+	fmt.Println("BEGIN MINT ENDORSEMENT")
 	expectedArgCount := 7
 	if len(args) != expectedArgCount {
 		str := "Incorrect number of arguments. Expecting %d, got: %d"
@@ -164,7 +164,7 @@ func (t *K0Chaincode) mint(
 
 	stub.PutState("numLeaves", newNumLeaves[:])
 
-	fmt.Println("MINT ENDORSMENT SUCCESS")
+	fmt.Println("MINT ENDORSEMENT SUCCESS")
 
 	return shim.Success(nil)
 }

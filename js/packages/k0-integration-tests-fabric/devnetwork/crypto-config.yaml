@@ -1,0 +1,30 @@
+OrdererOrgs:
+  - Name: OrdererOrg
+    Domain: orderer.org
+    Specs:
+      - Hostname: orderer
+PeerOrgs:
+  - Name: AlphaCo
+    Domain: alpha.com
+    Template:
+      Count: 1
+    Users:
+      Count: 1
+  - Name: BetaCo
+    Domain: beta.com
+    Template:
+      Count: 1
+    Users:
+      Count: 1
+  - Name: GammaCo
+    Domain: gamma.com
+    Template:
+      Count: 1
+    Users:
+      Count: 1
+  - Name: BankCo
+    Domain: bank.com
+    Template:
+      Count: 1
+    Users:
+      Count: 1

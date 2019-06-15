@@ -78,18 +78,63 @@ jobs:
             nvm alias default v8
       - restore_cache:
           keys:
-            - zktrading-js-deps-$CIRCLE_BRANCH-{{ checksum "js/package.json" }}
+            - zktrading-js-root-deps-$CIRCLE_BRANCH
+            - zktrading-js-core-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0/package.json" }}
+            - zktrading-js-eth-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-eth/package.json" }}
+            - zktrading-js-fabric-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-fabric/package.json" }}
+            - zktrading-js-platform-state-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-in-memory-platform-state/package.json" }}
+            - zktrading-js-secret-store-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-in-memory-secret-store/package.json" }}
+            - zktrading-js-integration-tests-eth-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-integration-tests-eth/package.json" }}
+            - zktrading-js-integration-tests-fabric-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-integration-tests-fabric/package.json" }}
       - run:
-          name: Install npm modules
-          command: cd js && npm i
+          name: Install lerna
+          command: cd js && npm i lerna
+      - run:
+          name: Lerna bootstrap
+          command: cd js && node_modules/.bin/lerna bootstrap --no-ci
       - save_cache:
-         key: zktrading-js-deps-$CIRCLE_BRANCH-{{ checksum "js/package.json" }}
+         key: zktrading-js-root-deps-$CIRCLE_BRANCH
          paths:
            - js/node_modules
+      - save_cache:
+         key: zktrading-js-core-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0/package.json" }}
+         paths:
+           - js/packages/k0/node_modules
+      - save_cache:
+         key: zktrading-js-eth-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-eth/package.json" }}
+         paths:
+           - js/packages/k0-eth/node_modules
+      - save_cache:
+         key: zktrading-js-eth-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-fabric/package.json" }}
+         paths:
+           - js/packages/k0-fabric/node_modules
+      - save_cache:
+         key: zktrading-js-platform-state-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-in-memory-platform-state/package.json" }}
+         paths:
+           - js/packages/k0-in-memory-platform-state/node_modules
+      - save_cache:
+         key: zktrading-js-secret-store-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-eth/in-memory-secret-store.json" }}
+         paths:
+           - js/packages/k0-in-memory-secret-store/node_modules
+      - save_cache:
+         key: zktrading-js-integration-tests-eth-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-integration-tests-eth/package.json" }}
+         paths:
+           - js/packages/k0-integration-tests-eth/node_modules
+      - save_cache:
+         key: zktrading-js-integration-tests-fabric-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-integration-tests-fabric/package.json" }}
+         paths:
+           - js/packages/k0-integration-tests-fabric/node_modules
       - persist_to_workspace:
           root: .
           paths:
             - js/node_modules
+            - js/packages/k0/node_modules
+            - js/packages/k0-eth/node_modules
+            - js/packages/k0-fabric/node_modules
+            - js/packages/k0-in-memory-platform-state/node_modules
+            - js/packages/k0-in-memory-secret-store/node_modules
+            - js/packages/k0-integration-tests-eth/node_modules
+            - js/packages/k0-integration-tests-fabric/node_modules
 
   # This could probably be run more efficiently on the docker executor
   chaincode:
@@ -164,6 +209,12 @@ jobs:
       - attach_workspace:
           at: .
       - run:
+          name: Install lerna
+          command: cd js && npm i lerna
+      - run:
+          name: Lerna bootstrap
+          command: cd js && node_modules/.bin/lerna bootstrap --no-ci
+      - run:
           name: "Generate proving and verification keys"
           command: |
             mkdir /tmp/k0keys
@@ -189,7 +240,7 @@ jobs:
       - run:
           name: "Package K0 chaincode"
           command: |
-            cd js/test/fabric/network
+            cd js/packages/k0-integration-tests-fabric/network
             docker run \
             -v $PWD/artefacts:/artefacts \
             -v ~/.go_workspace/src/github.com/hyperledger/fabric:/opt/gopath/src/github.com/hyperledger/fabric:ro \
@@ -200,23 +251,23 @@ jobs:
       - run:
           name: "Spin up Fabric network"
           command: |
-            cd js/test/fabric/network
+            cd js/packages/k0-integration-tests-fabric/network
             CI=true ./start.sh
       - run:
           name: "Install K0 chaincode"
           command: |
-            cd js/test/fabric/network
+            cd js/packages/k0-integration-tests-fabric/network
             for org in alpha beta gamma bank; do docker-compose run ${org}tools peer chaincode install /artefacts/k0chaincode.1.out; done
       - run:
           name: "Instantiate K0 chaincode"
           command: |
-            cd js/test/fabric
+            cd js/packages/k0-integration-tests-fabric
             CHAINCODE_ID=k0chaincode node instantiate
       - run:
           name: "Run integration tests"
           command: |
-            cd js
-            CHAINCODE_ID=k0chaincode node_modules/.bin/mocha test/fabric/test.js
+            cd js/packages/k0-integration-tests-fabric
+            CHAINCODE_ID=k0chaincode node_modules/.bin/mocha test
 
   ethereum_integration_tests:
     machine:
@@ -224,8 +275,6 @@ jobs:
       docker_layer_caching: true
     steps:
       - checkout
-      - attach_workspace:
-          at: .
       - run:
           name: Docker login
           command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
@@ -265,11 +314,20 @@ jobs:
             chmod +x solc-static-linux && sudo cp solc-static-linux /usr/bin/solc
       - run:
           name: Run the Docker servers
-          command: cd js/test/eth/network && docker-compose up -d && docker-compose logs -f
+          command: cd js/packages/k0-integration-tests-eth/network && docker-compose up -d && docker-compose logs -f
           background: true
+      - attach_workspace:
+          at: .
       - run:
-          name: init the demo state
-          command: cd js && npm run test:integration:eth
+          name: Install lerna
+          command: cd js && npm i lerna
+      - run:
+          name: Lerna bootstrap
+          command: cd js && node_modules/.bin/lerna bootstrap --no-ci
+      - run:
+          name: Run tests
+          command: cd js/packages/k0-integration-tests-eth && npm test
+
 
 workflows:
   version: 2
