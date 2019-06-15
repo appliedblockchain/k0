@@ -53,8 +53,9 @@ make install
 ### Install JS dependencies
 
 ```
+npm i -g lerna
 cd js
-npm i
+lerna bootstrap
 cd ..
 ```
 
