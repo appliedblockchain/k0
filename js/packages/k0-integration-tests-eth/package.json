@@ -8,6 +8,8 @@
   "dependencies": {
     "@appliedblockchain/k0": "^0.0.1",
     "@appliedblockchain/k0-eth": "^0.0.1",
+    "@appliedblockchain/k0-eth-contracts": "^0.0.0",
+    "@appliedblockchain/k0-eth-generate-verifier-contracts": "^0.0.0",
     "@appliedblockchain/k0-in-memory-platform-state": "^0.0.1",
     "@appliedblockchain/k0-in-memory-secret-store": "^0.0.1",
     "@appliedblockchain/k0-util": "^0.0.1",

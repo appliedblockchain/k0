@@ -4,7 +4,6 @@ const crypto = require('crypto')
 const deploy = require('./deploy')
 const execAsync = require('./exec-async')
 const path = require('path')
-const proofFromFile = require('./proof-from-file')
 const sendTransaction = require('./send-transaction')
 const Web3 = require('web3')
 const inquirer = require('inquirer')
@@ -58,26 +57,6 @@ async function pack256Bits(hex) {
   const command = `${executablePath} ${hex}`
   const result = await execAsync(command)
   return result.stdout.trim().split(',')
-}
-
-async function verifyOnChainWithProof(web3, contract, proof, args, expectSuccess) {
-  const data = contract.methods.verifyProof(...proof, args).encodeABI()
-  const receipt = await sendTransaction(web3, contract._address, data)
-  if (expectSuccess) {
-    assert(receipt.status)
-    assert(receipt.logs.length === 1)
-    // event "Verified(string)"
-    assert(receipt.logs[0].topics[0] === '0x3f3cfdb26fb5f9f1786ab4f1a1f9cd4c0b5e726cbdfc26e495261731aad44e39')
-    console.log(`Proof verified. Cost of verification: ${receipt.gasUsed} gas.`)
-  } else {
-    assert(receipt.status)
-    assert(receipt.logs.length === 0)
-  }
-}
-
-async function verifyOnChain(web3, contract, proofAltPath, args, expectSuccess) {
-  const proof = await proofFromFile(proofAltPath)
-  await verifyOnChainWithProof(web3, contract, proof, args, expectSuccess)
 }
 
 function randomBytes(len) {
@@ -194,11 +173,8 @@ module.exports = {
   paths,
   pack256Bits,
   prompt,
-  proofFromFile,
   randomBytesHex,
   sha256Instance,
-  verifyOnChain,
-  verifyOnChainWithProof,
   toUnits,
   fromUnits,
   ZERO_ADDRESS

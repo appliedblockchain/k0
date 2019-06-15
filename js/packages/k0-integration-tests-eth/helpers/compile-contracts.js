@@ -3,19 +3,22 @@
 const _ = require('lodash')
 const crypto = require('crypto')
 const execAsync = require('./exec-async')
+const generateVerifierContracts = require('@appliedblockchain/k0-eth-generate-verifier-contracts')
 const path = require('path')
 const asyncFs = require('./async-fs')
-const vkFromFile = require('./vk-from-file')
-const vkToSol = require('./vk-to-sol')
 
-// Path to this project's contracts directory
-const contractsSrcDir = path.join(
+const k0ContractsSrcDir = path.join(
   path.parse(module.filename).dir,
   '..',
+  'node_modules',
+  '@appliedblockchain',
+  'k0-eth-contracts'
+)
+
+const testContractsSrcDir = path.join(
+  path.parse(module.filename).dir,
   '..',
-  '..',
-  '..',
-  'sol'
+  'contracts'
 )
 
 // Path to openzeppelin contracts
@@ -33,24 +36,6 @@ function extractContractArtefacts(result, contractName) {
     abi: JSON.parse(contractInfo.abi),
     bytecode: '0x' + contractInfo.bin
   }
-}
-
-// Generates a verifier contract from a verifying key
-async function generateVerifierContractAlt(pathToVk, filePath, contractName) {
-  // Read vk and Solidity contract source code template
-  const templateFilePath = path.join(contractsSrcDir, 'GenericVerifier.sol')
-  const [vk, contractTemplate] = await Promise.all([
-    vkFromFile(pathToVk),
-    asyncFs.readTextFile(templateFilePath)
-  ])
-
-  // Put contract name and vk into contract source, write to temporary file
-  const vkSolSnippet = vkToSol(...vk)
-  let contractSource = contractTemplate.replace('____CONTRACT_NAME____', contractName)
-  contractSource = contractSource.replace('____VERIFYING_KEY_BODY____', vkSolSnippet)
-
-  await asyncFs.writeTextFile(filePath, contractSource, 'utf8')
-
 }
 
 async function compileContracts(tmpDir = '/tmp/k0keys') {
@@ -74,48 +59,47 @@ async function compileContracts(tmpDir = '/tmp/k0keys') {
     'TransferVerifier'
   ]
 
-  const normalContracts = [
+  const normalK0Contracts = [
     'Callee',
-    'CarToken',
-    'CarTrade',
-    'DollarCoin',
-    'HiddenPriceCarTrade',
-    'MoneyShower',
     'MVPPT',
     'Pairing'
   ]
+  let contractNames = verifiers.concat(normalK0Contracts)
 
-  const contractNames = verifiers.concat(normalContracts)
+  const testContracts = [
+    'CarToken',
+    'DollarCoin',
+    'HiddenPriceCarTrade',
+    'MoneyShower'
+  ]
 
-  await generateVerifierContractAlt(
+  contractNames = contractNames.concat(testContracts)
+
+  await generateVerifierContracts(
+    contractsDir,
     paths.commitmentVkAlt,
-    path.join(contractsDir, 'CommitmentVerifier.sol'),
-    'CommitmentVerifier'
-  )
-  await generateVerifierContractAlt(
     paths.additionVkAlt,
-    path.join(contractsDir, 'AdditionVerifier.sol'),
-    'AdditionVerifier'
-  )
-  await generateVerifierContractAlt(
     paths.transferVkAlt,
-    path.join(contractsDir, 'TransferVerifier.sol'),
-    'TransferVerifier'
-  )
-  await generateVerifierContractAlt(
-    paths.withdrawalVkAlt,
-    path.join(contractsDir, 'WithdrawalVerifier.sol'),
-    'WithdrawalVerifier'
+    paths.withdrawalVkAlt
   )
 
-  await Promise.all(normalContracts.map(name => {
+  await Promise.all(normalK0Contracts.map(name => {
     const filename = name + '.sol'
     return asyncFs.copyFile(
-      path.join(contractsSrcDir, filename),
+      path.join(k0ContractsSrcDir, filename),
       path.join(contractsDir, filename)
     )
   }))
 
+  await Promise.all(testContracts.map(name => {
+    const filename = name + '.sol'
+    return asyncFs.copyFile(
+      path.join(testContractsSrcDir, filename),
+      path.join(contractsDir, filename)
+    )
+  }))
+
+  console.log(contractsDir)
   const outputPath = path.join(contractsDir, 'output.json')
   const command = [
     `solc --combined-json abi,bin openzeppelin-solidity=${ozDir}`,
