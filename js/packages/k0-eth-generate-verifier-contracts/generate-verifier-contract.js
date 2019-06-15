@@ -3,13 +3,7 @@ const path = require('path')
 const vkFromFile = require('./vk-from-file')
 const vkToSol = require('./vk-to-sol')
 
-// Path to openzeppelin contracts
-const contractsSrcDir = path.join(
-  __dirname,
-  'node_modules',
-  '@appliedblockchain',
-  'k0-eth-contracts'
-)
+const contractsSrcDir = path.dirname(require.resolve("@appliedblockchain/k0-eth-contracts"))
 
 // Generates a verifier contract from a verifying key
 async function generateVerifierContract(pathToVk, filePath, contractName) {
