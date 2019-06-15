@@ -12,8 +12,8 @@ const prfAddr = require('./prf-addr')
 const ready = require('./ready')
 const verifyProof = require('./verify-proof')
 
-function client(serverPort = 4000) {
-  const jc = jayson.client.http({ port: serverPort })
+function client(serverEndpoint = 'http://localhost:4000/') {
+  const jc = jayson.client.http(endpoint)
   return {
     cm: cm.bind(null, jc),
     decryptNote: decryptNote.bind(null, jc),

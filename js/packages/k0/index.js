@@ -7,7 +7,7 @@ const pack256Bits = require('./actions/pack-256-bits')
 const prepareDeposit = require('./actions/prepare-deposit')
 const prepareTransfer = require('./actions/prepare-transfer')
 
-async function makeK0(serverPort = 4000) {
+async function makeK0(serverEndpoint = 'http://localhost:4000/') {
   const server = await makeClient(serverPort)
   return {
     decryptNote: decryptNote.bind(null, server),
