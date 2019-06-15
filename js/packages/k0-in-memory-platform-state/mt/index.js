@@ -6,7 +6,7 @@ const root = require('./root')
 const simulateAddition = require('./simulate-addition')
 
 async function makeMT(endpoint = 'http://localhost:4100') {
-  const jc = jayson.client.http(endpoin)
+  const jc = jayson.client.http(endpoint)
   return {
     add: add.bind(null, jc),
     path: path.bind(null, jc),
