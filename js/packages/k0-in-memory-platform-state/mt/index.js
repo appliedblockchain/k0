@@ -5,8 +5,8 @@ const reset = require('./reset')
 const root = require('./root')
 const simulateAddition = require('./simulate-addition')
 
-async function makeMT(serverPort = 4000) {
-  const jc = jayson.client.http({ port: serverPort })
+async function makeMT(endpoint = 'http://localhost:4100') {
+  const jc = jayson.client.http(endpoin)
   return {
     add: add.bind(null, jc),
     path: path.bind(null, jc),

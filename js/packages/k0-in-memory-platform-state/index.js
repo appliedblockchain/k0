@@ -9,8 +9,8 @@ const makeStateList = require('./state-list')
 const u = require('@appliedblockchain/k0-util')
 const assert = require('assert')
 
-async function makePlatformState(serverPort = 4100) {
-  const mt = await makeMT(serverPort)
+async function makePlatformState(mtServerEndpoint = 'http://localhost:4100') {
+  const mt = await makeMT(mtServerEndpoint)
   let stateList
   await reset()
 
