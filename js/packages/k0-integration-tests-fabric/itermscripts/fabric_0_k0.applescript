@@ -1,5 +1,5 @@
 tell application "System Events" to keystroke "t" using command down
-set tree_height to 7
+set tree_height to 4
 
 tell application "iTerm"
 	activate

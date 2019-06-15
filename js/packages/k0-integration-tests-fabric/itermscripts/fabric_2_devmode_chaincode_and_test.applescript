@@ -5,7 +5,7 @@ tell application "iTerm"
 	create tab with default profile
 	
 	tell current session of current window
-		write text "cd $GOPATH/src/github.com/appliedblockchain/zktrading/js/test/fabric/devnetwork"
+		write text "cd $GOPATH/src/github.com/appliedblockchain/zktrading/js/packages/k0-integration-tests-fabric/devnetwork"
 		write text "cd $GOPATH/src/github.com/appliedblockchain/zktrading/go/chaincode/cash"
 		write text "go build"
 		delay 2
@@ -21,10 +21,10 @@ tell application "iTerm"
 		end tell
 	end repeat
 	
-	my change_directory(1, "js/test/fabric/devnetwork/alphaadmin")
-	my change_directory(2, "js/test/fabric/devnetwork/betaadmin")
-	my change_directory(3, "js/test/fabric/devnetwork/gammaadmin")
-	my change_directory(4, "js/test/fabric/devnetwork/bankadmin")
+	my change_directory(1, "js/packages/k0-integration-tests-fabric/devnetwork/alphaadmin")
+	my change_directory(2, "js/packages/k0-integration-tests-fabric/devnetwork/betaadmin")
+	my change_directory(3, "js/packages/k0-integration-tests-fabric/devnetwork/gammaadmin")
+	my change_directory(4, "js/packages/k0-integration-tests-fabric/devnetwork/bankadmin")
 	
 	my change_directory(5, "go/chaincode/cash")
 	my change_directory(6, "go/chaincode/cash")
@@ -56,7 +56,7 @@ tell application "iTerm"
 	end repeat
 	
 	tell session 9 of current tab of current window
-		write text "cd $GOPATH/src/github.com/appliedblockchain/zktrading/js/test/fabric"
+		write text "cd $GOPATH/src/github.com/appliedblockchain/zktrading/js/packages/k0-integration-tests-fabric"
 		write text "export CHAINCODE_ID=" & chaincodeID
 		write text "export DEV_MODE=true"
 		write text "echo $CHAINCODE_ID"

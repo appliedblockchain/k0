@@ -4,7 +4,7 @@ tell application "iTerm"
 	select first window
 	
 	tell current session of current window
-		write text "cd $GOPATH/src/github.com/appliedblockchain/zktrading/js/test/fabric/devnetwork"
+		write text "cd $GOPATH/src/github.com/appliedblockchain/zktrading/js/packages/k0-integration-tests-fabric/devnetwork"
 		write text "./start.sh &"
 		split horizontally with default profile
 		split horizontally with default profile
@@ -56,7 +56,7 @@ end tell
 on change_directory(session_num, dir)
 	tell application "iTerm"
 		tell session session_num of current tab of current window
-			write text ("cd $GOPATH/src/github.com/appliedblockchain/zktrading/js/test/fabric/devnetwork/" & dir)
+			write text ("cd $GOPATH/src/github.com/appliedblockchain/zktrading/js/packages/k0-integration-tests-fabric/devnetwork/" & dir)
 		end tell
 	end tell
 end change_directory
