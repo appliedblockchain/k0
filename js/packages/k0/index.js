@@ -8,7 +8,7 @@ const prepareDeposit = require('./actions/prepare-deposit')
 const prepareTransfer = require('./actions/prepare-transfer')
 
 async function makeK0(serverEndpoint = 'http://localhost:4000/') {
-  const server = await makeClient(serverPort)
+  const server = await makeClient(serverEndpoint)
   return {
     decryptNote: decryptNote.bind(null, server),
     deriveKeys: server.deriveKeys,
