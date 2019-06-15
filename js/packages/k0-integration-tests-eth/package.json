@@ -1,6 +1,7 @@
 {
   "name": "@appliedblockchain/k0-integration-tests-eth",
   "version": "0.0.0",
+  "private": true,
   "scripts": {
     "test": "mocha all.integration.js"
   },

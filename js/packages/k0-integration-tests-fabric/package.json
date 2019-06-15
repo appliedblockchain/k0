@@ -1,7 +1,7 @@
 {
   "name": "@appliedblockchain/k0-integration-tests-fabric",
   "version": "0.0.0",
-  "private": "true",
+  "private": true,
   "dependencies": {
     "@appliedblockchain/k0": "0.0.0",
     "@appliedblockchain/k0-fabric": "0.0.0",
