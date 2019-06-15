@@ -1,18 +1,18 @@
 {
   "name": "@appliedblockchain/k0-integration-tests-eth",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "private": true,
   "scripts": {
     "test": "mocha all.integration.js"
   },
   "dependencies": {
-    "@appliedblockchain/k0": "^0.0.7",
-    "@appliedblockchain/k0-eth": "^0.0.7",
-    "@appliedblockchain/k0-eth-contracts": "^0.0.7",
-    "@appliedblockchain/k0-eth-generate-verifier-contracts": "^0.0.7",
-    "@appliedblockchain/k0-in-memory-platform-state": "^0.0.7",
-    "@appliedblockchain/k0-in-memory-secret-store": "^0.0.7",
-    "@appliedblockchain/k0-util": "^0.0.7",
+    "@appliedblockchain/k0": "^0.0.8",
+    "@appliedblockchain/k0-eth": "^0.0.8",
+    "@appliedblockchain/k0-eth-contracts": "^0.0.8",
+    "@appliedblockchain/k0-eth-generate-verifier-contracts": "^0.0.8",
+    "@appliedblockchain/k0-in-memory-platform-state": "^0.0.8",
+    "@appliedblockchain/k0-in-memory-secret-store": "^0.0.8",
+    "@appliedblockchain/k0-util": "^0.0.8",
     "bn.js": "^4.11.8",
     "chalk": "^2.4.2",
     "clear": "^0.1.0",
