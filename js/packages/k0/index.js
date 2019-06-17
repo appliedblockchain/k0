@@ -2,7 +2,7 @@
 
 const decryptNote = require('./actions/decrypt-note')
 const generatePaymentData = require('./actions/generate-payment-data')
-const makeClient = require('./client')
+const makeClient = require('@appliedblockchain/k0-server-client')
 const pack256Bits = require('./actions/pack-256-bits')
 const prepareDeposit = require('./actions/prepare-deposit')
 const prepareTransfer = require('./actions/prepare-transfer')

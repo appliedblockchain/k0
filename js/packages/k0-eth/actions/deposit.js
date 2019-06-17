@@ -9,6 +9,7 @@ const assert = require('assert')
 async function deposit(
   web3,
   mvppt,
+  server,
   privateKey,
   v,
   k,
@@ -30,10 +31,10 @@ async function deposit(
 
   const params = [
     v.toString(),
-    (await u.pack256Bits(k)).map(u.bn2string),
-    (await u.pack256Bits(cm)).map(u.bn2string),
+    (await server.pack256Bits(k)).map(u.bn2string),
+    (await server.pack256Bits(cm)).map(u.bn2string),
     u.buf2hex(data),
-    (await u.pack256Bits(nextRoot)).map(u.bn2string),
+    (await server.pack256Bits(nextRoot)).map(u.bn2string),
     commitmentProofCompact.map(u.bn2string),
     additionProofCompact.map(u.bn2string)
   ]

@@ -58,7 +58,7 @@ describe('Ethereum integration test', function ethIntegrationTest() {
     })
 
     let ready = false
-    console.log('TEST: waiting for all the servers to respond')
+    logger.info('TEST: waiting for all the servers to respond')
     while (!ready) {
       try {
         await Promise.all([
@@ -132,9 +132,9 @@ describe('Ethereum integration test', function ethIntegrationTest() {
       return { account }
     })
 
-    alice.platformState = await makePlatformState(platformPorts[0])
-    bob.platformState = await makePlatformState(platformPorts[1])
-    carol.platformState = await makePlatformState(platformPorts[2])
+    alice.platformState = await makePlatformState(`http://localhost:${platformPorts[0]}`)
+    bob.platformState = await makePlatformState(`http://localhost:${platformPorts[1]}`)
+    carol.platformState = await makePlatformState(`http://localhost:${platformPorts[2]}`)
 
     const initialRoot = await alice.platformState.merkleTreeRoot()
     // Deploying coin contract
@@ -225,9 +225,9 @@ describe('Ethereum integration test', function ethIntegrationTest() {
     bob.secretKey = crypto.randomBytes(32)
     carol.secretKey = crypto.randomBytes(32)
 
-    alice.k0 = await makeK0(k0Ports[0])
-    bob.k0 = await makeK0(k0Ports[1])
-    carol.k0 = await makeK0(k0Ports[2])
+    alice.k0 = await makeK0(`http://localhost:${k0Ports[0]}/`)
+    bob.k0 = await makeK0(`http://localhost:${k0Ports[1]}/`)
+    carol.k0 = await makeK0(`http://localhost:${k0Ports[2]}/`)
 
     async function initSecretStore(port, agent) {
       const { a_pk, sk_enc, pk_enc } =
@@ -474,7 +474,7 @@ describe('Ethereum integration test', function ethIntegrationTest() {
       carPrice
     )
 
-    const cmPacked = await u.pack256Bits(cm)
+    const cmPacked = await alice.k0.pack256Bits(cm)
 
     addresses.tradeContract = await testUtil.deployContract(
       web3,

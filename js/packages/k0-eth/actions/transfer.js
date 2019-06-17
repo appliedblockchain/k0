@@ -5,6 +5,7 @@ const u = require('@appliedblockchain/k0-util')
 async function transfer(
   web3,
   mvppt,
+  server,
   privateKey,
   in_0_sn,
   in_1_sn,
@@ -26,13 +27,13 @@ async function transfer(
   const proofCompact = flattenProof(proof)
 
   const params = [
-    (await u.pack256Bits(in_0_sn)).map(bn => bn.toString()),
-    (await u.pack256Bits(in_1_sn)).map(bn => bn.toString()),
-    (await u.pack256Bits(out_0_cm)).map(bn => bn.toString()),
-    (await u.pack256Bits(out_1_cm)).map(bn => bn.toString()),
+    (await server.pack256Bits(in_0_sn)).map(bn => bn.toString()),
+    (await server.pack256Bits(in_1_sn)).map(bn => bn.toString()),
+    (await server.pack256Bits(out_0_cm)).map(bn => bn.toString()),
+    (await server.pack256Bits(out_1_cm)).map(bn => bn.toString()),
     u.buf2hex(out_0_data),
     u.buf2hex(out_1_data),
-    (await u.pack256Bits(nextRoot)).map(bn => bn.toString()),
+    (await server.pack256Bits(nextRoot)).map(bn => bn.toString()),
     web3.utils.toChecksumAddress(u.buf2hex(calleeAddress)),
     proofCompact.map(bn => bn.toString())
   ]

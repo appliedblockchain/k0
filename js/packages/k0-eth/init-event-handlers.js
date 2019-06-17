@@ -2,7 +2,7 @@ const handleDeposit = require('./event-handlers/deposit')
 const handleTransfer = require('./event-handlers/transfer')
 const u = require('@appliedblockchain/k0-util')
 
-function initEventHandlers(mvppt, eventEmitter) {
+function initEventHandlers(mvppt, server, eventEmitter) {
   const queue = []
 
   let processing = false
@@ -27,9 +27,9 @@ function initEventHandlers(mvppt, eventEmitter) {
     }
 
     if (item.event === 'Deposit') {
-      await handleDeposit(eventEmitter, item)
+      await handleDeposit(server, eventEmitter, item)
     } else if (item.event === 'Transfer') {
-      await handleTransfer(eventEmitter, item)
+      await handleTransfer(server, eventEmitter, item)
     } else if (item.event === 'Log') {
       // console.log('LOG', require('util').inspect(item, { depth: null, colors: true }))
     } else if (item.event === 'SNRegistration') {

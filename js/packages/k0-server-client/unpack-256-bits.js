@@ -9,7 +9,7 @@ async function unpack256Bits(jc, a, b) {
   const res = await request(
     jc,
     'unpack256Bits',
-    [ a, b ].map(u.string2bn)
+    [ a, b ].map(u.bn2string)
   )
   return u.hex2buf(res)
 }

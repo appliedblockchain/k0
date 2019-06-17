@@ -17,8 +17,11 @@ async function deploy(web3, abi, bytecode, gas, args, account = null) {
     gas,
     u.hex2buf(account.privateKey)
   )
-  // TODO wait until tx is mined
-  const receipt = await web3.eth.getTransactionReceipt(u.buf2hex(txHash))
+  let receipt = await web3.eth.getTransactionReceipt(u.buf2hex(txHash))
+  while (receipt === null) {
+    u.wait(100)
+    receipt = await web3.eth.getTransactionReceipt(u.buf2hex(txHash))
+  }
   assert(receipt.contractAddress, 'No contract address in tx receipt')
   return u.hex2buf(receipt.contractAddress)
 }

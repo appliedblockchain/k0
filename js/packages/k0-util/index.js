@@ -2,14 +2,7 @@
 
 const assert = require('assert')
 const BN = require('bn.js')
-const execAsync = require('./exec-async')
 const path = require('path')
-const chalk = require('chalk')
-
-const baseDir = path.join(__dirname, '..', '..', '..')
-const cppDir = process.env.CPP_DIR || path.join(baseDir, 'cpp')
-const cppUtilDir = process.env.CPP_UTIL_DIR || path.join(cppDir, 'build', 'src')
-const { env } = process
 
 const buf2hex = buf => '0x' + buf.toString('hex')
 
@@ -121,39 +114,6 @@ function string2bn(str) {
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
 
-async function pack256Bits(buf) {
-  checkBuf(buf, 32)
-  const hex = buf2hex(buf)
-
-  let executablePath
-  if (env.CIRCLECI) {
-    executablePath = `docker run appliedblockchain/zktrading-pack:${env.CIRCLE_BRANCH}-${env.CIRCLE_SHA1}`
-  } else {
-    executablePath = path.join(cppUtilDir, 'pack_256_bits')
-  }
-
-  const command = `${executablePath} ${hex}`
-  const result = await execAsync(command)
-  return result.stdout.trim().split(',').map(str => new BN(str))
-}
-
-function unpack(bns) {
-  return unpack256Bits(bns[0], bns[1])
-}
-
-async function unpack256Bits(val1, val2) {
-  let executablePath
-  if (process.env.CIRCLECI) {
-    executablePath = `docker run appliedblockchain/zktrading-unpack:${env.CIRCLE_BRANCH}-${env.CIRCLE_SHA1}`
-  } else {
-    executablePath = path.join(cppUtilDir, 'unpack_256_bits')
-  }
-
-  const command = `${executablePath} ${val1.toString()} ${val2.toString()}`
-  const result = await execAsync(command)
-  return hex2buf(result.stdout.trim())
-}
-
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 function readBooleanFromENV(name) {
@@ -185,11 +145,8 @@ module.exports = {
   shorthex,
   string2bn,
   wait,
-  pack256Bits,
   parseG1Point,
   parseG2Point,
-  unpack,
-  unpack256Bits,
   ZERO_ADDRESS,
   readBooleanFromENV
 }
