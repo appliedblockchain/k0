@@ -1,8 +1,8 @@
 {
   "name": "@appliedblockchain/k0-server-client",
-  "version": "0.0.0",
+  "version": "0.0.12",
   "dependencies": {
-    "@appliedblockchain/k0-util": "^0.0.11",
+    "@appliedblockchain/k0-util": "^0.0.12",
     "jayson": "^3.0.2"
   }
 }
