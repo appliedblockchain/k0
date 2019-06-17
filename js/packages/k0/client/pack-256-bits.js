@@ -1,6 +1,5 @@
 'use strict'
 
-const BN = require('bn.js')
 const request = require('./request')
 const u = require('@appliedblockchain/k0-util')
 

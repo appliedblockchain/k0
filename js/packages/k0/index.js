@@ -6,6 +6,7 @@ const makeClient = require('./client')
 const pack256Bits = require('./actions/pack-256-bits')
 const prepareDeposit = require('./actions/prepare-deposit')
 const prepareTransfer = require('./actions/prepare-transfer')
+const unpack256Bits = require('./actions/unpack-256-bits')
 
 async function makeK0(serverEndpoint = 'http://localhost:4000/') {
   const server = await makeClient(serverEndpoint)
@@ -15,7 +16,8 @@ async function makeK0(serverEndpoint = 'http://localhost:4000/') {
     generatePaymentData: generatePaymentData.bind(null, server),
     pack256Bits: pack256Bits.bind(null, server),
     prepareDeposit: prepareDeposit.bind(null, server),
-    prepareTransfer: prepareTransfer.bind(null, server)
+    prepareTransfer: prepareTransfer.bind(null, server),
+    unpack256Bits: unpack256Bits.bind(null, server)
   }
 }
 

@@ -14,7 +14,7 @@ const spit = require('./spit')
 const u = require('@appliedblockchain/k0-util')
 const conv = require('./conversion')
 
-async function makeSecretStore(a_sk, a_pk, sk_enc, pk_enc, noteInfos) {
+function makeSecretStore(a_sk, a_pk, sk_enc, pk_enc, noteInfos) {
   u.checkBuf(a_sk, 32)
   u.checkBuf(a_pk, 32)
   u.checkBuf(sk_enc, 32)
