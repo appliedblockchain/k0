@@ -15,7 +15,10 @@ class K0Eth extends EventEmitter {}
 // transactions to Ethereum and listen to Ethereum events.
 // TODO Remove dependency on server(client). This is just for packing/unpacking
 // which could be done in JS directly.
-async function makeEth(web3, mvpptAddress, serverEndpoint = 'http://localhost:4000/') {
+async function makeEth(web3, mvpptAddress, serverEndpoint) {
+  if (!serverEndpoint) {
+    throw new Error('No server endpoint specified for k0-eth')
+  }
   u.checkBuf(mvpptAddress, 20)
   const server = await makeClient(serverEndpoint)
   const mvppt = new web3.eth.Contract(

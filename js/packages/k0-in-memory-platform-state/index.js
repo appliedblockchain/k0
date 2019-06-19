@@ -9,7 +9,12 @@ const makeStateList = require('./state-list')
 const u = require('@appliedblockchain/k0-util')
 const assert = require('assert')
 
-async function makePlatformState(mtServerEndpoint = 'http://localhost:4100') {
+async function makePlatformState(mtServerEndpoint) {
+  if (!mtServerEndpoint) {
+    throw new Error(
+      'No Merkle tree server endpoint provided for k0-in-memory-platform-state'
+    )
+  }
   const mt = await makeMT(mtServerEndpoint)
   let stateList
   await reset()

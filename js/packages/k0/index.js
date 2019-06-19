@@ -8,7 +8,10 @@ const prepareDeposit = require('./actions/prepare-deposit')
 const prepareTransfer = require('./actions/prepare-transfer')
 const unpack256Bits = require('./actions/unpack-256-bits')
 
-async function makeK0(serverEndpoint = 'http://localhost:4000/') {
+async function makeK0(serverEndpoint) {
+  if (!serverEndpoint) {
+    throw new Error('No server endpoint provided for k0')
+  }
   const server = await makeClient(serverEndpoint)
   return {
     decryptNote: decryptNote.bind(null, server),

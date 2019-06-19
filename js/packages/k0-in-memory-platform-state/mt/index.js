@@ -5,7 +5,10 @@ const reset = require('./reset')
 const root = require('./root')
 const simulateAddition = require('./simulate-addition')
 
-async function makeMT(endpoint = 'http://localhost:4100') {
+async function makeMT(endpoint) {
+  if (!endpoint) {
+    throw new Error('No Merkle tree server endpoint provided')
+  }
   const jc = jayson.client.http(endpoint)
   return {
     add: add.bind(null, jc),

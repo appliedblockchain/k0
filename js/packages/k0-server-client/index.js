@@ -13,7 +13,10 @@ const ready = require('./ready')
 const unpack256Bits = require('./unpack-256-bits')
 const verifyProof = require('./verify-proof')
 
-function client(endpoint = 'http://localhost:4000/') {
+function client(endpoint) {
+  if (!endpoint) {
+    throw new Error('No endpoint provided for k0-server-client')
+  }
   const jc = jayson.client.http(endpoint)
   return {
     cm: cm.bind(null, jc),
