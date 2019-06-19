@@ -1,12 +1,11 @@
 # ZKTRADING
 
-If you want to run the Fabric tests/demo, the project should be checked out in your GOPATH (eg. at `~/go/src/github.com/appliedblockchain/zktrading`).
+If you want to run the Fabric tests, the project should be checked out in your GOPATH (eg. at `~/go/src/github.com/appliedblockchain/zktrading`).
 
 [Set up the project dependencies](#set-up-the-project-dependencies)  
 [Build](#build)  
 [C++ tests](#c-tests)  
-[ZKP setup](#zkp-setup-needed-for-all-tests-and-demos)  
-[Ethereum demo](#ethereum-demo)  
+[ZKP setup](#zkp-setup)  
 [Ethereum integration tests](#ethereum-integration-tests)
 [Fabric integration tests](#fabric-integration-tests)  
 [Fabric dev mode](#fabric-dev-mode)
@@ -113,7 +112,7 @@ BASE_DIR=\$(pwd) build/test/letest --gtest_filter=EXPRESSION\*
 
 ```
 
-## ZKP setup (needed for all tests and demos)
+## ZKP setup
 
 ```
 rm -rf /tmp/k0keys && \
@@ -125,66 +124,9 @@ done
 
 ```
 
-## Ethereum demo
-
-ZKP setup as described [above](#zkp-setup-needed-for-all-tests-and-demos)
-
-Note: you will need 7 terminals (consider using iTerm2 on Mac for ease of use).
-
-Run the proving servers(one terminal each):
-
-```
-cpp/build/src/server 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 4000
-
-cpp/build/src/server 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 5000
-
-cpp/build/src/server 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 6000
-
-```
-
-Run the Merkle tree servers(1 terminal each):
-
-```
-cpp/build/src/mtserver 7 4100
-cpp/build/src/mtserver 7 5100
-cpp/build/src/mtserver 7 6100
-```
-
-Running Parity (in another terminal):
-
-```
-docker run -p 8545:8545 -p 8546:8546 appliedblockchain/parity-solo-instant
-```
-
-Init the js folder
-
-```
-cd js
-node init # create keys and addresses
-```
-
-initialize the state
-
-```
-cd demo
-node deposit alice
-node deposit bob
-```
-
-then, in separate terminals:
-
-```
-node wallet alice
-node wallet bob
-node wallet carol
-```
-
-[Video example of how to use the demo](https://www.youtube.com/watch?v=h2KyMOdnbtI)
-
-
 ## Ethereum integration tests
 
-ZKP setup as described [above](#zkp-setup-needed-for-all-tests-and-demos)
+ZKP setup as described [above](#zkp-setup)
 
 ```
 cd js
@@ -218,7 +160,7 @@ done
 
 The project needs to be checked out in the GOPATH (`$GOPATH/src/github.com/appliedblockchain/zktrading`)
 
-ZKP setup as described [above](#zkp-setup-needed-for-all-tests-and-demos)
+ZKP setup as described [above](#zkp-setup)
 
 Use node version 8, otherwise it will not work.
 
@@ -329,7 +271,7 @@ For a faster way to itterate on chaincode developement, use this setup, that wil
 
 ### Pre Setup
 
-First, start a ZKP setup as described [above](#zkp-setup-needed-for-all-tests-and-demos)
+First, start a ZKP setup as described [above](#zkp-setup)
 
 Then, add the following line to your `/etc/hosts` file:
 
