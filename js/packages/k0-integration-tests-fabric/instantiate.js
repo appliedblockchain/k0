@@ -20,7 +20,7 @@ async function run() {
   const config = getConfig('bank', 'Admin', devMode)
 
   const bankAdmin = await makeClient(config)
-  const bankPlatformState = await makePlatformState(config.mtServerPort)
+  const bankPlatformState = await makePlatformState(config.mtServerEndpoint)
 
   await bankPlatformState.reset()
 

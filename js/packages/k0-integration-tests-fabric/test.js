@@ -44,11 +44,11 @@ describe('Fabric workflow', function fabricTest() {
     for (let i = 0; i < orgs.length; i = i + 1) {
       const who = orgs[i]
       const config = getConfig(who, 'User1', devMode)
-      platformStates[who] = await makePlatformState(config.mtServerPort)
+      platformStates[who] = await makePlatformState(config.mtServerEndpoint)
       await platformStates[who].reset()
-      k0s[who] = await makeK0(config.proverPort)
+      k0s[who] = await makeK0(config.serverEndpoint)
       const privateKey = crypto.randomBytes(32)
-      secretStores[who] = await initSecretStore(config.proverPort, k0s[who], privateKey)
+      secretStores[who] = await initSecretStore(config.serverEndpoint, k0s[who], privateKey)
       addresses[who] = secretStores[who].getAddress()
       k0Fabrics[who] = await makeFabricPlatform(
         logger,
