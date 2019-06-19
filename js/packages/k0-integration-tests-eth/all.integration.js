@@ -216,10 +216,9 @@ describe('Ethereum integration test', function ethIntegrationTest() {
     addresses.bob = u.hex2buf(alice.account.address)
     addresses.carol = u.hex2buf(alice.account.address)
 
-    alice.k0Eth = await makeEthPlatform(web3, addresses.mvppt)
-    bob.k0Eth = await makeEthPlatform(web3, addresses.mvppt)
-    carol.k0Eth = await makeEthPlatform(web3, addresses.mvppt)
-
+    alice.k0Eth = await makeEthPlatform(web3, addresses.mvppt, `http://localhost:${k0Ports[0]}/`)
+    bob.k0Eth = await makeEthPlatform(web3, addresses.mvppt, `http://localhost:${k0Ports[1]}/`)
+    carol.k0Eth = await makeEthPlatform(web3, addresses.mvppt,`http://localhost:${k0Ports[2]}/`)
 
     alice.secretKey = crypto.randomBytes(32)
     bob.secretKey = crypto.randomBytes(32)
