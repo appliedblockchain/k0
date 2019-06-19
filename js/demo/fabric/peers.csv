@@ -1,4 +1,0 @@
-url,eventUrl,tlsCaCertPath,tlsHostnameOverride
-grpcs://localhost:11751,grpcs://localhost:11753,/Users/mario/dev/workshop/crypto-config/peerOrganizations/alpha.com/tlsca/tlsca.alpha.com-cert.pem,peer0.alpha.com
-grpcs://localhost:12751,grpcs://localhost:12753,/Users/mario/dev/workshop/crypto-config/peerOrganizations/beta.com/tlsca/tlsca.beta.com-cert.pem,peer0.beta.com
-grpcs://localhost:13751,grpcs://localhost:13753,/Users/mario/dev/workshop/crypto-config/peerOrganizations/gamma.com/tlsca/tlsca.gamma.com-cert.pem,peer0.gamma.com
