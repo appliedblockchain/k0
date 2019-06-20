@@ -1,5 +1,5 @@
 #include <iostream>
-#include <depends/libff/libff/common/utils.hpp>
+#include <libff/common/utils.hpp>
 #include <util.h>
 #include <libsnark/common/default_types/r1cs_ppzksnark_pp.hpp>
 #include "sha256.hpp"

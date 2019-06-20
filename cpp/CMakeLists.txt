@@ -25,7 +25,7 @@ set(
 option(
         DEBUG
         "Enable debugging mode"
-        ON
+        OFF
 )
 
 set(
@@ -46,7 +46,7 @@ option(
 option(
         WITH_PROCPS
         "Use procps for memory profiling"
-        ON
+        OFF
 )
 
 option(
@@ -58,7 +58,7 @@ option(
 option(
         BINARY_OUTPUT
         "In serialization, output raw binary data (instead of decimal), which is smaller and faster."
-        OFF
+        ON
 )
 
 if (CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -105,6 +105,9 @@ endif ()
 find_package(PkgConfig)
 pkg_search_module(GTEST REQUIRED gtest_main)
 
-add_subdirectory(depends)
+if (NOT "${USE_INSTALLED_LIBSNARK}")
+  add_subdirectory(depends)
+endif ()
+
 add_subdirectory(src)
 add_subdirectory(test)
