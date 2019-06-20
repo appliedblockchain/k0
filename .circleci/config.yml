@@ -32,6 +32,7 @@ jobs:
           name: "Push images"
           command: |
             cd cpp
+            docker tag zktrading appliedblockchain/zktrading:$CIRCLE_BRANCH
             docker push appliedblockchain/zktrading:$CIRCLE_BRANCH
             for IMAGE in setup server mtserver convert-vk
             do
