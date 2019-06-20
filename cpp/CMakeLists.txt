@@ -4,6 +4,8 @@ cmake_policy(SET CMP0076 NEW)
 
 project(zktrade)
 
+include_directories(include /usr/local/include ~/software/libsnark/usr/local/include)
+
 add_definitions(-DZKTRADE_DUMMYHASH)
 
 set(
@@ -14,18 +16,10 @@ set(
         "Default curve: one of ALT_BN128, BN128, EDWARDS, MNT4, MNT6"
 )
 
-set(
-        DEPENDS_DIR
-        "${CMAKE_CURRENT_SOURCE_DIR}/depends"
-        CACHE
-        STRING
-        "Optionally specify the dependency installation directory relative to the source directory (default: inside dependency folder)"
-)
-
 option(
         DEBUG
         "Enable debugging mode"
-        ON
+        OFF
 )
 
 set(
@@ -46,7 +40,7 @@ option(
 option(
         WITH_PROCPS
         "Use procps for memory profiling"
-        ON
+        OFF
 )
 
 option(
@@ -58,7 +52,7 @@ option(
 option(
         BINARY_OUTPUT
         "In serialization, output raw binary data (instead of decimal), which is smaller and faster."
-        OFF
+        ON
 )
 
 if (CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -105,6 +99,5 @@ endif ()
 find_package(PkgConfig)
 pkg_search_module(GTEST REQUIRED gtest_main)
 
-add_subdirectory(depends)
 add_subdirectory(src)
 add_subdirectory(test)

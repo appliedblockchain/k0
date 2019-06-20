@@ -1,8 +1,7 @@
-FROM zktrading-builder
+FROM appliedblockchain/k0-base
 
 COPY src /project/src
 COPY test /project/test
-COPY depends /project/depends
 COPY CMakeLists.txt /project/
 
 RUN mkdir /project/build
