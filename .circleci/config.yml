@@ -116,6 +116,15 @@ jobs:
           name: Install lerna
           command: cd js && npm i lerna
       - run:
+          name: Install fabric-ca-client to fix a dependency issue
+          command: |
+            cd js/packages
+            cd k0-fabric
+            npm i fabric-ca-client@1.2.0
+            cd ..
+            cd k0-integration-tests-fabric
+            npm i fabric-ca-client@1.2.0
+      - run:
           name: Lerna bootstrap
           command: cd js && node_modules/.bin/lerna bootstrap --no-ci
       - run:
@@ -223,6 +232,15 @@ jobs:
       - run:
           name: Install lerna
           command: cd js && npm i lerna
+      - run:
+          name: Install fabric-ca-client to fix a dependency issue
+          command: |
+            cd js/packages
+            cd k0-fabric
+            npm i fabric-ca-client@1.2.0
+            cd ..
+            cd k0-integration-tests-fabric
+            npm i fabric-ca-client@1.2.0
       - run:
           name: Lerna bootstrap
           command: cd js && node_modules/.bin/lerna bootstrap --no-ci
