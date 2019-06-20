@@ -44,6 +44,19 @@ target_link_libraries(
         crypto
 )
 
+if (NOT "${USE_INSTALLED_LIBSNARK}")
+target_include_directories(
+        zktrade
+
+        PUBLIC
+        .
+        ${DEPENDS_DIR}/libsnark
+        ${DEPENDS_DIR}/libsnark/depends/libff
+        ${DEPENDS_DIR}/libsnark/depends/libfqfft
+        /usr/local/include
+)
+endif ()
+
 add_executable(
         convert_vk
 
