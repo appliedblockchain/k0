@@ -12,11 +12,6 @@ jobs:
           name: "Docker login"
           command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
       - run:
-          name: "Download and tag previously generated main image"
-          command: |
-            docker pull appliedblockchain/zktrading:$CIRCLE_BRANCH || true
-            docker tag appliedblockchain/zktrading:$CIRCLE_BRANCH zktrading || true
-      - run:
           name: "Build main image"
           command: |
             cd cpp
