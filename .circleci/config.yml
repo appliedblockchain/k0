@@ -191,7 +191,7 @@ jobs:
           name: "Pull and tag app images"
           command: |
             cd cpp
-            for IMAGE in setup server mtserver convert-vk pack unpack
+            for IMAGE in setup server mtserver convert-vk
             do
               docker pull appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
               docker tag appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1 zktrading-$IMAGE
@@ -272,7 +272,7 @@ jobs:
           name: "Pull and tag the images"
           command: |
             cd cpp
-            for IMAGE in setup server mtserver convert-vk pack unpack
+            for IMAGE in setup server mtserver convert-vk
             do
               docker pull appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
               docker tag appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1 zktrading-$IMAGE
