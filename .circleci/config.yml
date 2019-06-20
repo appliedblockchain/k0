@@ -19,7 +19,7 @@ jobs:
           name: "Build main image"
           command: |
             cd cpp
-            docker build -f docker/ci.Dockerfile -t zktrading .
+            docker build -f docker/zktrading.Dockerfile -t zktrading .
       - run:
           name: "Build app images"
           command: |
