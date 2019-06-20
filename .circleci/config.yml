@@ -6,11 +6,7 @@ jobs:
       - image: docker:18.06.3-ce-git
     steps:
       - checkout
-#      # Run this to reset the Docker layer cache
-#      - run: docker images --no-trunc --format '{{.ID}}' | xargs docker rmi || true
-      - run:
-          name: "Get Git submodules"
-          command: git submodule update --init --recursive
+      - setup_remote_docker
       - run:
           name: "Docker login"
           command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
