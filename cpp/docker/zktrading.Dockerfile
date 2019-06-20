@@ -6,4 +6,4 @@ COPY CMakeLists.txt /project/
 
 RUN mkdir /project/build
 
-RUN cd /project/build && cmake .. && make setup server mtserver convert_vk
+RUN cd /project/build && cmake -DUSE_INSTALLED_LIBSNARK=ON .. && make setup server mtserver convert_vk
