@@ -7,8 +7,8 @@ jobs:
       docker_layer_caching: true
     steps:
       - checkout
-#      # Run this to reset the Docker layer cache
-#      - run: docker images --no-trunc --format '{{.ID}}' | xargs docker rmi || true
+      # Run this to reset the Docker layer cache
+      - run: docker images --no-trunc --format '{{.ID}}' | xargs docker rmi || true
       - run:
           name: "Get Git submodules"
           command: git submodule update --init --recursive
