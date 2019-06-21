@@ -26,5 +26,14 @@ target_link_libraries(
         sodium
         ${GTEST_LDFLAGS}
 )
-include_directories(../src)
+
+
+target_include_directories(
+        letest
+
+        PUBLIC
+        ${DEPENDS_DIR}/libsnark
+        ${DEPENDS_DIR}/libsnark/depends/libff
+)
+
 target_compile_options(letest PUBLIC ${GTEST_CFLAGS})

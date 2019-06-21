@@ -5,7 +5,6 @@
     "@appliedblockchain/k0-util": "^0.0.17",
     "@appliedblockchain/not-a-logger": "^1.0.1",
     "csv-load-sync": "^1.0.0",
-    "fabric-ca-client": "^1.4.2",
     "fabric-client": "^1.2.0",
     "lodash": "^4.17.11"
   }

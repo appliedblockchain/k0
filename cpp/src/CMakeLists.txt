@@ -1,6 +1,40 @@
-add_library(zktrade "")
+add_executable(
+        convert_vk
 
-include_directories(.)
+        convert_vk.cpp
+)
+target_link_libraries(
+        convert_vk
+
+        snark
+)
+target_include_directories(
+        convert_vk
+
+        PUBLIC
+        ${DEPENDS_DIR}/libsnark
+        ${DEPENDS_DIR}/libsnark/depends/libfqfft
+)
+
+add_executable(
+        pack_256_bits
+
+        pack_256_bits.cpp
+)
+target_link_libraries(
+        pack_256_bits
+
+        snark
+)
+target_include_directories(
+        pack_256_bits
+
+        PUBLIC
+        ${DEPENDS_DIR}/libsnark
+        ${DEPENDS_DIR}/libsnark/depends/libfqfft
+)
+
+add_library(zktrade "")
 
 target_sources(
         zktrade
@@ -38,13 +72,8 @@ target_link_libraries(
         zktrade
 
         sodium
-        gmp
-        gmpxx
-        ff
-        crypto
 )
 
-if (NOT "${USE_INSTALLED_LIBSNARK}")
 target_include_directories(
         zktrade
 
@@ -55,19 +84,8 @@ target_include_directories(
         ${DEPENDS_DIR}/libsnark/depends/libfqfft
         /usr/local/include
 )
-endif ()
 
-add_executable(
-        convert_vk
-
-        convert_vk.cpp
-)
-target_link_libraries(
-        convert_vk
-
-        snark
-        zktrade
-)
+include_directories(.)
 
 add_executable(
         setup
@@ -79,7 +97,14 @@ target_link_libraries(
         setup
 
         snark
-        zktrade
+)
+target_include_directories(
+        setup
+
+        PUBLIC
+        ${DEPENDS_DIR}/libsnark
+        ${DEPENDS_DIR}/libsnark/depends/libff
+        ${DEPENDS_DIR}/libsnark/depends/libfqfft
 )
 
 add_executable(
@@ -98,6 +123,54 @@ target_link_libraries(
         jsonrpccpp-common
         jsonrpccpp-server
 )
+target_include_directories(
+        server
+
+        PUBLIC
+        ${DEPENDS_DIR}/libsnark
+        ${DEPENDS_DIR}/libsnark/depends/libff
+        ${DEPENDS_DIR}/libsnark/depends/libfqfft
+)
+
+add_executable(
+        hash
+
+        hash.cpp
+)
+target_link_libraries(
+        hash
+
+        snark
+        zktrade
+)
+target_include_directories(
+        hash
+
+        PUBLIC
+        ${DEPENDS_DIR}/libsnark
+        ${DEPENDS_DIR}/libsnark/depends/libff
+        ${DEPENDS_DIR}/libsnark/depends/libfqfft
+)
+
+add_executable(
+        unpack_256_bits
+
+        unpack_256_bits.cpp
+)
+target_link_libraries(
+        unpack_256_bits
+
+        snark
+        zktrade
+)
+target_include_directories(
+        unpack_256_bits
+
+        PUBLIC
+        ${DEPENDS_DIR}/libsnark
+        ${DEPENDS_DIR}/libsnark/depends/libff
+        ${DEPENDS_DIR}/libsnark/depends/libfqfft
+)
 
 add_executable(
         mtserver
@@ -113,4 +186,32 @@ target_link_libraries(
         microhttpd
         jsonrpccpp-common
         jsonrpccpp-server
+)
+target_include_directories(
+        mtserver
+
+        PUBLIC
+        ${DEPENDS_DIR}/libsnark
+        ${DEPENDS_DIR}/libsnark/depends/libff
+        ${DEPENDS_DIR}/libsnark/depends/libfqfft
+)
+
+add_executable(
+        iotest
+
+        iotest.cpp
+)
+target_link_libraries(
+        iotest
+
+        snark
+        zktrade
+)
+target_include_directories(
+        iotest
+
+        PUBLIC
+        ${DEPENDS_DIR}/libsnark
+        ${DEPENDS_DIR}/libsnark/depends/libff
+        ${DEPENDS_DIR}/libsnark/depends/libfqfft
 )

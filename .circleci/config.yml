@@ -2,15 +2,35 @@ version: 2
 
 jobs:
   build_cpp_docker:
-    docker:
-      - image: docker:18.06.3-ce-git
+    machine:
+      image: circleci/classic:201808-01
+      docker_layer_caching: true
     steps:
       - checkout
-      - setup_remote_docker:
-         docker_layer_caching: true
+#      # Run this to reset the Docker layer cache
+#      - run: docker images --no-trunc --format '{{.ID}}' | xargs docker rmi || true
+      - run:
+          name: "Get Git submodules"
+          command: git submodule update --init --recursive
       - run:
           name: "Docker login"
           command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+      - run:
+          name: "Download and tag previously generated images"
+          command: |
+            docker pull appliedblockchain/zktrading-builder:$CIRCLE_BRANCH || true
+            docker tag appliedblockchain/zktrading-builder:$CIRCLE_BRANCH zktrading-builder || true
+            docker pull appliedblockchain/zktrading:$CIRCLE_BRANCH || true
+            docker tag appliedblockchain/zktrading:$CIRCLE_BRANCH zktrading || true
+            for IMAGE in setup server mtserver convert-vk pack unpack
+            do
+              docker pull appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH || true
+            done
+      - run:
+          name: "Build builder image"
+          command: |
+            cd cpp
+            docker build -f docker/builder.Dockerfile -t zktrading-builder .
       - run:
           name: "Build main image"
           command: |
@@ -20,7 +40,7 @@ jobs:
           name: "Build app images"
           command: |
             cd cpp
-            for IMAGE in setup server mtserver convert-vk
+            for IMAGE in setup server mtserver convert-vk pack unpack
             do
               docker build -f docker/$IMAGE.Dockerfile -t appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH .
             done
@@ -28,16 +48,135 @@ jobs:
           name: "Push images"
           command: |
             cd cpp
-            docker tag zktrading appliedblockchain/zktrading:$CIRCLE_BRANCH
-            docker push appliedblockchain/zktrading:$CIRCLE_BRANCH
-            for IMAGE in setup server mtserver convert-vk
+            for IMAGE in zktrading-builder zktrading
+            do
+              docker tag $IMAGE appliedblockchain/$IMAGE:$CIRCLE_BRANCH
+              docker push appliedblockchain/$IMAGE:$CIRCLE_BRANCH
+            done
+            for IMAGE in setup server mtserver convert-vk pack unpack
             do
               docker push appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH
               docker tag appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
               docker push appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
             done
 
-  fabric_integration_tests:
+  prepare_node:
+    machine:
+      image: circleci/classic:201808-01
+    steps:
+      - checkout
+      - run:
+          name: "Enable NVM"
+          command: |
+            echo 'export NVM_DIR="/opt/circleci/.nvm"' >> $BASH_ENV
+            echo ' [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+      - run:
+          name: "Update node"
+          command: |
+            nvm install v8
+            node -v
+            nvm alias default v8
+      - restore_cache:
+          keys:
+            - zktrading-js-root-deps-$CIRCLE_BRANCH
+            - zktrading-js-core-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0/package.json" }}
+            - zktrading-js-eth-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-eth/package.json" }}
+            - zktrading-js-fabric-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-fabric/package.json" }}
+            - zktrading-js-platform-state-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-in-memory-platform-state/package.json" }}
+            - zktrading-js-secret-store-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-in-memory-secret-store/package.json" }}
+            - zktrading-js-integration-tests-eth-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-integration-tests-eth/package.json" }}
+            - zktrading-js-integration-tests-fabric-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-integration-tests-fabric/package.json" }}
+      - run:
+          name: Install lerna
+          command: cd js && npm i lerna
+      - run:
+          name: Lerna bootstrap
+          command: cd js && node_modules/.bin/lerna bootstrap --no-ci
+      - save_cache:
+         key: zktrading-js-root-deps-$CIRCLE_BRANCH
+         paths:
+           - js/node_modules
+      - save_cache:
+         key: zktrading-js-core-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0/package.json" }}
+         paths:
+           - js/packages/k0/node_modules
+      - save_cache:
+         key: zktrading-js-eth-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-eth/package.json" }}
+         paths:
+           - js/packages/k0-eth/node_modules
+      - save_cache:
+         key: zktrading-js-eth-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-fabric/package.json" }}
+         paths:
+           - js/packages/k0-fabric/node_modules
+      - save_cache:
+         key: zktrading-js-platform-state-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-in-memory-platform-state/package.json" }}
+         paths:
+           - js/packages/k0-in-memory-platform-state/node_modules
+      - save_cache:
+         key: zktrading-js-secret-store-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-eth/in-memory-secret-store.json" }}
+         paths:
+           - js/packages/k0-in-memory-secret-store/node_modules
+      - save_cache:
+         key: zktrading-js-integration-tests-eth-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-integration-tests-eth/package.json" }}
+         paths:
+           - js/packages/k0-integration-tests-eth/node_modules
+      - save_cache:
+         key: zktrading-js-integration-tests-fabric-deps-$CIRCLE_BRANCH-{{ checksum "js/packages/k0-integration-tests-fabric/package.json" }}
+         paths:
+           - js/packages/k0-integration-tests-fabric/node_modules
+      - persist_to_workspace:
+          root: .
+          paths:
+            - js/node_modules
+            - js/packages/k0/node_modules
+            - js/packages/k0-eth/node_modules
+            - js/packages/k0-fabric/node_modules
+            - js/packages/k0-in-memory-platform-state/node_modules
+            - js/packages/k0-in-memory-secret-store/node_modules
+            - js/packages/k0-integration-tests-eth/node_modules
+            - js/packages/k0-integration-tests-fabric/node_modules
+
+  # This could probably be run more efficiently on the docker executor
+  chaincode:
+    machine:
+      image: circleci/classic:201808-01
+      docker_layer_caching: true
+    working_directory: ~/.go_workspace/src/github.com/appliedblockchain/zktrading
+    steps:
+      - checkout
+      - run:
+          name: "Docker login"
+          command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+      - run:
+          name: "Start server"
+          command: |
+            docker run -d \
+            -p 11400:11400 \
+            -v $PWD/go/serverclient/testdata/:/tmp/k0keys/:ro \
+            appliedblockchain/zktrading-server:$CIRCLE_BRANCH-$CIRCLE_SHA1 \
+            6 \
+            /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk \
+            /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk \
+            /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk \
+            /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk \
+            /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk 11400
+      - run:
+          name: "Get Fabric source code"
+          command: |
+            cd ~/.go_workspace/src/github.com
+            mkdir hyperledger
+            cd hyperledger
+            curl -LO https://github.com/hyperledger/fabric/archive/v1.2.0.tar.gz
+            tar xf v1.2.0.tar.gz
+            mv fabric-1.2.0 fabric
+            rm v1.2.0.tar.gz
+      - run:
+          name: "Run Go tests"
+          command: |
+            cd go
+            VERIFIER_ENDPOINT=http://localhost:11400/ go test ./...
+
+  fabric:
     machine:
       image: circleci/classic:201808-01
       docker_layer_caching: true
@@ -62,23 +201,16 @@ jobs:
           name: "Pull and tag app images"
           command: |
             cd cpp
-            for IMAGE in setup server mtserver convert-vk
+            for IMAGE in setup server mtserver convert-vk pack unpack
             do
               docker pull appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
               docker tag appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1 zktrading-$IMAGE
             done
+      - attach_workspace:
+          at: .
       - run:
           name: Install lerna
           command: cd js && npm i lerna
-      - run:
-          name: Install fabric-ca-client to fix a dependency issue
-          command: |
-            cd js/packages
-            cd k0-fabric
-            npm i fabric-ca-client@1.2.0
-            cd ..
-            cd k0-integration-tests-fabric
-            npm i fabric-ca-client@1.2.0
       - run:
           name: Lerna bootstrap
           command: cd js && node_modules/.bin/lerna bootstrap --no-ci
@@ -150,7 +282,7 @@ jobs:
           name: "Pull and tag the images"
           command: |
             cd cpp
-            for IMAGE in setup server mtserver convert-vk
+            for IMAGE in setup server mtserver convert-vk pack unpack
             do
               docker pull appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
               docker tag appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1 zktrading-$IMAGE
@@ -184,18 +316,11 @@ jobs:
           name: Run the Docker servers
           command: cd js/packages/k0-integration-tests-eth/network && docker-compose up -d && docker-compose logs -f
           background: true
+      - attach_workspace:
+          at: .
       - run:
           name: Install lerna
           command: cd js && npm i lerna
-      - run:
-          name: Install fabric-ca-client to fix a dependency issue
-          command: |
-            cd js/packages
-            cd k0-fabric
-            npm i fabric-ca-client@1.2.0
-            cd ..
-            cd k0-integration-tests-fabric
-            npm i fabric-ca-client@1.2.0
       - run:
           name: Lerna bootstrap
           command: cd js && node_modules/.bin/lerna bootstrap --no-ci
@@ -210,11 +335,19 @@ workflows:
     jobs:
       - build_cpp_docker:
           context: org-global
-      - fabric_integration_tests:
+      - prepare_node:
+          context: org-global
+      - chaincode:
           context: org-global
           requires:
             - build_cpp_docker
+      - fabric:
+          context: org-global
+          requires:
+            - build_cpp_docker
+            - prepare_node
       - ethereum_integration_tests:
           context: org-global
           requires:
             - build_cpp_docker
+            - prepare_node
