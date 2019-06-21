@@ -8,7 +8,7 @@ jobs:
     steps:
       - checkout
       # Run this to reset the Docker layer cache
-      - run: docker system prune -f --volumes -a
+      # - run: docker system prune -f --volumes -a
       - run:
           name: "Get Git submodules"
           command: git submodule update --init --recursive
