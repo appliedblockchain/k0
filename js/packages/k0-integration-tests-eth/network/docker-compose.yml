@@ -31,11 +31,11 @@ services:
     << : *mtserver
     ports:
       - 4100:80
-  mtserver1:
+  mtserver2:
     << : *mtserver
     ports:
       - 5100:80
-  mtserver1:
+  mtserver3:
     << : *mtserver
     ports:
       - 6100:80
