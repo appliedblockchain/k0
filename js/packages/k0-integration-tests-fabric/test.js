@@ -121,12 +121,16 @@ describe('Fabric workflow', function fabricTest() {
   }
 
 
-  it('Can get the peers\' state, and they are all at root "0" and 0 leaves', async function () {
+  it('Can get the peers\' state they each have the same root and 0 leaves', async function () {
+    let root
     for (let i = 0; i < orgs.length; i++) {
       const orgName = orgs[i]
       const state = await k0Fabrics[orgName].getState()
-      expect(state.root.toString('hex'))
-        .to.equal('0000000000000000000000000000000000000000000000000000000000000000')
+      if (i === 0) {
+        root = state.root
+      } else {
+        assert(state.root.equals(root))
+      }
       expect(state.numLeaves.eq(new BN(0))).to.equal(true)
     }
   })
