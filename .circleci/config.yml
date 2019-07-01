@@ -1,0 +1,223 @@
+version: 2
+
+jobs:
+  build_cpp_docker:
+    docker:
+      - image: docker:18.06.3-ce-git
+    resource_class: large
+    steps:
+      - checkout
+      - setup_remote_docker:
+         docker_layer_caching: true
+      - run:
+          name: "Docker login"
+          command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+      - run:
+          name: "Build main image"
+          command: |
+            cd cpp
+            docker build -f docker/zktrading.Dockerfile -t zktrading .
+      - run:
+          name: "Build app images"
+          command: |
+            cd cpp
+            for IMAGE in setup server mtserver convert-vk
+            do
+              docker build -f docker/$IMAGE.Dockerfile -t appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH .
+            done
+      - run:
+          name: "Push images"
+          command: |
+            cd cpp
+            docker tag zktrading appliedblockchain/zktrading:$CIRCLE_BRANCH
+            docker push appliedblockchain/zktrading:$CIRCLE_BRANCH
+            for IMAGE in setup server mtserver convert-vk
+            do
+              docker push appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH
+              docker tag appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
+              docker push appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
+            done
+
+  fabric_integration_tests:
+    machine:
+      image: circleci/classic:201808-01
+      docker_layer_caching: true
+    resource_class: large
+    working_directory: ~/.go_workspace/src/github.com/appliedblockchain/zktrading
+    steps:
+      - checkout
+      - run:
+          name: "Enable NVM"
+          command: |
+            echo 'export NVM_DIR="/opt/circleci/.nvm"' >> $BASH_ENV
+            echo ' [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+      - run:
+          name: "Update node"
+          command: |
+            nvm install v8
+            node -v
+            nvm alias default v8
+      - run:
+          name: "Docker login"
+          command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+      - run:
+          name: "Pull and tag app images"
+          command: |
+            cd cpp
+            for IMAGE in setup server mtserver convert-vk
+            do
+              docker pull appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
+              docker tag appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1 zktrading-$IMAGE
+            done
+      - run:
+          name: Install lerna
+          command: cd js && npm i lerna
+      - run:
+          name: Install fabric-ca-client to fix a dependency issue
+          command: |
+            cd js/packages
+            cd k0-fabric
+            npm i fabric-ca-client@1.2.0
+            cd ..
+            cd k0-integration-tests-fabric
+            npm i fabric-ca-client@1.2.0
+      - run:
+          name: Lerna bootstrap
+          command: cd js && node_modules/.bin/lerna bootstrap --no-ci
+      - run:
+          name: "Generate proving and verification keys"
+          command: |
+            mkdir /tmp/k0keys
+            for circuit in commitment transfer addition withdrawal example
+            do
+              docker run -v /tmp/k0keys:/tmp/k0keys zktrading-setup $circuit 7 /tmp/k0keys/${circuit}_pk /tmp/k0keys/${circuit}_vk
+              docker run -v /tmp/k0keys:/tmp/k0keys zktrading-convert-vk /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt
+            done
+      - run:
+          name: "Remove old chaincode images"
+          command: |
+            docker rmi $(docker images --filter=reference="*k0chaincode*" -q) || true
+      - run:
+          name: "Get Fabric source code"
+          command: |
+            cd ~/.go_workspace/src/github.com
+            mkdir hyperledger
+            cd hyperledger
+            curl -LO https://github.com/hyperledger/fabric/archive/v1.2.0.tar.gz
+            tar xf v1.2.0.tar.gz
+            mv fabric-1.2.0 fabric
+            rm v1.2.0.tar.gz
+      - run:
+          name: "Package K0 chaincode"
+          command: |
+            cd js/packages/k0-integration-tests-fabric/network
+            docker run \
+            -v $PWD/artefacts:/artefacts \
+            -v ~/.go_workspace/src/github.com/hyperledger/fabric:/opt/gopath/src/github.com/hyperledger/fabric:ro \
+            -v ~/.go_workspace/src/github.com/appliedblockchain/zktrading/go:/opt/gopath/src/github.com/appliedblockchain/zktrading/go:ro \
+            hyperledger/fabric-tools:1.2.0 \
+            peer chaincode package -n k0chaincode -v 1 -p github.com/appliedblockchain/zktrading/go/chaincode/cash \
+            /artefacts/k0chaincode.1.out
+      - run:
+          name: "Spin up Fabric network"
+          command: |
+            cd js/packages/k0-integration-tests-fabric/network
+            CI=true ./start.sh
+      - run:
+          name: "Install K0 chaincode"
+          command: |
+            cd js/packages/k0-integration-tests-fabric/network
+            for org in alpha beta gamma bank; do docker-compose run ${org}tools peer chaincode install /artefacts/k0chaincode.1.out; done
+      - run:
+          name: "Instantiate K0 chaincode"
+          command: |
+            cd js/packages/k0-integration-tests-fabric
+            CHAINCODE_ID=k0chaincode node instantiate
+      - run:
+          name: "Run integration tests"
+          command: |
+            cd js/packages/k0-integration-tests-fabric
+            CHAINCODE_ID=k0chaincode node_modules/.bin/mocha test
+
+  ethereum_integration_tests:
+    machine:
+      image: circleci/classic:201808-01
+      docker_layer_caching: true
+    resource_class: large
+    steps:
+      - checkout
+      - run:
+          name: Docker login
+          command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+      - run:
+          name: "Pull and tag the images"
+          command: |
+            cd cpp
+            for IMAGE in setup server mtserver convert-vk
+            do
+              docker pull appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1
+              docker tag appliedblockchain/zktrading-$IMAGE:$CIRCLE_BRANCH-$CIRCLE_SHA1 zktrading-$IMAGE
+            done
+      - run:
+          name: Generate proving and verification keys
+          command: |
+            rm -rf /tmp/k0keys
+            mkdir /tmp/k0keys
+            for circuit in commitment transfer addition withdrawal example
+            do
+              docker run -v /tmp/k0keys:/tmp/k0keys zktrading-setup $circuit 4 /tmp/k0keys/${circuit}_pk /tmp/k0keys/${circuit}_vk
+              docker run -v /tmp/k0keys:/tmp/k0keys zktrading-convert-vk /tmp/k0keys/${circuit}_vk /tmp/k0keys/${circuit}_vk_alt
+            done
+      - run:
+          name: "Enable NVM"
+          command: |
+            echo 'export NVM_DIR="/opt/circleci/.nvm"' >> $BASH_ENV
+            echo ' [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+      - run:
+          name: Setup node 8
+          command: nvm install 8 && nvm alias default 8
+      - run:
+          name: Install Solidity
+          command: |
+            if [ ! -e solc-static-linux ]; then
+              wget https://github.com/ethereum/solidity/releases/download/v0.5.3/solc-static-linux && chmod +x solc-static-linux
+            fi
+            chmod +x solc-static-linux && sudo cp solc-static-linux /usr/bin/solc
+      - run:
+          name: Run the Docker servers
+          command: cd js/packages/k0-integration-tests-eth/network && docker-compose up -d && docker-compose logs -f
+          background: true
+      - run:
+          name: Install lerna
+          command: cd js && npm i lerna
+      - run:
+          name: Install fabric-ca-client to fix a dependency issue
+          command: |
+            cd js/packages
+            cd k0-fabric
+            npm i fabric-ca-client@1.2.0
+            cd ..
+            cd k0-integration-tests-fabric
+            npm i fabric-ca-client@1.2.0
+      - run:
+          name: Lerna bootstrap
+          command: cd js && node_modules/.bin/lerna bootstrap --no-ci
+      - run:
+          name: Run tests
+          command: cd js/packages/k0-integration-tests-eth && npm test
+
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - build_cpp_docker:
+          context: org-global
+      - fabric_integration_tests:
+          context: org-global
+          requires:
+            - build_cpp_docker
+      - ethereum_integration_tests:
+          context: org-global
+          requires:
+            - build_cpp_docker
