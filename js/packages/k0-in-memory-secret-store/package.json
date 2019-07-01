@@ -1,8 +1,8 @@
 {
   "name": "@appliedblockchain/k0-in-memory-secret-store",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "dependencies": {
-    "@appliedblockchain/k0-util": "^0.0.17",
+    "@appliedblockchain/k0-util": "^0.0.18",
     "bn.js": "^4.11.8",
     "immutable": "^4.0.0-rc.12"
   }
