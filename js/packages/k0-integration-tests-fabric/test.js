@@ -44,7 +44,6 @@ describe('Fabric workflow', function fabricTest() {
     const devMode = u.readBooleanFromENV('DEV_MODE')
 
 
-    process.stdout.write('Waiting for servers to become available...')
     let ready = false
     const serverWaitStart = Date.now()
     while (!ready) {
@@ -57,11 +56,9 @@ describe('Fabric workflow', function fabricTest() {
         ready = results.reduce((a, b) => a & b, true)
       } catch (e) {
         console.log(e)
-        process.stdout.write('.')
         await u.wait(1000)
       }
     }
-    process.stdout.write('\n')
     console.log(`Waited: ${Date.now() - serverWaitStart}`)
 
     for (let i = 0; i < orgs.length; i = i + 1) {
