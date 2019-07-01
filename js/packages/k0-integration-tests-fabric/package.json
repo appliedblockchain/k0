@@ -10,7 +10,8 @@
     "@appliedblockchain/k0-util": "^0.0.17",
     "code": "^5.2.4",
     "log4js": "^4.3.1",
-    "mocha": "^6.1.4"
+    "mocha": "^6.1.4",
+    "wait-port": "^0.2.2"
   },
   "devDependencies": {
     "fabric-client": "^1.2.0"

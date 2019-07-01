@@ -15,6 +15,8 @@ const makePlatformState = require('@appliedblockchain/k0-in-memory-platform-stat
 const makeSecretStore = require('@appliedblockchain/k0-in-memory-secret-store')
 const testUtil = require('./helpers/util')
 const u = require('@appliedblockchain/k0-util')
+const url = require('url')
+const waitPort = require('wait-port')
 
 async function initSecretStore(port, k0, secretKey) {
   const { a_pk, sk_enc, pk_enc } =
@@ -40,6 +42,27 @@ describe('Fabric workflow', function fabricTest() {
     logger.level = process.env.LOG_LEVEL || 'info'
 
     const devMode = u.readBooleanFromENV('DEV_MODE')
+
+
+    process.stdout.write('Waiting for servers to become available...')
+    let ready = false
+    const serverWaitStart = Date.now()
+    while (!ready) {
+      try {
+        const results = await Promise.all(orgs.map(o => {
+          const config = getConfig(o, 'User1', devMode)
+          const port = parseInt(url.parse(config.serverEndpoint).port, 10)
+          return waitPort({ port })
+        }))
+        ready = results.reduce((a, b) => a & b, true)
+      } catch (e) {
+        console.log(e)
+        process.stdout.write('.')
+        await u.wait(1000)
+      }
+    }
+    process.stdout.write('\n')
+    console.log(`Waited: ${Date.now() - serverWaitStart}`)
 
     for (let i = 0; i < orgs.length; i = i + 1) {
       const who = orgs[i]
@@ -121,7 +144,7 @@ describe('Fabric workflow', function fabricTest() {
   }
 
 
-  it('Can get the peers\' state they each have the same root and 0 leaves', async function () {
+  it('Can get the peers\' state; they each have the same root and 0 leaves', async function () {
     let root
     for (let i = 0; i < orgs.length; i++) {
       const orgName = orgs[i]
