@@ -25,6 +25,9 @@ int main(int argc, char *argv[]) {
     Server<FieldT, CommitmentHashT, MerkleTreeHashT> server(
         std::stoi(argv[1]), httpserver, jsonrpc::JSONRPC_SERVER_V2);
 
+    server.StartListening();
+
+    std::cout << "Server started (port " << port << ")." << std::endl;
 
     std::cout << "Loading commitment proving key..." << std::endl;
     server.setCommitmentPk(argv[2]);
@@ -51,9 +54,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Loading example verification key..." << std::endl;
     server.setExampleVk(argv[11]);
 
-    server.StartListening();
-
-    std::cout << "Server started (port " << port << ")." << std::endl;
+    std::cout << "All keys loaded." << std::endl;
 
     bool need_to_shut_down = false;
     while(!need_to_shut_down) {

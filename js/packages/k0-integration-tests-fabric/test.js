@@ -15,8 +15,6 @@ const makePlatformState = require('@appliedblockchain/k0-in-memory-platform-stat
 const makeSecretStore = require('@appliedblockchain/k0-in-memory-secret-store')
 const testUtil = require('./helpers/util')
 const u = require('@appliedblockchain/k0-util')
-const url = require('url')
-const waitPort = require('wait-port')
 
 async function initSecretStore(port, k0, secretKey) {
   const { a_pk, sk_enc, pk_enc } =
@@ -43,30 +41,18 @@ describe('Fabric workflow', function fabricTest() {
 
     const devMode = u.readBooleanFromENV('DEV_MODE')
 
-
-    let ready = false
-    const serverWaitStart = Date.now()
-    while (!ready) {
-      try {
-        const results = await Promise.all(orgs.map(o => {
-          const config = getConfig(o, 'User1', devMode)
-          const port = parseInt(url.parse(config.serverEndpoint).port, 10)
-          return waitPort({ port })
-        }))
-        ready = results.reduce((a, b) => a & b, true)
-      } catch (e) {
-        console.log(e)
-        await u.wait(1000)
-      }
-    }
-    console.log(`Waited: ${Date.now() - serverWaitStart}`)
-
     for (let i = 0; i < orgs.length; i = i + 1) {
       const who = orgs[i]
       const config = getConfig(who, 'User1', devMode)
       platformStates[who] = await makePlatformState(config.mtServerEndpoint)
       await platformStates[who].reset()
       k0s[who] = await makeK0(config.serverEndpoint)
+      let k0ready = k0s[who].ready()
+      while (!k0ready) {
+        logger.info(`Waiting for ${who} server to become ready.`)
+        await wait(1000)
+        k0ready = k0s[who].ready()
+      }
       const privateKey = crypto.randomBytes(32)
       secretStores[who] = await initSecretStore(config.serverEndpoint, k0s[who], privateKey)
       addresses[who] = secretStores[who].getAddress()

@@ -9,7 +9,7 @@ const pack256Bits = require('./pack-256-bits')
 const prepareTransfer = require('./prepare-transfer')
 const prepare_withdrawal = require('./prepare_withdrawal')
 const prfAddr = require('./prf-addr')
-const ready = require('./ready')
+const status = require('./status')
 const unpack256Bits = require('./unpack-256-bits')
 const verifyProof = require('./verify-proof')
 
@@ -29,7 +29,7 @@ function client(endpoint) {
     prepareTransfer: prepareTransfer.bind(null, jc),
     prepare_withdrawal: prepare_withdrawal.bind(null, jc),
     prfAddr: prfAddr.bind(null, jc),
-    ready: ready.bind(null, jc),
+    status: status.bind(null, jc),
     unpack256Bits: unpack256Bits.bind(null, jc),
     verifyProof: verifyProof.bind(null, jc)
   }

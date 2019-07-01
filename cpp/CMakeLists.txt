@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 
 cmake_policy(SET CMP0076 NEW)
 
+include_directories(include /usr/local/include ~/software/libsnark/usr/local/include)
+
 project(zktrade)
 
 set(
@@ -112,9 +114,16 @@ else ()
     add_definitions(-DNO_PROCPS)
 endif ()
 
+if ("${USE_DUMMYHASH}")
+  add_definitions(-DZKTRADE_DUMMYHASH)
+endif ()
+
 find_package(PkgConfig)
 pkg_search_module(GTEST REQUIRED gtest_main)
 
-add_subdirectory(depends)
+if (NOT "${USE_INSTALLED_LIBSNARK}")
+  add_subdirectory(depends)
+endif ()
+
 add_subdirectory(src)
 add_subdirectory(test)
