@@ -4,8 +4,7 @@ jobs:
   build_cpp_docker:
     docker:
       - image: docker:18.06.3-ce-git
-    parallelism: 4
-    resource_class: xlarge
+    resource_class: large
     steps:
       - checkout
       - setup_remote_docker:
@@ -43,8 +42,7 @@ jobs:
     machine:
       image: circleci/classic:201808-01
       docker_layer_caching: true
-    parallelism: 4
-    resource_class: xlarge
+    resource_class: large
     working_directory: ~/.go_workspace/src/github.com/appliedblockchain/zktrading
     steps:
       - checkout
@@ -145,8 +143,7 @@ jobs:
     machine:
       image: circleci/classic:201808-01
       docker_layer_caching: true
-    parallelism: 4
-    resource_class: xlarge
+    resource_class: large
     steps:
       - checkout
       - run:
