@@ -119,46 +119,6 @@ jobs:
             - js/packages/k0-integration-tests-eth/node_modules
             - js/packages/k0-integration-tests-fabric/node_modules
 
-  # This could probably be run more efficiently on the docker executor
-  chaincode:
-    machine:
-      image: circleci/classic:201808-01
-      docker_layer_caching: true
-    working_directory: ~/.go_workspace/src/github.com/appliedblockchain/zktrading
-    steps:
-      - checkout
-      - run:
-          name: "Docker login"
-          command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
-      - run:
-          name: "Start server"
-          command: |
-            docker run -d \
-            -p 11400:11400 \
-            -v $PWD/go/serverclient/testdata/:/tmp/k0keys/:ro \
-            appliedblockchain/zktrading-server:$CIRCLE_BRANCH-$CIRCLE_SHA1 \
-            6 \
-            /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk \
-            /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk \
-            /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk \
-            /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk \
-            /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk 11400
-      - run:
-          name: "Get Fabric source code"
-          command: |
-            cd ~/.go_workspace/src/github.com
-            mkdir hyperledger
-            cd hyperledger
-            curl -LO https://github.com/hyperledger/fabric/archive/v1.2.0.tar.gz
-            tar xf v1.2.0.tar.gz
-            mv fabric-1.2.0 fabric
-            rm v1.2.0.tar.gz
-      - run:
-          name: "Run Go tests"
-          command: |
-            cd go
-            VERIFIER_ENDPOINT=http://localhost:11400/ go test ./...
-
   fabric:
     machine:
       image: circleci/classic:201808-01
@@ -320,10 +280,6 @@ workflows:
           context: org-global
       - prepare_node:
           context: org-global
-      - chaincode:
-          context: org-global
-          requires:
-            - build_cpp_docker
       - fabric:
           context: org-global
           requires:
