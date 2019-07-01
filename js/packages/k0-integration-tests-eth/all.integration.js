@@ -1,24 +1,25 @@
 'use strict'
 
-const _ = require('lodash')
 const BN = require('bn.js')
+const _ = require('lodash')
+const compileContracts = require('./helpers/compile-contracts')
 const crypto = require('crypto')
-const log4js = require('log4js')
-const { expect } = require('code')
-const waitPort = require('wait-port')
+const initEventHandlers = require('./helpers/event-handlers')
 const jayson = require('jayson/promise')
-const u = require('@appliedblockchain/k0-util')
-const makeK0 = require('@appliedblockchain/k0')
-const testUtil = require('./helpers/util')
+const log4js = require('log4js')
 const makeEthPlatform = require('@appliedblockchain/k0-eth')
-const serverReady = require('./helpers/ready')
+const makeK0 = require('@appliedblockchain/k0')
+const makePlatformState = require('@appliedblockchain/k0-in-memory-platform-state')
 const makeSecretStore = require('@appliedblockchain/k0-in-memory-secret-store')
+const makeServerClient = require('@appliedblockchain/k0-server-client')
 const sendSignedTransaction = require('./helpers/send-signed-transaction')
 const sendTransaction = require('./helpers/send-transaction')
-const makePlatformState = require('@appliedblockchain/k0-in-memory-platform-state')
-const compileContracts = require('./helpers/compile-contracts')
-const initEventHandlers = require('./helpers/event-handlers')
+const serverReady = require('./helpers/ready')
 const signTransaction = require('./helpers/sign-transaction')
+const testUtil = require('./helpers/util')
+const u = require('@appliedblockchain/k0-util')
+const waitPort = require('wait-port')
+const { expect } = require('code')
 
 const assert = require('assert')
 
@@ -83,7 +84,7 @@ describe('Ethereum integration test', function ethIntegrationTest() {
         await u.wait(10000)
       }
     }
-
+    const helperServer = makeServerClient(`http://localhost:${k0Ports[0]}`)
     web3 = testUtil.initWeb3()
     // DollarCoin minter
     tokenMaster = web3.eth.accounts.create()
@@ -141,7 +142,7 @@ describe('Ethereum integration test', function ethIntegrationTest() {
     addresses.mvppt = await testUtil.deployContract(web3, artefacts.MVPPT, [
       u.buf2hex(addresses.dollarCoin),
       ...verifierAddresses,
-      await testUtil.pack256Bits(u.buf2hex(initialRoot))
+      (await helperServer.pack256Bits(initialRoot)).map(u.bn2string)
     ])
     mvppt = new web3.eth.Contract(
       artefacts.CarToken.abi,
@@ -263,28 +264,17 @@ describe('Ethereum integration test', function ethIntegrationTest() {
   })
 
   async function checkRootsConsistency() {
-    let consistent = false
-    let rounds = 0
-    while (!consistent) {
-      if (rounds > 3) {
-        throw new Error(`Roots not consistent: ${[ethRoot, root1, root2, root3].map(u.buf2hex).join(', ')}`)
-      }
-      const ethRoot = await alice.k0Eth.merkleTreeRoot()
+    const ethRoot = await alice.k0Eth.merkleTreeRoot()
 
-      const [ root1, root2, root3 ] = await Promise.all([
-        alice.platformState.merkleTreeRoot(),
-        bob.platformState.merkleTreeRoot(),
-        carol.platformState.merkleTreeRoot()
-      ])
+    const [ root1, root2, root3 ] = await Promise.all([
+      alice.platformState.merkleTreeRoot(),
+      bob.platformState.merkleTreeRoot(),
+      carol.platformState.merkleTreeRoot()
+    ])
 
-      consistent = ethRoot.equals(root1) && ethRoot.equals(root2) && ethRoot.equals(root3)
-
-      if (!consistent) {
-        console.log('Roots not yet consistent. Waiting a bit...')
-        await wait(100)
-        rounds += 1
-      }
-    }
+    assert(ethRoot.equals(root1))
+    assert(ethRoot.equals(root2))
+    assert(ethRoot.equals(root3))
   }
 
   // Consume  $coin in exchange for CMs

@@ -3,15 +3,15 @@
   "version": "0.0.18",
   "private": true,
   "dependencies": {
-    "@appliedblockchain/k0": "^0.0.18",
-    "@appliedblockchain/k0-fabric": "^0.0.18",
-    "@appliedblockchain/k0-in-memory-platform-state": "^0.0.18",
-    "@appliedblockchain/k0-in-memory-secret-store": "^0.0.18",
-    "@appliedblockchain/k0-util": "^0.0.18",
+    "@appliedblockchain/k0": "^0.0.17",
+    "@appliedblockchain/k0-fabric": "^0.0.17",
+    "@appliedblockchain/k0-in-memory-platform-state": "^0.0.17",
+    "@appliedblockchain/k0-in-memory-secret-store": "^0.0.17",
+    "@appliedblockchain/k0-util": "^0.0.17",
     "code": "^5.2.4",
+    "fabric-ca-client": "^1.4.2",
     "log4js": "^4.3.1",
-    "mocha": "^6.1.4",
-    "wait-port": "^0.2.2"
+    "mocha": "^6.1.4"
   },
   "devDependencies": {
     "fabric-client": "^1.2.0"

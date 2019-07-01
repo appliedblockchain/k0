@@ -2,7 +2,6 @@ const assert = require('assert')
 const compileContract = require('./compile-contract')
 const crypto = require('crypto')
 const deploy = require('./deploy')
-const execAsync = require('./exec-async')
 const path = require('path')
 const sendTransaction = require('./send-transaction')
 const Web3 = require('web3')
@@ -15,18 +14,6 @@ const { env } = process
 const baseDir = path.join(__dirname, '..', '..', '..', '..')
 const cppDir = process.env.CPP_DIR || path.join(baseDir, 'cpp')
 const cppUtilDir = process.env.CPP_UTIL_DIR || path.join(cppDir, 'build', 'src')
-
-async function convertVk(vkPath, vkAltPath) {
-  const executablePath = path.join(cppUtilDir, 'convert_vk')
-  const command = `${executablePath} ${vkPath} ${vkAltPath}`
-  return execAsync(command)
-}
-
-async function convertProof(proofPath, proofAltPath) {
-  const executablePath = path.join(cppUtilDir, 'convert_proof')
-  const command = `${executablePath} ${proofPath} ${proofAltPath}`
-  return execAsync(command)
-}
 
 function paths(label) {
   const tmpDir = process.env.TMP_DIR || path.join('/', 'tmp', 'k0keys')
@@ -44,29 +31,8 @@ function paths(label) {
   }
 }
 
-async function pack256Bits(hex) {
-  globalUtil.checkString(hex)
-  let executablePath
-
-  if (env.CIRCLECI) {
-    executablePath = `docker run appliedblockchain/zktrading-pack:${env.CIRCLE_BRANCH}-${env.CIRCLE_SHA1}`
-  } else {
-    executablePath = path.join(cppUtilDir, 'pack_256_bits')
-  }
-
-  const command = `${executablePath} ${hex}`
-  const result = await execAsync(command)
-  return result.stdout.trim().split(',')
-}
-
 function randomBytes(len) {
   return '0x' + crypto.randomBytes(len).toString('hex')
-}
-
-async function sha256Instance() {
-  const pyScriptPath = path.join(baseDir, 'python', 'sha256_instance.py')
-  const pyResult = await execAsync(`python ${pyScriptPath}`)
-  return pyResult.stdout.split(',')
 }
 
 function initWeb3() {
@@ -164,17 +130,13 @@ module.exports = {
   awaitEvent,
   sleep,
   clear,
-  convertVk,
-  convertProof,
   deployContract,
   deployStandardContract,
   initWeb3,
   randomBytes,
   paths,
-  pack256Bits,
   prompt,
   randomBytesHex,
-  sha256Instance,
   toUnits,
   fromUnits,
   ZERO_ADDRESS
