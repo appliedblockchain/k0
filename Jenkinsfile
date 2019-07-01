@@ -20,7 +20,7 @@ node {
         sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose up -d'
     }
     stage('Run integration tests') {
-        sh 'cd js/packages/k0-integration-tests-eth && npm test'
+        sh 'set +ex && export NVM_DIR="$HOME/.nvm" && . ~/.nvm/nvm.sh && nvm use v8 && set -ex && cd js/packages/k0-integration-tests-eth && npm test'
     }
     stage('Shut down docker containers') {
         sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose down'
