@@ -263,17 +263,28 @@ describe('Ethereum integration test', function ethIntegrationTest() {
   })
 
   async function checkRootsConsistency() {
-    const ethRoot = await alice.k0Eth.merkleTreeRoot()
+    let consistent = false
+    let rounds = 0
+    while (!consistent) {
+      if (rounds > 3) {
+        throw new Error(`Roots not consistent: ${[ethRoot, root1, root2, root3].map(u.buf2hex).join(', ')}`)
+      }
+      const ethRoot = await alice.k0Eth.merkleTreeRoot()
 
-    const [ root1, root2, root3 ] = await Promise.all([
-      alice.platformState.merkleTreeRoot(),
-      bob.platformState.merkleTreeRoot(),
-      carol.platformState.merkleTreeRoot()
-    ])
+      const [ root1, root2, root3 ] = await Promise.all([
+        alice.platformState.merkleTreeRoot(),
+        bob.platformState.merkleTreeRoot(),
+        carol.platformState.merkleTreeRoot()
+      ])
 
-    assert(ethRoot.equals(root1))
-    assert(ethRoot.equals(root2))
-    assert(ethRoot.equals(root3))
+      consistent = ethRoot.equals(root1) && ethRoot.equals(root2) && ethRoot.equals(root3)
+
+      if (!consistent) {
+        console.log('Roots not yet consistent. Waiting a bit...')
+        await wait(100)
+        rounds += 1
+      }
+    }
   }
 
   // Consume  $coin in exchange for CMs
