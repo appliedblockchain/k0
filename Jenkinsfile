@@ -16,14 +16,17 @@ node {
     stage('lerna bootstrap') {
         sh 'set +ex && export NVM_DIR="$HOME/.nvm" && . ~/.nvm/nvm.sh && nvm use v8 && set -ex && cd js && lerna bootstrap --no-ci'
     }
-    stage('Run docker servers') {
+    stage('ETH: Run docker servers') {
         sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose down'
         sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose up -d'
     }
-    stage('Run integration tests') {
+    stage('ETH: Run integration tests') {
         sh 'set +ex && export NVM_DIR="$HOME/.nvm" && . ~/.nvm/nvm.sh && nvm use v8 && set -ex && cd js/packages/k0-integration-tests-eth && npm test'
     }
-    stage('Shut down docker containers') {
+    stage('ETH: Shut down docker containers') {
         sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose down'
+    }
+    stage('Fabric: Package chaincode') {
+        sh 'cd js/packages/k0-integration-tests-fabric/network && docker run -v $PWD/artefacts:/artefacts -v ~/go/src/github.com/hyperledger/fabric:/opt/gopath/src/github.com/hyperledger/fabric:ro -v ../../../../go:/opt/gopath/src/github.com/appliedblockchain/zktrading/go:ro \ hyperledger/fabric-tools:1.2.0 peer chaincode package -n k0chaincode -v 1 -p github.com/appliedblockchain/zktrading/go/chaincode/cash /artefacts/k0chaincode.1.out'
     }
 }
