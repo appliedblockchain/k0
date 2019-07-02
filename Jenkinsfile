@@ -27,6 +27,15 @@ node {
         sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose down'
     }
     stage('Fabric: Package chaincode') {
-        sh 'cd js/packages/k0-integration-tests-fabric/network && docker run -v $PWD/artefacts:/artefacts -v ~/go/src/github.com/hyperledger/fabric:/opt/gopath/src/github.com/hyperledger/fabric:ro -v ../../../../go:/opt/gopath/src/github.com/appliedblockchain/zktrading/go:ro \ hyperledger/fabric-tools:1.2.0 peer chaincode package -n k0chaincode -v 1 -p github.com/appliedblockchain/zktrading/go/chaincode/cash /artefacts/k0chaincode.1.out'
+        sh '''
+            docker run -v $PWD/js/packages/k0-integration-tests-fabric/network/artefacts:/artefacts \
+                -v ~/go/src/github.com/hyperledger/fabric:/opt/gopath/src/github.com/hyperledger/fabric:ro \
+                -v go:/opt/gopath/src/github.com/appliedblockchain/zktrading/go:ro \
+                hyperledger/fabric-tools:1.2.0 \
+                peer chaincode package \
+                    -n k0chaincode -v 1 \
+                    -p github.com/appliedblockchain/zktrading/go/chaincode/cash \
+                    /artefacts/k0chaincode.1.out
+        '''
     }
 }
