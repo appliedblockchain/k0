@@ -39,4 +39,32 @@ node {
                     /artefacts/k0chaincode.1.out
         '''
     }
+    stage('Spin up Fabric network') {
+        sh '''
+            docker rmi $(docker images --filter=reference="*k0chaincode*" -q) || true
+            cd js/packages/k0-integration-tests-fabric/network
+            CI=true ./start.sh
+        '''
+    }
+    stage('Install K0 chaincode') {
+        sh '''
+            cd js/packages/k0-integration-tests-fabric/network
+            for org in alpha beta gamma bank
+            do
+                docker-compose run ${org}tools peer chaincode install /artefacts/k0chaincode.1.out
+            done
+        '''
+    }
+    stage('Instantiate K0 chaincode') {
+        sh '''
+            cd js/packages/k0-integration-tests-fabric
+            CHAINCODE_ID=k0chaincode node instantiate
+        '''
+    }
+    stage('Run integration tests') {
+        sh '''
+            cd js/packages/k0-integration-tests-fabric
+            CHAINCODE_ID=k0chaincode node_modules/.bin/mocha test
+        '''
+    }
 }
