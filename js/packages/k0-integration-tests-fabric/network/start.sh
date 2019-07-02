@@ -7,9 +7,8 @@ then
   maybe_ci_dc_file="-f docker-compose-ci.yaml"
 fi
 
-echo Clearing everything...
+echo Clearing crypto config...
 sudo rm -rf crypto-config
-docker rm $(docker ps -aq) || true
 
 echo Creating crypto config...
 docker run -v $PWD/crypto-config.yaml:/crypto-config.yaml:ro -v $PWD/crypto-config:/crypto-config hyperledger/fabric-tools:1.2.0 cryptogen generate --config=/crypto-config.yaml --output=/crypto-config
