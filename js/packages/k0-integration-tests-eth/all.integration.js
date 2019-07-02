@@ -362,7 +362,7 @@ describe('Ethereum integration test', function ethIntegrationTest() {
     }
   }
 
-  it('allows alice to transfer funds to bob', async () => {
+  xit('allows alice to transfer funds to bob', async () => {
     await checkRootsConsistency()
     const in0 = await getInputNote(alice.platformState, alice.secretStore, 0)
     const in1 = await getInputNote(alice.platformState, alice.secretStore, 1)
@@ -455,7 +455,7 @@ describe('Ethereum integration test', function ethIntegrationTest() {
     ).to.equal(numInitialNotes + 1)
   })
 
-  it('allows carol to sell her car to bob', async () => {
+  xit('allows carol to sell her car to bob', async () => {
     // Deploying The trading contract
     const bobNotes = bob.secretStore.getAvailableNotes()
     const [ in0, in1 ] = bobNotes

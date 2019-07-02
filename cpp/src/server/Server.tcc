@@ -380,7 +380,9 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::depositCommitmentProo
         r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
             commitment_vk, circuit.pb->primary_input(),
             proof);
-
+    cout << "COMMITMENT params" << endl
+         << hex << circuit.pb->primary_input()
+         << endl;
     if (verified)
     {
         cout << "Commitment proof successfully verified." << endl;
@@ -452,7 +454,7 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::merkleTreeAdditionPro
             addition_pk, circuit.pb->primary_input(),
             circuit.pb->auxiliary_input());
     cout << "ADDITION params" << endl
-         << dec << circuit.pb->primary_input()
+         << hex << circuit.pb->primary_input()
          << endl;
     bool verified =
         r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
