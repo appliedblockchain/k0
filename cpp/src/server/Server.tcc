@@ -91,6 +91,8 @@ void zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setTransferPk(
 {
     transfer_pk = loadFromFile<r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp>>(
         pk_path);
+    cout << "loaded transfer pk" << endl;
+    cout << "pk cs num_inputs " << transfer_pk.constraint_system.num_inputs() << endl;
     transfer_pk_loaded = true;
 }
 
