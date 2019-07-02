@@ -42,6 +42,11 @@ node {
     stage('Spin up Fabric network') {
         sh '''
             docker rmi $(docker images --filter=reference="*k0chaincode*" -q) || true
+            set +ex
+            export NVM_DIR="$HOME/.nvm"
+            . ~/.nvm/nvm.sh
+            nvm use v8
+            set -ex
             cd js/packages/k0-integration-tests-fabric/network
             CI=true ./start.sh
         '''
@@ -58,12 +63,22 @@ node {
     stage('Instantiate K0 chaincode') {
         sh '''
             cd js/packages/k0-integration-tests-fabric
+            set +ex
+            export NVM_DIR="$HOME/.nvm"
+            . ~/.nvm/nvm.sh
+            nvm use v8
+            set -ex
             CHAINCODE_ID=k0chaincode node instantiate
         '''
     }
     stage('Run integration tests') {
         sh '''
             cd js/packages/k0-integration-tests-fabric
+            set +ex
+            export NVM_DIR="$HOME/.nvm"
+            . ~/.nvm/nvm.sh
+            nvm use v8
+            set -ex
             CHAINCODE_ID=k0chaincode node_modules/.bin/mocha test
         '''
     }
