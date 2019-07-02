@@ -16,16 +16,16 @@ node {
     stage('lerna bootstrap') {
         sh 'set +ex && export NVM_DIR="$HOME/.nvm" && . ~/.nvm/nvm.sh && nvm use v8 && set -ex && cd js && lerna bootstrap --no-ci'
     }
-    stage('ETH: Run docker servers') {
-        sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose down'
-        sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose up -d'
-    }
-    stage('ETH: Run integration tests') {
-        sh 'set +ex && export NVM_DIR="$HOME/.nvm" && . ~/.nvm/nvm.sh && nvm use v8 && set -ex && cd js/packages/k0-integration-tests-eth && npm test'
-    }
-    stage('ETH: Shut down docker containers') {
-        sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose down'
-    }
+    // stage('ETH: Run docker servers') {
+    //     sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose down'
+    //     sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose up -d'
+    // }
+    // stage('ETH: Run integration tests') {
+    //     sh 'set +ex && export NVM_DIR="$HOME/.nvm" && . ~/.nvm/nvm.sh && nvm use v8 && set -ex && cd js/packages/k0-integration-tests-eth && npm test'
+    // }
+    // stage('ETH: Shut down docker containers') {
+    //     sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose down'
+    // }
     stage('Fabric: Package chaincode') {
         sh '''
             rm -f js/packages/k0-integration-tests-fabric/network/artefacts/*
