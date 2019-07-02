@@ -6,12 +6,6 @@ x-custom:
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: peer node start --logging-level=debug
 
-  server: &server
-    image: appliedblockchain/zktrading-server
-    volumes:
-      - /tmp/k0keys:/tmp/k0keys:ro
-    command: 7 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 80
-
   couchdb: &couch
     image: hyperledger/fabric-couchdb:0.4.10
     environment:
@@ -40,9 +34,11 @@ services:
       - ./crypto-config/ordererOrganizations/orderer.org/orderers/orderer.orderer.org/msp:/msp:ro
       - ./crypto-config/ordererOrganizations/orderer.org/orderers/orderer.orderer.org/tls:/etc/hyperledger/fabric/tls:ro
 
-  verifier:
-    << : *server
-    container_name: verifier
+  server:
+    image: appliedblockchain/zktrading-server
+    volumes:
+      - /tmp/k0keys:/tmp/k0keys:ro
+    command: 4 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 80
     ports:
       - 4000:80
 

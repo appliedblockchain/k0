@@ -25,7 +25,7 @@ function getConfig(org, username, devMode = false) {
     mspid: org.charAt(0).toUpperCase() + org.slice(1) + 'CoMSP',
     queryPeerIndex: orgs.indexOf(org),
     channelName: 'the-channel',
-    serverEndpoint: `http://localhost:${10000 + orgNum * 1000 + 400}`,
+    serverEndpoint: `http://localhost:4000`,
     mtServerEndpoint: `http://localhost:${10000 + orgNum * 1000 + 410}`
   }
   if (devMode) {
