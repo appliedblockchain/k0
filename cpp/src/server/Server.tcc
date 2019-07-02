@@ -618,6 +618,10 @@ zktrade::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepareTransfer(
          << hex
          << xfer_circuit.pb->primary_input() << endl;
 
+    cout << dec;
+    cout << "pk cs num_inputs" << transfer_pk.constraint_system.num_inputs() << endl;
+    cout << "circuit primary inputs" << xfer_circuit.pb->primary_input().size() << endl;
+
     auto xfer_proof =
         r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
             transfer_pk, xfer_circuit.pb->primary_input(),
