@@ -4,7 +4,7 @@ then
 fi
 
 echo Clearing everything...
-rm -rf crypto-config
+sudo rm -rf crypto-config
 docker rm $(docker ps -aq)
 
 echo Creating crypto config...
