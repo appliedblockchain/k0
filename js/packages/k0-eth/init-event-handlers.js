@@ -55,7 +55,8 @@ function initEventHandlers(mvppt, server, eventEmitter) {
       })
       console.log()
     } else {
-      throw new Error(`Don't know what to do with event of type ${item.event}`)
+      console.log(`Don't know what to do with event of type ${item.event}`)
+      console.log(item)
     }
     await u.wait(200)
     lastBlockNumber = item.blockNumber
