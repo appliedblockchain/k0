@@ -16,14 +16,14 @@ node {
     stage('lerna bootstrap') {
         sh 'set +ex && export NVM_DIR="$HOME/.nvm" && . ~/.nvm/nvm.sh && nvm use v8 && set -ex && cd js && lerna bootstrap --no-ci'
     }
-    // stage('ETH: Run docker servers') {
+    // stage('ETH: Run Docker servers') {
     //     sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose down'
     //     sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose up -d'
     // }
     // stage('ETH: Run integration tests') {
     //     sh 'set +ex && export NVM_DIR="$HOME/.nvm" && . ~/.nvm/nvm.sh && nvm use v8 && set -ex && cd js/packages/k0-integration-tests-eth && npm test'
     // }
-    // stage('ETH: Shut down docker containers') {
+    // stage('ETH: Shut down Docker containers') {
     //     sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose down'
     // }
     stage('Fabric: Package chaincode') {
@@ -80,6 +80,12 @@ node {
             nvm use v8
             set -ex
             CHAINCODE_ID=k0chaincode node_modules/.bin/mocha test
+        '''
+    }
+    stage('Shut down Docker containers') {
+        sh '''
+            cd js/packages/k0-integration-tests-fabric/network
+            CI=true ./start.sh
         '''
     }
 }
