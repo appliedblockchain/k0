@@ -17,6 +17,7 @@ node {
         sh 'set +ex && export NVM_DIR="$HOME/.nvm" && . ~/.nvm/nvm.sh && nvm use v8 && set -ex && cd js && lerna bootstrap --no-ci'
     }
     stage('Run docker servers') {
+        sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose down'
         sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose up -d'
     }
     stage('Run integration tests') {
