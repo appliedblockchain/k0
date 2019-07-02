@@ -41,6 +41,8 @@ node {
     }
     stage('Fabric: Spin up network') {
         sh '''
+            docker stop $(docker ps -aq)
+            docker rm $(docker ps -aq)
             docker rmi $(docker images --filter=reference="*k0chaincode*" -q) || true
             set +ex
             export NVM_DIR="$HOME/.nvm"
