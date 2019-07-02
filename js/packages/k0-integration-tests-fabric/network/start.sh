@@ -1,3 +1,7 @@
+#!/bin/bash
+
+set -e
+
 if [ "$CI" = "true" ]
 then
   maybe_ci_dc_file="-f docker-compose-ci.yaml"
