@@ -85,7 +85,7 @@ node {
     stage('Shut down Docker containers') {
         sh '''
             cd js/packages/k0-integration-tests-fabric/network
-            CI=true ./start.sh
+            CI=true ./stop.sh
         '''
     }
 }
