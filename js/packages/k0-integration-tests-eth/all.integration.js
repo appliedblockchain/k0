@@ -263,7 +263,10 @@ describe('Ethereum integration test', function ethIntegrationTest() {
     console.log('Test Suite Initialized.')
   })
 
-  async function checkRootsConsistency() {
+  async function checkRootsConsistency(tries = 10) {
+    if (tries = 0) {
+      throw new Error('Roots not equal')
+    }
     const ethRoot = await alice.k0Eth.merkleTreeRoot()
 
     const [ root1, root2, root3 ] = await Promise.all([
@@ -272,9 +275,11 @@ describe('Ethereum integration test', function ethIntegrationTest() {
       carol.platformState.merkleTreeRoot()
     ])
 
-    assert(ethRoot.equals(root1))
-    assert(ethRoot.equals(root2))
-    assert(ethRoot.equals(root3))
+    if (!(ethRoot.equals(root1) && ethRoot.equals(root2) && ethRoot.equals(root3))) {
+      console.log("Roots don't match (yet). Waiting a bit...")
+      await u.wait(300)
+      await checkRootsConsistency(tries - 1)
+    }
   }
 
   // Consume  $coin in exchange for CMs
