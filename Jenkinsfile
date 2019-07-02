@@ -28,9 +28,10 @@ node {
     }
     stage('Fabric: Package chaincode') {
         sh '''
+            rm -f js/packages/k0-integration-tests-fabric/network/artefacts/*
             docker run -v $PWD/js/packages/k0-integration-tests-fabric/network/artefacts:/artefacts \
                 -v ~/go/src/github.com/hyperledger/fabric:/opt/gopath/src/github.com/hyperledger/fabric:ro \
-                -v go:/opt/gopath/src/github.com/appliedblockchain/zktrading/go:ro \
+                -v $PWD/go:/opt/gopath/src/github.com/appliedblockchain/zktrading/go:ro \
                 hyperledger/fabric-tools:1.2.0 \
                 peer chaincode package \
                     -n k0chaincode -v 1 \
