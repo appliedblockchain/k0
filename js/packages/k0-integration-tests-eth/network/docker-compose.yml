@@ -1,86 +1,48 @@
-version: '3'
+version: '3.7'
+
+x-custom:
+  server: &server
+    image: appliedblockchain/zktrading-server
+    volumes:
+      - /tmp/k0keys:/tmp/k0keys:ro
+    command: 4 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 80
+
+  server: &mtserver
+    image: appliedblockchain/zktrading-mtserver
+    volumes:
+      - /tmp/k0keys:/tmp/k0keys:ro
+    command: 4 80
 
 services:
   server1:
-    image: zktrading-server
-    build:
-      context: ../../../../cpp
-      dockerfile: docker/server.Dockerfile
-    command: 4 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 4000
-    restart: on-failure
-    volumes:
-      - /tmp/k0keys:/tmp/k0keys:ro
+    << : *server
     ports:
-      - 4000:4000
-    networks:
-      - main
+      - 4000:80
   server2:
-    image: zktrading-server
-    build:
-      context: ../../../../cpp
-      dockerfile: docker/server.Dockerfile
-    command: 4 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 5000
-    restart: on-failure
-    volumes:
-      - /tmp/k0keys:/tmp/k0keys:ro
+    << : *server
     ports:
-      - 5000:5000
-    networks:
-      - main
+      - 5000:80
   server3:
-    image: zktrading-server
-    build:
-      context: ../../../../cpp
-      dockerfile: docker/server.Dockerfile
-    command: 4 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 6000
-    restart: on-failure
-    volumes:
-      - /tmp/k0keys:/tmp/k0keys:ro
+    << : *server
     ports:
-      - 6000:6000
-    networks:
-      - main
-  mtserver1:
-    image: zktrading-mtserver
-    build:
-      context: ../../../../cpp
-      dockerfile: docker/mtserver.Dockerfile
-    command: 4 4100
-    restart: on-failure
-    ports:
-      - 4100:4100
-    networks:
-      - main
-  mtserver2:
-    image: zktrading-mtserver
-    build:
-      context: ../../../../cpp
-      dockerfile: docker/mtserver.Dockerfile
-    command: 4 5100
-    restart: on-failure
-    ports:
-      - 5100:5100
-    networks:
-      - main
-  mtserver3:
-    image: zktrading-mtserver
-    build:
-      context: ../../../../cpp
-      dockerfile: docker/mtserver.Dockerfile
-    command: 4 6100
-    restart: on-failure
+      - 6000:80
 
+  mtserver1:
+    << : *mtserver
     ports:
-      - 6100:6100
-    networks:
-      - main
+      - 4100:80
+  mtserver2:
+    << : *mtserver
+    ports:
+      - 5100:80
+  mtserver3:
+    << : *mtserver
+    ports:
+      - 6100:80
+
   parity:
     image: appliedblockchain/parity-solo-instant:latest
     restart: on-failure
     ports:
       - 8545:8545
       - 8546:8546
-    networks:
-      - main
-networks:
-  main:

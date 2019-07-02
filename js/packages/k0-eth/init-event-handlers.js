@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const handleDeposit = require('./event-handlers/deposit')
 const handleTransfer = require('./event-handlers/transfer')
 const u = require('@appliedblockchain/k0-util')
@@ -30,26 +31,32 @@ function initEventHandlers(mvppt, server, eventEmitter) {
       await handleDeposit(server, eventEmitter, item)
     } else if (item.event === 'Transfer') {
       await handleTransfer(server, eventEmitter, item)
-    } else if (item.event === 'Log') {
-      // console.log('LOG', require('util').inspect(item, { depth: null, colors: true }))
     } else if (item.event === 'SNRegistration') {
       // ignore
-    } else if (item.event === 'SNReuseAttemptError') {
-      console.log('SN reuse attempt', item.returnValues.pos, item.returnValues.hash)
-      process.exit(1)
-    } else if (item.event === 'DepositFailure') {
-      console.log('DepositFailure')
-      process.exit(1)
-    } else if (item.event === 'TransferFailure') {
-      console.log('TransferFailure')
-      process.exit(1)
-    } else if (item.event === 'TransferFromFailure') {
-      console.log('TransferFromFailure')
-      process.exit(1)
-    } else if (item.event === 'Debug') {
-      // console.log('ETH DEBUG', require('util').inspect(item, { depth: null, colors: true }))
+    } else if (item.event === 'PublicInputsCommitment') {
+      console.log('Commitment public inputs')
+      _.range(5).forEach(idx => {
+        const num = item.returnValues[idx.toString()]
+        console.log(num.toString(16))
+      })
+      console.log()
+    } else if (item.event === 'PublicInputsAddition') {
+      console.log('Addition public inputs')
+      _.range(7).forEach(idx => {
+        const num = item.returnValues[idx.toString()]
+        console.log(num.toString(16))
+      })
+      console.log()
+    } else if (item.event === 'PublicInputsTransfer') {
+      console.log('Transfer public inputs')
+      _.range(11).forEach(idx => {
+        const num = item.returnValues[idx.toString()]
+        console.log(num.toString(16))
+      })
+      console.log()
     } else {
-      throw new Error(`Don't know what to do with event of type ${item.event}`)
+      console.log(`Don't know what to do with event of type ${item.event}`)
+      console.log(item)
     }
     await u.wait(200)
     lastBlockNumber = item.blockNumber

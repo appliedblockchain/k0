@@ -1,11 +1,14 @@
+#!/bin/bash
+
+set -e
+
 if [ "$CI" = "true" ]
 then
   maybe_ci_dc_file="-f docker-compose-ci.yaml"
 fi
 
-echo Clearing everything...
-rm -rf crypto-config
-docker rm $(docker ps -aq)
+echo Clearing crypto config...
+sudo rm -rf crypto-config
 
 echo Creating crypto config...
 docker run -v $PWD/crypto-config.yaml:/crypto-config.yaml:ro -v $PWD/crypto-config:/crypto-config hyperledger/fabric-tools:1.2.0 cryptogen generate --config=/crypto-config.yaml --output=/crypto-config
@@ -15,7 +18,7 @@ then
 fi
 
 echo Generating orderer genesis block...
-docker run -it -v $PWD:/config hyperledger/fabric-tools:1.2.0 configtxgen -configPath /config -profile TheGenesis -channelID orderer-system-channel -outputBlock /config/artefacts/orderer_genesis.block
+docker run -v $PWD:/config hyperledger/fabric-tools:1.2.0 configtxgen -configPath /config -profile TheGenesis -channelID orderer-system-channel -outputBlock /config/artefacts/orderer_genesis.block
 
 echo Starting network...
 docker-compose -f docker-compose.yaml $maybe_ci_dc_file up -d
@@ -29,7 +32,7 @@ bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:14584)" 
 
 echo Generating channel creation tx...
 
-docker run -it -v $PWD:/config hyperledger/fabric-tools:1.2.0 configtxgen -configPath /config -profile TheChannel -channelID the-channel -outputCreateChannelTx ./config/artefacts/channel_creation.tx
+docker run -v $PWD:/config hyperledger/fabric-tools:1.2.0 configtxgen -configPath /config -profile TheChannel -channelID the-channel -outputCreateChannelTx ./config/artefacts/channel_creation.tx
 
 echo Creating channel...
 
@@ -44,10 +47,10 @@ done
 
 echo Generating anchor definition txs...
 
-docker run -it -v $PWD:/config hyperledger/fabric-tools:1.2.0 configtxgen -configPath /config -profile TheChannel -channelID the-channel -outputAnchorPeersUpdate ./config/artefacts/alphaco_anchor_peers_definition.tx -asOrg AlphaCo
-docker run -it -v $PWD:/config hyperledger/fabric-tools:1.2.0 configtxgen -configPath /config -profile TheChannel -channelID the-channel -outputAnchorPeersUpdate ./config/artefacts/betaco_anchor_peers_definition.tx -asOrg BetaCo
-docker run -it -v $PWD:/config hyperledger/fabric-tools:1.2.0 configtxgen -configPath /config -profile TheChannel -channelID the-channel -outputAnchorPeersUpdate ./config/artefacts/gammaco_anchor_peers_definition.tx -asOrg GammaCo
-docker run -it -v $PWD:/config hyperledger/fabric-tools:1.2.0 configtxgen -configPath /config -profile TheChannel -channelID the-channel -outputAnchorPeersUpdate ./config/artefacts/bankco_anchor_peers_definition.tx -asOrg BankCo
+docker run -v $PWD:/config hyperledger/fabric-tools:1.2.0 configtxgen -configPath /config -profile TheChannel -channelID the-channel -outputAnchorPeersUpdate ./config/artefacts/alphaco_anchor_peers_definition.tx -asOrg AlphaCo
+docker run -v $PWD:/config hyperledger/fabric-tools:1.2.0 configtxgen -configPath /config -profile TheChannel -channelID the-channel -outputAnchorPeersUpdate ./config/artefacts/betaco_anchor_peers_definition.tx -asOrg BetaCo
+docker run -v $PWD:/config hyperledger/fabric-tools:1.2.0 configtxgen -configPath /config -profile TheChannel -channelID the-channel -outputAnchorPeersUpdate ./config/artefacts/gammaco_anchor_peers_definition.tx -asOrg GammaCo
+docker run -v $PWD:/config hyperledger/fabric-tools:1.2.0 configtxgen -configPath /config -profile TheChannel -channelID the-channel -outputAnchorPeersUpdate ./config/artefacts/bankco_anchor_peers_definition.tx -asOrg BankCo
 
 echo Sending anchor definition txs...
 

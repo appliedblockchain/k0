@@ -28,7 +28,9 @@ contract MVPPT {
 
     event Withdrawal(uint[2] snj);
 
-    event Log(uint,uint,uint,uint,uint,uint,uint,uint,uint,uint,uint);
+    event PublicInputsCommitment(uint,uint,uint,uint,uint);
+    event PublicInputsAddition(uint,uint,uint,uint,uint,uint,uint);
+    event PublicInputsTransfer(uint,uint,uint,uint,uint,uint,uint,uint,uint,uint,uint);
 
     event SNRegistration(bytes32 hash);
     event SNReuseAttemptError(uint pos, bytes32 hash);
@@ -69,6 +71,12 @@ contract MVPPT {
         commInputs[2] = v;
         commInputs[3] = comm_cm[0];
         commInputs[4] = comm_cm[1];
+        emit PublicInputsCommitment(
+            commInputs[0],
+            commInputs[1],
+            commInputs[2],
+            commInputs[3],
+            commInputs[4]);
 
         uint[] memory addInputs = new uint[](7);
         addInputs[0] = root[0];
@@ -78,6 +86,14 @@ contract MVPPT {
         addInputs[4] = comm_cm[1];
         addInputs[5] = new_root[0];
         addInputs[6] = new_root[1];
+        emit PublicInputsAddition(
+            addInputs[0],
+            addInputs[1],
+            addInputs[2],
+            addInputs[3],
+            addInputs[4],
+            addInputs[5],
+            addInputs[6]);
 
         if (
             commitmentVerifier.verifyProof(
@@ -149,7 +165,18 @@ contract MVPPT {
         inputs[8] = cm_out_1[0];
         inputs[9] = cm_out_1[1];
         inputs[10] = uint256(callee_address);
-        emit Log(inputs[0],inputs[1],inputs[2],inputs[3],inputs[4],inputs[5],inputs[6],inputs[7],inputs[8],inputs[9],inputs[10]);
+        emit PublicInputsTransfer(
+            inputs[0],
+            inputs[1],
+            inputs[2],
+            inputs[3],
+            inputs[4],
+            inputs[5],
+            inputs[6],
+            inputs[7],
+            inputs[8],
+            inputs[9],
+            inputs[10]);
         if (transferVerifier.verifyProof(
                 [proof[0], proof[1]], // a
                 [proof[2], proof[3]], // a_p
