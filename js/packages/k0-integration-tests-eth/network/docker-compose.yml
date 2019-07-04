@@ -1,12 +1,6 @@
 version: '3.7'
 
 x-custom:
-  server: &server
-    image: appliedblockchain/zktrading-server
-    volumes:
-      - /tmp/k0keys:/tmp/k0keys:ro
-    command: 4 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 80
-
   server: &mtserver
     image: appliedblockchain/zktrading-mtserver
     volumes:
@@ -14,19 +8,6 @@ x-custom:
     command: 4 80
 
 services:
-  server1:
-    << : *server
-    ports:
-      - 4000:80
-  server2:
-    << : *server
-    ports:
-      - 5000:80
-  server3:
-    << : *server
-    ports:
-      - 6000:80
-
   mtserver1:
     << : *mtserver
     ports:

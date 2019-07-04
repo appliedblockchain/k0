@@ -23,7 +23,7 @@ const { expect } = require('code')
 
 const assert = require('assert')
 
-const k0Ports = [ 4000, 5000, 6000 ]
+const k0Ports = [ 4000, 4000, 4000 ]
 const platformPorts = [ 4100, 5100, 6100 ]
 
 let web3
