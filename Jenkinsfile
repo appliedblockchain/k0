@@ -16,17 +16,22 @@ node {
     stage('lerna bootstrap') {
         sh 'set +ex && export NVM_DIR="$HOME/.nvm" && . ~/.nvm/nvm.sh && nvm use v8 && set -ex && cd js && lerna bootstrap --no-ci'
     }
-    stage('ETH: Run Docker servers') {
+
+    stage('Reset Docker') {
+        sh 'docker stop $(docker ps -aq) || true'
+        sh 'docker rm $(docker ps -aq) || true'
+        sh 'docker rmi $(docker images --filter=reference="*k0chaincode*" -q) || true'
+    }
+
+    parallel {
+
+    eth {
         sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose down'
         sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose up -d'
-    }
-    stage('ETH: Run integration tests') {
         sh 'set +ex && export NVM_DIR="$HOME/.nvm" && . ~/.nvm/nvm.sh && nvm use v8 && set -ex && cd js/packages/k0-integration-tests-eth && npm test'
-    }
-    stage('ETH: Shut down Docker containers') {
         sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose down'
     }
-    stage('Fabric: Package chaincode') {
+    fabric {
         sh '''
             sudo rm -rf js/packages/k0-integration-tests-fabric/network/artefacts/*
             docker run -v $PWD/js/packages/k0-integration-tests-fabric/network/artefacts:/artefacts \
@@ -38,12 +43,7 @@ node {
                     -p github.com/appliedblockchain/zktrading/go/chaincode/cash \
                     /artefacts/k0chaincode.1.out
         '''
-    }
-    stage('Fabric: Spin up network') {
         sh '''
-            docker stop $(docker ps -aq)
-            docker rm $(docker ps -aq)
-            docker rmi $(docker images --filter=reference="*k0chaincode*" -q) || true
             set +ex
             export NVM_DIR="$HOME/.nvm"
             . ~/.nvm/nvm.sh
@@ -52,8 +52,6 @@ node {
             cd js/packages/k0-integration-tests-fabric/network
             CI=true ./start.sh
         '''
-    }
-    stage('Fabric: Install chaincode') {
         sh '''
             cd js/packages/k0-integration-tests-fabric/network
             for org in alpha beta gamma bank
@@ -61,8 +59,6 @@ node {
                 docker-compose run ${org}tools peer chaincode install /artefacts/k0chaincode.1.out
             done
         '''
-    }
-    stage('Fabric: Instantiate chaincode') {
         sh '''
             cd js/packages/k0-integration-tests-fabric
             set +ex
@@ -72,8 +68,6 @@ node {
             set -ex
             CHAINCODE_ID=k0chaincode node instantiate
         '''
-    }
-    stage('Fabric: Run integration tests') {
         sh '''
             cd js/packages/k0-integration-tests-fabric
             set +ex
@@ -83,11 +77,10 @@ node {
             set -ex
             CHAINCODE_ID=k0chaincode node_modules/.bin/mocha test
         '''
-    }
-    stage('Fabric: Shut down Docker containers') {
         sh '''
             cd js/packages/k0-integration-tests-fabric/network
             CI=true ./stop.sh
         '''
+    }
     }
 }
