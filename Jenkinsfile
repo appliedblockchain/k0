@@ -25,13 +25,16 @@ node {
 
     stage('Start server') {
         sh '''
-            docker run appliedblockchain/zktrading-server 4 \
+            docker run -d --name k0server \
+            -v /tmp/k0keys/:/tmp/k0keys/:ro \
+            -p 4000:80 \
+            appliedblockchain/zktrading-server 4 \
             /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk \
             /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk \
             /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk \
             /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk \
             /tmp/k0keys/example_pk /tmp/k0keys/example_vk \
-            4000
+            80
         '''
     }
 
@@ -95,4 +98,12 @@ node {
         '''
     }
     }
+    stage('Stop server') {
+        sh '''
+            docker stop k0server
+            docker rm k0server
+        '''
+    }
+
+
 }
