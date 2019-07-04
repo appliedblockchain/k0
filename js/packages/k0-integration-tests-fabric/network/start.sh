@@ -8,7 +8,12 @@ then
 fi
 
 echo Clearing crypto config...
-rm -rf crypto-config
+if [ "$CI" = "true" ]
+then
+  sudo rm -rf crypto-config
+else
+  rm -rf crypto-config
+fi
 
 echo Creating crypto config...
 docker run -v $PWD/crypto-config.yaml:/crypto-config.yaml:ro -v $PWD/crypto-config:/crypto-config hyperledger/fabric-tools:1.2.0 cryptogen generate --config=/crypto-config.yaml --output=/crypto-config
