@@ -38,15 +38,13 @@ node {
         '''
     }
 
-    parallel {
-
-    eth: {
+    stage('Ethereum tests') {
         sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose down'
         sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose up -d'
         sh 'set +ex && export NVM_DIR="$HOME/.nvm" && . ~/.nvm/nvm.sh && nvm use v8 && set -ex && cd js/packages/k0-integration-tests-eth && npm test'
         sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose down'
     }
-    fabric: {
+    stage('Fabric tests') {
         sh '''
             sudo rm -rf js/packages/k0-integration-tests-fabric/network/artefacts/*
             docker run -v $PWD/js/packages/k0-integration-tests-fabric/network/artefacts:/artefacts \
@@ -96,7 +94,6 @@ node {
             cd js/packages/k0-integration-tests-fabric/network
             CI=true ./stop.sh
         '''
-    }
     }
     stage('Stop server') {
         sh '''
