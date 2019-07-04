@@ -65,7 +65,7 @@ func (t *K0Chaincode) mint(
 
 	endpoint, is_set := os.LookupEnv("VERIFIER_ENDPOINT")
 	if !is_set {
-		endpoint = "http://server/"
+		endpoint = "http://verifier/"
 	}
 	k, err := util.VariableToFixed32(args[0])
 	v, err := util.VariableToFixed8(args[1])
