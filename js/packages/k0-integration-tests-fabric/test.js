@@ -47,11 +47,11 @@ describe('Fabric workflow', function fabricTest() {
       platformStates[who] = await makePlatformState(config.mtServerEndpoint)
       await platformStates[who].reset()
       k0s[who] = await makeK0(config.serverEndpoint)
-      let k0ready = k0s[who].ready()
+      let k0ready = await k0s[who].ready()
       while (!k0ready) {
         logger.info(`Waiting for ${who} server to become ready.`)
-        await wait(1000)
-        k0ready = k0s[who].ready()
+        await u.wait(1000)
+        k0ready = await k0s[who].ready()
       }
       const privateKey = crypto.randomBytes(32)
       secretStores[who] = await initSecretStore(config.serverEndpoint, k0s[who], privateKey)
