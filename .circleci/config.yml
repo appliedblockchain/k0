@@ -15,8 +15,6 @@ workflows:
     jobs:
       - publish_on_tag:
           context: org-global
-          requires:
-            - build
           filters:
             tags:
               only: /^v\d+\.\d+\.\d+$/
