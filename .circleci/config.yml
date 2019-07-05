@@ -5,10 +5,19 @@ jobs:
       - image: circleci/node:10
     steps:
       - checkout
-      - run: echo "//registry.npmjs.org/:_authToken=$PRIVATE_NPM_TOKEN" > ~/.npmrc
-      - run: sudo npm i -g lerna
-      - run: lerna init
-      - run: lerna publish --yes
+      - run:
+          name: Publish npm packages
+          command: |
+            echo "//registry.npmjs.org/:_authToken=$PRIVATE_NPM_TOKEN" > ~/.npmrc
+            cd js/packages
+            for module in eth eth-contracts eth-generate-verifier-contracts fabric in-memory-platform-state in-memory-secret-store server-client util
+            do
+              cd k0-$module
+              npm publish
+              cd ..
+            done
+            cd k0
+            npm publish
 
 workflows:
   version: 2
