@@ -1,3 +1,3 @@
-FROM zktrading
+FROM appliedblockchain/zktrading
 
 ENTRYPOINT ["/project/build/src/mtserver"]
