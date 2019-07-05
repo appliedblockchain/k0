@@ -39,10 +39,10 @@ node {
     }
 
     stage('Ethereum tests') {
-        sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose down'
-        sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose up -d'
+        sh 'cd js/packages/k0-integration-tests-eth && docker-compose -f docker-compose-ci.yml down'
+        sh 'cd js/packages/k0-integration-tests-eth && docker-compose -f docker-compose-ci.yml up -d'
         sh 'set +ex && export NVM_DIR="$HOME/.nvm" && . ~/.nvm/nvm.sh && nvm use v8 && set -ex && cd js/packages/k0-integration-tests-eth && npm test'
-        sh 'cd js/packages/k0-integration-tests-eth/network && docker-compose down'
+        sh 'cd js/packages/k0-integration-tests-eth && docker-compose -f docker-compose-ci.yml down'
     }
     stage('Fabric tests') {
         sh '''
