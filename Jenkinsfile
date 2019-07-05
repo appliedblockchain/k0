@@ -37,6 +37,10 @@ node {
             80
         '''
         sh '''
+            set +ex
+            export NVM_DIR="$HOME/.nvm"
+            . ~/.nvm/nvm.sh && nvm use v8
+            set -ex
             cd js/packages/k0-integration-tests-eth
             node wait-for-server
         '''
