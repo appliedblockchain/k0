@@ -1,6 +1,43 @@
 version: 2
+
 jobs:
-  publish_on_tag:
+  build_and_push_docker:
+    machine:
+      image: circleci/classic:201808-01
+      docker_layer_caching: true
+    steps:
+     - checkout
+     - run:
+          name: "Docker login"
+          command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+      - run:
+          name: "Download latest image"
+          command: |
+            docker pull appliedblockchain/zktrading
+      - run:
+          name: "Build main image"
+          command: |
+            cd cpp
+            docker build -f docker/zktrading.Dockerfile -t appliedblockchain/zktrading .
+      - run:
+          name: "Build app images"
+          command: |
+            cd cpp
+            for IMAGE in setup server mtserver convert-vk
+            do
+              docker build -f docker/$IMAGE.Dockerfile -t appliedblockchain/zktrading-$IMAGE .
+            done
+      - run:
+          name: "Push images"
+          command: |
+            for IMAGE in zktrading zktrading-setup zktrading-server zktrading-mtserver zktrading-convert-vk
+            do
+              docker push appliedblockchain/$IMAGE
+              docker tag appliedblockchain/$IMAGE appliedblockchain/$IMAGE:$CIRCLE_TAG
+              docker push appliedblockchain/$IMAGE:$CIRCLE_TAG
+            done
+
+  publish_npm:
     docker:
       - image: circleci/node:10
     steps:
@@ -23,8 +60,17 @@ workflows:
   version: 2
   main:
     jobs:
-      - publish_on_tag:
+      - build_and_push_docker:
           context: org-global
+          filters:
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+            branches:
+              ignore: /.*/
+      - publish_npm:
+          context: org-global
+          requires:
+            - build_and_push_docker
           filters:
             tags:
               only: /^v\d+\.\d+\.\d+$/
