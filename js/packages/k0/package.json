@@ -1,9 +1,9 @@
 {
   "name": "@appliedblockchain/k0",
-  "version": "0.0.25",
+  "version": "0.0.26",
   "dependencies": {
-    "@appliedblockchain/k0-server-client": "^0.0.25",
-    "@appliedblockchain/k0-util": "^0.0.25",
+    "@appliedblockchain/k0-server-client": "^0.0.26",
+    "@appliedblockchain/k0-util": "^0.0.26",
     "bn.js": "^4.11.8",
     "jayson": "^3.0.2"
   }
