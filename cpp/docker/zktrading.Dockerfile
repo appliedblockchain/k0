@@ -1,4 +1,4 @@
-FROM appliedblockchain/k0-base:v0.0.3
+FROM appliedblockchain/k0-base:v0.0.5
 
 COPY src /project/src
 COPY test /project/test
