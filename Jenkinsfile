@@ -36,6 +36,10 @@ node {
             /tmp/k0keys/example_pk /tmp/k0keys/example_vk \
             80
         '''
+        sh '''
+            cd js/packages/k0-integration-tests-eth
+            node wait-for-server
+        '''
     }
 
     stage('Ethereum tests') {
