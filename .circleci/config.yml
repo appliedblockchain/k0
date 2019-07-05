@@ -6,7 +6,7 @@ jobs:
     steps:
       - checkout
       - run: echo "//registry.npmjs.org/:_authToken=$PRIVATE_NPM_TOKEN" > ~/.npmrc
-      - run: npm i -g lerna
+      - run: sudo npm i -g lerna
       - run: lerna publish
 
 workflows:
