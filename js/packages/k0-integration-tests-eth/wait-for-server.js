@@ -1,4 +1,5 @@
 const makeK0 = require('@appliedblockchain/k0')
+const u = require('@k0-util')
 
 process.on('unhandledRejection', error => {
   console.error(error)
