@@ -54,13 +54,26 @@ option(
         "Print internal messages"
         OFF
 )
-
 option(
-        BINARY_OUTPUT
-        "In serialization, output raw binary data (instead of decimal), which is smaller and faster."
-        ON
+  MULTICORE
+  "Enable parallelized execution, using OpenMP"
+  OFF
 )
-
+option(
+  BINARY_OUTPUT
+  "In serialization, output raw binary data (instead of decimal), which is smaller and faster."
+  ON
+)
+option(
+  MONTGOMERY_OUTPUT
+  "Serialize Fp elements as their Montgomery representations (faster but not human-readable)"
+  ON
+)
+option(
+  USE_PT_COMPRESSION
+  "Use point compression"
+  ON
+)
 option(
         CPPDEBUG
         "Enable debugging of C++ STL (does not imply DEBUG)"
@@ -101,9 +114,21 @@ if ("${VERBOSE}")
     add_definitions(-DVERBOSE=1)
 endif ()
 
-if ("${MULTICORE}")
-    add_definitions(-DMULTICORE=1)
-endif ()
+if("${MULTICORE}")
+  add_definitions(-DMULTICORE=1)
+endif()
+
+if("${BINARY_OUTPUT}")
+  add_definitions(-DBINARY_OUTPUT)
+endif()
+
+if("${MONTGOMERY_OUTPUT}")
+  add_definitions(-DMONTGOMERY_OUTPUT)
+endif()
+
+if(NOT "${USE_PT_COMPRESSION}")
+  add_definitions(-DNO_PT_COMPRESSION=1)
+endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPT_FLAGS}")
 
@@ -117,6 +142,18 @@ endif ()
 if ("${USE_DUMMYHASH}")
   add_definitions(-DZKTRADE_DUMMYHASH)
 endif ()
+
+if("${PERFORMANCE}")
+  add_definitions(-DNDEBUG)
+  set(
+    CMAKE_CXX_FLAGS
+    "${CMAKE_CXX_FLAGS} -flto -fuse-linker-plugin"
+  )
+  set(
+    CMAKE_EXE_LINKER_FLAGS
+    "${CMAKE_EXE_LINKER_FLAGS} -flto"
+  )
+endif()
 
 find_package(PkgConfig)
 pkg_search_module(GTEST REQUIRED gtest_main)
