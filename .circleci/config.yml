@@ -6,8 +6,8 @@ jobs:
       image: circleci/classic:201808-01
       docker_layer_caching: true
     steps:
-     - checkout
-     - run:
+      - checkout
+      - run:
           name: "Docker login"
           command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
       - run:
