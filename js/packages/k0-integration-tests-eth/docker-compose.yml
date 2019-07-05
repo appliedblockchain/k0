@@ -2,21 +2,12 @@ version: '3.7'
 
 x-custom:
   mtserver: &mtserver
-    image: appliedblockchain/zktrading-mtserver
+    image: appliedblockchain/zktrading-mtserver:v0.0.27
     volumes:
       - /tmp/k0keys:/tmp/k0keys:ro
     command: 4 80
 
 services:
-  server:
-    container_name: server
-    image: appliedblockchain/zktrading-server
-    volumes:
-      - /tmp/k0keys:/tmp/k0keys:ro
-    command: 4 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 80
-    ports:
-      - 4000:80
-
   alicemtserver:
     << : *mtserver
     container_name: alicemtserver
@@ -36,7 +27,16 @@ services:
   parity:
     container_name: parity
     image: appliedblockchain/parity-solo-instant:latest
-    restart: on-failure
     ports:
       - 8545:8545
       - 8546:8546
+
+  server:
+    container_name: server
+    image: appliedblockchain/zktrading-server:v0.0.27
+    volumes:
+      - /tmp/k0keys:/tmp/k0keys:ro
+    command: 4 /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 80
+    ports:
+      - 4000:80
+
