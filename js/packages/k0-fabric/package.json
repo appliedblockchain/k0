@@ -1,8 +1,8 @@
 {
   "name": "@appliedblockchain/k0-fabric",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "dependencies": {
-    "@appliedblockchain/k0-util": "^0.0.20",
+    "@appliedblockchain/k0-util": "^0.0.21",
     "@appliedblockchain/not-a-logger": "^1.0.1",
     "csv-load-sync": "^1.0.0",
     "fabric-ca-client": "^1.4.2",

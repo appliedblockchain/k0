@@ -1,8 +1,8 @@
 {
   "name": "@appliedblockchain/k0-eth-generate-verifier-contracts",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "dependencies": {
-    "@appliedblockchain/k0-eth-contracts": "^0.0.20",
-    "@appliedblockchain/k0-util": "^0.0.20"
+    "@appliedblockchain/k0-eth-contracts": "^0.0.21",
+    "@appliedblockchain/k0-util": "^0.0.21"
   }
 }
