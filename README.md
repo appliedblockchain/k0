@@ -3,6 +3,11 @@ K0 is an implementation of Zerocash for smart contract platforms. Currently Ethe
 
 __WARNING! This is alpha-stage software. It has not been security-audited. DO NOT USE IN PRODUCTION!__
 
+A quickstart guide to run some integration tests is provided [#quickstart](below). For instructions on how to build and run the C++ components please read the README files in the following subdirectories:
+- [cpp](cpp)
+- [js/packages/k0-integration-tests-eth](js/packages/k0-integration-tests-eth)
+- [js/packages/k0-integration-tests-fabric](js/packages/k0-integration-tests-fabric)
+
 ## Quickstart
 
 The easiest way to see the code in action is to run the Ethereum integration using the provided Docker Compose file for the server components. However, first we need to run the "trusted setup", also using Docker (this might take a couple of minutes):
@@ -29,8 +34,3 @@ Among other things, this starts a proving server, which reads in the proving and
 npm i
 npm test
 ```
-
-For instructions on how to build and run the C++ components please read the README files in the following subdirectories:
-- [cpp](cpp)
-- [js/packages/k0-integration-tests-eth](js/packages/k0-integration-tests-eth)
-- [js/packages/k0-integration-tests-fabric](js/packages/k0-integration-tests-fabric)
