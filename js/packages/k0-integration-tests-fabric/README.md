@@ -1,6 +1,6 @@
 # K0 Fabric integration tests
 
-The project needs to be checked out in the GOPATH (`$GOPATH/src/github.com/appliedblockchain/zktrading`). You also need to have the Hyperledger Fabric source code (version 1.2.0) at `$GOPATH/src/github.com/hyperledger/fabric`.
+The project needs to be checked out in the GOPATH (`$GOPATH/src/github.com/appliedblockchain/k0`). You also need to have the Hyperledger Fabric source code (version 1.2.0) at `$GOPATH/src/github.com/hyperledger/fabric`.
 
 Use node version 8, otherwise it will not work.
 
@@ -37,7 +37,7 @@ In `network`:
 ```
 export CHAINCODE_VERSION=$(($CHAINCODE_VERSION+1)) && echo $CHAINCODE_VERSION
 
-docker run -v $PWD/artefacts:/artefacts -v $GOPATH/src/github.com/hyperledger/fabric:/opt/gopath/src/github.com/hyperledger/fabric:ro -v $GOPATH/src/github.com/appliedblockchain/zktrading/go/:/opt/gopath/src/github.com/appliedblockchain/zktrading/go/:ro hyperledger/fabric-tools:1.2.0 peer chaincode package -n k0chaincode -v $CHAINCODE_VERSION -p github.com/appliedblockchain/zktrading/go/chaincode/cash /artefacts/k0chaincode.${CHAINCODE_VERSION}.out
+docker run -v $PWD/artefacts:/artefacts -v $GOPATH/src/github.com/hyperledger/fabric:/opt/gopath/src/github.com/hyperledger/fabric:ro -v $GOPATH/src/github.com/appliedblockchain/k0/go/:/opt/gopath/src/github.com/appliedblockchain/k0/go/:ro hyperledger/fabric-tools:1.2.0 peer chaincode package -n k0chaincode -v $CHAINCODE_VERSION -p github.com/appliedblockchain/k0/go/chaincode/cash /artefacts/k0chaincode.${CHAINCODE_VERSION}.out
 ```
 
 ## Install chaincode
@@ -194,7 +194,7 @@ VERIFIER_ENDPOINT=http://localhost:14400/ CORE_CHAINCODE_LOGLEVEL=debug CORE_PEE
 Finally, in alphaadmin, betaadmin, gammaadmin and bankadmin, run:
 
 ```
-CORE_CHAINCODE_MODE=net peer chaincode install -p github.com/appliedblockchain/zktrading/go/chaincode/cash -n k0chaincode -v 1
+CORE_CHAINCODE_MODE=net peer chaincode install -p github.com/appliedblockchain/k0/go/chaincode/cash -n k0chaincode -v 1
 ```
 
 ### Instantiating and running the chaincode

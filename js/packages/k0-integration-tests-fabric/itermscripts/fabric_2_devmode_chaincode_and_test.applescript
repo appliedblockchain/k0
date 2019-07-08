@@ -5,8 +5,8 @@ tell application "iTerm"
 	create tab with default profile
 	
 	tell current session of current window
-		write text "cd $GOPATH/src/github.com/appliedblockchain/zktrading/js/packages/k0-integration-tests-fabric/devnetwork"
-		write text "cd $GOPATH/src/github.com/appliedblockchain/zktrading/go/chaincode/cash"
+		write text "cd $GOPATH/src/github.com/appliedblockchain/k0/js/packages/k0-integration-tests-fabric/devnetwork"
+		write text "cd $GOPATH/src/github.com/appliedblockchain/k0/go/chaincode/cash"
 		write text "go build"
 		delay 2
 		split horizontally with default profile
@@ -51,12 +51,12 @@ tell application "iTerm"
 	
 	repeat with sessionNumber in {1, 2, 3, 4}
 		tell session sessionNumber of current tab of current window
-			write text "CORE_CHAINCODE_MODE=net peer chaincode install -p github.com/appliedblockchain/zktrading/go/chaincode/cash -n" & chaincodeID & " -v 1"
+			write text "CORE_CHAINCODE_MODE=net peer chaincode install -p github.com/appliedblockchain/k0/go/chaincode/cash -n" & chaincodeID & " -v 1"
 		end tell
 	end repeat
 	
 	tell session 9 of current tab of current window
-		write text "cd $GOPATH/src/github.com/appliedblockchain/zktrading/js/packages/k0-integration-tests-fabric"
+		write text "cd $GOPATH/src/github.com/appliedblockchain/k0/js/packages/k0-integration-tests-fabric"
 		write text "export CHAINCODE_ID=" & chaincodeID
 		write text "export DEV_MODE=true"
 		write text "echo $CHAINCODE_ID"
@@ -69,7 +69,7 @@ end tell
 on change_directory(session_num, dir)
 	tell application "iTerm"
 		tell session session_num of current tab of current window
-			write text "cd $GOPATH/src/github.com/appliedblockchain/zktrading/" & dir
+			write text "cd $GOPATH/src/github.com/appliedblockchain/k0/" & dir
 		end tell
 	end tell
 end change_directory

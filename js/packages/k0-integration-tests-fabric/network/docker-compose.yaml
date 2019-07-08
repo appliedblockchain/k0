@@ -35,7 +35,7 @@ services:
       - ./crypto-config/ordererOrganizations/orderer.org/orderers/orderer.orderer.org/tls:/etc/hyperledger/fabric/tls:ro
 
   verifier:
-    image: appliedblockchain/zktrading-server
+    image: appliedblockchain/k0-server
     volumes:
       - /tmp/k0keys:/tmp/k0keys:ro
     command: 4 /tmp/k0keys/example_pk /tmp/k0keys/commitment_vk /tmp/k0keys/example_pk /tmp/k0keys/addition_vk /tmp/k0keys/example_pk /tmp/k0keys/transfer_vk /tmp/k0keys/example_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk 80

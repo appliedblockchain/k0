@@ -2,9 +2,9 @@ package serverclient
 
 import (
 	"encoding/json"
-	"github.com/appliedblockchain/zktrading/go/data"
-	"github.com/appliedblockchain/zktrading/go/jsonrpc"
-	"github.com/appliedblockchain/zktrading/go/util"
+	"github.com/appliedblockchain/k0/go/data"
+	"github.com/appliedblockchain/k0/go/jsonrpc"
+	"github.com/appliedblockchain/k0/go/util"
 	"math/big"
 )
 

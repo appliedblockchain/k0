@@ -13,24 +13,24 @@ jobs:
       - run:
           name: "Download latest image"
           command: |
-            docker pull appliedblockchain/zktrading || true
+            docker pull appliedblockchain/k0 || true
       - run:
           name: "Build main image"
           command: |
             cd cpp
-            docker build -f docker/zktrading.Dockerfile -t appliedblockchain/zktrading .
+            docker build -f docker/k0.Dockerfile -t appliedblockchain/k0 .
       - run:
           name: "Build app images"
           command: |
             cd cpp
             for IMAGE in setup server mtserver convert-vk
             do
-              docker build -f docker/$IMAGE.Dockerfile -t appliedblockchain/zktrading-$IMAGE .
+              docker build -f docker/$IMAGE.Dockerfile -t appliedblockchain/k0-$IMAGE .
             done
       - run:
           name: "Push images"
           command: |
-            for IMAGE in zktrading zktrading-setup zktrading-server zktrading-mtserver zktrading-convert-vk
+            for IMAGE in k0 k0-setup k0-server k0-mtserver k0-convert-vk
             do
               docker push appliedblockchain/$IMAGE
               docker tag appliedblockchain/$IMAGE appliedblockchain/$IMAGE:$CIRCLE_TAG

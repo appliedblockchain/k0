@@ -6,9 +6,9 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/appliedblockchain/zktrading/go/data"
-	"github.com/appliedblockchain/zktrading/go/serverclient"
-	"github.com/appliedblockchain/zktrading/go/util"
+	"github.com/appliedblockchain/k0/go/data"
+	"github.com/appliedblockchain/k0/go/serverclient"
+	"github.com/appliedblockchain/k0/go/util"
 	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"

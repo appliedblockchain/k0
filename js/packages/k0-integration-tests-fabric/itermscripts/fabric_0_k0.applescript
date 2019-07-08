@@ -34,18 +34,18 @@ tell application "iTerm"
 end tell
 
 on start_server(session_num, tree_height, port)
-	my run_zktrading_command(session_num, "cpp/build/src/server " & tree_height & " /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk " & port)
+	my run_k0_command(session_num, "cpp/build/src/server " & tree_height & " /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk /tmp/k0keys/example_pk /tmp/k0keys/example_vk " & port)
 end start_server
 
 on start_mtserver(session_num, tree_height, port)
-	my run_zktrading_command(session_num, "cpp/build/src/mtserver " & tree_height & " " & port)
+	my run_k0_command(session_num, "cpp/build/src/mtserver " & tree_height & " " & port)
 end start_mtserver
 
-on run_zktrading_command(session_num, cmd)
+on run_k0_command(session_num, cmd)
 	tell application "iTerm"
 		tell session session_num of current tab of current window
-			write text "cd ~/go/src/github.com/appliedblockchain/zktrading"
+			write text "cd ~/go/src/github.com/appliedblockchain/k0"
 			write text cmd
 		end tell
 	end tell
-end run_zktrading_command
+end run_k0_command

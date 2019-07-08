@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/appliedblockchain/zktrading/go/util"
+	"github.com/appliedblockchain/k0/go/util"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
