@@ -1,5 +1,5 @@
 # K0
-K0 is an implementation of Zerocash for smart contract platforms. Currently Ethereum and Hyperledger Fabric are supported. The protocol has been modified slightly to enable an additional use case, namely the use of a predefined private payment in a secondary smart contract. For more information please read our [technical description](https://appliedblockchain.com/k0.pdf).
+K0 is an implementation of [Zerocash](http://zerocash-project.org/) for smart contract platforms. Currently Ethereum and Hyperledger Fabric are supported. The protocol has been modified slightly to enable an additional use case, namely the use of a predefined private payment in a secondary smart contract. For more information please read our [technical description](https://appliedblockchain.com/k0.pdf).
 
 __WARNING! This is alpha-stage software. It has not been security-audited. DO NOT USE IN PRODUCTION!__
 
