@@ -3,7 +3,7 @@ node {
         checkout scm
     }
     stage('Get Git submodules') {
-        sh 'git subumodule update --init --recursive'
+        sh 'git submodule update --init --recursive'
     }
     stage('Build main image') {
         sh 'cd cpp && docker build -f docker/k0.Dockerfile -t appliedblockchain/k0 .'
