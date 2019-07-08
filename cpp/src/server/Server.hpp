@@ -10,7 +10,7 @@ using namespace libsnark;
 
 namespace k0 {
     template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
-    class Server : public ZKTradeStubServer {
+    class Server : public K0StubServer {
         r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp> commitment_pk;
         r1cs_ppzksnark_verification_key<default_r1cs_ppzksnark_pp> commitment_vk;
         r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp> addition_pk;

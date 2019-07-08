@@ -30,7 +30,7 @@ k0::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::Server(
     size_t height,
     AbstractServerConnector &connector,
     serverVersion_t type)
-    : ZKTradeStubServer(connector, type),
+    : K0StubServer(connector, type),
       tree_height{height},
       mt{height}
 {
