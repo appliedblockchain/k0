@@ -30,4 +30,7 @@ npm i
 npm test
 ```
 
-For instructions on how to build and run the C++ components please read the README files in the subdirectories [cpp](cpp), [js/packages/k0-integration-tests-eth](js/packages/k0-integration-tests-eth),  [js/packages/k0-integration-tests-fabric](js/packages/k0-integration-tests-fabric).
+For instructions on how to build and run the C++ components please read the README files in the following subdirectories:
+- [cpp](cpp)
+- [js/packages/k0-integration-tests-eth](js/packages/k0-integration-tests-eth)
+- [js/packages/k0-integration-tests-fabric](js/packages/k0-integration-tests-fabric).

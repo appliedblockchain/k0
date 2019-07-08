@@ -1,4 +1,4 @@
-# Fabric integration tests
+# K0 Fabric integration tests
 
 The project needs to be checked out in the GOPATH (`$GOPATH/src/github.com/appliedblockchain/zktrading`). You also need to have the Hyperledger Fabric source code (version 1.2.0) at `$GOPATH/src/github.com/hyperledger/fabric`.
 

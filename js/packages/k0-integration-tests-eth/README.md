@@ -1,4 +1,4 @@
-## Ethereum integration tests
+# K0 Ethereum integration tests
 
 ## ZKP setup
 ```
