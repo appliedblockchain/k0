@@ -2,19 +2,15 @@
 
 ## Set up the project dependencies
 
-Linux:
+Linux (Ubuntu):
 
 ```
 sudo apt-get install -y \
 build-essential cmake git libgmp3-dev libprocps-dev python-markdown \
 libboost-all-dev libssl-dev libjsonrpccpp-dev libjsonrpccpp-tools
-
-sudo ln -s /usr/include/jsoncpp/json/ /usr/include/json
-
-git submodule update --init --recursive
 ```
 
-Mac:
+Mac (using Homebrew):
 
 ```
 brew install https://raw.githubusercontent.com/ethereum/homebrew-ethereum/e05aa38c0f26874ec36409a83d1dbf83424552a4/solidity.rb # install solc 0.5.3
@@ -37,6 +33,11 @@ cd build
 cmake ..
 make
 make install
+```
+
+## Load code for Git submodules
+```
+git submodule update --init --recursive
 ```
 
 ## Build
@@ -79,4 +80,3 @@ BASE_DIR=\$(pwd) build/test/letest
 BASE_DIR=\$(pwd) build/test/letest --gtest_filter=EXPRESSION\*
 
 ```
-
