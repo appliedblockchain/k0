@@ -12,7 +12,7 @@
 using namespace std;
 using namespace libsnark;
 
-namespace zktrade {
+namespace k0 {
     template<typename FieldT, typename HashT>
     class prf_gadget : gadget<FieldT> {
     private:

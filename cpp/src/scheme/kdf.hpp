@@ -4,7 +4,7 @@
 #include <libff/common/utils.hpp>
 using namespace libff;
 
-namespace zktrade {
+namespace k0 {
 
 void kdf(unsigned char key[32], const unsigned char dhsecret[32],
          const unsigned char epk[32], const unsigned char pk_enc[32]);

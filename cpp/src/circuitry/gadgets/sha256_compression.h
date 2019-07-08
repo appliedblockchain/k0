@@ -5,7 +5,7 @@
 
 using namespace libsnark;
 
-namespace zktrade {
+namespace k0 {
 
     template<typename FieldT>
     class sha256_compression_gadget : public gadget<FieldT> {

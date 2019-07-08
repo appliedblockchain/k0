@@ -4,7 +4,7 @@
 #include "circuitry/gadgets/ExampleGadget.hpp"
 #include <memory>
 
-namespace zktrade {
+namespace k0 {
 
 template <typename FieldT> class ExampleCircuit {
   public:
@@ -15,7 +15,7 @@ template <typename FieldT> class ExampleCircuit {
     ExampleCircuit();
 };
 
-} // namespace zktrade
+} // namespace k0
 
 #include "ExampleCircuit.tcc"
 

@@ -5,7 +5,7 @@
 #include "scheme/comms.hpp"
 #include "scheme/prfs.h"
 
-using namespace zktrade;
+using namespace k0;
 
 typedef Fr<default_r1cs_ppzksnark_pp> FieldT;
 

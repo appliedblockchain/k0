@@ -3,7 +3,7 @@
 
 #include <libff/common/utils.hpp>
 
-namespace zktrade {
+namespace k0 {
     libff::bit_vector sha256(libff::bit_vector &input);
 }
 

@@ -1,5 +1,5 @@
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
-zktrade::input_note_gadget<FieldT, CommitmentHashT, MerkleTreeHashT>::input_note_gadget(
+k0::input_note_gadget<FieldT, CommitmentHashT, MerkleTreeHashT>::input_note_gadget(
         const size_t &tree_height,
         protoboard<FieldT> &pb, pb_variable<FieldT> &ZERO,
         digest_variable<FieldT> &rt_bits, pb_variable_array<FieldT> &v_bits,
@@ -25,7 +25,7 @@ zktrade::input_note_gadget<FieldT, CommitmentHashT, MerkleTreeHashT>::input_note
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 void
-zktrade::input_note_gadget<FieldT, CommitmentHashT, MerkleTreeHashT>::generate_r1cs_constraints() {
+k0::input_note_gadget<FieldT, CommitmentHashT, MerkleTreeHashT>::generate_r1cs_constraints() {
     addr_gadget.generate_r1cs_constraints();
     commitment_gadget.generate_r1cs_constraints();
     mt_path_gadget.generate_r1cs_constraints();
@@ -34,7 +34,7 @@ zktrade::input_note_gadget<FieldT, CommitmentHashT, MerkleTreeHashT>::generate_r
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 void
-zktrade::input_note_gadget<FieldT, CommitmentHashT, MerkleTreeHashT>::generate_r1cs_witness() {
+k0::input_note_gadget<FieldT, CommitmentHashT, MerkleTreeHashT>::generate_r1cs_witness() {
     addr_gadget.generate_r1cs_witness();
     commitment_gadget.generate_r1cs_witness();
     mt_path_gadget.generate_r1cs_witness();

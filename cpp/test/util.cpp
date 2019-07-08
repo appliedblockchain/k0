@@ -4,7 +4,7 @@
 
 using namespace std;
 using namespace libff;
-using namespace zktrade;
+using namespace k0;
 
 typedef Fr<default_r1cs_ppzksnark_pp> FieldT;
 

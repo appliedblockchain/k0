@@ -6,7 +6,7 @@
 #include "circuitry/gadgets/comms.hpp"
 #include "circuitry/gadgets/MTLeafAddition.hpp"
 
-namespace zktrade {
+namespace k0 {
     template<typename FieldT, typename HashT>
     struct CommitmentCircuit {
         protoboard<FieldT> *pb;

@@ -7,7 +7,7 @@
 #include "circuitry/gadgets/comms.hpp"
 #include "data.hpp"
 
-namespace zktrade {
+namespace k0 {
     template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
     struct TransferCircuit {
         protoboard<FieldT> *pb;

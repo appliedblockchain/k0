@@ -1,9 +1,9 @@
-add_library(zktrade "")
+add_library(k0 "")
 
 include_directories(.)
 
 target_sources(
-        zktrade
+        k0
 
         PRIVATE
         hash/sha256.cpp
@@ -35,7 +35,7 @@ target_sources(
 )
 
 target_link_libraries(
-        zktrade
+        k0
 
         sodium
         gmp
@@ -46,7 +46,7 @@ target_link_libraries(
 
 if (NOT "${USE_INSTALLED_LIBSNARK}")
 target_include_directories(
-        zktrade
+        k0
 
         PUBLIC
         .
@@ -66,7 +66,7 @@ target_link_libraries(
         convert_vk
 
         snark
-        zktrade
+        k0
 )
 
 add_executable(
@@ -79,7 +79,7 @@ target_link_libraries(
         setup
 
         snark
-        zktrade
+        k0
 )
 
 add_executable(
@@ -92,7 +92,7 @@ target_link_libraries(
         server
 
         snark
-        zktrade
+        k0
         jsoncpp
         microhttpd
         jsonrpccpp-common
@@ -108,7 +108,7 @@ target_link_libraries(
         mtserver
 
         snark
-        zktrade
+        k0
         jsoncpp
         microhttpd
         jsonrpccpp-common

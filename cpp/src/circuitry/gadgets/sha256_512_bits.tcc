@@ -17,7 +17,7 @@ from_bits(std::vector<bool> bits, pb_variable<FieldT> &ZERO) {
 }
 
 template<typename FieldT>
-zktrade::sha256_512_bits_gadget<FieldT>::sha256_512_bits_gadget(
+k0::sha256_512_bits_gadget<FieldT>::sha256_512_bits_gadget(
         protoboard<FieldT> &pb, pb_variable<FieldT> &ZERO,
         block_variable<FieldT> &block1, digest_variable<FieldT> &result,
         const std::string &annotation_prefix) :
@@ -119,13 +119,13 @@ zktrade::sha256_512_bits_gadget<FieldT>::sha256_512_bits_gadget(
 
 
 template<typename FieldT>
-void zktrade::sha256_512_bits_gadget<FieldT>::generate_r1cs_constraints() {
+void k0::sha256_512_bits_gadget<FieldT>::generate_r1cs_constraints() {
     hasher1->generate_r1cs_constraints();
     hasher2->generate_r1cs_constraints();
 }
 
 template<typename FieldT>
-void zktrade::sha256_512_bits_gadget<FieldT>::generate_r1cs_witness() {
+void k0::sha256_512_bits_gadget<FieldT>::generate_r1cs_witness() {
     hasher1->generate_r1cs_witness();
     hasher2->generate_r1cs_witness();
 }

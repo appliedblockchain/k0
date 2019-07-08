@@ -1,6 +1,6 @@
 #pragma once
 
-namespace zktrade {
+namespace k0 {
 
 template <typename FieldT> class ExampleGadget : public gadget<FieldT> {
   private:
@@ -19,6 +19,6 @@ template <typename FieldT> class ExampleGadget : public gadget<FieldT> {
     void generate_r1cs_witness();
 };
 
-} // namespace zktrade
+} // namespace k0
 
 #include "ExampleGadget.tcc"

@@ -10,7 +10,7 @@
 
 using namespace libff;
 using namespace libsnark;
-using namespace zktrade;
+using namespace k0;
 
 TEST(MerkleTreeAddition, Test) {
 

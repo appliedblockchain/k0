@@ -4,7 +4,7 @@
 #include "scheme/kdf.hpp"
 #include "util.h"
 
-int zktrade::encrypt_note(unsigned char epk[32],
+int k0::encrypt_note(unsigned char epk[32],
                           unsigned char ciphertext[104],
                           const unsigned char plaintext[88],
                           const unsigned char pk_enc[32])
@@ -30,7 +30,7 @@ int zktrade::encrypt_note(unsigned char epk[32],
         ciphertext, NULL, plaintext, 88, NULL, 0, NULL, cipher_nonce, key);
 }
 
-int zktrade::decrypt_note(unsigned char plaintext[88],
+int k0::decrypt_note(unsigned char plaintext[88],
                           const unsigned char epk[32],
                           const unsigned char ciphertext[104],
                           const unsigned char sk_enc[32],

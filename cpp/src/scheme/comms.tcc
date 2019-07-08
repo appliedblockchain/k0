@@ -2,10 +2,10 @@
 #include "util.h"
 
 using namespace libff;
-using namespace zktrade;
+using namespace k0;
 
 template<typename HashT>
-bit_vector zktrade::comm_r(bit_vector a_pk, bit_vector rho, bit_vector r) {
+bit_vector k0::comm_r(bit_vector a_pk, bit_vector rho, bit_vector r) {
     if (a_pk.size() != 256) {
         throw invalid_argument("Bit vector a_pk is not of length 256");
     }
@@ -21,7 +21,7 @@ bit_vector zktrade::comm_r(bit_vector a_pk, bit_vector rho, bit_vector r) {
 }
 
 template<typename HashT>
-bit_vector zktrade::comm_s(bit_vector k, bit_vector v) {
+bit_vector k0::comm_s(bit_vector k, bit_vector v) {
     if (k.size() != 256) {
         throw invalid_argument("Bit vector k is not of length 256");
     }

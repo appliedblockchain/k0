@@ -201,18 +201,18 @@ void MerkleTree<HashT>::print() {
     uint num_elems = exp2(depth - level - 1);
     for (uint pos = 0; pos < num_elems; pos++) {
       if (node_levels[level].size() - 1 >= pos) {
-        zktrade::printnode(node_levels[level][pos]);
+        k0::printnode(node_levels[level][pos]);
       } else {
-        zktrade::printnode(empty_tree_roots[level]);
+        k0::printnode(empty_tree_roots[level]);
       }
     }
     cout << endl;
   }
   for (uint pos = 0; pos < max_size; pos++) {
     if (leaves->size() - 1 >= pos) {
-      zktrade::printnode(leaves->at(pos));
+      k0::printnode(leaves->at(pos));
     } else {
-      zktrade::printnode(all_zeros);
+      k0::printnode(all_zeros);
     }
   }
   cout << endl;

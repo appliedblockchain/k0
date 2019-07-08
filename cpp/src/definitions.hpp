@@ -3,12 +3,12 @@
 
 #include <libsnark/common/default_types/r1cs_ppzksnark_pp.hpp>
 
-namespace zktrade {}
+namespace k0 {}
 
 using namespace std;
 using namespace libff;
 using namespace libsnark;
-using namespace zktrade;
+using namespace k0;
 
 typedef Fr<default_r1cs_ppzksnark_pp> FieldT;
 

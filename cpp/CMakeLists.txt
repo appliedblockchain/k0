@@ -4,7 +4,7 @@ cmake_policy(SET CMP0076 NEW)
 
 include_directories(include /usr/local/include ~/software/libsnark/usr/local/include)
 
-project(zktrade)
+project(k0)
 
 set(
         CURVE

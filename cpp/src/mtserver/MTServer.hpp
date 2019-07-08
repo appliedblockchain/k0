@@ -8,7 +8,7 @@
 using namespace jsonrpc;
 using namespace libsnark;
 
-namespace zktrade {
+namespace k0 {
 
     template<typename FieldT, typename MerkleTreeHashT>
     class MTServer : public MTStubServer {

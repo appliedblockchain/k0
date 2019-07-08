@@ -4,5 +4,5 @@
 using namespace std;
 
 TEST(Foo, Bar) {
-    zktrade::foo(42);
+    k0::foo(42);
 };

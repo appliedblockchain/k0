@@ -21,7 +21,7 @@ target_link_libraries(
 
         ff
         snark
-        zktrade
+        k0
         jsoncpp
         sodium
         ${GTEST_LDFLAGS}

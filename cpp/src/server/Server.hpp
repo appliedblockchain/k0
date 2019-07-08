@@ -1,6 +1,6 @@
 #pragma once
 
-#include "zktradestubserver.h"
+#include "k0stubserver.h"
 #include <libsnark/common/default_types/r1cs_ppzksnark_pp.hpp>
 #include <libsnark/zk_proof_systems/ppzksnark/r1cs_ppzksnark/r1cs_ppzksnark.hpp>
 #include "MerkleTree.hpp"
@@ -8,7 +8,7 @@
 using namespace jsonrpc;
 using namespace libsnark;
 
-namespace zktrade {
+namespace k0 {
     template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
     class Server : public ZKTradeStubServer {
         r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp> commitment_pk;

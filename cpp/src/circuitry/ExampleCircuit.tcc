@@ -1,7 +1,7 @@
 #include "ExampleCircuit.hpp"
 
 template<typename FieldT>
-zktrade::ExampleCircuit<FieldT>::ExampleCircuit()
+k0::ExampleCircuit<FieldT>::ExampleCircuit()
 {
     out.allocate(pb);
     x.allocate(pb);

@@ -4,7 +4,7 @@
 #include <libff/common/utils.hpp>
 using namespace libff;
 
-namespace zktrade {
+namespace k0 {
 
 int encrypt_note(unsigned char epk[32],
                  unsigned char ciphertext[104],

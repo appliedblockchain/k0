@@ -8,7 +8,7 @@
 
 using namespace libsnark;
 
-namespace zktrade {
+namespace k0 {
 
 template<typename FieldT>
 class dummyhash_knapsack_wrapper_gadget : public gadget<FieldT> {
@@ -74,7 +74,7 @@ public:
     };
 
 
-} // zktrade
+} // k0
 
 #include "dummyhash_gadget.tcc"
 

@@ -6,7 +6,7 @@
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 TransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT>
-zktrade::make_transfer_circuit(size_t tree_height) {
+k0::make_transfer_circuit(size_t tree_height) {
     protoboard<FieldT> *pb = new protoboard<FieldT>();
 
     pb_variable_array<FieldT> *rt_packed = new pb_variable_array<FieldT>();
@@ -323,7 +323,7 @@ zktrade::make_transfer_circuit(size_t tree_height) {
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 void
-zktrade::print(TransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> &c) {
+k0::print(TransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> &c) {
     cout << endl;
     cout << endl;
     cout
@@ -415,7 +415,7 @@ zktrade::print(TransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> &c) {
 }
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
-void zktrade::populate(
+void k0::populate(
         TransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> &c,
         size_t tree_height,
         bit_vector &merkle_tree_root,
@@ -464,7 +464,7 @@ void zktrade::populate(
 }
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
-void zktrade::generate_witness(
+void k0::generate_witness(
         TransferCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> &c) {
     c.rt_packer->generate_r1cs_witness_from_bits();
     c.in_0_note_gadget->generate_r1cs_witness();

@@ -5,7 +5,7 @@
 #include "circuitry/gadgets/comms.hpp"
 #include "circuitry/gadgets/prfs.hpp"
 
-namespace zktrade {
+namespace k0 {
 
     template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
     class input_note_gadget : public gadget<FieldT> {

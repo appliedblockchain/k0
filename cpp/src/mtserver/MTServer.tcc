@@ -17,7 +17,7 @@
 #include "util.h"
 
 template <typename FieldT, typename MerkleTreeHashT>
-zktrade::MTServer<FieldT, MerkleTreeHashT>::MTServer(size_t height,
+k0::MTServer<FieldT, MerkleTreeHashT>::MTServer(size_t height,
                                                      AbstractServerConnector &connector,
                                                      serverVersion_t type)
     : MTStubServer(connector, type),
@@ -25,20 +25,20 @@ zktrade::MTServer<FieldT, MerkleTreeHashT>::MTServer(size_t height,
       mt{height} {}
 
 template <typename FieldT, typename MerkleTreeHashT>
-string zktrade::MTServer<FieldT, MerkleTreeHashT>::reset()
+string k0::MTServer<FieldT, MerkleTreeHashT>::reset()
 {
   mt = MerkleTree<MerkleTreeHashT>{tree_height};
   return bits2hex(mt.root());
 }
 
 template <typename FieldT, typename MerkleTreeHashT>
-string zktrade::MTServer<FieldT, MerkleTreeHashT>::root()
+string k0::MTServer<FieldT, MerkleTreeHashT>::root()
 {
   return bits2hex(mt.root());
 }
 
 template <typename FieldT, typename MerkleTreeHashT>
-Json::Value zktrade::MTServer<FieldT, MerkleTreeHashT>::add(
+Json::Value k0::MTServer<FieldT, MerkleTreeHashT>::add(
     const string &leaf_hex)
 {
   bit_vector leaf_bv = hex2bits(leaf_hex);
@@ -54,7 +54,7 @@ Json::Value zktrade::MTServer<FieldT, MerkleTreeHashT>::add(
 }
 
 template <typename FieldT, typename MerkleTreeHashT>
-string zktrade::MTServer<FieldT, MerkleTreeHashT>::element(
+string k0::MTServer<FieldT, MerkleTreeHashT>::element(
     int address)
 {
   if (mt.num_elements() == 0 || address > (mt.num_elements() - 1))
@@ -65,7 +65,7 @@ string zktrade::MTServer<FieldT, MerkleTreeHashT>::element(
 }
 
 template <typename FieldT, typename MerkleTreeHashT>
-Json::Value zktrade::MTServer<FieldT, MerkleTreeHashT>::path(
+Json::Value k0::MTServer<FieldT, MerkleTreeHashT>::path(
     const std::string &address_dec)
 {
     auto address = stoul(address_dec);
@@ -80,7 +80,7 @@ Json::Value zktrade::MTServer<FieldT, MerkleTreeHashT>::path(
 }
 
 template <typename FieldT, typename MerkleTreeHashT>
-Json::Value zktrade::MTServer<FieldT, MerkleTreeHashT>::simulateAddition(
+Json::Value k0::MTServer<FieldT, MerkleTreeHashT>::simulateAddition(
     const std::string &cm_str)
 {
   bit_vector cm_bits = hex2bits(cm_str);
@@ -101,7 +101,7 @@ Json::Value zktrade::MTServer<FieldT, MerkleTreeHashT>::simulateAddition(
 
 template <typename FieldT, typename MerkleTreeHashT>
 Json::Value
-zktrade::MTServer<FieldT, MerkleTreeHashT>::status()
+k0::MTServer<FieldT, MerkleTreeHashT>::status()
 {
   Json::Value result;
   result["ready"] = true;

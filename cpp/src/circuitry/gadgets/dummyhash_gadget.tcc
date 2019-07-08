@@ -4,7 +4,7 @@
 using namespace std;
 
 template<typename FieldT>
-zktrade::dummyhash_knapsack_wrapper_gadget<FieldT>::dummyhash_knapsack_wrapper_gadget(
+k0::dummyhash_knapsack_wrapper_gadget<FieldT>::dummyhash_knapsack_wrapper_gadget(
         protoboard<FieldT> &pb,
         const block_variable<FieldT> &block,
         const digest_variable<FieldT> &output,
@@ -20,7 +20,7 @@ zktrade::dummyhash_knapsack_wrapper_gadget<FieldT>::dummyhash_knapsack_wrapper_g
 
 template<typename FieldT>
 void
-zktrade::dummyhash_knapsack_wrapper_gadget<FieldT>::generate_r1cs_constraints() {
+k0::dummyhash_knapsack_wrapper_gadget<FieldT>::generate_r1cs_constraints() {
     knapsack_crh.generate_r1cs_constraints();
     for (size_t i = 0; i < 254; i++) {
         pb->add_r1cs_constraint(
@@ -31,7 +31,7 @@ zktrade::dummyhash_knapsack_wrapper_gadget<FieldT>::generate_r1cs_constraints() 
 
 template<typename FieldT>
 void
-zktrade::dummyhash_knapsack_wrapper_gadget<FieldT>::generate_r1cs_witness() {
+k0::dummyhash_knapsack_wrapper_gadget<FieldT>::generate_r1cs_witness() {
     knapsack_crh.generate_r1cs_witness();
     for (size_t i = 0; i < 254; i++) {
         pb->val(output->bits[i]) = pb->val(knapsack_output.bits[i]);
@@ -41,7 +41,7 @@ zktrade::dummyhash_knapsack_wrapper_gadget<FieldT>::generate_r1cs_witness() {
 
 
 template<typename FieldT>
-zktrade::dummyhash_two_to_one_hash_gadget<FieldT>::dummyhash_two_to_one_hash_gadget(
+k0::dummyhash_two_to_one_hash_gadget<FieldT>::dummyhash_two_to_one_hash_gadget(
         protoboard<FieldT> &pb,
         const digest_variable<FieldT> &left,
         const digest_variable<FieldT> &right,
@@ -59,7 +59,7 @@ zktrade::dummyhash_two_to_one_hash_gadget<FieldT>::dummyhash_two_to_one_hash_gad
 }
 
 template<typename FieldT>
-zktrade::dummyhash_two_to_one_hash_gadget<FieldT>::dummyhash_two_to_one_hash_gadget(
+k0::dummyhash_two_to_one_hash_gadget<FieldT>::dummyhash_two_to_one_hash_gadget(
         protoboard<FieldT> &pb,
         const size_t block_length,
         const block_variable<FieldT> &input_block,
@@ -74,7 +74,7 @@ zktrade::dummyhash_two_to_one_hash_gadget<FieldT>::dummyhash_two_to_one_hash_gad
 
 template<typename FieldT>
 void
-zktrade::dummyhash_two_to_one_hash_gadget<FieldT>::generate_r1cs_constraints(
+k0::dummyhash_two_to_one_hash_gadget<FieldT>::generate_r1cs_constraints(
         const bool ensure_output_bitness) {
     libff::UNUSED(ensure_output_bitness);
     f->generate_r1cs_constraints();
@@ -82,22 +82,22 @@ zktrade::dummyhash_two_to_one_hash_gadget<FieldT>::generate_r1cs_constraints(
 
 template<typename FieldT>
 void
-zktrade::dummyhash_two_to_one_hash_gadget<FieldT>::generate_r1cs_witness() {
+k0::dummyhash_two_to_one_hash_gadget<FieldT>::generate_r1cs_witness() {
     f->generate_r1cs_witness();
 }
 
 template<typename FieldT>
-size_t zktrade::dummyhash_two_to_one_hash_gadget<FieldT>::get_block_len() {
+size_t k0::dummyhash_two_to_one_hash_gadget<FieldT>::get_block_len() {
     return 512;
 }
 
 template<typename FieldT>
-size_t zktrade::dummyhash_two_to_one_hash_gadget<FieldT>::get_digest_len() {
+size_t k0::dummyhash_two_to_one_hash_gadget<FieldT>::get_digest_len() {
     return 256;
 }
 
 template<typename FieldT>
-libff::bit_vector zktrade::dummyhash_two_to_one_hash_gadget<FieldT>::get_hash(
+libff::bit_vector k0::dummyhash_two_to_one_hash_gadget<FieldT>::get_hash(
         const libff::bit_vector &input) {
     protoboard<FieldT> pb;
 
@@ -114,14 +114,14 @@ libff::bit_vector zktrade::dummyhash_two_to_one_hash_gadget<FieldT>::get_hash(
 }
 
 template<typename FieldT>
-size_t zktrade::dummyhash_two_to_one_hash_gadget<FieldT>::expected_constraints(
+size_t k0::dummyhash_two_to_one_hash_gadget<FieldT>::expected_constraints(
         const bool ensure_output_bitness) {
     libff::UNUSED(ensure_output_bitness);
     return 27280; /* hardcoded for now */
 }
 
 template<typename FieldT>
-zktrade::dummyhash_compression_gadget<FieldT>::dummyhash_compression_gadget(
+k0::dummyhash_compression_gadget<FieldT>::dummyhash_compression_gadget(
         protoboard<FieldT> &pb,
         std::vector<pb_variable_array<FieldT>> inputs,
         digest_variable<FieldT> &result,
@@ -140,17 +140,17 @@ zktrade::dummyhash_compression_gadget<FieldT>::dummyhash_compression_gadget(
 
 template<typename FieldT>
 void
-zktrade::dummyhash_compression_gadget<FieldT>::generate_r1cs_constraints() {
+k0::dummyhash_compression_gadget<FieldT>::generate_r1cs_constraints() {
     f->generate_r1cs_constraints();
 }
 
 template<typename FieldT>
-void zktrade::dummyhash_compression_gadget<FieldT>::generate_r1cs_witness() {
+void k0::dummyhash_compression_gadget<FieldT>::generate_r1cs_witness() {
     f->generate_r1cs_witness();
 }
 
 template<typename FieldT>
-libff::bit_vector zktrade::dummyhash_compression_gadget<FieldT>::get_hash(
+libff::bit_vector k0::dummyhash_compression_gadget<FieldT>::get_hash(
         const libff::bit_vector &input) {
     protoboard<FieldT> pb;
 

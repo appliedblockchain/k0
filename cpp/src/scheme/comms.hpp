@@ -5,7 +5,7 @@
 
 using namespace libff;
 
-namespace zktrade {
+namespace k0 {
     template<typename HashT>
     bit_vector comm_r(bit_vector a_pk, bit_vector rho, bit_vector r);
     template<typename HashT>

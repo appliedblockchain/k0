@@ -6,7 +6,7 @@
 using namespace libff;
 using namespace libsnark;
 
-namespace zktrade {
+namespace k0 {
 
     template<typename FieldT>
     bit_vector libsnark_hash(bit_vector input) {

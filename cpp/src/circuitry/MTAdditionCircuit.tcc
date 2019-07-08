@@ -6,8 +6,8 @@ using namespace libff;
 using namespace libsnark;
 
 template<typename FieldT, typename MerkleTreeHashT>
-zktrade::MTAdditionCircuit<FieldT, MerkleTreeHashT>
-zktrade::make_mt_addition_circuit(size_t tree_height) {
+k0::MTAdditionCircuit<FieldT, MerkleTreeHashT>
+k0::make_mt_addition_circuit(size_t tree_height) {
 
     auto pb = new protoboard<FieldT>();
 

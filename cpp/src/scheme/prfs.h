@@ -4,7 +4,7 @@
 #include <libff/common/utils.hpp>
 using namespace libff;
 
-namespace zktrade {
+namespace k0 {
     // TODO All these deviate a bit from Zerocash/ZCash. Verify if ok
     template<typename HashT>
     bit_vector prf_addr_a_pk(bit_vector a_sk);

@@ -8,7 +8,7 @@ using namespace libff;
 using namespace libsnark;
 using namespace std;
 
-namespace zktrade {
+namespace k0 {
     bit_vector byte_to_bits(unsigned char b);
 
     unsigned char bits_to_byte(bit_vector bv);

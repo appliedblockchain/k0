@@ -2,7 +2,7 @@
 #define K0_GADGETS_SHA256_COMPRESSION_TCC
 
 template<typename FieldT>
-zktrade::sha256_compression_gadget<FieldT>::sha256_compression_gadget(
+k0::sha256_compression_gadget<FieldT>::sha256_compression_gadget(
         protoboard<FieldT> &pb,
         std::vector<pb_variable_array<FieldT>> inputs,
         digest_variable<FieldT> &result,
@@ -22,17 +22,17 @@ zktrade::sha256_compression_gadget<FieldT>::sha256_compression_gadget(
 
 template<typename FieldT>
 void
-zktrade::sha256_compression_gadget<FieldT>::generate_r1cs_constraints() {
+k0::sha256_compression_gadget<FieldT>::generate_r1cs_constraints() {
     f->generate_r1cs_constraints();
 }
 
 template<typename FieldT>
-void zktrade::sha256_compression_gadget<FieldT>::generate_r1cs_witness() {
+void k0::sha256_compression_gadget<FieldT>::generate_r1cs_witness() {
     f->generate_r1cs_witness();
 }
 
 template<typename FieldT>
-libff::bit_vector zktrade::sha256_compression_gadget<FieldT>::get_hash(const libff::bit_vector &input) {
+libff::bit_vector k0::sha256_compression_gadget<FieldT>::get_hash(const libff::bit_vector &input) {
     protoboard<FieldT> pb;
 
     pb_variable_array<FieldT> input_va;

@@ -9,7 +9,7 @@
 using namespace libff;
 using namespace libsnark;
 
-namespace zktrade {
+namespace k0 {
     template<typename FieldT, typename MerkleTreeHashT>
     struct MTAdditionCircuit {
         protoboard<FieldT> *pb;

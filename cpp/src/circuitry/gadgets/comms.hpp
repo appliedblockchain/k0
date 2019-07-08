@@ -5,9 +5,9 @@
 
 using namespace libsnark;
 using namespace std;
-using namespace zktrade;
+using namespace k0;
 
-namespace zktrade {
+namespace k0 {
 
     template<typename FieldT>
     pb_variable_array<FieldT> repeat(pb_variable<FieldT> v, size_t len) {

@@ -4,7 +4,7 @@
 
 // Adapded from ZCash
 
-void zktrade::kdf(unsigned char key[32], const unsigned char dhsecret[32],
+void k0::kdf(unsigned char key[32], const unsigned char dhsecret[32],
                   const unsigned char epk[32], const unsigned char pk_enc[32]) {
 
     unsigned char block[96] = {};

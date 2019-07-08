@@ -10,7 +10,7 @@
 #include "scheme/prfs.h"
 #include "util.h"
 
-using namespace zktrade;
+using namespace k0;
 using namespace libsnark;
 
 typedef Fr<default_r1cs_ppzksnark_pp> FieldT;

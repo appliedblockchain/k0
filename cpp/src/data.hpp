@@ -4,7 +4,7 @@
 using namespace std;
 using namespace libff;
 
-namespace zktrade {
+namespace k0 {
     struct input_note {
         uint64_t address;
         bit_vector a_sk;

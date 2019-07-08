@@ -12,7 +12,7 @@
 using namespace std;
 using namespace libff;
 using namespace libsnark;
-using namespace zktrade;
+using namespace k0;
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 struct WithdrawalCircuit {

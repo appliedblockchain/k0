@@ -1,4 +1,4 @@
-namespace zktrade {
+namespace k0 {
 
 template <typename FieldT>
 ExampleGadget<FieldT>::ExampleGadget(protoboard<FieldT> &pb,
@@ -30,4 +30,4 @@ template <typename FieldT> void ExampleGadget<FieldT>::generate_r1cs_witness() {
     this->pb.val(out) = this->pb.val(sym_2) + 5;
 }
 
-} // namespace zktrade
+} // namespace k0

@@ -4,7 +4,7 @@
 #include <libff/common/utils.hpp>
 using namespace libff;
 
-namespace zktrade {
+namespace k0 {
 
 // Copied from Zcash
 // https://github.com/zcash/zcash/blob/v1.1.2/src/zcash/NoteEncryption.cpp
@@ -14,6 +14,6 @@ void ka_derive_public(unsigned char pk[32], const unsigned char sk_enc[32]);
 void ka_agree(unsigned char dhsecret[32], const unsigned char priv[32],
               const unsigned char pub[32]);
 
-} // namespace zktrade
+} // namespace k0
 
 #endif // K0_SCHEME_KA_HPP
