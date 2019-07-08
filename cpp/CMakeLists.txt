@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 2.8)
 
 cmake_policy(SET CMP0076 NEW)
 
-include_directories(include /usr/local/include ~/software/libsnark/usr/local/include)
-
 project(k0)
 
 set(
@@ -40,13 +38,19 @@ set(
 option(
         MULTICORE
         "Enable parallelized execution, using OpenMP"
-        ON
+        OFF
+)
+
+option(
+  WITH_SUPERCOP
+  "Support for Ed25519 signatures required by ADSNARK"
+  OFF
 )
 
 option(
         WITH_PROCPS
         "Use procps for memory profiling"
-        ON
+        OFF
 )
 
 option(
@@ -54,20 +58,16 @@ option(
         "Print internal messages"
         OFF
 )
-option(
-  MULTICORE
-  "Enable parallelized execution, using OpenMP"
-  OFF
-)
+
 option(
   BINARY_OUTPUT
   "In serialization, output raw binary data (instead of decimal), which is smaller and faster."
-  ON
+  OFF
 )
 option(
   MONTGOMERY_OUTPUT
   "Serialize Fp elements as their Montgomery representations (faster but not human-readable)"
-  ON
+  OFF
 )
 option(
   USE_PT_COMPRESSION
