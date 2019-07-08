@@ -22,7 +22,7 @@ do
 done
 ```
 
-Then, spin up the Docker containers:
+Then, spin up the Docker containers. In the directory `js/packages/k0-integration-tests-eth`:
 
 ```
 docker-compose up
