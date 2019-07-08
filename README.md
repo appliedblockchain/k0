@@ -10,7 +10,7 @@ A quickstart guide to run some integration tests is provided [below](#quickstart
 
 ## Quickstart
 
-The easiest way to see the code in action is to run the Ethereum integration using the provided Docker Compose file for the server components. However, first we need to run the "trusted setup", also using Docker (this might take a couple of minutes):
+The easiest way to see the code in action is to run the Ethereum integration tests using the provided Docker Compose file for the server components. However, first we need to run the "trusted setup", also using Docker (this might take a couple of minutes):
 
 ```
 rm -rf /tmp/k0keys
