@@ -83,7 +83,13 @@ option(
 option(
         PERFORMANCE
         "Enable link-time and aggressive optimizations"
-        ON
+        OFF
+)
+
+option(
+  USE_ASM
+  "Use architecture-specific optimized assembly code"
+  ON
 )
 
 if (CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -153,6 +159,10 @@ if("${PERFORMANCE}")
     CMAKE_EXE_LINKER_FLAGS
     "${CMAKE_EXE_LINKER_FLAGS} -flto"
   )
+endif()
+
+if("${USE_ASM}")
+  add_definitions(-DUSE_ASM)
 endif()
 
 find_package(PkgConfig)
