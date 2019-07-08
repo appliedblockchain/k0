@@ -3,7 +3,7 @@ node {
         checkout scm
     }
     stage('Build main image') {
-        sh 'cd cpp && docker build -f docker/k0.Dockerfile -t k0 .'
+        sh 'cd cpp && docker build -f docker/k0.Dockerfile -t appliedblockchain/k0 .'
     }
     stage('Build app images') {
         sh 'cd cpp && for IMAGE in setup server mtserver convert-vk; do docker build -f docker/$IMAGE.Dockerfile -t appliedblockchain/k0-$IMAGE .; done'
