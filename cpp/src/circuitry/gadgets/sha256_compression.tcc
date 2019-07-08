@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_GADGETS_SHA256_COMPRESSION_TCC
-#define ZKTRADE_GADGETS_SHA256_COMPRESSION_TCC
+#ifndef K0_GADGETS_SHA256_COMPRESSION_TCC
+#define K0_GADGETS_SHA256_COMPRESSION_TCC
 
 template<typename FieldT>
 zktrade::sha256_compression_gadget<FieldT>::sha256_compression_gadget(
@@ -45,4 +45,4 @@ libff::bit_vector zktrade::sha256_compression_gadget<FieldT>::get_hash(const lib
     return output.get_digest();
 }
 
-#endif //ZKTRADE_GADGETS_SHA256_COMPRESSION_TCC
+#endif //K0_GADGETS_SHA256_COMPRESSION_TCC

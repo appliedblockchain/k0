@@ -146,7 +146,7 @@ else ()
 endif ()
 
 if ("${USE_DUMMYHASH}")
-  add_definitions(-DZKTRADE_DUMMYHASH)
+  add_definitions(-DK0_DUMMYHASH)
 endif ()
 
 if("${PERFORMANCE}")

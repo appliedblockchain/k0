@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_DUMMYHASH_GADGET_HPP
-#define ZKTRADE_DUMMYHASH_GADGET_HPP
+#ifndef K0_DUMMYHASH_GADGET_HPP
+#define K0_DUMMYHASH_GADGET_HPP
 
 #include <libsnark/common/data_structures/merkle_tree.hpp>
 #include <libsnark/gadgetlib1/gadgets/basic_gadgets.hpp>

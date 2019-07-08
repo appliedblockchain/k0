@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_CIRCUITRY_WITHDRAWAL_CIRCUIT_HPP
-#define ZKTRADE_CIRCUITRY_WITHDRAWAL_CIRCUIT_HPP
+#ifndef K0_CIRCUITRY_WITHDRAWAL_CIRCUIT_HPP
+#define K0_CIRCUITRY_WITHDRAWAL_CIRCUIT_HPP
 
 #include <libsnark/gadgetlib1/protoboard.hpp>
 #include <libsnark/gadgetlib1/gadgets/basic_gadgets.hpp>
@@ -51,4 +51,4 @@ WithdrawalCircuit<FieldT, CommitmentHashT, MerkleTreeHashT> make_withdrawal_circ
 
 #include "WithdrawalCircuit.tcc"
 
-#endif //ZKTRADE_CIRCUITRY_WITHDRAWAL_CIRCUIT_HPP
+#endif //K0_CIRCUITRY_WITHDRAWAL_CIRCUIT_HPP

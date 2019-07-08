@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_SCHEME_KA_HPP
-#define ZKTRADE_SCHEME_KA_HPP
+#ifndef K0_SCHEME_KA_HPP
+#define K0_SCHEME_KA_HPP
 
 #include <libff/common/utils.hpp>
 using namespace libff;
@@ -16,4 +16,4 @@ void ka_agree(unsigned char dhsecret[32], const unsigned char priv[32],
 
 } // namespace zktrade
 
-#endif // ZKTRADE_SCHEME_KA_HPP
+#endif // K0_SCHEME_KA_HPP

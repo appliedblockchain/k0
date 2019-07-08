@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_SCHEME_COMMS_HPP
-#define ZKTRADE_SCHEME_COMMS_HPP
+#ifndef K0_SCHEME_COMMS_HPP
+#define K0_SCHEME_COMMS_HPP
 
 #include <libff/common/utils.hpp>
 
@@ -14,4 +14,4 @@ namespace zktrade {
 
 #include "comms.tcc"
 
-#endif //ZKTRADE_SCHEME_COMMS_HPP
+#endif //K0_SCHEME_COMMS_HPP

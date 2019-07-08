@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_GADGETS_SHA256_512_BITS_TCC
-#define ZKTRADE_GADGETS_SHA256_512_BITS_TCC
+#ifndef K0_GADGETS_SHA256_512_BITS_TCC
+#define K0_GADGETS_SHA256_512_BITS_TCC
 
 // Adapted from the commitment gadget in ZCash
 
@@ -130,4 +130,4 @@ void zktrade::sha256_512_bits_gadget<FieldT>::generate_r1cs_witness() {
     hasher2->generate_r1cs_witness();
 }
 
-#endif //ZKTRADE_GADGETS_SHA256_512_BITS_TCC
+#endif //K0_GADGETS_SHA256_512_BITS_TCC

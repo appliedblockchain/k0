@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_LIBSNARK_HASH_HPP
-#define ZKTRADE_LIBSNARK_HASH_HPP
+#ifndef K0_LIBSNARK_HASH_HPP
+#define K0_LIBSNARK_HASH_HPP
 
 #include <libsnark/gadgetlib1/gadgets/hashes/sha256/sha256_gadget.hpp>
 
@@ -24,4 +24,4 @@ namespace zktrade {
     }
 
 }
-#endif //ZKTRADE_LIBSNARK_HASH_HPP
+#endif //K0_LIBSNARK_HASH_HPP

@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_SCHEME_PRFS_H
-#define ZKTRADE_SCHEME_PRFS_H
+#ifndef K0_SCHEME_PRFS_H
+#define K0_SCHEME_PRFS_H
 
 #include <libff/common/utils.hpp>
 using namespace libff;
@@ -16,4 +16,4 @@ namespace zktrade {
 
 #include "prfs.tcc"
 
-#endif //ZKTRADE_SCHEME_PRFS_H
+#endif //K0_SCHEME_PRFS_H

@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_UTIL_H
-#define ZKTRADE_UTIL_H
+#ifndef K0_UTIL_H
+#define K0_UTIL_H
 
 #include <libff/common/utils.hpp>
 #include <libsnark/gadgetlib1/gadgets/basic_gadgets.hpp>
@@ -145,4 +145,4 @@ namespace zktrade {
 
 }
 
-#endif //ZKTRADE_UTIL_H
+#endif //K0_UTIL_H

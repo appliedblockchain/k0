@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_CIRCUITRY_WITHDRAWAL_CIRCUIT_TCC
-#define ZKTRADE_CIRCUITRY_WITHDRAWAL_CIRCUIT_TCC
+#ifndef K0_CIRCUITRY_WITHDRAWAL_CIRCUIT_TCC
+#define K0_CIRCUITRY_WITHDRAWAL_CIRCUIT_TCC
 
 template<typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 WithdrawalCircuit<FieldT, CommitmentHashT, MerkleTreeHashT>
@@ -129,4 +129,4 @@ make_withdrawal_circuit(size_t tree_height) {
     return circuit;
 }
 
-#endif //ZKTRADE_CIRCUITRY_WITHDRAWAL_CIRCUIT_TCC
+#endif //K0_CIRCUITRY_WITHDRAWAL_CIRCUIT_TCC

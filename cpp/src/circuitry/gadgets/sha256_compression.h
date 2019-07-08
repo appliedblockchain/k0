@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_GADGETS_SHA256_COMPRESSION_H
-#define ZKTRADE_GADGETS_SHA256_COMPRESSION_H
+#ifndef K0_GADGETS_SHA256_COMPRESSION_H
+#define K0_GADGETS_SHA256_COMPRESSION_H
 
 #include <libsnark/gadgetlib1/gadgets/hashes/sha256/sha256_gadget.hpp>
 
@@ -28,4 +28,4 @@ namespace zktrade {
 
 #include "sha256_compression.tcc"
 
-#endif //ZKTRADE_GADGETS_SHA256_COMPRESSION_H
+#endif //K0_GADGETS_SHA256_COMPRESSION_H

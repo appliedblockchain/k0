@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_GADGETS_PRFS_HPP
-#define ZKTRADE_GADGETS_PRFS_HPP
+#ifndef K0_GADGETS_PRFS_HPP
+#define K0_GADGETS_PRFS_HPP
 
 /*
  Copied from Zcash source code (MIT license)
@@ -93,4 +93,4 @@ namespace zktrade {
                                result, annotation_prefix) {}
     };
 }
-#endif //ZKTRADE_GADGETS_PRFS_HPP
+#endif //K0_GADGETS_PRFS_HPP

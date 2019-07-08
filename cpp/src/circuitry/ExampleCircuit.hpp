@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_EXAMPLECIRCUIT_HPP
-#define ZKTRADE_EXAMPLECIRCUIT_HPP
+#ifndef K0_EXAMPLECIRCUIT_HPP
+#define K0_EXAMPLECIRCUIT_HPP
 
 #include "circuitry/gadgets/ExampleGadget.hpp"
 #include <memory>
@@ -19,4 +19,4 @@ template <typename FieldT> class ExampleCircuit {
 
 #include "ExampleCircuit.tcc"
 
-#endif // ZKTRADE_EXAMPLECIRCUIT_HPP
+#endif // K0_EXAMPLECIRCUIT_HPP

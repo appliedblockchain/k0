@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_GADGETS_COMMS_HPP
-#define ZKTRADE_GADGETS_COMMS_HPP
+#ifndef K0_GADGETS_COMMS_HPP
+#define K0_GADGETS_COMMS_HPP
 
 #include "circuitry/gadgets/sha256_compression.h"
 
@@ -119,4 +119,4 @@ namespace zktrade {
     };
 
 }
-#endif //ZKTRADE_GADGETS_COMMS_HPP
+#endif //K0_GADGETS_COMMS_HPP

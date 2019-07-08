@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_INIT_HPP
-#define ZKTRADE_INIT_HPP
+#ifndef K0_INIT_HPP
+#define K0_INIT_HPP
 
 #include <libsnark/common/default_types/r1cs_ppzksnark_pp.hpp>
 
@@ -12,7 +12,7 @@ using namespace zktrade;
 
 typedef Fr<default_r1cs_ppzksnark_pp> FieldT;
 
-#ifdef ZKTRADE_DUMMYHASH
+#ifdef K0_DUMMYHASH
 
 #include "circuitry/gadgets/dummyhash_gadget.hpp"
 typedef dummyhash_compression_gadget<FieldT> CommitmentHashT;
@@ -27,4 +27,4 @@ typedef sha256_two_to_one_hash_gadget<FieldT> MerkleTreeHashT;
 
 #endif
 
-#endif //ZKTRADE_INIT_HPP
+#endif //K0_INIT_HPP

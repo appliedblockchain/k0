@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_MERKLETREE_TCC
-#define ZKTRADE_MERKLETREE_TCC
+#ifndef K0_MERKLETREE_TCC
+#define K0_MERKLETREE_TCC
 
 #include <bitset>
 #include <iomanip>
@@ -218,4 +218,4 @@ void MerkleTree<HashT>::print() {
   cout << endl;
 }
 
-#endif // ZKTRADE_MERKLETREE_TCC
+#endif // K0_MERKLETREE_TCC

@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_HASH_HPP
-#define ZKTRADE_HASH_HPP
+#ifndef K0_HASH_HPP
+#define K0_HASH_HPP
 
 #include "definitions.hpp"
 #include "printbits.hpp"
@@ -19,4 +19,4 @@ int main(int argc, char* argv[]) {
   printbits(hash);
 }
 
-#endif //ZKTRADE_HASH_HPP
+#endif //K0_HASH_HPP

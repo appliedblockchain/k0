@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_SUMEQUALITYGADGET_HPP
-#define ZKTRADE_SUMEQUALITYGADGET_HPP
+#ifndef K0_SUMEQUALITYGADGET_HPP
+#define K0_SUMEQUALITYGADGET_HPP
 
 #include <libsnark/gadgetlib1/gadget.hpp>
 #include <libsnark/gadgetlib1/gadgets/hashes/hash_io.hpp>
@@ -31,4 +31,4 @@ class MTLeafAddition: public gadget<FieldT> {
 private:
     pb_variable<FieldT> ZERO;
 
-#endif //ZKTRADE_SUMEQUALITYGADGET_HPP
+#endif //K0_SUMEQUALITYGADGET_HPP

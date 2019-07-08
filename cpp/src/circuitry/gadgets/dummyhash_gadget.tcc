@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_DUMMYHASH_GADGET_TCC
-#define ZKTRADE_DUMMYHASH_GADGET_TCC
+#ifndef K0_DUMMYHASH_GADGET_TCC
+#define K0_DUMMYHASH_GADGET_TCC
 
 using namespace std;
 
@@ -164,4 +164,4 @@ libff::bit_vector zktrade::dummyhash_compression_gadget<FieldT>::get_hash(
     return output.get_digest();
 }
 
-#endif // ZKTRADE_DUMMYHASH_GADGET_TCC
+#endif // K0_DUMMYHASH_GADGET_TCC

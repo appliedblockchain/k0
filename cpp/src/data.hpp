@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_DATA_HPP
-#define ZKTRADE_DATA_HPP
+#ifndef K0_DATA_HPP
+#define K0_DATA_HPP
 
 using namespace std;
 using namespace libff;
@@ -23,4 +23,4 @@ namespace zktrade {
 
 }
 
-#endif //ZKTRADE_DATA_HPP
+#endif //K0_DATA_HPP

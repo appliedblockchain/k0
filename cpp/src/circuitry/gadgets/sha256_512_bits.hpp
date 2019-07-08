@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_GADGETS_SHA256_512_BITS_HPP
-#define ZKTRADE_GADGETS_SHA256_512_BITS_HPP
+#ifndef K0_GADGETS_SHA256_512_BITS_HPP
+#define K0_GADGETS_SHA256_512_BITS_HPP
 
 using namespace libsnark;
 
@@ -31,4 +31,4 @@ namespace zktrade {
 
 #include "sha256_512_bits.tcc"
 
-#endif //ZKTRADE_GADGETS_SHA256_HPP
+#endif //K0_GADGETS_SHA256_HPP

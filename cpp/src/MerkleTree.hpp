@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_MERKLETREE_HPP
-#define ZKTRADE_MERKLETREE_HPP
+#ifndef K0_MERKLETREE_HPP
+#define K0_MERKLETREE_HPP
 
 #include <libff/common/utils.hpp>
 
@@ -35,4 +35,4 @@ private:
 
 #include "MerkleTree.tcc"
 
-#endif // ZKTRADE_MERKLETREE_HPP
+#endif // K0_MERKLETREE_HPP

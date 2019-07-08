@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_SCHEME_NOTE_ENCRYPTION_HPP
-#define ZKTRADE_SCHEME_NOTE_ENCRYPTION_HPP
+#ifndef K0_SCHEME_NOTE_ENCRYPTION_HPP
+#define K0_SCHEME_NOTE_ENCRYPTION_HPP
 
 #include <libff/common/utils.hpp>
 using namespace libff;
@@ -19,4 +19,4 @@ int decrypt_note(unsigned char plaintext[88],
 
 }
 
-#endif // ZKTRADE_SCHEME_NOTE_ENCRYPTION_HPP
+#endif // K0_SCHEME_NOTE_ENCRYPTION_HPP

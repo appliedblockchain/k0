@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_TRANSFERCIRCUIT_HPP
-#define ZKTRADE_TRANSFERCIRCUIT_HPP
+#ifndef K0_TRANSFERCIRCUIT_HPP
+#define K0_TRANSFERCIRCUIT_HPP
 
 
 #include <libsnark/gadgetlib1/gadgets/merkle_tree/merkle_authentication_path_variable.hpp>
@@ -106,4 +106,4 @@ namespace zktrade {
 
 #include "TransferCircuit.tcc"
 
-#endif //ZKTRADE_TRANSFERCIRCUIT_HPP
+#endif //K0_TRANSFERCIRCUIT_HPP

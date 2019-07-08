@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_MTADDITIONCIRCUIT_HPP
-#define ZKTRADE_MTADDITIONCIRCUIT_HPP
+#ifndef K0_MTADDITIONCIRCUIT_HPP
+#define K0_MTADDITIONCIRCUIT_HPP
 
 #include <libsnark/gadgetlib1/protoboard.hpp>
 #include <libsnark/gadgetlib1/gadgets/basic_gadgets.hpp>
@@ -41,4 +41,4 @@ namespace zktrade {
 
 #include "MTAdditionCircuit.tcc"
 
-#endif //ZKTRADE_MTADDITIONCIRCUIT_HPP
+#endif //K0_MTADDITIONCIRCUIT_HPP

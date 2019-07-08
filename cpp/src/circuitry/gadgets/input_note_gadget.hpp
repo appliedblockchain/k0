@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_INPUT_NOTE_GADGET_HPP
-#define ZKTRADE_INPUT_NOTE_GADGET_HPP
+#ifndef K0_INPUT_NOTE_GADGET_HPP
+#define K0_INPUT_NOTE_GADGET_HPP
 
 #include <libsnark/gadgetlib1/gadgets/merkle_tree/merkle_tree_check_read_gadget.hpp>
 #include "circuitry/gadgets/comms.hpp"
@@ -41,4 +41,4 @@ namespace zktrade {
 
 #include "input_note_gadget.tcc"
 
-#endif //ZKTRADE_INPUT_NOTE_GADGET_HPP
+#endif //K0_INPUT_NOTE_GADGET_HPP

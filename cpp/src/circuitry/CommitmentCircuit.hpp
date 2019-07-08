@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_COMMITMENTCIRCUIT_HPP
-#define ZKTRADE_COMMITMENTCIRCUIT_HPP
+#ifndef K0_COMMITMENTCIRCUIT_HPP
+#define K0_COMMITMENTCIRCUIT_HPP
 
 #include <libsnark/gadgetlib1/gadgets/hashes/hash_io.hpp>
 #include <libsnark/gadgetlib1/gadgets/merkle_tree/merkle_authentication_path_variable.hpp>
@@ -32,4 +32,4 @@ namespace zktrade {
 
 #include "CommitmentCircuit.tcc"
 
-#endif //ZKTRADE_COMMITMENTCIRCUIT_HPP
+#endif //K0_COMMITMENTCIRCUIT_HPP

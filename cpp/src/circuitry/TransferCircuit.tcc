@@ -1,5 +1,5 @@
-#ifndef ZKTRADE_TRANSFERCIRCUIT_TCC
-#define ZKTRADE_TRANSFERCIRCUIT_TCC
+#ifndef K0_TRANSFERCIRCUIT_TCC
+#define K0_TRANSFERCIRCUIT_TCC
 
 #include "serialization.hpp"
 #include "util.h"
@@ -477,4 +477,4 @@ void zktrade::generate_witness(
     c.out_1_cm_packer->generate_r1cs_witness_from_bits();
 }
 
-#endif //ZKTRADE_TRANSFERCIRCUIT_TCC
+#endif //K0_TRANSFERCIRCUIT_TCC
