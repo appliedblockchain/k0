@@ -69,7 +69,7 @@ make
 
 (If you have multiple cores, try e.g. `make -j 4` for 4 cores).
 
-## C++ tests
+## Run tests
 
 ```
 BASE_DIR=\$(pwd) build/test/letest
