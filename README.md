@@ -28,7 +28,9 @@ Then, spin up the Docker containers. In the directory `js/packages/k0-integratio
 docker-compose up
 ```
 
-Among other things, this starts a proving server, which reads in the proving and verification keys generated in the setup. This takes a while. You should see messages like "Loading commitment proving key...". Once you see the message "All keys loaded." you can run the integration tests (in another terminal window):
+Among other things, this starts a proving server, which reads in the proving and verification keys generated in the setup. This takes a while. You should see messages like "Loading commitment proving key...". Once you see the message "All keys loaded." you can run the integration tests.
+
+In the directory `js/packages/k0-integration-tests-eth` (in another terminal window):
 
 ```
 npm i
