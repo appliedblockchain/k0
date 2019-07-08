@@ -3,7 +3,7 @@ K0 is an implementation of Zerocash for smart contract platforms. Currently Ethe
 
 __WARNING! This is alpha-stage software. It has not been security-audited. DO NOT USE IN PRODUCTION!__
 
-A quickstart guide to run some integration tests is provided [#quickstart](below). For instructions on how to build and run the C++ components please read the README files in the following subdirectories:
+A quickstart guide to run some integration tests is provided [below](#quickstart). For instructions on how to build and run the C++ components please read the README files in the following subdirectories:
 - [cpp](cpp)
 - [js/packages/k0-integration-tests-eth](js/packages/k0-integration-tests-eth)
 - [js/packages/k0-integration-tests-fabric](js/packages/k0-integration-tests-fabric)
