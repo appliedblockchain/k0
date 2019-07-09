@@ -34,26 +34,11 @@ function initEventHandlers(mvppt, server, eventEmitter) {
     } else if (item.event === 'SNRegistration') {
       // ignore
     } else if (item.event === 'PublicInputsCommitment') {
-      console.log('Commitment public inputs')
-      _.range(5).forEach(idx => {
-        const num = item.returnValues[idx.toString()]
-        console.log(num.toString(16))
-      })
-      console.log()
+      // ignore
     } else if (item.event === 'PublicInputsAddition') {
-      console.log('Addition public inputs')
-      _.range(7).forEach(idx => {
-        const num = item.returnValues[idx.toString()]
-        console.log(num.toString(16))
-      })
-      console.log()
+      // ignore
     } else if (item.event === 'PublicInputsTransfer') {
-      console.log('Transfer public inputs')
-      _.range(11).forEach(idx => {
-        const num = item.returnValues[idx.toString()]
-        console.log(num.toString(16))
-      })
-      console.log()
+      // ignore
     } else {
       console.log(`Don't know what to do with event of type ${item.event}`)
       console.log(item)
