@@ -23,8 +23,16 @@ const { expect } = require('code')
 
 const assert = require('assert')
 
-const k0Ports = [ 4000, 4000, 4000 ]
-const platformPorts = [ 4100, 5100, 6100 ]
+const serverEndpoints = [
+  process.env.ALICE_SERVER_ENDPOINT || 'http://localhost:4000/',
+  process.env.BOB_SERVER_ENDPOINT || 'http://localhost:4000/',
+  process.env.CAROL_SERVER_ENDPOINT || 'http://localhost:4000/'
+]
+const mtserverEndpoints= [
+  process.env.ALICE_MTSERVER_ENDPOINT || 'http://localhost:4100',
+  process.env.BOB_MTSERVER_ENDPOINT || 'http://localhost:5100',
+  process.env.CAROL_MTSERVER_ENDPOINT || 'http://localhost:6100'
+]
 
 let web3
 
@@ -58,33 +66,6 @@ describe('Ethereum integration test', function ethIntegrationTest() {
       process.exit(1)
     })
 
-    let ready = false
-    logger.info('TEST: waiting for all the servers to respond')
-    while (!ready) {
-      try {
-        await Promise.all([
-          waitPort({ port: k0Ports[0] }),
-          waitPort({ port: k0Ports[1] }),
-          waitPort({ port: k0Ports[2] }),
-          waitPort({ port: 8546 }), // parity
-          waitPort({ port: platformPorts[0] }),
-          waitPort({ port: platformPorts[1] }),
-          waitPort({ port: platformPorts[2] })
-        ])
-
-        await Promise.all([
-          serverReady(jayson.client.http({ port: k0Ports[0] })),
-          serverReady(jayson.client.http({ port: k0Ports[1] })),
-          serverReady(jayson.client.http({ port: k0Ports[2] }))
-        ])
-
-        ready = true
-      } catch (err) {
-        process.stdout.write('.')
-        await u.wait(10000)
-      }
-    }
-    const helperServer = makeServerClient(`http://localhost:${k0Ports[0]}`)
     web3 = testUtil.initWeb3()
     // DollarCoin minter
     tokenMaster = web3.eth.accounts.create()
@@ -133,9 +114,11 @@ describe('Ethereum integration test', function ethIntegrationTest() {
       return { account }
     })
 
-    alice.platformState = await makePlatformState(`http://localhost:${platformPorts[0]}`)
-    bob.platformState = await makePlatformState(`http://localhost:${platformPorts[1]}`)
-    carol.platformState = await makePlatformState(`http://localhost:${platformPorts[2]}`)
+    alice.platformState = await makePlatformState(mtserverEndpoints[0])
+    bob.platformState = await makePlatformState(mtserverEndpoints[1])
+    carol.platformState = await makePlatformState(mtserverEndpoints[2])
+
+    const helperServer = makeServerClient(serverEndpoints[0])
 
     const initialRoot = await alice.platformState.merkleTreeRoot()
     // Deploying coin contract
@@ -217,27 +200,32 @@ describe('Ethereum integration test', function ethIntegrationTest() {
     addresses.bob = u.hex2buf(alice.account.address)
     addresses.carol = u.hex2buf(alice.account.address)
 
-    alice.k0Eth = await makeEthPlatform(web3, addresses.mvppt, `http://localhost:${k0Ports[0]}/`)
-    bob.k0Eth = await makeEthPlatform(web3, addresses.mvppt, `http://localhost:${k0Ports[1]}/`)
-    carol.k0Eth = await makeEthPlatform(web3, addresses.mvppt,`http://localhost:${k0Ports[2]}/`)
+    alice.k0Eth = await makeEthPlatform(web3, addresses.mvppt, serverEndpoints[0])
+    bob.k0Eth = await makeEthPlatform(web3, addresses.mvppt, serverEndpoints[1])
+    carol.k0Eth = await makeEthPlatform(web3, addresses.mvppt, serverEndpoints[2])
 
     alice.secretKey = crypto.randomBytes(32)
     bob.secretKey = crypto.randomBytes(32)
     carol.secretKey = crypto.randomBytes(32)
 
-    alice.k0 = await makeK0(`http://localhost:${k0Ports[0]}/`)
-    bob.k0 = await makeK0(`http://localhost:${k0Ports[1]}/`)
-    carol.k0 = await makeK0(`http://localhost:${k0Ports[2]}/`)
+    alice.k0 = await makeK0(serverEndpoints[0])
+    bob.k0 = await makeK0(serverEndpoints[1])
+    carol.k0 = await makeK0(serverEndpoints[2])
 
-    async function initSecretStore(port, agent) {
+    while (!(await alice.k0.ready())) {
+      logger.info('Waiting for the server to become ready.')
+      await u.wait(1000)
+    }
+
+    async function initSecretStore(agent) {
       const { a_pk, sk_enc, pk_enc } =
             await agent.k0.deriveKeys(agent.secretKey)
       return makeSecretStore(agent.secretKey, a_pk, sk_enc, pk_enc)
     }
 
-    alice.secretStore = await initSecretStore(k0Ports[0], alice)
-    bob.secretStore = await initSecretStore(k0Ports[1], bob)
-    carol.secretStore = await initSecretStore(k0Ports[2], carol)
+    alice.secretStore = await initSecretStore(alice)
+    bob.secretStore = await initSecretStore(bob)
+    carol.secretStore = await initSecretStore(carol)
 
     alice.emitter = initEventHandlers(
       alice.platformState,

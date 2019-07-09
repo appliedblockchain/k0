@@ -1,0 +1,51 @@
+version: '3.7'
+
+x-custom:
+  mtserver: &mtserver
+    image: appliedblockchain/k0-mtserver:v0.0.30
+    command: 4 80
+    volumes:
+      - /tmp/k0keys:/tmp/k0keys:ro
+
+services:
+  alicemtserver:
+    << : *mtserver
+    container_name: alicemtserver
+  bobmtserver:
+    << : *mtserver
+    container_name: bobmtserver
+  carolmtserver:
+    << : *mtserver
+    container_name: carolmtserver
+
+  parity:
+    container_name: parity
+    image: appliedblockchain/parity-solo-instant:latest
+
+  server:
+    container_name: server
+    image: appliedblockchain/k0-server:v0.0.30
+    volumes:
+      - /tmp/k0keys:/tmp/k0keys:ro
+    command: >
+      4
+      /tmp/k0keys/commitment_pk /tmp/k0keys/commitment_vk
+      /tmp/k0keys/addition_pk /tmp/k0keys/addition_vk
+      /tmp/k0keys/transfer_pk /tmp/k0keys/transfer_vk
+      /tmp/k0keys/withdrawal_pk /tmp/k0keys/withdrawal_vk
+      /tmp/k0keys/example_pk /tmp/k0keys/example_vk
+      80
+
+  runner:
+    container_name: runner
+    image: appliedblockchain/k0-integration-tests-eth-runner
+    volumes: 
+      - /tmp/k0keys:/tmp/k0keys
+    environment:
+      - ETHEREUM_JSONRPC_ENDPOINT=ws://parity:8546/
+      - ALICE_SERVER_ENDPOINT=http://server/
+      - BOB_SERVER_ENDPOINT=http://server/
+      - CAROL_SERVER_ENDPOINT=http://server/
+      - ALICE_MTSERVER_ENDPOINT=http://alicemtserver/
+      - BOB_MTSERVER_ENDPOINT=http://bobmtserver/
+      - CAROL_MTSERVER_ENDPOINT=http://carolmtserver/
