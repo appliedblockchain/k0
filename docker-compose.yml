@@ -20,7 +20,7 @@ services:
 
   parity:
     container_name: parity
-    image: appliedblockchain/parity-solo-instant:latest
+    image: appliedblockchain/parity-solo-instant:v4.0.0
 
   server:
     container_name: server
