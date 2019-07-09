@@ -33,7 +33,7 @@ Monitor the tests:
 docker-compose logs -f runner
 ```
 
-Optional: Monitor the whole Docker Compose network
+Optional: Monitor the whole Docker Compose network (maybe in a separate terminal window):
 ```
 docker-compose logs -f --tail 100
 ```
