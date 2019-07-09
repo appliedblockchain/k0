@@ -42,11 +42,7 @@ Json::Value k0::MTServer<FieldT, MerkleTreeHashT>::add(
     const string &leaf_hex)
 {
   bit_vector leaf_bv = hex2bits(leaf_hex);
-  cout << endl;
-  cout << "mt root before " << bits2hex(mt.root()) << endl;
-  cout << "mt adding leaf " << bits2hex(leaf_bv) << endl;
   uint address = mt.add(leaf_bv);
-  cout << "mt root after  " << bits2hex(mt.root()) << endl;
   Json::Value result;
   result["address"] = address;
   result["nextRoot"] = bits2hex(mt.root());

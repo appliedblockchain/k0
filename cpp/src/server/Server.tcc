@@ -91,8 +91,6 @@ void k0::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setTransferPk(
 {
     transfer_pk = loadFromFile<r1cs_ppzksnark_proving_key<default_r1cs_ppzksnark_pp>>(
         pk_path);
-    cout << "loaded transfer pk" << endl;
-    cout << "pk cs num_inputs " << transfer_pk.constraint_system.num_inputs() << endl;
     transfer_pk_loaded = true;
 }
 
@@ -141,17 +139,12 @@ void k0::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::setExampleVk(
     example_vk_loaded = true;
 }
 
-
 template <typename FieldT, typename CommitmentHashT, typename MerkleTreeHashT>
 Json::Value k0::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::add(
     const string &leaf_hex)
 {
-    cout << "leaf " << leaf_hex << endl;
     bit_vector leaf_bv = hex2bits(leaf_hex);
-    cout << "mt root before" << bits2hex(mt.root()) << endl;
-    cout << "mt adding " << bits2hex(leaf_bv) << endl;
     uint address = mt.add(leaf_bv);
-    cout << "mt root after" << bits2hex(mt.root()) << endl;
     Json::Value result;
     result["address"] = address;
     result["nextRoot"] = bits2hex(mt.root());
@@ -280,12 +273,6 @@ Json::Value k0::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::exampleWitness
     ExampleCircuit<FieldT> circuit;
     circuit.pb.val(circuit.x) = FieldT(x.c_str());
     circuit.example_gadget->generate_r1cs_witness();
-    if (circuit.pb.is_satisfied()) {
-        cout << "SATISFIED" << endl;
-    } else {
-        cout << "NOT SATISFIED" << endl;
-    }
-
     const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> proof =
         r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
             example_pk, circuit.pb.primary_input(),
@@ -295,26 +282,15 @@ Json::Value k0::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::exampleWitness
         r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
             example_vk, circuit.pb.primary_input(),
             proof);
-    if (verified)
+    if (!verified)
     {
-        cout << "Example proof successfully verified." << endl;
-    }
-    else
-    {
-        cerr << "Example proof verification failed." << endl;
         throw JsonRpcException(-32010, "Example proof verification failed.");
     }
-
-    cout << "PROOF RAW" << endl;
-    cout << proof << endl;
 
     Json::Value res;
     res["out"] = field_element_to_string(circuit.pb.val(circuit.out));
     res["proofAffine"] = json_conversion::proof_to_json_affine(proof);
     res["proofJacobian"] = json_conversion::proof_to_json_jacobian(proof);
-
-    cout << "PROOF JSON" << endl;
-    cout << res["proofJacobian"] << endl;
 
     return res;
 }
@@ -365,14 +341,6 @@ k0::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::depositCommitmentProof(
         throw JsonRpcException(-32010, "Commitment circuit not satisfied");
     }
 
-    cout << "CIRCUIT" << endl;
-    cout << "k  " << bits2hex(circuit.k_bits->get_bits(*circuit.pb))
-         << endl;
-    cout << "cm " << bits2hex(circuit.cm_bits->get_digest()) << endl;
-    cout << "CHECKING COMMITMENT" << endl;
-    cout << circuit.pb->primary_input().size() << " "
-         << commitment_pk.constraint_system.num_inputs() << endl;
-
     const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> proof =
         r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
             commitment_pk, circuit.pb->primary_input(),
@@ -382,16 +350,8 @@ k0::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::depositCommitmentProof(
         r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
             commitment_vk, circuit.pb->primary_input(),
             proof);
-    cout << "COMMITMENT params" << endl
-         << hex << circuit.pb->primary_input()
-         << endl;
-    if (verified)
+    if (!verified)
     {
-        cout << "Commitment proof successfully verified." << endl;
-    }
-    else
-    {
-        cerr << "Commitment proof verification failed." << endl;
         throw JsonRpcException(-32010, "Commitment proof verification failed.");
     }
 
@@ -449,25 +409,16 @@ k0::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::merkleTreeAdditionProof(
     //TODO rename vars
     auto start = std::chrono::system_clock::now();
     std::time_t readableStart = std::chrono::system_clock::to_time_t(start);
-    cout << "Called at: " << std::ctime(&readableStart) << endl;
 
     const r1cs_ppzksnark_proof<default_r1cs_ppzksnark_pp> proof =
         r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
             addition_pk, circuit.pb->primary_input(),
             circuit.pb->auxiliary_input());
-    cout << "ADDITION params" << endl
-         << hex << circuit.pb->primary_input()
-         << endl;
     bool verified =
         r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
             addition_vk, circuit.pb->primary_input(), proof);
-    if (verified)
+    if (!verified)
     {
-        cout << "Addition proof successfully verified." << endl;
-    }
-    else
-    {
-        cerr << "Addition proof verification failed." << endl;
         throw JsonRpcException(-32010, "Addition proof verification failed.");
     }
 
@@ -516,8 +467,6 @@ k0::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepareTransfer(
     const std::string &output_1_v_str,
     const std::string &callee_hex_str)
 {
-
-    cout << "MAX " << dec << UINT64_MAX << endl;
 
     // TODO validate inputs (max values for bit lengths)
 
@@ -569,60 +518,15 @@ k0::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepareTransfer(
     auto xfer_circuit = make_transfer_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(
         tree_height);
     bit_vector mt_root = hex2bits(prev_root_hex);
-    cout << "got root" << bits2hex(mt_root) << endl;
     populate(xfer_circuit, tree_height, mt_root, in[0], in[1], out[0],
              out[1], callee);
 
-    print(xfer_circuit);
-    for (size_t i = 0; i < 2; i++)
-    {
-        input_note c = in[i];
-        cout << "Input note " << i << endl;
-        cout << "address: " << c.address << endl;
-        cout << "a_sk: " << bits2hex(c.a_sk) << endl;
-        cout << "rho: " << bits2hex(c.rho) << endl;
-        cout << "r: " << bits2hex(c.r) << endl;
-        cout << "v: " << c.v << endl;
-        cout << "MT path" << endl;
-        for (auto x : c.path)
-        {
-            cout << bits2hex(x) << endl;
-        }
-        cout << endl;
-    }
-
-    for (size_t i = 0; i < 2; i++)
-    {
-        output_note c = out[i];
-        cout << "Output note " << i << endl;
-        cout << "p_sk: " << bits2hex(c.a_pk) << endl;
-        cout << "rho: " << bits2hex(c.rho) << endl;
-        cout << "r: " << bits2hex(c.r) << endl;
-        cout << "v: " << c.v << endl;
-        cout << endl;
-    }
-
-    cout << "Root after 1 " << bits2hex(xfer_circuit.rt_bits->get_digest())
-         << endl;
-
     generate_witness(xfer_circuit);
 
-    cout << "Root after 2 " << bits2hex(xfer_circuit.rt_bits->get_digest())
-         << endl;
-
-    print(xfer_circuit);
     if (!xfer_circuit.pb->is_satisfied())
     {
         throw JsonRpcException(-32010, "Transfer circuit not satisfied");
     }
-
-    cout << "TRANSFER PUBLIC INPUT" << endl
-         << hex
-         << xfer_circuit.pb->primary_input() << endl;
-
-    cout << dec;
-    cout << "pk cs num_inputs" << transfer_pk.constraint_system.num_inputs() << endl;
-    cout << "circuit primary inputs" << xfer_circuit.pb->primary_input().size() << endl;
 
     auto xfer_proof =
         r1cs_ppzksnark_prover<default_r1cs_ppzksnark_pp>(
@@ -633,18 +537,10 @@ k0::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepareTransfer(
         r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
             transfer_vk, xfer_circuit.pb->primary_input(),
             xfer_proof);
-    if (xfer_verified)
+    if (!xfer_verified)
     {
-        cout << "Transfer proof successfully verified." << endl;
-    }
-    else
-    {
-        cerr << "Transfer proof verification failed." << endl;
         throw JsonRpcException(-32010, "Transfer proof verification failed.");
     }
-
-    cout << "TRANSFER PUBLIC INPUTS" << endl;
-    cout << xfer_circuit.pb->primary_input() << endl;
 
     Json::Value result;
     result["input_0_sn"] = bits2hex(
@@ -680,13 +576,6 @@ k0::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_withdrawal(
     auto recipient_dec_str = hex_to_dec_string(recipient_hex_str);
     auto recipient = FieldT(recipient_dec_str.c_str());
 
-    cout << "Coin" << endl;
-    cout << "address " << dec << address << endl;
-    cout << "a_sk " << bits2hex(a_sk_bits) << endl;
-    cout << "rho " << bits2hex(rho_bits) << endl;
-    cout << "r " << bits2hex(r_bits) << endl;
-    cout << "v " << v << endl;
-
     auto wd_circuit =
         make_withdrawal_circuit<FieldT, CommitmentHashT, MerkleTreeHashT>(
             tree_height);
@@ -719,19 +608,10 @@ k0::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::prepare_withdrawal(
     bool verified =
         r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
             withdrawal_vk, wd_circuit.pb->primary_input(), proof);
-    if (verified)
+    if (!verified)
     {
-        cout << "Withdrawal proof successfully verified." << endl;
-    }
-    else
-    {
-        cerr << "Withdrawal proof verification failed." << endl;
         throw JsonRpcException(-32010, "Withdrawal proof verification failed.");
     }
-
-    cout << "WITHDRAWAL PUBLIC INPUT" << endl
-         << hex
-         << wd_circuit.pb->primary_input() << endl;
 
     Json::Value result;
     result["sn"] = bits_to_hex(wd_circuit.sn_bits->get_digest());
@@ -815,19 +695,9 @@ bool k0::Server<FieldT, CommitmentHashT, MerkleTreeHashT>::verifyProof(
     //TODO: rename vars or extract func
     auto start = std::chrono::system_clock::now();
     std::time_t readableStart = std::chrono::system_clock::to_time_t(start);
-    cout << "Called at: " << std::ctime(&readableStart) << endl;
-    cout << "PRIMARY INPUT" << endl << dec << public_inputs << endl;
     bool verified = r1cs_ppzksnark_verifier_strong_IC<default_r1cs_ppzksnark_pp>(
         vk,
         public_inputs,
         proof);
-    if (verified)
-    {
-        cout << "Proof verified!" << endl;
-    }
-    else
-    {
-        cout << "Proof NOT verified :(" << endl;
-    }
     return verified;
 }
