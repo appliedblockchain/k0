@@ -6,6 +6,9 @@ jobs:
       - image: docker:stable-git
     steps:
       - checkout
+      - run:
+          name: "Init Git submodules"
+          command: git submodule update --init --recursive
       - setup_remote_docker
       - run:
           name: "Docker login"
