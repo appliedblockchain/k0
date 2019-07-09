@@ -10,7 +10,7 @@ A quickstart guide to run some integration tests is provided [below](#quickstart
 
 ## Quickstart
 
-The easiest way to see the code in action is to run the Ethereum integration tests using the provided Docker Compose file for the server components. However, first we need to run the "trusted setup", also using Docker (this might take a couple of minutes):
+The easiest way to see the code in action is to run the Ethereum integration tests using the provided Docker Compose file. However, first we need to run the "trusted setup", also using Docker (this might take a couple of minutes):
 
 ```
 rm -rf /tmp/k0keys
@@ -22,17 +22,8 @@ do
 done
 ```
 
-Then, spin up the Docker containers. In the directory `js/packages/k0-integration-tests-eth`:
+Then, spin up the Docker containers and start the tests (the server takes a while to start up, the tests should start immediately afterwards):
 
 ```
 docker-compose up
-```
-
-Among other things, this starts a proving server, which reads in the proving and verification keys generated in the setup. This takes a while. You should see messages like "Loading commitment proving key...". Once you see the message "All keys loaded." you can run the integration tests.
-
-In the directory `js/packages/k0-integration-tests-eth` (in another terminal window):
-
-```
-npm i
-npm test
 ```
