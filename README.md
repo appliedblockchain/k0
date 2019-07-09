@@ -22,7 +22,7 @@ do
 done
 ```
 
-Then, spin up the Docker containers and start the tests (the server takes a while to start up, the tests should start immediately afterwards):
+Then, spin up the Docker containers and run the tests (the server takes a while to start up, the tests should start immediately afterwards):
 
 ```
 docker-compose up
