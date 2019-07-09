@@ -49,3 +49,4 @@ services:
       - ALICE_MTSERVER_ENDPOINT=http://alicemtserver/
       - BOB_MTSERVER_ENDPOINT=http://bobmtserver/
       - CAROL_MTSERVER_ENDPOINT=http://carolmtserver/
+    tty: true
