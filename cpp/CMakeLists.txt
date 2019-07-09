@@ -5,91 +5,93 @@ cmake_policy(SET CMP0076 NEW)
 project(k0)
 
 set(
-        CURVE
-        "ALT_BN128"
-        CACHE
-        STRING
-        "Default curve: one of ALT_BN128, BN128, EDWARDS, MNT4, MNT6"
+    CURVE
+    "ALT_BN128"
+    CACHE
+    STRING
+    "Default curve: one of ALT_BN128, BN128, EDWARDS, MNT4, MNT6"
 )
 
 set(
-        DEPENDS_DIR
-        "${CMAKE_CURRENT_SOURCE_DIR}/depends"
-        CACHE
-        STRING
-        "Optionally specify the dependency installation directory relative to the source directory (default: inside dependency folder)"
+    DEPENDS_DIR
+    "${CMAKE_CURRENT_SOURCE_DIR}/depends"
+    CACHE
+    STRING
+    "Optionally specify the dependency installation directory relative to the source directory (default: inside dependency folder)"
 )
 
 option(
-        DEBUG
-        "Enable debugging mode"
-        OFF
+    DEBUG
+    "Enable debugging mode"
+    OFF
 )
 
 set(
-        OPT_FLAGS
-#        "-g -O0"
-        ""
-        CACHE
-        STRING
-        "Override C++ compiler optimization flags"
+    OPT_FLAGS
+    ""
+    CACHE
+    STRING
+    "Override C++ compiler optimization flags"
 )
 
 option(
-        MULTICORE
-        "Enable parallelized execution, using OpenMP"
-        OFF
+    MULTICORE
+    "Enable parallelized execution, using OpenMP"
+    OFF
 )
 
 option(
-  WITH_SUPERCOP
-  "Support for Ed25519 signatures required by ADSNARK"
-  OFF
+    WITH_SUPERCOP
+    "Support for Ed25519 signatures required by ADSNARK"
+    OFF
 )
 
 option(
-        WITH_PROCPS
-        "Use procps for memory profiling"
-        OFF
+    WITH_PROCPS
+    "Use procps for memory profiling"
+    OFF
 )
 
 option(
-        VERBOSE
-        "Print internal messages"
-        OFF
+    VERBOSE
+    "Print internal messages"
+    OFF
 )
 
 option(
-  BINARY_OUTPUT
-  "In serialization, output raw binary data (instead of decimal), which is smaller and faster."
-  OFF
-)
-option(
-  MONTGOMERY_OUTPUT
-  "Serialize Fp elements as their Montgomery representations (faster but not human-readable)"
-  OFF
-)
-option(
-  USE_PT_COMPRESSION
-  "Use point compression"
-  ON
-)
-option(
-        CPPDEBUG
-        "Enable debugging of C++ STL (does not imply DEBUG)"
-        OFF
+    BINARY_OUTPUT
+    "In serialization, output raw binary data (instead of decimal), which is smaller and faster."
+    OFF
 )
 
 option(
-        PERFORMANCE
-        "Enable link-time and aggressive optimizations"
-        OFF
+    MONTGOMERY_OUTPUT
+    "Serialize Fp elements as their Montgomery representations (faster but not human-readable)"
+    OFF
 )
 
 option(
-  USE_ASM
-  "Use architecture-specific optimized assembly code"
-  ON
+    USE_PT_COMPRESSION
+    "Use point compression"
+    ON
+)
+
+option(
+    CPPDEBUG
+    "Enable debugging of C++ STL (does not imply DEBUG)"
+    OFF
+)
+
+option(
+    PERFORMANCE
+    "Enable link-time and aggressive optimizations"
+    OFF
+)
+
+option(
+    USE_ASM
+    "Use architecture-specific optimized assembly code"
+    ON
 )
 
 if (CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
