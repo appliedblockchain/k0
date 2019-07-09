@@ -17,8 +17,8 @@ rm -rf /tmp/k0keys
 mkdir /tmp/k0keys
 for circuit in commitment transfer addition withdrawal example
 do
-  docker run -it -v /tmp/k0keys/:/tmp/k0keys/ appliedblockchain/k0-setup:v0.0.27 $circuit 4 /tmp/k0keys/${circuit}\_pk /tmp/k0keys/${circuit}_vk
-  docker run -it -v /tmp/k0keys/:/tmp/k0keys/ appliedblockchain/k0-convert-vk:v0.0.27 /tmp/k0keys/${circuit}\_vk /tmp/k0keys/${circuit}\_vk_alt
+  docker run -it -v /tmp/k0keys/:/tmp/k0keys/ appliedblockchain/k0-setup:v0.0.30 $circuit 4 /tmp/k0keys/${circuit}\_pk /tmp/k0keys/${circuit}_vk
+  docker run -it -v /tmp/k0keys/:/tmp/k0keys/ appliedblockchain/k0-convert-vk:v0.0.30 /tmp/k0keys/${circuit}\_vk /tmp/k0keys/${circuit}\_vk_alt
 done
 ```
 
