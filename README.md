@@ -4,9 +4,9 @@ K0 is an implementation of [Zerocash](http://zerocash-project.org/) for smart co
 __WARNING! This is alpha-stage software. It has not been security-audited. DO NOT USE IN PRODUCTION!__
 
 A quickstart guide to run some integration tests is provided [below](#quickstart). If you want to start developing with/on K0 (not needed for the quickstart), please consult the README files in the following subdirectories:
-- [cpp](cpp: Build and run C++ components)
-- [js/packages/k0-integration-tests-eth](js/packages/k0-integration-tests-eth: Run Ethereum integration tests)
-- [js/packages/k0-integration-tests-fabric](js/packages/k0-integration-tests-fabric: Run Fabric integration tests)
+- [cpp: Build and run C++ components](cpp)
+- [js/packages/k0-integration-tests-eth: Run Ethereum integration tests](js/packages/k0-integration-tests-eth)
+- [js/packages/k0-integration-tests-fabric: Run Fabric integration tests](js/packages/k0-integration-tests-fabric)
 
 ## Quickstart
 
