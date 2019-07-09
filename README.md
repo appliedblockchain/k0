@@ -22,8 +22,23 @@ do
 done
 ```
 
-Then, spin up the Docker containers and run the tests (the server takes a while to start up, the tests should start immediately afterwards):
+Then, spin up the Docker containers:
 
 ```
-docker-compose up
+docker-compose up -d
+```
+
+Monitor the tests:
+```
+docker-compose logs -f runner
+```
+
+Optional: Monitor the whole Docker Compose network
+```
+docker-compose logs -f --tail 100
+```
+
+After the tests have run, shut down the network:
+```
+docker-compose down
 ```
