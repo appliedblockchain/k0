@@ -2,7 +2,7 @@ version: '3.7'
 
 x-custom:
   mtserver: &mtserver
-    image: appliedblockchain/k0-mtserver:v0.0.30
+    image: appliedblockchain/k0-mtserver:v0.0.31
     command: 4 80
     volumes:
       - /tmp/k0keys:/tmp/k0keys:ro
@@ -24,7 +24,7 @@ services:
 
   server:
     container_name: server
-    image: appliedblockchain/k0-server:v0.0.30
+    image: appliedblockchain/k0-server:v0.0.31
     volumes:
       - /tmp/k0keys:/tmp/k0keys:ro
     command: >
@@ -38,7 +38,7 @@ services:
 
   runner:
     container_name: runner
-    image: appliedblockchain/k0-integration-tests-eth-runner:v0.0.30
+    image: appliedblockchain/k0-integration-tests-eth-runner:v0.0.31
     volumes: 
       - /tmp/k0keys:/tmp/k0keys
     environment:

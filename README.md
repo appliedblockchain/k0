@@ -1,4 +1,5 @@
 # K0
+
 K0 is an implementation of [Zerocash](http://zerocash-project.org/) for smart contract platforms. Currently Ethereum and Hyperledger Fabric are supported. The protocol has been modified slightly to enable an additional use case, namely the use of a predefined private payment in a secondary smart contract. For more information please read our [technical description](https://appliedblockchain.com/k0.pdf).
 
 __WARNING! This is alpha-stage software. It has not been security-audited. DO NOT USE IN PRODUCTION!__
@@ -17,8 +18,8 @@ rm -rf /tmp/k0keys
 mkdir /tmp/k0keys
 for circuit in commitment transfer addition withdrawal example
 do
-  docker run -it -v /tmp/k0keys/:/tmp/k0keys/ appliedblockchain/k0-setup:v0.0.30 $circuit 4 /tmp/k0keys/${circuit}\_pk /tmp/k0keys/${circuit}_vk
-  docker run -it -v /tmp/k0keys/:/tmp/k0keys/ appliedblockchain/k0-convert-vk:v0.0.30 /tmp/k0keys/${circuit}\_vk /tmp/k0keys/${circuit}\_vk_alt
+  docker run -it -v /tmp/k0keys/:/tmp/k0keys/ appliedblockchain/k0-setup:v0.0.31 $circuit 4 /tmp/k0keys/${circuit}\_pk /tmp/k0keys/${circuit}_vk
+  docker run -it -v /tmp/k0keys/:/tmp/k0keys/ appliedblockchain/k0-convert-vk:v0.0.31 /tmp/k0keys/${circuit}\_vk /tmp/k0keys/${circuit}\_vk_alt
 done
 ```
 
