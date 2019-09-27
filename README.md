@@ -2,7 +2,7 @@
 
 K0 is an implementation of [Zerocash](http://zerocash-project.org/) for smart contract platforms. Currently Ethereum and Hyperledger Fabric are supported. The protocol has been modified slightly to enable an additional use case, namely the use of a predefined private payment in a secondary smart contract. For more information please read our [technical description](https://appliedblockchain.com/k0.pdf).
 
-__WARNING! This is alpha-stage software. It has not been security-audited. DO NOT USE IN PRODUCTION!__
+__WARNING! This is alpha-stage software. It has not been security-audited yet.__
 
 A quickstart guide to run some integration tests is provided [below](#quickstart). If you want to start developing with/on K0 (not needed for the quickstart), please consult the README files in the following subdirectories:
 - [cpp: Build and run C++ components](cpp)
