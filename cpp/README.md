@@ -22,7 +22,7 @@ brew install sodium
 
 ### Install Google Test
 
-- download https://github.com/google/googletest/releases/tag/release-1.8.1 to a directory
+- download https://github.com/google/googletest/archive/release-1.8.1.tar.gz
 - unpack it with `mkdir gtest && tar -xzf release-1.8.1.tar.gz -C gtest/`
 - build and install it:
 
