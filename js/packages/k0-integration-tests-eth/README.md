@@ -6,7 +6,7 @@ rm -rf /tmp/k0keys
 mkdir /tmp/k0keys
 for circuit in commitment transfer addition withdrawal example
 do
-  ../../../cpp/build/src/server $circuit 4 /tmp/k0keys/${circuit}\_pk /tmp/k0keys/${circuit}_vk
+  ../../../cpp/build/src/setup $circuit 4 /tmp/k0keys/${circuit}\_pk /tmp/k0keys/${circuit}_vk
   ../../../cpp/build/src/convert_vk /tmp/k0keys/${circuit}\_vk /tmp/k0keys/${circuit}\_vk_alt
 done
 ```
